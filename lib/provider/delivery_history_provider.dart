@@ -1,0 +1,79 @@
+import 'package:bizd_tech_service/utilities/dio_client.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
+import 'package:flutter/material.dart';
+
+class DeliveryNoteHistoryProvider extends ChangeNotifier {
+  List<dynamic> _documents = [];
+  bool _isLoading = false;
+  bool _hasMore = true;
+  bool _isLoadingSetFilter = false;
+
+  int _skip = 0;
+  final int _limit = 10;
+  String _currentFilter = "All";
+
+  final DioClient dio = DioClient();
+
+  List<dynamic> get documents => _documents;
+  bool get isLoading => _isLoading;
+  bool get hasMore => _hasMore;
+  bool get isLoadingSetFilter => _isLoadingSetFilter;
+
+  String get currentFilter => _currentFilter;
+
+  Future<void> fetchDocuments(
+      {bool loadMore = false, bool isSetFilter = false}) async {
+    if (_isLoading) return;
+    if (isSetFilter) {
+      if (_isLoadingSetFilter) return;
+      _isLoadingSetFilter = true;
+    }
+    _isLoading = true;
+    notifyListeners();
+
+    final userId = await LocalStorageManger.getString('UserId');
+    final String filterCondition = _currentFilter == "All"
+        ? "(U_lk_delstat eq 'Pending' or U_lk_delstat eq 'Delivered' or U_lk_delstat eq 'Failed')"
+        : "U_lk_delstat eq '${_currentFilter == "Completed" ? "Delivered" : "Failed"}'";
+
+    try {
+      final response = await dio.get(
+          "/DeliveryNotes?\$top=$_limit&\$skip=$_skip&\$filter=$filterCondition and U_lk_driver eq $userId");
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data["value"];
+        if (loadMore) {
+          _documents.addAll(data);
+        } else {
+          _documents = data;
+        }
+
+        _hasMore = data.length == _limit;
+        _skip += _limit;
+      } else {
+        throw Exception("Failed to load documents");
+      }
+    } catch (e) {
+      print("Error fetching documents: $e");
+    } finally {
+      if (isSetFilter) {
+        _isLoadingSetFilter = false;
+      }
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void resetPagination() {
+    _skip = 0;
+    _hasMore = true;
+    _documents.clear();
+  }
+
+  void setFilter(String filter) {
+    if (_currentFilter == filter) return;
+    _currentFilter = filter;
+    resetPagination();
+    fetchDocuments(isSetFilter: true); // Re-fetch with new filter
+  }
+}

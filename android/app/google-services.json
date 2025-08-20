@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "68357478334",
+    "project_id": "lkdelivery-2692e",
+    "storage_bucket": "lkdelivery-2692e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68357478334:android:3a2ff3bf2edb6eb8958bef",
+        "android_client_info": {
+          "package_name": "com.example.ckservice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIQcpR-zBoAvJ7iVNe6AEUvQFrFS6Cuog"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
