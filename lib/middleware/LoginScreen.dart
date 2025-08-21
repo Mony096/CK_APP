@@ -273,23 +273,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 25,
                       ),
                       ElevatedButton(
-                        // onPressed: () async {
-                        //   // setState(() => _isLoading = true);
-                        //   // final success = await Provider.of<AuthProvider>(
-                        //   //         context,
-                        //   //         listen: false)
-                        //   //     .login(context, _userName.text, _password.text);
-
-                        //   // if (success) {
-                        //   //   Navigator.of(context).pushAndRemoveUntil(
-                        //   //     MaterialPageRoute(
-                        //   //         builder: (_) => const WrapperScreen()),
-                        //   //     (route) => false,
-                        //   //   );
-                        //   // }
-                        //   // setState(() => _isLoading = false);
-
-                        // },
                         onPressed: () async {
                           try {
                             setState(() => _isLoading = true);

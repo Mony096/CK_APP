@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
+import 'package:bizd_tech_service/screens/equipment/equipment_create.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
 
@@ -113,10 +115,10 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                 width: MediaQuery.of(context).size.width,
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 66, 83, 100),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
+                  // borderRadius: BorderRadius.only(
+                  //   bottomLeft: Radius.circular(12),
+                  //   bottomRight: Radius.circular(12),
+                  // ),
                 ),
                 child: Stack(
                   clipBehavior: Clip.none,
@@ -201,51 +203,54 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   width: 33,
                                 ),
                                 const SizedBox(
-                                  width: 10,
+                                  width: 15,
                                 ),
                                 const Text(
-                                  "Equiment Overview",
+                                  "Equipment Overview",
                                   style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 21,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 )
                               ],
                             ),
-                            Container(
-                              width: 65,
-                              height: 35,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color.fromARGB(255, 56, 67, 80)
-                                        .withOpacity(0.3), // Light gray shadow
-                                    spreadRadius: 3, // Smaller spread
-                                    blurRadius: 3, // Smaller blur
-                                    offset: const Offset(
-                                        0, 1), // Minimal vertical offset
-                                  ),
-                                ],
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.add,
-                                        size: 16,
-                                        color:
-                                            Color.fromARGB(255, 104, 104, 110)),
-                                    Text(
-                                      "New",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: Color.fromARGB(
-                                              255, 104, 104, 110)),
+                            GestureDetector(
+                              onTap: ()=> goTo(context, EquipmentCreateScreen()),
+                              child: Container(
+                                width: 65,
+                                height: 35,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color.fromARGB(255, 56, 67, 80)
+                                          .withOpacity(0.3), // Light gray shadow
+                                      spreadRadius: 3, // Smaller spread
+                                      blurRadius: 3, // Smaller blur
+                                      offset: const Offset(
+                                          0, 1), // Minimal vertical offset
                                     ),
                                   ],
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.only(right: 4),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add,
+                                          size: 16,
+                                          color:
+                                              Color.fromARGB(255, 104, 104, 110)),
+                                      Text(
+                                        "New",
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            color: Color.fromARGB(
+                                                255, 104, 104, 110)),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
