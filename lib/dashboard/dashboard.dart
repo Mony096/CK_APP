@@ -1,6 +1,5 @@
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
-import 'package:bizd_tech_service/screens/recently/recently_list.dart';
 import 'package:bizd_tech_service/screens/service/service.dart';
 import 'package:flutter/material.dart';
 

@@ -2,7 +2,7 @@ import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/main.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
-import 'package:bizd_tech_service/provider/delivery_history_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
@@ -10,36 +10,18 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class BlockDeliveryNotification {
-  final String fromWarehouse;
-  final String toWarehouse;
-  final double distanceKm;
-  final DateTime deliveryDate;
-  final String address;
-  final String status; // Add this line ✅
-
-  BlockDeliveryNotification({
-    required this.fromWarehouse,
-    required this.toWarehouse,
-    required this.distanceKm,
-    required this.deliveryDate,
-    required this.address,
-    required this.status, // Add this line ✅
-  });
-}
-
-class DeliveryNotificationList extends StatefulWidget {
-  const DeliveryNotificationList({super.key});
+class BusinessPartnerPage extends StatefulWidget {
+  const BusinessPartnerPage({super.key});
 
   @override
-  State<DeliveryNotificationList> createState() =>
-      _DeliveryNotificationListState();
+  State<BusinessPartnerPage> createState() => _BusinessPartnerPageState();
 }
 
-class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
+class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
   List<dynamic> warehouses = [];
   List<dynamic> customers = [];
   bool _initialLoading = true;
+  final filter = TextEditingController();
 
   final ScrollController _scrollController = ScrollController();
 
@@ -50,7 +32,7 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
 
     _scrollController.addListener(() {
       final provider =
-          Provider.of<DeliveryNoteHistoryProvider>(context, listen: false);
+          Provider.of<CustomerListProvider>(context, listen: false);
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
           provider.hasMore &&
@@ -64,7 +46,7 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
     setState(() => _initialLoading = true);
 
     final provider =
-        Provider.of<DeliveryNoteHistoryProvider>(context, listen: false);
+        Provider.of<CustomerListProvider>(context, listen: false);
     final whProvider = Provider.of<HelperProvider>(context, listen: false);
 
     if (provider.documents.isEmpty) {
@@ -90,7 +72,7 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
     setState(() => _initialLoading = true);
 
     final provider =
-        Provider.of<DeliveryNoteHistoryProvider>(context, listen: false);
+        Provider.of<CustomerListProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
     provider.resetPagination();
     await provider.fetchDocuments();
@@ -112,9 +94,9 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: const Color.fromARGB(255, 33, 107, 243),
+        backgroundColor: const Color.fromARGB(255, 102, 103, 104),
         title: const Text(
-          "Delivered Recently",
+          "Customer Lists",
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
         centerTitle: true,
@@ -133,32 +115,15 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                   color: Colors.white,
                 ),
               ),
-              IconButton(
-                onPressed: () async {
-                  MaterialDialog.loading(context);
-                  await Provider.of<AuthProvider>(context, listen: false)
-                      .logout();
-                  Navigator.of(context).pop(); // Close loading
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                icon: const Icon(
-                  Icons.logout,
-                  size: 27,
-                  color: Colors.white,
-                ),
-              ),
             ],
           ),
           const SizedBox(width: 12),
         ],
       ),
-      body: Consumer<DeliveryNoteHistoryProvider>(
+      body: Consumer<CustomerListProvider>(
         builder: (context, deliveryProvider, _) {
           final documents = deliveryProvider.documents;
-          final provider = Provider.of<DeliveryNoteHistoryProvider>(context);
+          final provider = Provider.of<CustomerListProvider>(context);
           final isLoadingMore = provider.isLoading && provider.hasMore;
 
           // if (isLoading && documents.isEmpty) {
@@ -204,48 +169,82 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
               SizedBox(
                 height: 10,
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width - 25,
-                child: ButtonTheme(
-                    alignedDropdown:
-                        true, // 👈 ensures popup aligns with button
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: DropdownButton<String>(
-                        isExpanded: true, // important for full width
-                        value: provider.currentFilter,
-                        items: const [
-                          DropdownMenuItem(
-                              value: "All",
-                              child: Text(
-                                "All",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: Color.fromARGB(255, 66, 66, 68)),
-                              )),
-                          DropdownMenuItem(
-                              value: "Completed",
-                              child: Text(
-                                "Completed",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: Color.fromARGB(255, 66, 66, 68)),
-                              )),
-                          DropdownMenuItem(
-                              value: "Failed",
-                              child: Text("Failed",
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      color: Color.fromARGB(255, 66, 66, 68),
-                                      fontWeight: FontWeight.normal))),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            provider.setFilter(value);
-                          }
-                        },
+              Container(
+                padding: const EdgeInsets.fromLTRB(18, 15, 18, 15),
+                child: Row(
+                  children: [
+                    // smaller search field
+                    Expanded(
+                      child: SizedBox(
+                        height: 40,
+                        child: TextField(
+                          controller: filter,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 206, 206, 208),
+                                width: 1,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 203, 203, 203),
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(7),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 96, 126, 105),
+                                width: 1.5,
+                              ),
+                            ),
+                            hintText: "Search",
+                            hintStyle: const TextStyle(
+                                color: Colors.grey, fontSize: 14),
+                            // Decrease vertical and horizontal padding to shrink the field
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 4, // Reduced from 8
+                                horizontal: 12 // Reduced from 12
+                                ),
+                            // border: OutlineInputBorder(
+                            //   borderRadius: BorderRadius.circular(10),
+                            //   borderSide: BorderSide.none,
+                            // ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
                       ),
-                    )),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    // smaller button
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        provider.setFilter(filter.text);
+
+                        // example: print search text
+                        // print("Search for: ${controller.text}");
+                      },
+                      child: const Text("GO"),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: 5,
@@ -253,12 +252,15 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
               // 📦 List View with Pagination and States
               Expanded(
                 child: _initialLoading || provider.isLoadingSetFilter
-                    ? const Center(
-                        child: SpinKitFadingCircle(
-                          color: Colors.blue,
-                          size: 50.0,
+                    ? Padding(
+                      padding: const EdgeInsets.only(bottom: 100),
+                      child: const Center(
+                          child: SpinKitFadingCircle(
+                            color: Colors.blue,
+                            size: 50.0,
+                          ),
                         ),
-                      )
+                    )
                     : documents.isEmpty
                         ? const Center(
                             child: Text(
@@ -288,25 +290,15 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                                   ),
                                 );
                               }
-
                               final doc = documents[index];
-                              final warehouse = warehouses.firstWhere(
-                                (e) =>
-                                    e["WarehouseCode"] ==
-                                    doc["DocumentLines"][0]["WarehouseCode"],
-                                orElse: () => {"WarehouseName": "N/A"},
-                              );
-                              final whName = warehouse["WarehouseName"];
 
                               return Container(
                                 margin: const EdgeInsets.symmetric(
                                     vertical: 8, horizontal: 15),
                                 padding: const EdgeInsets.all(15),
                                 decoration: BoxDecoration(
-                                  color: doc["U_lk_delstat"] == "Delivered"
-                                      ? Colors.white
-                                      : const Color.fromARGB(
-                                          255, 248, 231, 231),
+                                  color:
+                                      const Color.fromARGB(255, 248, 231, 231),
                                   borderRadius: BorderRadius.circular(8),
                                   boxShadow: const [
                                     BoxShadow(
@@ -335,7 +327,7 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                                                       color: Colors.black),
                                                   const SizedBox(width: 4),
                                                   Text(
-                                                    whName,
+                                                    doc["CardCode"],
                                                     style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -349,18 +341,13 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                                                   Text(
                                                     "→ ",
                                                     style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          doc["U_lk_delstat"] ==
-                                                                  "Delivered"
-                                                              ? Colors.green
-                                                              : Colors.red,
-                                                    ),
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.green),
                                                   ),
                                                   Text(
-                                                    "  ${doc["CardName"]}",
+                                                    "  1111",
                                                     style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -379,18 +366,13 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: doc["U_lk_delstat"] ==
-                                                    "Delivered"
-                                                ? Colors.green
-                                                : Colors.red,
+                                            color: Colors.green,
                                             borderRadius:
                                                 BorderRadius.circular(5),
                                           ),
                                           child: Center(
                                             child: Text(
-                                              doc["U_lk_delstat"] == "Delivered"
-                                                  ? "Completed"
-                                                  : "Failed",
+                                              "Failed",
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 12,
@@ -408,13 +390,7 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(
-                                            doc["DocumentLines"][0]
-                                                        ["ShipToDescription"]
-                                                    .toString()
-                                                    .isEmpty
-                                                ? "N/A"
-                                                : doc["DocumentLines"][0]
-                                                    ["ShipToDescription"],
+                                            "aa",
                                             style: const TextStyle(
                                               fontSize: 14,
                                               color: Color.fromARGB(
@@ -447,7 +423,7 @@ class _DeliveryNotificationListState extends State<DeliveryNotificationList> {
                                             size: 20, color: Colors.orange),
                                         const SizedBox(width: 6),
                                         Text(
-                                          "${doc["DocDate"].split("T")[0]}  ${formatCustomTime(doc["DocTime"])}",
+                                          "aaaa",
                                           style: const TextStyle(
                                             fontSize: 14,
                                             color: Color.fromARGB(

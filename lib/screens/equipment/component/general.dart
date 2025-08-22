@@ -1,6 +1,8 @@
 import 'package:bizd_tech_service/component/text_field.dart';
 import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
+import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
 import 'package:flutter/material.dart';
 
 class General extends StatefulWidget {
@@ -14,7 +16,8 @@ class General extends StatefulWidget {
 }
 
 class _GeneralState extends State<General> {
-  final eqtype = ["Active"];
+  List<dynamic> eqtype = ["Active", "Retired", "Suspended", "Inactive"];
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -80,7 +83,7 @@ class _GeneralState extends State<General> {
                   size: 28,
                 ),
                 onclickIcon: () {
-                  print("Scan icon tapped!");
+                  _customerSelect();
                 },
               ),
               const SizedBox(height: 8),
@@ -200,7 +203,7 @@ class _GeneralState extends State<General> {
       context: context,
       builder: (context) {
         return AlertDialog(
-           shape: RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
           title: Padding(
@@ -281,5 +284,17 @@ class _GeneralState extends State<General> {
         widget.controller?["equipType"].text = selectedValue;
       });
     }
+  }
+
+  void _customerSelect() async {
+    goTo(context, const BusinessPartnerPage()).then((value) => {
+          if (value != null)
+            {
+              setState(() {
+                // customerCode.text = getDataFromDynamic(value["CardCode"]);
+                // customerName.text = getDataFromDynamic(value["CardName"]);
+              })
+            }
+        });
   }
 }

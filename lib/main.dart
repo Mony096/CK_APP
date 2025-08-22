@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:bizd_tech_service/AppLifecycleTracker%20.dart';
 import 'package:bizd_tech_service/core/disble_ssl.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
-import 'package:bizd_tech_service/provider/delivery_history_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/live_location_provider.dart';
@@ -88,7 +88,7 @@ void main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
       ChangeNotifierProvider(create: (_) => DeliveryNoteProvider()),
-      ChangeNotifierProvider(create: (_) => DeliveryNoteHistoryProvider()),
+      ChangeNotifierProvider(create: (_) => CustomerListProvider()),
       ChangeNotifierProvider(create: (_) => HelperProvider()),
       ChangeNotifierProvider(create: (_) => UpdateStatusProvider()),
       ChangeNotifierProvider(create: (_) => LocationProvider()),

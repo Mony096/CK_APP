@@ -2,7 +2,7 @@ import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 
-class DeliveryNoteHistoryProvider extends ChangeNotifier {
+class CustomerListProvider extends ChangeNotifier {
   List<dynamic> _documents = [];
   bool _isLoading = false;
   bool _hasMore = true;
@@ -10,7 +10,7 @@ class DeliveryNoteHistoryProvider extends ChangeNotifier {
 
   int _skip = 0;
   final int _limit = 10;
-  String _currentFilter = "All";
+  String _currentFilter = "";
 
   final DioClient dio = DioClient();
 
@@ -31,14 +31,13 @@ class DeliveryNoteHistoryProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final userId = await LocalStorageManger.getString('UserId');
-    final String filterCondition = _currentFilter == "All"
-        ? "(U_lk_delstat eq 'Pending' or U_lk_delstat eq 'Delivered' or U_lk_delstat eq 'Failed')"
-        : "U_lk_delstat eq '${_currentFilter == "Completed" ? "Delivered" : "Failed"}'";
+    final String filterCondition = _currentFilter == ""
+        ? ""
+        : "&\$filter=contains(CardCode,'${_currentFilter}')";
 
     try {
       final response = await dio.get(
-          "/DeliveryNotes?\$top=$_limit&\$skip=$_skip&\$filter=$filterCondition and U_lk_driver eq $userId");
+          "/BusinessPartners?\$top=$_limit&\$skip=$_skip$filterCondition &\$select=CardCode,CardName");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];
@@ -71,7 +70,7 @@ class DeliveryNoteHistoryProvider extends ChangeNotifier {
   }
 
   void setFilter(String filter) {
-    if (_currentFilter == filter) return;
+    // if (_currentFilter == filter) return;
     _currentFilter = filter;
     resetPagination();
     fetchDocuments(isSetFilter: true); // Re-fetch with new filter
