@@ -197,9 +197,11 @@ class _PartState extends State<Part> {
               // const SizedBox(height: 8),
               // const SizedBox(height: 10),
               CustomTextField(
-                controller:code,
+                controller: code,
                 label: 'Code',
                 star: true,
+                focusNode: codeFocusNode,
+
                 // icon: const Icon(Icons.qr_code_scanner,
                 //     color: Colors.grey),
                 // onclickIcon: () {
@@ -219,7 +221,7 @@ class _PartState extends State<Part> {
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller:part,
+                controller: part,
                 label: 'Part Number',
                 star: false,
               ),
@@ -238,7 +240,7 @@ class _PartState extends State<Part> {
               Container(
                 margin: const EdgeInsets.fromLTRB(20, 20, 20, 13),
                 child: ElevatedButton(
-                   onPressed: () async {
+                  onPressed: () async {
                     onAddPart();
                   },
                   style: ElevatedButton.styleFrom(
