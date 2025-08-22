@@ -65,6 +65,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // await LocalStorageManger.setString('SessionId', "1");
+      // checkSession();
+      //   _isLoggedIn = true;
+      //   notifyListeners();
+      //   return true;
       final response = await dio.post('/login', true, false, data: {
         "userName": username,
         "password": password,
@@ -148,7 +153,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     // await updateDocumentStatus("");
     await LocalStorageManger.removeString('SessionId');
-    await FirebaseMessaging.instance.deleteToken();
+    // await FirebaseMessaging.instance.deleteToken();
     _isLoggedIn = false;
     notifyListeners();
   }
@@ -158,8 +163,8 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       _isCheckSessionId = true;
-           final sessionId = await LocalStorageManger.getString('SessionId');
-        _isLoggedIn = sessionId.isNotEmpty;
+      final sessionId = await LocalStorageManger.getString('SessionId');
+      _isLoggedIn = sessionId.isNotEmpty;
       // final userId = await LocalStorageManger.getString('UserId');
       // final response = await dio.get(
       //     "/DeliveryNotes?\$filter=U_lk_delstat eq 'Pending' and U_lk_driver eq $userId &\$select=U_lk_delstat,U_lk_driver");

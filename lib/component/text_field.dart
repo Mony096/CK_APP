@@ -8,6 +8,7 @@ class CustomTextField extends StatefulWidget {
     required this.controller,
     required this.star,
     this.icon, // optional custom icon widget
+    this.focusNode,
   });
 
   final VoidCallback? onclickIcon;
@@ -15,6 +16,7 @@ class CustomTextField extends StatefulWidget {
   final bool star;
   final TextEditingController? controller;
   final Widget? icon; // icon provided by parent
+  final dynamic focusNode;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -60,6 +62,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           child: SizedBox(
             height: 43,
             child: TextField(
+              focusNode: widget.focusNode,
               controller: widget.controller,
               style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(

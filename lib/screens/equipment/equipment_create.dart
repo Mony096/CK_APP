@@ -467,7 +467,17 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                     General(
                       controller: {
                         "equipCode": equipCode,
-                        "equipName": equipName
+                        "equipName": equipName,
+                        "customerCode": customerCode,
+                        "equipType": equipType,
+                        "site": site,
+                        "brand": brand,
+                        "serialNumber": serialNumber,
+                        "remark": remark,
+                        "uploadImg":uploadImg,
+                        "installedDate": installedDate,
+                        "nextDate": nextDate,
+                        "warrantyDate": warrantyDate
                       },
                     ),
                      Component(

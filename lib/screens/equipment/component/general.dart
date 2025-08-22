@@ -70,7 +70,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['customerCode'],
                 label: 'Customer',
                 star: true,
                 icon: const Icon(
@@ -84,7 +84,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['equipType'],
                 label: 'Status',
                 star: true,
                 icon: const Icon(
@@ -98,19 +98,19 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['site'],
                 label: 'Site',
                 star: false,
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['brand'],
                 label: 'Brand',
                 star: true,
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['serialNumber'],
                 label: 'Serial Number',
                 star: true,
                 icon: const Icon(
@@ -124,7 +124,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 8),
               CustomTextRemark(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['remark'],
                 label: 'Remark',
               ),
               const SizedBox(height: 28),
@@ -133,7 +133,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['uploadImg'],
                 label: 'Upload Image',
                 star: true,
                 icon: const Icon(
@@ -147,7 +147,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['installedDate'],
                 label: 'Installed Date',
                 star: true,
                 icon: const Icon(
@@ -161,7 +161,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['nextDate'],
                 label: 'Next Service Date',
                 star: false,
                 icon: const Icon(
@@ -175,7 +175,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                controller: widget.controller?['equipName'],
+                controller: widget.controller?['warrantyDate'],
                 label: 'Warranty Expire Date',
                 star: true,
                 icon: const Icon(
