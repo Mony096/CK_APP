@@ -14,6 +14,7 @@ class General extends StatefulWidget {
 }
 
 class _GeneralState extends State<General> {
+  final eqtype = ["Active"];
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -93,7 +94,7 @@ class _GeneralState extends State<General> {
                   size: 28,
                 ),
                 onclickIcon: () {
-                  print("Scan icon tapped!");
+                  _equipmentTypeSelect();
                 },
               ),
               const SizedBox(height: 8),
@@ -192,5 +193,93 @@ class _GeneralState extends State<General> {
         ),
       ),
     );
+  }
+
+  void _equipmentTypeSelect() async {
+    final selectedValue = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+           shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13.0), // Rounded corners
+          ),
+          title: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.task_outlined,
+                  color: Colors.blueGrey[800],
+                ),
+                const SizedBox(
+                  width: 7,
+                ),
+                Text(
+                  "Status",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey[800],
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ],
+            ),
+          ),
+          content: Container(
+            padding: const EdgeInsets.only(top: 10),
+            decoration: const BoxDecoration(
+                border: Border(
+                    top: BorderSide(
+                        color: Color.fromARGB(255, 219, 221, 224), width: 1))),
+            // color: Colors.red,
+            width: double.maxFinite, // Use full width of the dialog
+            constraints: const BoxConstraints(
+              maxHeight: 300, // Limit the height to prevent overflow
+            ),
+            child: ListView(
+              shrinkWrap: true,
+              children: eqtype.asMap().entries.map((entry) {
+                var item = entry.value;
+
+                return TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, item);
+                  },
+                  style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                      const EdgeInsets.all(10), // Add top padding of 10
+                    ),
+                    minimumSize: MaterialStateProperty.all<Size>(Size.zero),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment
+                        .centerLeft, // Ensure the button itself aligns to the left
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft, // Align text to the left
+                    child: Text(
+                      item, // Use index if needed
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 72, 73, 75),
+                          fontWeight:
+                              FontWeight.normal // Set text color to black
+                          ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 4.0,
+        );
+      },
+    );
+    if (selectedValue != null) {
+      setState(() {
+        widget.controller?["equipType"].text = selectedValue;
+      });
+    }
   }
 }
