@@ -62,6 +62,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           child: SizedBox(
             height: 43,
             child: TextField(
+              //  enabled: false, 
               focusNode: widget.focusNode,
               controller: widget.controller,
               style: const TextStyle(fontSize: 16),

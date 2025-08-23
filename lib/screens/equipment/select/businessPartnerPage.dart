@@ -1,10 +1,4 @@
-import 'package:bizd_tech_service/helper/helper.dart';
-import 'package:bizd_tech_service/main.dart';
-import 'package:bizd_tech_service/middleware/LoginScreen.dart';
-import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
-import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -45,25 +39,13 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
   Future<void> _init() async {
     setState(() => _initialLoading = true);
 
-    final provider =
-        Provider.of<CustomerListProvider>(context, listen: false);
-    final whProvider = Provider.of<HelperProvider>(context, listen: false);
+    final provider = Provider.of<CustomerListProvider>(context, listen: false);
 
     if (provider.documents.isEmpty) {
       await provider.fetchDocuments();
     }
 
-    if (whProvider.warehouses.isEmpty) {
-      await whProvider.fetchWarehouse();
-    }
-
-    if (whProvider.customer.isEmpty) {
-      await whProvider.fetchCustomer();
-    }
-
     setState(() {
-      warehouses = whProvider.warehouses;
-      customers = whProvider.customer;
       _initialLoading = false;
     });
   }
@@ -71,23 +53,23 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider =
-        Provider.of<CustomerListProvider>(context, listen: false);
+    final provider = Provider.of<CustomerListProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
     provider.resetPagination();
     await provider.fetchDocuments();
-
-    setState(() {
-      _initialLoading = false;
-    });
+    setState(() => _initialLoading = false);
   }
 
   String formatDateTime(DateTime dt) {
     return DateFormat('yyyy-MM-dd HH:mm').format(dt);
   }
+
 // String formatDateTime(DateTime dt) {
 //   return DateFormat('dd-MMM-yyyy - HH:mm').format(dt);
 // }
+  void onPressed(dynamic bp) {
+    Navigator.pop(context, bp);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,13 +127,13 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
           // }
           return Column(
             children: [
-              SizedBox(
-                height: 20,
+              const SizedBox(
+                height: 15,
               ),
               // 🔽 Filter Dropdown
               SizedBox(
                   width: MediaQuery.of(context).size.width - 40,
-                  child: Row(
+                  child: const Row(
                     children: [
                       Icon(
                         Icons.list,
@@ -166,11 +148,8 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                       ),
                     ],
                   )),
-              SizedBox(
-                height: 10,
-              ),
               Container(
-                padding: const EdgeInsets.fromLTRB(18, 15, 18, 15),
+                padding: const EdgeInsets.fromLTRB(18, 10, 18, 5),
                 child: Row(
                   children: [
                     // smaller search field
@@ -202,7 +181,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                 width: 1.5,
                               ),
                             ),
-                            hintText: "Search",
+                            hintText: "Customer Code",
                             hintStyle: const TextStyle(
                                 color: Colors.grey, fontSize: 14),
                             // Decrease vertical and horizontal padding to shrink the field
@@ -246,196 +225,111 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 5,
-              ),
+              // const SizedBox(
+              //   height: 5,
+              // ),
               // 📦 List View with Pagination and States
               Expanded(
                 child: _initialLoading || provider.isLoadingSetFilter
-                    ? Padding(
-                      padding: const EdgeInsets.only(bottom: 100),
-                      child: const Center(
+                    ? const Padding(
+                        padding: EdgeInsets.only(bottom: 100),
+                        child: Center(
                           child: SpinKitFadingCircle(
-                            color: Colors.blue,
+                            color: Colors.green,
                             size: 50.0,
                           ),
                         ),
-                    )
+                      )
                     : documents.isEmpty
                         ? const Center(
                             child: Text(
-                              "No Delivered Recently",
+                              "No Customer",
                               style:
                                   TextStyle(fontSize: 16, color: Colors.grey),
                             ),
                           )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.only(top: 8),
-                            itemCount:
-                                documents.length + (isLoadingMore ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index == documents.length && isLoadingMore) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  child: SizedBox(
-                                    height: 40,
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: SpinKitFadingCircle(
-                                        color: Colors.blue,
-                                        size: 50.0,
+                        : Container(
+                            padding: const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            margin: const EdgeInsets.all(7),
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.only(top: 6),
+                              itemCount:
+                                  documents.length + (isLoadingMore ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == documents.length &&
+                                    isLoadingMore) {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: SizedBox(
+                                      height: 40,
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: SpinKitFadingCircle(
+                                          color: Colors.green,
+                                          size: 50.0,
+                                        ),
                                       ),
+                                    ),
+                                  );
+                                }
+                                final doc = documents[index];
+                                return GestureDetector(
+                                  onTap: () => onPressed(doc),
+                                  child: Container(
+                                    margin:
+                                        const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                          255, 255, 255, 255),
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: const Color.fromARGB(
+                                            255, 239, 239, 240), // border color
+                                        width: 1, // border width
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${doc["CardCode"]} - ${doc["CardName"]}',
+                                          style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color.fromARGB(
+                                                  255, 69, 70, 72)),
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          '${doc["ShipToDefault"] ?? "N/A"}',
+                                          style: const TextStyle(
+                                              fontSize: 15,
+                                              // fontWeight: FontWeight.bold,
+                                              color: Color.fromARGB(
+                                                  255, 69, 70, 72)),
+                                        )
+                                      ],
                                     ),
                                   ),
                                 );
-                              }
-                              final doc = documents[index];
-
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 15),
-                                padding: const EdgeInsets.all(15),
-                                decoration: BoxDecoration(
-                                  color:
-                                      const Color.fromARGB(255, 248, 231, 231),
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  const Icon(Icons.store,
-                                                      size: 18,
-                                                      color: Colors.black),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    doc["CardCode"],
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "→ ",
-                                                    style: TextStyle(
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.green),
-                                                  ),
-                                                  Text(
-                                                    "  1111",
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 80,
-                                          margin:
-                                              const EdgeInsets.only(bottom: 22),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green,
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              "Failed",
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.location_on,
-                                            size: 20, color: Colors.blue),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            "aa",
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Color.fromARGB(
-                                                  255, 119, 116, 116),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: const [
-                                        Icon(Icons.directions_car,
-                                            size: 20, color: Colors.green),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          "N/A km",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Color.fromARGB(
-                                                255, 119, 116, 116),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.access_time,
-                                            size: 20, color: Colors.orange),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          "aaaa",
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Color.fromARGB(
-                                                255, 119, 116, 116),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                              },
+                            ),
                           ),
               ),
             ],

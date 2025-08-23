@@ -2,14 +2,14 @@ import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 
-class CustomerListProvider extends ChangeNotifier {
+class EquipmentListProvider extends ChangeNotifier {
   List<dynamic> _documents = [];
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isLoadingSetFilter = false;
 
   int _skip = 0;
-  final int _limit = 20;
+  final int _limit = 10;
   String _currentFilter = "";
 
   final DioClient dio = DioClient();
@@ -32,12 +32,12 @@ class CustomerListProvider extends ChangeNotifier {
     notifyListeners();
 
     final String filterCondition = _currentFilter == ""
-        ? "&\$filter = CardType eq 'cCustomer'"
-        : "&\$filter=contains(CardCode,'${_currentFilter}') and CardType eq 'cCustomer'";
+        ? ""
+        : "&\$filter=contains(Code,'${_currentFilter}')";
 
     try {
       final response = await dio.get(
-          "/BusinessPartners?\$top=$_limit&\$skip=$_skip$filterCondition &\$select=CardCode,CardName,ShipToDefault");
+          "/CK_CUSEQUI?\$top=$_limit&\$skip=$_skip$filterCondition &\$select=U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];

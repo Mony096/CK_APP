@@ -3,7 +3,6 @@ import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/serviceById.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -50,25 +49,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
     if (dnProvider.documents.isEmpty) {
       await dnProvider.fetchDocuments();
     }
-
-    final whProvider = Provider.of<HelperProvider>(context, listen: false);
-    if (whProvider.warehouses.isEmpty) {
-      await whProvider.fetchWarehouse();
-    }
-
-    final customerProvider =
-        Provider.of<HelperProvider>(context, listen: false);
-    if (customerProvider.customer.isEmpty) {
-      await customerProvider.fetchCustomer();
-    }
-
-    if (!mounted) return;
-    setState(() {
-      warehouses = whProvider.warehouses;
-      customers = customerProvider.customer;
-
-      _isLoading = false;
-    });
   }
 
   Future<void> _loadUserName() async {

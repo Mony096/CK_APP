@@ -5,7 +5,6 @@ import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/component/general.dart';
 import 'package:bizd_tech_service/screens/equipment/component/component.dart';
@@ -105,21 +104,8 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       await dnProvider.fetchDocuments();
     }
 
-    final whProvider = Provider.of<HelperProvider>(context, listen: false);
-    if (whProvider.warehouses.isEmpty) {
-      await whProvider.fetchWarehouse();
-    }
-
-    final customerProvider =
-        Provider.of<HelperProvider>(context, listen: false);
-    if (customerProvider.customer.isEmpty) {
-      await customerProvider.fetchCustomer();
-    }
-
     if (!mounted) return;
     setState(() {
-      warehouses = whProvider.warehouses;
-      customers = customerProvider.customer;
 
       _isLoading = false;
     });
@@ -469,6 +455,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                         "equipCode": equipCode,
                         "equipName": equipName,
                         "customerCode": customerCode,
+                        "customerName":customerName,
                         "equipType": equipType,
                         "site": site,
                         "brand": brand,

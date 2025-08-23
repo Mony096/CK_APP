@@ -1,23 +1,15 @@
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:bizd_tech_service/AppLifecycleTracker%20.dart';
+
 import 'package:bizd_tech_service/core/disble_ssl.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
-import 'package:bizd_tech_service/provider/live_location_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
-import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/wrapper_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:provider/provider.dart';
-import 'package:vibration/vibration.dart';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:provider/provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -48,8 +40,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = DisableSSL();
+
   // await Firebase.initializeApp();
-  await LocationProvider.initializeService();
+  // await LocationProvider.initializeService();
   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // AwesomeNotifications().initialize(
@@ -89,9 +83,10 @@ void main() async {
       ChangeNotifierProvider(create: (_) => AuthProvider()),
       ChangeNotifierProvider(create: (_) => DeliveryNoteProvider()),
       ChangeNotifierProvider(create: (_) => CustomerListProvider()),
-      ChangeNotifierProvider(create: (_) => HelperProvider()),
       ChangeNotifierProvider(create: (_) => UpdateStatusProvider()),
-      ChangeNotifierProvider(create: (_) => LocationProvider()),
+      ChangeNotifierProvider(create: (_) => EquipmentListProvider()),
+
+      // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],
     child: MyApp(),
   ));

@@ -2,15 +2,17 @@ import 'dart:async';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_create.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EquipmentListScreen extends StatefulWidget {
@@ -21,8 +23,11 @@ class EquipmentListScreen extends StatefulWidget {
 
 class _EquipmentListScreenState extends State<EquipmentListScreen> {
   final DioClient dio = DioClient(); // Your custom Dio client
+  bool _initialLoading = true;
+  final ScrollController _scrollController = ScrollController();
+  final filter = TextEditingController();
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   List<dynamic> documents = [];
   List<dynamic> warehouses = [];
   List<dynamic> customers = [];
@@ -31,80 +36,63 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _init(); // this safely runs after first build
+    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+
+    _scrollController.addListener(() {
+      final provider =
+          Provider.of<EquipmentListProvider>(context, listen: false);
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          provider.hasMore &&
+          !provider.isLoading) {
+        provider.fetchDocuments(loadMore: true);
+      }
     });
   }
 
   Future<void> _init() async {
-    if (!mounted) return;
+    setState(() => _initialLoading = true);
+
+    final provider = Provider.of<EquipmentListProvider>(context, listen: false);
+
+    if (provider.documents.isEmpty) {
+      await provider.fetchDocuments();
+    }
+
     setState(() {
-      _isLoading = true;
-    });
-    final dnProvider =
-        Provider.of<DeliveryNoteProvider>(context, listen: false);
-    if (dnProvider.documents.isEmpty) {
-      await dnProvider.fetchDocuments();
-    }
-
-    final whProvider = Provider.of<HelperProvider>(context, listen: false);
-    if (whProvider.warehouses.isEmpty) {
-      await whProvider.fetchWarehouse();
-    }
-
-    final customerProvider =
-        Provider.of<HelperProvider>(context, listen: false);
-    if (customerProvider.customer.isEmpty) {
-      await customerProvider.fetchCustomer();
-    }
-
-    if (!mounted) return;
-    setState(() {
-      warehouses = whProvider.warehouses;
-      customers = customerProvider.customer;
-
-      _isLoading = false;
+      _initialLoading = false;
     });
   }
 
-  void onCompletedSkip(dynamic entry, List<dynamic> documents) async {
-    MaterialDialog.loading(context); // Show loading dialog
-    await Provider.of<UpdateStatusProvider>(context, listen: false)
-        .updateDocumentAndStatus(
-            docEntry: entry,
-            status: "Delivered",
-            remarks: "",
-            context: context);
-    await Future.microtask(() {
-      final provider =
-          Provider.of<DeliveryNoteProvider>(context, listen: false);
-      provider.fetchDocuments();
-    });
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
+  Future<void> _refreshData() async {
+    setState(() => _initialLoading = true);
+
+    final provider = Provider.of<EquipmentListProvider>(context, listen: false);
+    // ✅ Only fetch if not already loaded
+    provider.resetPagination();
+    await provider.fetchDocuments();
+    setState(() => _initialLoading = false);
   }
 
-  void onFailedDelivery(dynamic entry, List<dynamic> documents) async {
-    MaterialDialog.loading(context); // Show loading dialog
-    await Provider.of<UpdateStatusProvider>(context, listen: false)
-        .updateDocumentAndStatus(
-            docEntry: entry, status: "Failed", remarks: "", context: context);
-    await Future.microtask(() {
-      final provider =
-          Provider.of<DeliveryNoteProvider>(context, listen: false);
-      provider.fetchDocuments();
-    });
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
+  String formatDateTime(DateTime dt) {
+    return DateFormat('yyyy-MM-dd HH:mm').format(dt);
+  }
+
+// String formatDateTime(DateTime dt) {
+//   return DateFormat('dd-MMM-yyyy - HH:mm').format(dt);
+// }
+  void onPressed(dynamic bp) {
+    Navigator.pop(context, bp);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeliveryNoteProvider>(
+    return Consumer<EquipmentListProvider>(
       builder: (context, deliveryProvider, _) {
         final documents = deliveryProvider.documents;
-        final isLoading = deliveryProvider.isLoading;
-
+        // final isLoading = deliveryProvider.isLoading;
+        final provider = Provider.of<EquipmentListProvider>(context);
+        final isLoadingMore = provider.isLoading && provider.hasMore;
         return Scaffold(
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,14 +137,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                           Row(
                             children: [
                               IconButton(
-                                onPressed: () async {
-                                  Future.microtask(() {
-                                    final provider =
-                                        Provider.of<DeliveryNoteProvider>(
-                                            context,
-                                            listen: false);
-                                    provider.fetchDocuments();
-                                  });
+                                onPressed: () {
+                                  _refreshData();
                                 },
                                 icon: const Icon(
                                   Icons.refresh,
@@ -215,7 +197,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               ],
                             ),
                             GestureDetector(
-                              onTap: ()=> goTo(context, EquipmentCreateScreen()),
+                              onTap: () =>
+                                  goTo(context, const EquipmentCreateScreen()),
                               child: Container(
                                 width: 65,
                                 height: 35,
@@ -224,8 +207,10 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   color: Colors.white,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color.fromARGB(255, 56, 67, 80)
-                                          .withOpacity(0.3), // Light gray shadow
+                                      color:
+                                          const Color.fromARGB(255, 56, 67, 80)
+                                              .withOpacity(
+                                                  0.3), // Light gray shadow
                                       spreadRadius: 3, // Smaller spread
                                       blurRadius: 3, // Smaller blur
                                       offset: const Offset(
@@ -240,8 +225,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                     children: [
                                       Icon(Icons.add,
                                           size: 16,
-                                          color:
-                                              Color.fromARGB(255, 104, 104, 110)),
+                                          color: Color.fromARGB(
+                                              255, 104, 104, 110)),
                                       Text(
                                         "New",
                                         style: TextStyle(
@@ -306,6 +291,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               child: SizedBox(
                                 height: 40,
                                 child: TextField(
+                                  controller: filter,
                                   style: const TextStyle(fontSize: 14),
                                   decoration: InputDecoration(
                                     hintText: "Search",
@@ -342,6 +328,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 ),
                               ),
                               onPressed: () {
+                                provider.setFilter(filter.text);
+
                                 // example: print search text
                                 // print("Search for: ${controller.text}");
                               },
@@ -356,178 +344,191 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                   ],
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               // CONTENT
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Column(children: [
-                    ...List.generate(10, (index) => 'Item ${index + 1}')
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                      final index = entry.key;
-                      final item = entry.value;
-
-                      return GestureDetector(
-                        onTap: () {
-                          // onEdit(item, index);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(10, 6.5, 10, 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border(
-                              top: BorderSide(
-                                color: index == 0
-                                    ? const Color.fromARGB(255, 222, 224, 227)
-                                    : Colors.white,
-                                width: 1,
-                              ),
-                              bottom: const BorderSide(
-                                color: Color.fromARGB(255, 222, 224, 227),
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  height: 45,
-                                  width:
-                                      45, // Ensure the width and height are equal for a perfect circle
-                                  decoration: BoxDecoration(
-                                    // color:
-                                    //     const Color.fromARGB(255, 33, 107, 243),
-                                    shape: BoxShape
-                                        .circle, // Makes the container circular
-                                    border: Border.all(
-                                      color: const Color.fromARGB(255, 39, 204,
-                                          39), // Optional: Add a border if needed
-                                      width: 1.0, // Border width
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: SvgPicture.asset(
-                                      'images/svg/key.svg',
-                                      width: 20,
-                                      height: 20,
-                                      color: const Color.fromARGB(
-                                          255, 39, 204, 39),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                flex: 6,
-                                child: Column(
-                                  children: [
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text("A001 - EQ Name",
-                                            // "${getDataFromDynamic(item["Code"])} - ${getDataFromDynamic(item["Name"])} ", // Show index
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                            ),
-                                            textScaleFactor: 1.0),
-                                        Icon(
-                                          Icons.keyboard_arrow_right,
-                                          size: 25,
-                                          color: Color.fromARGB(
-                                              255, 135, 137, 138),
-                                        )
-                                        // Text(
-                                        //     getDataFromDynamic(
-                                        //         item["U_ck_CusName"]),
-                                        //     style:
-                                        //         const TextStyle(fontSize: 13),
-                                        //     textScaleFactor: 1.0),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 6,
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 104,
-                                              child: Text("Serial Number",
-                                                  style:
-                                                      TextStyle(fontSize: 13),
-                                                  textScaleFactor: 1.0),
-                                            ),
-                                            Text(
-                                                // ": ${getDataFromDynamic(item["U_ck_eqSerNum"])}",
-                                                ": 01922",
-                                                style: TextStyle(fontSize: 13),
-                                                textScaleFactor: 1.0),
-                                          ],
-                                        ),
-                                        // Text("No. ${index + 1}",
-                                        //     style:
-                                        //         const TextStyle(fontSize: 13),
-                                        //     textScaleFactor: 1.0),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 6,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 104,
-                                              child: Text("Customer Name",
-                                                  style:
-                                                      TextStyle(fontSize: 13),
-                                                  textScaleFactor: 1.0),
-                                            ),
-                                            Text(
-                                                // ": ${getDataFromDynamic(item["U_ck_CusName"])}",
-                                                ": EQ Name",
-                                                style: TextStyle(
-                                                    color: Colors.green,
-                                                    fontSize: 13),
-                                                textScaleFactor: 1.0),
-                                          ],
-                                        ),
-                                        Text("No : ${index + 1}",
-                                            style:
-                                                const TextStyle(fontSize: 13),
-                                            textScaleFactor: 1.0),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              )
-                            ],
+                child: _initialLoading || provider.isLoadingSetFilter
+                    ? const Padding(
+                        padding: EdgeInsets.only(bottom: 100),
+                        child: Center(
+                          child: SpinKitFadingCircle(
+                            color: Colors.green,
+                            size: 50.0,
                           ),
                         ),
-                      );
-                    }),
-                  ]),
-                ),
+                      )
+                    : documents.isEmpty
+                        ? const Center(
+                            child: Text(
+                              "No Equipment",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          )
+                        : Container(
+                            // padding: const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            // margin: const EdgeInsets.all(10),
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.only(top: 5),
+                              itemCount:
+                                  documents.length + (isLoadingMore ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == documents.length &&
+                                    isLoadingMore) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: SizedBox(
+                                      height: 40,
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: SpinKitFadingCircle(
+                                          color: Colors.green,
+                                          size: 50.0,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final item = documents[index];
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    // onEdit(item, index);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        10, 6.5, 10, 10),
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 2, horizontal: 5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: const Color.fromARGB(
+                                            255, 239, 239, 240),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // Circle icon
+                                        Container(
+                                          height: 45,
+                                          width: 45,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: const Color.fromARGB(
+                                                  255, 39, 204, 39),
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: SvgPicture.asset(
+                                              'images/svg/key.svg',
+                                              width: 20,
+                                              height: 20,
+                                              color: const Color.fromARGB(
+                                                  255, 39, 204, 39),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+
+                                        // Info section
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "A001 - EQ Name",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                  Icon(
+                                                    Icons.keyboard_arrow_right,
+                                                    size: 25,
+                                                    color: Color.fromARGB(
+                                                        255, 135, 137, 138),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 6),
+                                              const Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 104,
+                                                    child: Text("Serial Number",
+                                                        style: TextStyle(
+                                                            fontSize: 13)),
+                                                  ),
+                                                  Text(": 01922",
+                                                      style: TextStyle(
+                                                          fontSize: 13)),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  const Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 104,
+                                                        child: Text(
+                                                            "Customer Name",
+                                                            style: TextStyle(
+                                                                fontSize: 13)),
+                                                      ),
+                                                      Text(": EQ Name",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.green,
+                                                              fontSize: 13)),
+                                                    ],
+                                                  ),
+                                                  Text("No : ${index + 1}",
+                                                      style: const TextStyle(
+                                                          fontSize: 13)),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
               ),
             ],
           ),

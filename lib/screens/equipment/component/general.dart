@@ -1,9 +1,11 @@
+import 'package:bizd_tech_service/component/DatePicker.dart';
 import 'package:bizd_tech_service/component/text_field.dart';
 import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class General extends StatefulWidget {
   const General({super.key, this.controller});
@@ -74,7 +76,7 @@ class _GeneralState extends State<General> {
               ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['customerCode'],
+                controller: widget.controller?['customerName'],
                 label: 'Customer',
                 star: true,
                 icon: const Icon(
@@ -123,7 +125,7 @@ class _GeneralState extends State<General> {
                   size: 25,
                 ),
                 onclickIcon: () {
-                  print("Scan icon tapped!");
+                  _scanBarcode(context);
                 },
               ),
               const SizedBox(height: 8),
@@ -150,50 +152,93 @@ class _GeneralState extends State<General> {
                 },
               ),
               const SizedBox(height: 10),
-              CustomTextField(
-                controller: widget.controller?['installedDate'],
+
+              CustomDatePickerField(
                 label: 'Installed Date',
                 star: true,
-                icon: const Icon(
-                  Icons.calendar_month,
-                  color: Colors.grey,
-                  size: 28,
-                ),
-                onclickIcon: () {
-                  print("Scan icon tapped!");
-                },
+                controller: widget.controller?['installedDate'],
               ),
               const SizedBox(height: 10),
-              CustomTextField(
-                controller: widget.controller?['nextDate'],
+              CustomDatePickerField(
                 label: 'Next Service Date',
                 star: false,
-                icon: const Icon(
-                  Icons.calendar_month,
-                  color: Colors.grey,
-                  size: 28,
-                ),
-                onclickIcon: () {
-                  print("Scan icon tapped!");
-                },
+                controller: widget.controller?['nextDate'],
               ),
+
               const SizedBox(height: 10),
-              CustomTextField(
-                controller: widget.controller?['warrantyDate'],
+
+              CustomDatePickerField(
                 label: 'Warranty Expire Date',
                 star: true,
-                icon: const Icon(
-                  Icons.calendar_month,
-                  color: Colors.grey,
-                  size: 28,
-                ),
-                onclickIcon: () {
-                  print("Scan icon tapped!");
-                },
+                controller: widget.controller?['warrantyDate'],
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _scanBarcode(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Padding(
+          padding: EdgeInsets.only(bottom: 5),
+          child: Row(
+            children: [
+              Icon(
+                Icons.camera_alt, // Use an appropriate icon
+                color: Color.fromARGB(255, 33, 46, 57),
+                size: 24,
+              ),
+              SizedBox(width: 8), // Space between icon and text
+              Text(
+                'Scanning Serial Number...',
+                textScaleFactor: 1.0,
+                style: TextStyle(
+                  fontSize: 17,
+                  // fontWeight: FontWeight.bold, // Make the text bold
+                  color: Colors.black, // Set a suitable color
+                ),
+              ),
+            ],
+          ),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: MobileScanner(
+            onDetect: (BarcodeCapture capture) {
+              final barcode = capture.barcodes.isNotEmpty
+                  ? capture.barcodes.first.rawValue
+                  : 'Unknown';
+              setState(() {
+                widget.controller?['serialNumber'].text = barcode!;
+              });
+              Navigator.pop(context); // Close the dialog
+            },
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0), // Adjust radius here
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: const Text(
+              'Cancel',
+              textScaleFactor: 1.0,
+              style: TextStyle(
+                fontSize: 15,
+                // fontWeight: FontWeight.bold, // Make the text bold
+                color: Color.fromARGB(255, 65, 66, 67), // Set a suitable color
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -291,6 +336,11 @@ class _GeneralState extends State<General> {
           if (value != null)
             {
               setState(() {
+                print(value);
+                widget.controller?["customerCode"].text =
+                    getDataFromDynamic(value["CardCode"]);
+                widget.controller?["customerName"].text =
+                    getDataFromDynamic(value["CardName"]);
                 // customerCode.text = getDataFromDynamic(value["CardCode"]);
                 // customerName.text = getDataFromDynamic(value["CardName"]);
               })
