@@ -30,7 +30,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         // Label row
         Padding(
-          padding: const EdgeInsets.only(left: 20),
+          // padding: const EdgeInsets.only(left: 20),
+            padding: const EdgeInsets.only(left: 0),
           child: Row(
             children: [
               Text(
@@ -58,7 +59,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
         // TextField with optional parent-provided icon
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          // padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          padding: EdgeInsetsGeometry.all(0),
           child: SizedBox(
             height: 43,
             child: TextField(

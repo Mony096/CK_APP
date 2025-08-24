@@ -1,5 +1,4 @@
 import 'package:bizd_tech_service/component/text_field.dart';
-import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -27,16 +26,143 @@ class _ComponentState extends State<Component> {
   final brand = TextEditingController();
   final model = TextEditingController();
   final FocusNode codeFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
-  @override
-  void dispose() {
-    _scrollController.dispose();
 
-    super.dispose();
+  void _showCreateComponent() async {
+    await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13.0), // Rounded corners
+          ),
+          title: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.task_outlined,
+                  color: Colors.blueGrey[800],
+                ),
+                const SizedBox(
+                  width: 7,
+                ),
+                Text(
+                  "Create Component",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey[800],
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ],
+            ),
+          ),
+          content: Container(
+              padding: const EdgeInsets.only(top: 10),
+              decoration: const BoxDecoration(
+                  border: Border(
+                      top: BorderSide(
+                          color: Color.fromARGB(255, 219, 221, 224),
+                          width: 1))),
+              // color: Colors.red,
+              width: double.maxFinite, // Use full width of the dialog
+              constraints: const BoxConstraints(
+                maxHeight: 460, // Limit the height to prevent overflow
+              ),
+              child: Container(
+                  child: Column(
+                children: [
+                  CustomTextField(
+                    controller: code,
+                    label: 'Code',
+                    star: true,
+                    focusNode: codeFocusNode,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTextField(
+                    controller: name,
+                    label: 'Name',
+                    star: true,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTextField(
+                    controller: part,
+                    label: 'Part Number',
+                    star: false,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTextField(
+                    controller: brand,
+                    label: 'Brand',
+                    star: true,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTextField(
+                    controller: model,
+                    label: 'Model',
+                    star: false,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(color: Color.fromARGB(255, 66, 83, 100)),
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      SizedBox(
+                        height: 35,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // if (onConfirm != null) {
+                            //   onConfirm();
+                            // }
+                            _onAddComponent();
+                            Navigator.of(context).pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                            foregroundColor: Colors.white,
+                            elevation: 3,
+                            // Adjust the padding to make the button smaller
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(7, 0, 5, 0),
+                            child: Text(
+                                isEditComp >= 0 ? "Edit" : "Add",
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ))),
+          backgroundColor: Colors.white,
+          elevation: 4.0,
+        );
+      },
+    );
   }
 
-  List<GlobalKey> itemKeys = [];
-  void onAddComponent({bool force = false}) {
+  void _onAddComponent({bool force = false}) {
     try {
       List<dynamic> data = [...componentList];
 
@@ -68,19 +194,11 @@ class _ComponentState extends State<Component> {
         componentList = data;
       });
 
-      if (editedIndex != -1) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = itemKeys[editedIndex].currentContext;
-          if (ctx != null) {
-            Scrollable.ensureVisible(
-              ctx,
-              alignment: 0.3, // 0.0 = top, 1.0 = bottom, 0.3 = near top
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-            );
-          }
-        });
-      }
+      // if (editedIndex != -1) {
+      //   WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      //   });
+      // }
     } catch (err) {
       if (err is Exception) {
         MaterialDialog.success(context, title: 'Warning', body: err.toString());
@@ -96,16 +214,24 @@ class _ComponentState extends State<Component> {
       confirmLabel: "Edit",
       cancelLabel: "Remove",
       onConfirm: () {
+        // Navigator.of(context).pop(); // Close warning dialog first
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showCreateComponent(); // Then open edit form dialog
+        });
+
         code.text = getDataFromDynamic(item["U_ck_comCode"]);
         name.text = getDataFromDynamic(item["U_U_ck_comName"]);
         part.text = getDataFromDynamic(item["U_ck_partNum"]);
         brand.text = getDataFromDynamic(item["U_ck_brand"]);
         model.text = getDataFromDynamic(item["U_ck_model"]);
         FocusScope.of(context).requestFocus(codeFocusNode);
+
         setState(() {
           isEditComp = index;
         });
       },
+
       onCancel: () {
         List<dynamic> data = [...componentList];
         data.removeAt(index);
@@ -191,58 +317,44 @@ class _ComponentState extends State<Component> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // const SizedBox(height: 7),
-              // const ComponentTitle(
-              //   label: "Infomation",
+              // CustomTextField(
+              //   controller: code,
+              //   label: 'Code',
+              //   star: true,
+              //   focusNode: codeFocusNode,
+
               // ),
               // const SizedBox(height: 8),
-              // const SizedBox(height: 10),
-              CustomTextField(
-                controller: code,
-                label: 'Code',
-                star: true,
-                focusNode: codeFocusNode,
+              // CustomTextField(
+              //   controller: name,
+              //   label: 'Name',
+              //   star: true,
 
-                // icon: const Icon(Icons.qr_code_scanner,
-                //     color: Colors.grey),
-                // onclickIcon: () {
-                //   print("Scan icon tapped!");
-                // },
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: name,
-                label: 'Name',
-                star: true,
-                // icon: const Icon(Icons.qr_code_scanner,
-                //     color: Colors.grey),
-                // onclickIcon: () {
-                //   print("Scan icon tapped!");
-                // },
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: part,
-                label: 'Part Number',
-                star: false,
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: brand,
-                label: 'Brand',
-                star: true,
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: model,
-                label: 'Model',
-                star: false,
-              ),
+              // ),
+              // const SizedBox(height: 8),
+              // CustomTextField(
+              //   controller: part,
+              //   label: 'Part Number',
+              //   star: false,
+              // ),
+              // const SizedBox(height: 8),
+              // CustomTextField(
+              //   controller: brand,
+              //   label: 'Brand',
+              //   star: true,
+              // ),
+              // const SizedBox(height: 8),
+              // CustomTextField(
+              //   controller: model,
+              //   label: 'Model',
+              //   star: false,
+              // ),
               Container(
-                margin: const EdgeInsets.fromLTRB(20, 20, 20, 13),
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 13),
                 child: ElevatedButton(
                   onPressed: () async {
-                    onAddComponent();
+                    // onAddComponent();
+                    _showCreateComponent();
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 46),
@@ -253,7 +365,7 @@ class _ComponentState extends State<Component> {
                   ),
                   child: Text(
                     // 'Add Component',
-                    isEditComp >= 0 ? "Update Component" : "Add Component",
+                    "Add Component",
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
@@ -292,12 +404,12 @@ class _ComponentState extends State<Component> {
               ...componentList.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
-                if (itemKeys.length < componentList.length) {
-                  itemKeys.add(GlobalKey());
-                }
+                // if (itemKeys.length < componentList.length) {
+                //   itemKeys.add(GlobalKey());
+                // }
 
                 return GestureDetector(
-                  key: itemKeys[index],
+                  // key: itemKeys[index],
                   onTap: () {
                     onEditComp(item, index);
                   },

@@ -136,7 +136,7 @@ class MaterialDialog {
   }) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -252,7 +252,7 @@ class MaterialDialog {
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Color.fromARGB(255, 66, 83, 100),
                       foregroundColor: Colors.white,
                       elevation: 3,
                       // Adjust the padding to make the button smaller
