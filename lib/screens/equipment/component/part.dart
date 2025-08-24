@@ -1,9 +1,11 @@
 import 'package:bizd_tech_service/component/text_field_dialog.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class Part extends StatefulWidget {
   const Part({super.key, this.controller});
@@ -128,7 +130,7 @@ class _PartState extends State<Part> {
                             // if (onConfirm != null) {
                             //   onConfirm();
                             // }
-                            _onAddComponent();
+                            _onAddPart(context);
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
@@ -165,10 +167,8 @@ class _PartState extends State<Part> {
     );
   }
 
-  void _onAddComponent({bool force = false}) {
+  void _onAddPart(BuildContext context, {bool force = false}) {
     try {
-      List<dynamic> data = [...partList];
-
       if (code.text.isEmpty) throw Exception('Code is missing.');
       if (name.text.isEmpty) throw Exception('Name is missing.');
 
@@ -180,28 +180,16 @@ class _PartState extends State<Part> {
         "U_ck_model": model.text,
       };
 
-      int editedIndex = isEditPart;
+      Provider.of<EquipmentCreateProvider>(context, listen: false)
+          .addOrEditPart(item, editIndex: isEditPart);
 
-      if (isEditPart == -1) {
-        data.add(item);
-      } else {
-        data[isEditPart] = item;
-        isEditPart = -1;
-      }
+      // Reset edit mode
+      isEditPart = -1;
 
       clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).unfocus();
       });
-      setState(() {
-        partList = data;
-      });
-
-      // if (editedIndex != -1) {
-      //   WidgetsBinding.instance.addPostFrameCallback((_) {
-
-      //   });
-      // }
     } catch (err) {
       if (err is Exception) {
         MaterialDialog.success(context, title: 'Warning', body: err.toString());
@@ -209,11 +197,11 @@ class _PartState extends State<Part> {
     }
   }
 
-  void onEditComp(dynamic item, int index) {
+  void onEditPart(dynamic item, int index) {
     if (index < 0) return;
     MaterialDialog.warningWithRemove(
       context,
-      title: 'Parts (${item['U_ck_comCode']})',
+      title: 'Comps (${item['U_ck_comCode']})',
       confirmLabel: "Edit",
       cancelLabel: "Remove",
       onConfirm: () {
@@ -236,16 +224,17 @@ class _PartState extends State<Part> {
       },
 
       onCancel: () {
-        List<dynamic> data = [...partList];
-        data.removeAt(index);
+        // Remove using Provider
+        Provider.of<EquipmentCreateProvider>(context, listen: false)
+            .removePart(index);
 
-        setState(() {
-          partList = data;
-          isEditPart = -1;
-        });
+        // Reset edit state
+        isEditPart = -1;
+
+        // Show SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
             behavior: SnackBarBehavior.floating,
             elevation: 10,
             margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
@@ -277,10 +266,13 @@ class _PartState extends State<Part> {
             duration: const Duration(seconds: 4),
           ),
         );
+
+        // Unfocus keyboard
         WidgetsBinding.instance.addPostFrameCallback((_) {
           FocusScope.of(context).unfocus();
         });
       },
+
       icon: Icons.question_mark, // 👈 Pass the icon here
     );
   }
@@ -379,7 +371,7 @@ class _PartState extends State<Part> {
               ),
               const SizedBox(height: 4),
               ////list----------------------------------------------------------------
-              partList.isEmpty
+              context.watch<EquipmentCreateProvider>().parts.isEmpty
                   ? SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: 100,
@@ -404,7 +396,12 @@ class _PartState extends State<Part> {
                       )),
                     )
                   : Container(),
-              ...partList.asMap().entries.map((entry) {
+              ...context
+                  .watch<EquipmentCreateProvider>()
+                  .parts
+                  .asMap()
+                  .entries
+                  .map((entry) {
                 final index = entry.key;
                 final item = entry.value;
                 // if (itemKeys.length < componentList.length) {
@@ -414,7 +411,7 @@ class _PartState extends State<Part> {
                 return GestureDetector(
                   // key: itemKeys[index],
                   onTap: () {
-                    onEditComp(item, index);
+                    onEditPart(item, index);
                   },
                   child: Container(
                     margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),

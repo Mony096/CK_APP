@@ -167,37 +167,35 @@ class _ComponentState extends State<Component> {
     );
   }
 
-void _onAddComponent(BuildContext context, {bool force = false}) {
-  try {
-    if (code.text.isEmpty) throw Exception('Code is missing.');
-    if (name.text.isEmpty) throw Exception('Name is missing.');
+  void _onAddComponent(BuildContext context, {bool force = false}) {
+    try {
+      if (code.text.isEmpty) throw Exception('Code is missing.');
+      if (name.text.isEmpty) throw Exception('Name is missing.');
 
-    final item = {
-      "U_ck_comCode": code.text,
-      "U_U_ck_comName": name.text,
-      "U_ck_partNum": part.text,
-      "U_ck_brand": brand.text,
-      "U_ck_model": model.text,
-    };
+      final item = {
+        "U_ck_comCode": code.text,
+        "U_U_ck_comName": name.text,
+        "U_ck_partNum": part.text,
+        "U_ck_brand": brand.text,
+        "U_ck_model": model.text,
+      };
 
-    Provider.of<EquipmentCreateProvider>(context, listen: false)
-        .addOrEditComponent(item, editIndex: isEditComp);
+      Provider.of<EquipmentCreateProvider>(context, listen: false)
+          .addOrEditComponent(item, editIndex: isEditComp);
 
-    // Reset edit mode
-    isEditComp = -1;
+      // Reset edit mode
+      isEditComp = -1;
 
-    clear();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).unfocus();
-    });
-
-  } catch (err) {
-    if (err is Exception) {
-      MaterialDialog.success(context, title: 'Warning', body: err.toString());
+      clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
+      });
+    } catch (err) {
+      if (err is Exception) {
+        MaterialDialog.success(context, title: 'Warning', body: err.toString());
+      }
     }
   }
-}
-
 
   void onEditComp(dynamic item, int index) {
     if (index < 0) return;
@@ -225,54 +223,55 @@ void _onAddComponent(BuildContext context, {bool force = false}) {
         });
       },
 
-    onCancel: () {
-  // Remove using Provider
-  Provider.of<EquipmentCreateProvider>(context, listen: false).removeComponent(index);
+      onCancel: () {
+        // Remove using Provider
+        Provider.of<EquipmentCreateProvider>(context, listen: false)
+            .removeComponent(index);
 
-  // Reset edit state
-  isEditComp = -1;
+        // Reset edit state
+        isEditComp = -1;
 
-  // Show SnackBar
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-      behavior: SnackBarBehavior.floating,
-      elevation: 10,
-      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(9),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      content: Row(
-        children: [
-          const Icon(Icons.remove_circle, color: Colors.white, size: 28),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        // Show SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: Row(
               children: [
-                Text(
-                  "Component Removed (${item['U_ck_comCode']})",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
+                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Component Removed (${item['U_ck_comCode']})",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+            duration: const Duration(seconds: 4),
           ),
-        ],
-      ),
-      duration: const Duration(seconds: 4),
-    ),
-  );
+        );
 
-  // Unfocus keyboard
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    FocusScope.of(context).unfocus();
-  });
-},
+        // Unfocus keyboard
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).unfocus();
+        });
+      },
 
       icon: Icons.question_mark, // 👈 Pass the icon here
     );
@@ -397,7 +396,12 @@ void _onAddComponent(BuildContext context, {bool force = false}) {
                       )),
                     )
                   : Container(),
-              ...context.watch<EquipmentCreateProvider>().components.asMap().entries.map((entry) {
+              ...context
+                  .watch<EquipmentCreateProvider>()
+                  .components
+                  .asMap()
+                  .entries
+                  .map((entry) {
                 final index = entry.key;
                 final item = entry.value;
                 // if (itemKeys.length < componentList.length) {
