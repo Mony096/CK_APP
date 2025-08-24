@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bizd_tech_service/core/disble_ssl.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
@@ -85,7 +86,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => CustomerListProvider()),
       ChangeNotifierProvider(create: (_) => UpdateStatusProvider()),
       ChangeNotifierProvider(create: (_) => EquipmentListProvider()),
-
+      ChangeNotifierProvider(create: (_) => EquipmentCreateProvider()),
       // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],
     child: MyApp(),

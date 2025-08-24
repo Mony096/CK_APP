@@ -1,9 +1,11 @@
 import 'package:bizd_tech_service/component/text_field_dialog.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class Component extends StatefulWidget {
   const Component({super.key, this.controller});
@@ -128,7 +130,7 @@ class _ComponentState extends State<Component> {
                             // if (onConfirm != null) {
                             //   onConfirm();
                             // }
-                            _onAddComponent();
+                            _onAddComponent(context);
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
@@ -165,49 +167,37 @@ class _ComponentState extends State<Component> {
     );
   }
 
-  void _onAddComponent({bool force = false}) {
-    try {
-      List<dynamic> data = [...componentList];
+void _onAddComponent(BuildContext context, {bool force = false}) {
+  try {
+    if (code.text.isEmpty) throw Exception('Code is missing.');
+    if (name.text.isEmpty) throw Exception('Name is missing.');
 
-      if (code.text.isEmpty) throw Exception('Code is missing.');
-      if (name.text.isEmpty) throw Exception('Name is missing.');
+    final item = {
+      "U_ck_comCode": code.text,
+      "U_U_ck_comName": name.text,
+      "U_ck_partNum": part.text,
+      "U_ck_brand": brand.text,
+      "U_ck_model": model.text,
+    };
 
-      final item = {
-        "U_ck_comCode": code.text,
-        "U_U_ck_comName": name.text,
-        "U_ck_partNum": part.text,
-        "U_ck_brand": brand.text,
-        "U_ck_model": model.text,
-      };
+    Provider.of<EquipmentCreateProvider>(context, listen: false)
+        .addOrEditComponent(item, editIndex: isEditComp);
 
-      int editedIndex = isEditComp;
+    // Reset edit mode
+    isEditComp = -1;
 
-      if (isEditComp == -1) {
-        data.add(item);
-      } else {
-        data[isEditComp] = item;
-        isEditComp = -1;
-      }
+    clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
 
-      clear();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).unfocus();
-      });
-      setState(() {
-        componentList = data;
-      });
-
-      // if (editedIndex != -1) {
-      //   WidgetsBinding.instance.addPostFrameCallback((_) {
-
-      //   });
-      // }
-    } catch (err) {
-      if (err is Exception) {
-        MaterialDialog.success(context, title: 'Warning', body: err.toString());
-      }
+  } catch (err) {
+    if (err is Exception) {
+      MaterialDialog.success(context, title: 'Warning', body: err.toString());
     }
   }
+}
+
 
   void onEditComp(dynamic item, int index) {
     if (index < 0) return;
@@ -235,52 +225,55 @@ class _ComponentState extends State<Component> {
         });
       },
 
-      onCancel: () {
-        List<dynamic> data = [...componentList];
-        data.removeAt(index);
+    onCancel: () {
+  // Remove using Provider
+  Provider.of<EquipmentCreateProvider>(context, listen: false).removeComponent(index);
 
-        setState(() {
-          componentList = data;
-          isEditComp = -1;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Color.fromARGB(255, 66, 83, 100),
-            behavior: SnackBarBehavior.floating,
-            elevation: 10,
-            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            content: Row(
+  // Reset edit state
+  isEditComp = -1;
+
+  // Show SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+      behavior: SnackBarBehavior.floating,
+      elevation: 10,
+      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(9),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      content: Row(
+        children: [
+          const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Component Removed (${item['U_ck_comCode']})",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                Text(
+                  "Component Removed (${item['U_ck_comCode']})",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
                   ),
                 ),
               ],
             ),
-            duration: const Duration(seconds: 4),
           ),
-        );
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context).unfocus();
-        });
-      },
+        ],
+      ),
+      duration: const Duration(seconds: 4),
+    ),
+  );
+
+  // Unfocus keyboard
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    FocusScope.of(context).unfocus();
+  });
+},
+
       icon: Icons.question_mark, // 👈 Pass the icon here
     );
   }
@@ -379,7 +372,7 @@ class _ComponentState extends State<Component> {
               ),
               const SizedBox(height: 4),
               ////list----------------------------------------------------------------
-              componentList.isEmpty
+              context.watch<EquipmentCreateProvider>().components.isEmpty
                   ? SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: 100,
@@ -404,7 +397,7 @@ class _ComponentState extends State<Component> {
                       )),
                     )
                   : Container(),
-              ...componentList.asMap().entries.map((entry) {
+              ...context.watch<EquipmentCreateProvider>().components.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
                 // if (itemKeys.length < componentList.length) {
