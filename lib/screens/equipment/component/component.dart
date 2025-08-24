@@ -1,4 +1,4 @@
-import 'package:bizd_tech_service/component/text_field.dart';
+import 'package:bizd_tech_service/component/text_field_dialog.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -29,6 +29,8 @@ class _ComponentState extends State<Component> {
 
   void _showCreateComponent() async {
     await showDialog<String>(
+      barrierDismissible: false, // user must tap button!
+
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -74,32 +76,32 @@ class _ComponentState extends State<Component> {
               child: Container(
                   child: Column(
                 children: [
-                  CustomTextField(
+                  CustomTextFieldDialog(
                     controller: code,
                     label: 'Code',
                     star: true,
                     focusNode: codeFocusNode,
                   ),
                   const SizedBox(height: 8),
-                  CustomTextField(
+                  CustomTextFieldDialog(
                     controller: name,
                     label: 'Name',
                     star: true,
                   ),
                   const SizedBox(height: 8),
-                  CustomTextField(
+                  CustomTextFieldDialog(
                     controller: part,
                     label: 'Part Number',
                     star: false,
                   ),
                   const SizedBox(height: 8),
-                  CustomTextField(
+                  CustomTextFieldDialog(
                     controller: brand,
                     label: 'Brand',
                     star: true,
                   ),
                   const SizedBox(height: 8),
-                  CustomTextField(
+                  CustomTextFieldDialog(
                     controller: model,
                     label: 'Model',
                     star: false,
@@ -114,7 +116,8 @@ class _ComponentState extends State<Component> {
                         },
                         child: Text(
                           "Cancel",
-                          style: TextStyle(color: Color.fromARGB(255, 66, 83, 100)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 66, 83, 100)),
                         ),
                       ),
                       const SizedBox(width: 15),
@@ -142,7 +145,7 @@ class _ComponentState extends State<Component> {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(7, 0, 5, 0),
                             child: Text(
-                                isEditComp >= 0 ? "Edit" : "Add",
+                              isEditComp >= 0 ? "Edit" : "Add",
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,

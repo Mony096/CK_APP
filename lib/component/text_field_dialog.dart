@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class CustomTextField extends StatefulWidget {
-  const CustomTextField({
+class CustomTextFieldDialog extends StatefulWidget {
+  const CustomTextFieldDialog({
     super.key,
     this.onclickIcon,
     required this.label,
@@ -19,10 +19,10 @@ class CustomTextField extends StatefulWidget {
   final dynamic focusNode;
 
   @override
-  State<CustomTextField> createState() => _CustomTextFieldState();
+  State<CustomTextFieldDialog> createState() => _CustomTextFieldDialogState();
 }
 
-class _CustomTextFieldState extends State<CustomTextField> {
+class _CustomTextFieldDialogState extends State<CustomTextFieldDialog> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -30,8 +30,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         // Label row
         Padding(
-          padding: const EdgeInsets.only(left: 20),
-            // padding: const EdgeInsets.only(left: 0),
+          // padding: const EdgeInsets.only(left: 20),
+            padding: const EdgeInsets.only(left: 0),
           child: Row(
             children: [
               Text(
@@ -59,8 +59,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
         // TextField with optional parent-provided icon
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-          // padding: EdgeInsetsGeometry.all(0),
+          // padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          padding: EdgeInsetsGeometry.all(0),
           child: SizedBox(
             height: 43,
             child: TextField(
