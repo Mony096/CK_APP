@@ -97,7 +97,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
 
   Future<void> _init() async {
     // Check if widget.data exists and is not empty
-    if (widget.data == null || widget.data.isEmpty) return;
+    if (widget.data.isEmpty) return;
     if (!mounted) return;
 
     MaterialDialog.loading(context); // Show loading dialog
@@ -292,7 +292,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                             ],
                           ),
                           GestureDetector(
-                            onTap: () => onCreateEQ(),
+                            onTap: () => widget.data.isEmpty ? onCreateEQ() : null,
                             child: Container(
                               width: 65,
                               height: 35,
@@ -310,11 +310,11 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                   ),
                                 ],
                               ),
-                              child: const Padding(
+                              child: Padding(
                                 padding: EdgeInsets.fromLTRB(0, 0, 3, 3),
                                 child: Center(
                                   child: Text(
-                                    "save",
+                                    widget.data.isEmpty ? "Save":"Detail",
                                     style: TextStyle(
                                         fontSize: 15,
                                         color:
@@ -474,7 +474,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
               },
               children: [
                 General(
-                  data:widget.data,
+                  data: widget.data,
                   controller: {
                     "equipCode": equipCode,
                     "equipName": equipName,
