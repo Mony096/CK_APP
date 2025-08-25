@@ -492,9 +492,11 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                   },
                 ),
                 Component(
+                   data: widget.data,
                   controller: {"equipCode": equipCode, "equipName": equipName},
                 ),
                 Part(
+                   data: widget.data,
                   controller: {"equipCode": equipCode, "equipName": equipName},
                 ),
               ],

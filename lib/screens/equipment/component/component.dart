@@ -8,7 +8,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class Component extends StatefulWidget {
-  const Component({super.key, this.controller});
+  const Component({super.key, this.controller, required this.data});
+  final Map<String, dynamic> data;
 
   // Specify the type here
   final Map<String, dynamic>? controller;
@@ -429,27 +430,30 @@ class _ComponentState extends State<Component> {
               //   label: 'Model',
               //   star: false,
               // ),
-              Container(
-                margin: const EdgeInsets.fromLTRB(20, 0, 20, 13),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // onAddComponent();
-                    _showCreateComponent();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 46),
-                    backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    // 'Add Component',
-                    "Add Component",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+              widget.data.isEmpty
+                  ? Container(
+                      margin: const EdgeInsets.fromLTRB(20, 0, 20, 13),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // onAddComponent();
+                          _showCreateComponent();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 46),
+                          backgroundColor:
+                              const Color.fromARGB(255, 66, 83, 100),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          // 'Add Component',
+                          "Add Component",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    )
+                  : Container(),
               //  const SizedBox(height: 7),
               const ComponentTitle(
                 label: "Component Lists",
@@ -496,7 +500,9 @@ class _ComponentState extends State<Component> {
                 return GestureDetector(
                   // key: itemKeys[index],
                   onTap: () {
-                    onEditComp(item, index);
+                    if (widget.data.isEmpty) {
+                      onEditComp(item, index);
+                    }
                   },
                   child: Container(
                     margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),

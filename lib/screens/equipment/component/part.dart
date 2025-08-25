@@ -8,7 +8,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class Part extends StatefulWidget {
-  const Part({super.key, this.controller});
+  const Part({super.key, this.controller, required this.data});
+  final Map<String, dynamic> data;
 
   // Specify the type here
   final Map<String, dynamic>? controller;
@@ -41,8 +42,6 @@ class _PartState extends State<Part> {
       {"missing": false, "value": "Brand required", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> modelFieldNotifier = ValueNotifier(
       {"missing": false, "value": "Model required", "isAdded": 0});
-
-
 
   void _showCreateComponent() async {
     await showDialog<String>(
@@ -428,30 +427,31 @@ class _PartState extends State<Part> {
               //   label: 'Model',
               //   star: false,
               // ),
-              Container(
-                margin: const EdgeInsets.fromLTRB(20, 0, 20, 13),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // onAddComponent();
-                    setState(() {
-                      isEditPart = -1;
-                    });
-                    _showCreateComponent();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 46),
-                    backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    // 'Add Component',
-                    "Add Part",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+              widget.data.isEmpty
+                  ? Container(
+                      margin: const EdgeInsets.fromLTRB(20, 0, 20, 13),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // onAddComponent();
+
+                          _showCreateComponent();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 46),
+                          backgroundColor:
+                              const Color.fromARGB(255, 66, 83, 100),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          // 'Add Component',
+                          "Add Part",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    )
+                  : Container(),
               //  const SizedBox(height: 7),
               const ComponentTitle(
                 label: "Part Lists",
@@ -498,7 +498,9 @@ class _PartState extends State<Part> {
                 return GestureDetector(
                   // key: itemKeys[index],
                   onTap: () {
-                    onEditPart(item, index);
+                    if (widget.data.isEmpty) {
+                      onEditPart(item, index);
+                    }
                   },
                   child: Container(
                     margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),
