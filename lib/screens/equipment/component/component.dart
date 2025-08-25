@@ -21,13 +21,25 @@ class _ComponentState extends State<Component> {
   int updateIndexComps = -1;
   int isEditComp = -1;
   List<dynamic> componentList = [];
-
+  int isAdded = 0;
   final code = TextEditingController();
   final name = TextEditingController();
   final part = TextEditingController();
   final brand = TextEditingController();
   final model = TextEditingController();
   final FocusNode codeFocusNode = FocusNode();
+  final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> nameFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Name required", "isAdded": 0});
+
+  final ValueNotifier<Map<String, dynamic>> partFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Part required", "isAdded": 0});
+
+  final ValueNotifier<Map<String, dynamic>> brandFieldNotifier = ValueNotifier(
+      {"missing": false, "value": "Brand required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> modelFieldNotifier = ValueNotifier(
+      {"missing": false, "value": "Model required", "isAdded": 0});
 
   void _showCreateComponent() async {
     await showDialog<String>(
@@ -39,46 +51,48 @@ class _ComponentState extends State<Component> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
-          title: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.task_outlined,
-                  color: Colors.blueGrey[800],
-                ),
-                const SizedBox(
-                  width: 7,
-                ),
-                Text(
-                  "Create Component",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey[800],
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ],
-            ),
-          ),
+          // title: Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 0),
+          //   child: Row(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       Icon(
+          //         Icons.task_outlined,
+          //         color: Colors.blueGrey[800],
+          //       ),
+          //       const SizedBox(
+          //         width: 7,
+          //       ),
+          //       Text(
+          //         "Create Component",
+          //         style: TextStyle(
+          //           fontSize: 16,
+          //           fontWeight: FontWeight.bold,
+          //           color: Colors.blueGrey[800],
+          //         ),
+          //         textAlign: TextAlign.left,
+          //       ),
+          //     ],
+          //   ),
+          // ),
           content: Container(
-              padding: const EdgeInsets.only(top: 10),
-              decoration: const BoxDecoration(
-                  border: Border(
-                      top: BorderSide(
-                          color: Color.fromARGB(255, 219, 221, 224),
-                          width: 1))),
+              padding: const EdgeInsets.only(top: 7),
+              // decoration: const BoxDecoration(
+              //     // border: Border(
+              //     //     top: BorderSide(
+              //     //         color: Color.fromARGB(255, 219, 221, 224),
+              //     //         width: 1))
+              //     ),
               // color: Colors.red,
               width: double.maxFinite, // Use full width of the dialog
               constraints: const BoxConstraints(
-                maxHeight: 460, // Limit the height to prevent overflow
+                maxHeight: 465, // Limit the height to prevent overflow
               ),
               child: Container(
-                  child: Column(
+                  child: ListView(
                 children: [
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: codeFieldNotifier,
                     controller: code,
                     label: 'Code',
                     star: true,
@@ -86,37 +100,45 @@ class _ComponentState extends State<Component> {
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: nameFieldNotifier,
                     controller: name,
                     label: 'Name',
                     star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: partFieldNotifier,
                     controller: part,
                     label: 'Part Number',
-                    star: false,
+                    star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: brandFieldNotifier,
                     controller: brand,
                     label: 'Brand',
                     star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: modelFieldNotifier,
                     controller: model,
                     label: 'Model',
-                    star: false,
+                    star: true,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 21),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
                         onPressed: () {
+                          setState(() {
+                            isEditComp = -1;
+                          });
+                          clear();
                           Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                           "Cancel",
                           style: TextStyle(
                               color: Color.fromARGB(255, 66, 83, 100)),
@@ -130,11 +152,46 @@ class _ComponentState extends State<Component> {
                             // if (onConfirm != null) {
                             //   onConfirm();
                             // }
+                            if (code.text.isEmpty ||
+                                name.text.isEmpty ||
+                                part.text.isEmpty ||
+                                brand.text.isEmpty ||
+                                model.text.isEmpty) {
+                              codeFieldNotifier.value = {
+                                "missing": code.text.isEmpty,
+                                "value": "Code is required!",
+                                "isAdded": 1,
+                              };
+                              nameFieldNotifier.value = {
+                                "missing": name.text.isEmpty,
+                                "value": "Name is required!",
+                                "isAdded": 1,
+                              };
+                              partFieldNotifier.value = {
+                                "missing": part.text.isEmpty,
+                                "value": "Part is required!",
+                                "isAdded": 1,
+                              };
+
+                              brandFieldNotifier.value = {
+                                "missing": brand.text.isEmpty,
+                                "value": "Brand is required!",
+                                "isAdded": 1,
+                              };
+                              modelFieldNotifier.value = {
+                                "missing": model.text.isEmpty,
+                                "value": "Model is required!",
+                                "isAdded": 1,
+                              };
+                              return;
+                            }
+
                             _onAddComponent(context);
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                            backgroundColor:
+                                const Color.fromARGB(255, 66, 83, 100),
                             foregroundColor: Colors.white,
                             elevation: 3,
                             // Adjust the padding to make the button smaller
@@ -145,7 +202,7 @@ class _ComponentState extends State<Component> {
                             ),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(7, 0, 5, 0),
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                             child: Text(
                               isEditComp >= 0 ? "Edit" : "Add",
                               style: const TextStyle(
@@ -169,8 +226,8 @@ class _ComponentState extends State<Component> {
 
   void _onAddComponent(BuildContext context, {bool force = false}) {
     try {
-      if (code.text.isEmpty) throw Exception('Code is missing.');
-      if (name.text.isEmpty) throw Exception('Name is missing.');
+      // if (name.text.isEmpty) throw Exception('Name is missing.');
+      // if (brand.text.isEmpty) throw Exception('Brand is missing.');
 
       final item = {
         "U_ck_comCode": code.text,
@@ -184,14 +241,16 @@ class _ComponentState extends State<Component> {
           .addOrEditComponent(item, editIndex: isEditComp);
 
       // Reset edit mode
-      isEditComp = -1;
-
+      setState(() {
+        isEditComp = -1;
+      });
       clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).unfocus();
       });
     } catch (err) {
       if (err is Exception) {
+        // Sh SnackBar
         MaterialDialog.success(context, title: 'Warning', body: err.toString());
       }
     }
@@ -283,6 +342,32 @@ class _ComponentState extends State<Component> {
     part.text = "";
     brand.text = "";
     model.text = "";
+    codeFieldNotifier.value = {
+      "missing": false,
+      "value": "Code is required!",
+      "isAdded": 1,
+    };
+    nameFieldNotifier.value = {
+      "missing": false,
+      "value": "Name is required!",
+      "isAdded": 1,
+    };
+    partFieldNotifier.value = {
+      "missing": false,
+      "value": "Part is required!",
+      "isAdded": 1,
+    };
+
+    brandFieldNotifier.value = {
+      "missing": false,
+      "value": "Brand is required!",
+      "isAdded": 1,
+    };
+    modelFieldNotifier.value = {
+      "missing": false,
+      "value": "Model is required!",
+      "isAdded": 1,
+    };
   }
 
   @override
@@ -358,10 +443,10 @@ class _ComponentState extends State<Component> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     // 'Add Component',
                     "Add Component",
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),

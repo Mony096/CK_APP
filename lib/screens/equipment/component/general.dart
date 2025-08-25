@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class General extends StatefulWidget {
-  const General({super.key, this.controller});
+  const General({super.key, this.controller, required this.data});
 
   // Specify the type here
   final Map<String, dynamic>? controller;
+  final Map<String, dynamic> data;
 
   @override
   State<General> createState() => _GeneralState();
@@ -54,124 +55,127 @@ class _GeneralState extends State<General> {
               const SizedBox(height: 8),
               // const SizedBox(height: 10),
               CustomTextField(
-                controller: widget.controller?['equipCode'],
-                label: 'Equipment Code',
-                star: true,
-                // icon: const Icon(Icons.qr_code_scanner,
-                //     color: Colors.grey),
-                // onclickIcon: () {
-                //   print("Scan icon tapped!");
-                // },
-              ),
+                  controller: widget.controller?['equipCode'],
+                  label: 'Equipment Code',
+                  star: true,
+                  detail: widget.data.isNotEmpty
+                  // icon: const Icon(Icons.qr_code_scanner,
+                  //     color: Colors.grey),
+                  // onclickIcon: () {
+                  //   print("Scan icon tapped!");
+                  // },
+                  ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipName'],
-                label: 'Equipment Name',
-                star: true,
-                // icon: const Icon(Icons.qr_code_scanner,
-                //     color: Colors.grey),
-                // onclickIcon: () {
-                //   print("Scan icon tapped!");
-                // },
-              ),
+                  controller: widget.controller?['equipName'],
+                  label: 'Equipment Name',
+                  star: true,
+                  detail: widget.data.isNotEmpty
+
+                  // icon: const Icon(Icons.qr_code_scanner,
+                  //     color: Colors.grey),
+                  // onclickIcon: () {
+                  //   print("Scan icon tapped!");
+                  // },
+                  ),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['customerName'],
-                label: 'Customer',
-                star: true,
-                icon: const Icon(
-                  Icons.keyboard_arrow_right,
-                  color: Colors.grey,
-                  size: 28,
-                ),
-                onclickIcon: () {
-                  _customerSelect();
-                },
-              ),
+                  controller: widget.controller?['customerName'],
+                  label: 'Customer',
+                  star: true,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_right,
+                    color: Colors.grey,
+                    size: 28,
+                  ),
+                  onclickIcon: () {
+                    _customerSelect();
+                  },
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['equipType'],
-                label: 'Status',
-                star: true,
-                icon: const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.grey,
-                  size: 28,
-                ),
-                onclickIcon: () {
-                  _equipmentTypeSelect();
-                },
-              ),
+                  controller: widget.controller?['equipType'],
+                  label: 'Status',
+                  star: true,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.grey,
+                    size: 28,
+                  ),
+                  onclickIcon: () {
+                    _equipmentTypeSelect();
+                  },
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['site'],
-                label: 'Site',
-                star: false,
-              ),
+                  controller: widget.controller?['site'],
+                  label: 'Site',
+                  star: false,
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['brand'],
-                label: 'Brand',
-                star: true,
-              ),
+                  controller: widget.controller?['brand'],
+                  label: 'Brand',
+                  star: true,
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextField(
-                controller: widget.controller?['serialNumber'],
-                label: 'Serial Number',
-                star: true,
-                icon: const Icon(
-                  Icons.qr_code_scanner,
-                  color: Colors.grey,
-                  size: 25,
-                ),
-                onclickIcon: () {
-                  _scanBarcode(context);
-                },
-              ),
+                  controller: widget.controller?['serialNumber'],
+                  label: 'Serial Number',
+                  star: true,
+                  icon: const Icon(
+                    Icons.qr_code_scanner,
+                    color: Colors.grey,
+                    size: 25,
+                  ),
+                  onclickIcon: () {
+                    _scanBarcode(context);
+                  },
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextRemark(
-                controller: widget.controller?['remark'],
-                label: 'Remark',
-              ),
+                  controller: widget.controller?['remark'],
+                  label: 'Remark',
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 28),
               const ComponentTitle(
                 label: "Date & images",
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                controller: widget.controller?['uploadImg'],
-                label: 'Upload Image',
-                star: true,
-                icon: const Icon(
-                  Icons.image,
-                  color: Colors.grey,
-                  size: 28,
-                ),
-                onclickIcon: () {
-                  print("Scan icon tapped!");
-                },
-              ),
+                  controller: widget.controller?['uploadImg'],
+                  label: 'Upload Image',
+                  star: true,
+                  icon: const Icon(
+                    Icons.image,
+                    color: Colors.grey,
+                    size: 28,
+                  ),
+                  onclickIcon: () {
+                    print("Scan icon tapped!");
+                  },
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 10),
 
               CustomDatePickerField(
-                label: 'Installed Date',
-                star: true,
-                controller: widget.controller?['installedDate'],
-              ),
+                  label: 'Installed Date',
+                  star: true,
+                  controller: widget.controller?['installedDate'],
+                  detail: widget.data.isNotEmpty),
               const SizedBox(height: 10),
               CustomDatePickerField(
-                label: 'Next Service Date',
-                star: false,
-                controller: widget.controller?['nextDate'],
-              ),
+                  label: 'Next Service Date',
+                  star: false,
+                  controller: widget.controller?['nextDate'],
+                  detail: widget.data.isNotEmpty),
 
               const SizedBox(height: 10),
 
               CustomDatePickerField(
-                label: 'Warranty Expire Date',
-                star: true,
-                controller: widget.controller?['warrantyDate'],
-              ),
+                  label: 'Warranty Expire Date',
+                  star: true,
+                  controller: widget.controller?['warrantyDate'],
+                  detail: widget.data.isNotEmpty),
             ],
           ),
         ),

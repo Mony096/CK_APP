@@ -65,11 +65,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await LocalStorageManger.setString('SessionId', "1");
-      checkSession();
-        _isLoggedIn = true;
-        notifyListeners();
-        return true;
+      // await LocalStorageManger.setString('SessionId', "1");
+      // checkSession();
+      //   _isLoggedIn = true;
+      //   notifyListeners();
+      //   return true;
       final response = await dio.post('/login', true, false, data: {
         "userName": username,
         "password": password,

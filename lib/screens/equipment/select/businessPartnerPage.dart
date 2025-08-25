@@ -56,7 +56,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
     final provider = Provider.of<CustomerListProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
     provider.resetPagination();
-    await provider.fetchDocuments();
+    await provider.resfreshFetchDocuments();
     setState(() => _initialLoading = false);
   }
 
@@ -76,7 +76,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: const Color.fromARGB(255, 102, 103, 104),
+        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
         title: const Text(
           "Customer Lists",
           style: TextStyle(color: Colors.white, fontSize: 18),
@@ -127,104 +127,127 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
           // }
           return Column(
             children: [
-              const SizedBox(
-                height: 15,
-              ),
+              // const SizedBox(
+              //   height: 15,
+              // ),
               // 🔽 Filter Dropdown
-              SizedBox(
-                  width: MediaQuery.of(context).size.width - 40,
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.list,
-                        size: 25,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "MATCHES YOUR FILTER",
-                        style: TextStyle(fontSize: 15, color: Colors.black),
-                      ),
-                    ],
-                  )),
               Container(
-                padding: const EdgeInsets.fromLTRB(18, 10, 18, 5),
-                child: Row(
-                  children: [
-                    // smaller search field
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: TextField(
-                          controller: filter,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              borderSide: const BorderSide(
-                                color: Color.fromARGB(255, 206, 206, 208),
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              borderSide: const BorderSide(
-                                color: Color.fromARGB(255, 203, 203, 203),
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              borderSide: const BorderSide(
-                                color: Color.fromARGB(255, 96, 126, 105),
-                                width: 1.5,
-                              ),
-                            ),
-                            hintText: "Customer Code",
-                            hintStyle: const TextStyle(
-                                color: Colors.grey, fontSize: 14),
-                            // Decrease vertical and horizontal padding to shrink the field
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 4, // Reduced from 8
-                                horizontal: 12 // Reduced from 12
-                                ),
-                            // border: OutlineInputBorder(
-                            //   borderRadius: BorderRadius.circular(10),
-                            //   borderSide: BorderSide.none,
-                            // ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ),
+                padding: const EdgeInsets.fromLTRB(5, 10, 5, 5),
+                margin: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                        width: MediaQuery.of(context).size.width - 40,
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.person,
+                              size: 25,
+                              color: Color.fromARGB(255, 84, 84, 85),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              "MATCHES YOUR FILTER",
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color.fromARGB(255, 53, 53, 55)),
+                            ),
+                          ],
+                        )),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(13, 10, 13, 5),
+                      child: Row(
+                        children: [
+                          // smaller search field
+                          Expanded(
+                            child: SizedBox(
+                              height: 40,
+                              child: TextField(
+                                controller: filter,
+                                style: const TextStyle(fontSize: 14),
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                    borderSide: const BorderSide(
+                                      color: Color.fromARGB(255, 206, 206, 208),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                    borderSide: const BorderSide(
+                                      color: Color.fromARGB(255, 203, 203, 203),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                    borderSide: const BorderSide(
+                                      color: Color.fromARGB(255, 96, 126, 105),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  hintText: "Customer Code",
+                                  hintStyle: const TextStyle(
+                                      color: Colors.grey, fontSize: 14),
+                                  // Decrease vertical and horizontal padding to shrink the field
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 4, // Reduced from 8
+                                      horizontal: 12 // Reduced from 12
+                                      ),
+                                  // border: OutlineInputBorder(
+                                  //   borderRadius: BorderRadius.circular(10),
+                                  //   borderSide: BorderSide.none,
+                                  // ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
 
-                    const SizedBox(width: 10),
+                          const SizedBox(width: 10),
 
-                    // smaller button
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
-                        textStyle: const TextStyle(fontSize: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                          // smaller button
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 17, vertical: 13),
+                              textStyle: const TextStyle(fontSize: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              provider.setFilter(filter.text);
+
+                              // example: print search text
+                              // print("Search for: ${controller.text}");
+                            },
+                            child: const Text("GO"),
+                          ),
+                        ],
                       ),
-                      onPressed: () {
-                        provider.setFilter(filter.text);
-
-                        // example: print search text
-                        // print("Search for: ${controller.text}");
-                      },
-                      child: const Text("GO"),
                     ),
                   ],
                 ),
               ),
+
               // const SizedBox(
               //   height: 5,
               // ),
@@ -261,7 +284,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                 ),
                               ],
                             ),
-                            margin: const EdgeInsets.all(7),
+                            // margin: const EdgeInsets.all(7),
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(top: 6),
@@ -289,7 +312,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                   onTap: () => onPressed(doc),
                                   child: Container(
                                     margin:
-                                        const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                                        const EdgeInsets.fromLTRB(5, 2, 5, 2),
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
                                       color: const Color.fromARGB(
@@ -305,13 +328,24 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          '${doc["CardCode"]} - ${doc["CardName"]}',
-                                          style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromARGB(
-                                                  255, 69, 70, 72)),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              '${doc["CardCode"]} - ${(doc["CardName"] == null || doc["CardName"].toString().isEmpty) ? "N/A" : doc["CardName"]}',
+                                              style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color.fromARGB(
+                                                      255, 69, 70, 72)),
+                                            ),
+                                            const Icon(
+                                              Icons.arrow_right,
+                                              size: 21,
+                                              color: Colors.grey,
+                                            )
+                                          ],
                                         ),
                                         const SizedBox(
                                           height: 5,
@@ -319,7 +353,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                         Text(
                                           '${doc["ShipToDefault"] ?? "N/A"}',
                                           style: const TextStyle(
-                                              fontSize: 15,
+                                              fontSize: 14,
                                               // fontWeight: FontWeight.bold,
                                               color: Color.fromARGB(
                                                   255, 69, 70, 72)),

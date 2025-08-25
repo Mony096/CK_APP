@@ -70,7 +70,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
     final provider = Provider.of<EquipmentListProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
     provider.resetPagination();
-    await provider.fetchDocuments();
+    await provider.resfreshFetchDocuments();
     setState(() => _initialLoading = false);
   }
 
@@ -83,6 +83,19 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
 // }
   void onPressed(dynamic bp) {
     Navigator.pop(context, bp);
+  }
+
+  void onDetail(dynamic data, int index) {
+    if (index < 0) return;
+
+    MaterialDialog.viewDetailDialog(
+      context,
+      title: 'Equipment (${data['Code']})',
+      cancelLabel: "Go",
+      onCancel: () {
+        goTo(context, EquipmentCreateScreen(data: data));
+      },
+    );
   }
 
   @override
@@ -197,8 +210,15 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               ],
                             ),
                             GestureDetector(
-                              onTap: () =>
-                                  goTo(context, const EquipmentCreateScreen()),
+                              onTap: () async {
+                                await goTo(
+                                        context,
+                                        EquipmentCreateScreen(
+                                          data: const {},
+                                        ))
+                                    .then(
+                                        (res) => {print(res), _refreshData()});
+                              },
                               child: Container(
                                 width: 65,
                                 height: 35,
@@ -408,7 +428,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
 
                                 return GestureDetector(
                                   onTap: () {
-                                    // onEdit(item, index);
+                                    onDetail(item, index);
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.fromLTRB(
@@ -457,20 +477,20 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Row(
+                                              Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    "A001 - EQ Name",
-                                                    style: TextStyle(
+                                                    "${item["Code"] ?? "N/A"} - ${item["Name"] ?? "N/A"}",
+                                                    style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       fontSize: 13,
                                                     ),
                                                   ),
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.keyboard_arrow_right,
                                                     size: 25,
                                                     color: Color.fromARGB(
@@ -479,16 +499,17 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                 ],
                                               ),
                                               const SizedBox(height: 6),
-                                              const Row(
+                                              Row(
                                                 children: [
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 104,
                                                     child: Text("Serial Number",
                                                         style: TextStyle(
                                                             fontSize: 13)),
                                                   ),
-                                                  Text(": 01922",
-                                                      style: TextStyle(
+                                                  Text(
+                                                      ": ${item["U_ck_eqSerNum"] ?? "N/A"}",
+                                                      style: const TextStyle(
                                                           fontSize: 13)),
                                                 ],
                                               ),
@@ -498,20 +519,23 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  const Row(
+                                                  Row(
                                                     children: [
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         width: 104,
                                                         child: Text(
                                                             "Customer Name",
                                                             style: TextStyle(
                                                                 fontSize: 13)),
                                                       ),
-                                                      Text(": EQ Name",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.green,
-                                                              fontSize: 13)),
+                                                      Text(
+                                                          ": ${item["U_ck_CusName"] ?? "N/A"}",
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Colors
+                                                                      .green,
+                                                                  fontSize:
+                                                                      13)),
                                                     ],
                                                   ),
                                                   Text("No : ${index + 1}",

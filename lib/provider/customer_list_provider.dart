@@ -20,6 +20,26 @@ class CustomerListProvider extends ChangeNotifier {
   bool get isLoadingSetFilter => _isLoadingSetFilter;
 
   String get currentFilter => _currentFilter;
+  Future<void> resfreshFetchDocuments() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await dio.get(
+          "/BusinessPartners?\$top=$_limit&\$skip=$_skip&\$select=CardCode,CardName,ShipToDefault");
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data["value"];
+
+        _documents = data;
+      } else {
+        throw Exception("Failed to load documents");
+      }
+    } catch (e) {
+      print("Error fetching documents: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchDocuments(
       {bool loadMore = false, bool isSetFilter = false}) async {

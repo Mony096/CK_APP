@@ -20,6 +20,7 @@ class Part extends StatefulWidget {
 class _PartState extends State<Part> {
   int updateIndexPart = -1;
   int isEditPart = -1;
+  int isAdded = 0;
   List<dynamic> partList = [];
 
   final code = TextEditingController();
@@ -28,6 +29,20 @@ class _PartState extends State<Part> {
   final brand = TextEditingController();
   final model = TextEditingController();
   final FocusNode codeFocusNode = FocusNode();
+  final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> nameFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Name required", "isAdded": 0});
+
+  final ValueNotifier<Map<String, dynamic>> partFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Part required", "isAdded": 0});
+
+  final ValueNotifier<Map<String, dynamic>> brandFieldNotifier = ValueNotifier(
+      {"missing": false, "value": "Brand required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> modelFieldNotifier = ValueNotifier(
+      {"missing": false, "value": "Model required", "isAdded": 0});
+
+
 
   void _showCreateComponent() async {
     await showDialog<String>(
@@ -39,46 +54,48 @@ class _PartState extends State<Part> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
-          title: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.task_outlined,
-                  color: Colors.blueGrey[800],
-                ),
-                const SizedBox(
-                  width: 7,
-                ),
-                Text(
-                  "Create Part",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey[800],
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ],
-            ),
-          ),
+          // title: Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 0),
+          //   child: Row(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       Icon(
+          //         Icons.task_outlined,
+          //         color: Colors.blueGrey[800],
+          //       ),
+          //       const SizedBox(
+          //         width: 7,
+          //       ),
+          //       Text(
+          //         "Create Component",
+          //         style: TextStyle(
+          //           fontSize: 16,
+          //           fontWeight: FontWeight.bold,
+          //           color: Colors.blueGrey[800],
+          //         ),
+          //         textAlign: TextAlign.left,
+          //       ),
+          //     ],
+          //   ),
+          // ),
           content: Container(
-              padding: const EdgeInsets.only(top: 10),
-              decoration: const BoxDecoration(
-                  border: Border(
-                      top: BorderSide(
-                          color: Color.fromARGB(255, 219, 221, 224),
-                          width: 1))),
+              padding: const EdgeInsets.only(top: 7),
+              // decoration: const BoxDecoration(
+              //     // border: Border(
+              //     //     top: BorderSide(
+              //     //         color: Color.fromARGB(255, 219, 221, 224),
+              //     //         width: 1))
+              //     ),
               // color: Colors.red,
               width: double.maxFinite, // Use full width of the dialog
               constraints: const BoxConstraints(
-                maxHeight: 460, // Limit the height to prevent overflow
+                maxHeight: 465, // Limit the height to prevent overflow
               ),
               child: Container(
-                  child: Column(
+                  child: ListView(
                 children: [
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: codeFieldNotifier,
                     controller: code,
                     label: 'Code',
                     star: true,
@@ -86,37 +103,45 @@ class _PartState extends State<Part> {
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: nameFieldNotifier,
                     controller: name,
                     label: 'Name',
                     star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: partFieldNotifier,
                     controller: part,
                     label: 'Part Number',
-                    star: false,
+                    star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: brandFieldNotifier,
                     controller: brand,
                     label: 'Brand',
                     star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
+                    isMissingFieldNotifier: modelFieldNotifier,
                     controller: model,
                     label: 'Model',
-                    star: false,
+                    star: true,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 21),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
                         onPressed: () {
+                          setState(() {
+                            isEditPart = -1;
+                          });
+                          clear();
                           Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                           "Cancel",
                           style: TextStyle(
                               color: Color.fromARGB(255, 66, 83, 100)),
@@ -130,11 +155,46 @@ class _PartState extends State<Part> {
                             // if (onConfirm != null) {
                             //   onConfirm();
                             // }
+                            if (code.text.isEmpty ||
+                                name.text.isEmpty ||
+                                part.text.isEmpty ||
+                                brand.text.isEmpty ||
+                                model.text.isEmpty) {
+                              codeFieldNotifier.value = {
+                                "missing": code.text.isEmpty,
+                                "value": "Code is required!",
+                                "isAdded": 1,
+                              };
+                              nameFieldNotifier.value = {
+                                "missing": name.text.isEmpty,
+                                "value": "Name is required!",
+                                "isAdded": 1,
+                              };
+                              partFieldNotifier.value = {
+                                "missing": part.text.isEmpty,
+                                "value": "Part is required!",
+                                "isAdded": 1,
+                              };
+
+                              brandFieldNotifier.value = {
+                                "missing": brand.text.isEmpty,
+                                "value": "Brand is required!",
+                                "isAdded": 1,
+                              };
+                              modelFieldNotifier.value = {
+                                "missing": model.text.isEmpty,
+                                "value": "Model is required!",
+                                "isAdded": 1,
+                              };
+                              return;
+                            }
+
                             _onAddPart(context);
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                            backgroundColor:
+                                const Color.fromARGB(255, 66, 83, 100),
                             foregroundColor: Colors.white,
                             elevation: 3,
                             // Adjust the padding to make the button smaller
@@ -145,7 +205,7 @@ class _PartState extends State<Part> {
                             ),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(7, 0, 5, 0),
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                             child: Text(
                               isEditPart >= 0 ? "Edit" : "Add",
                               style: const TextStyle(
@@ -169,22 +229,20 @@ class _PartState extends State<Part> {
 
   void _onAddPart(BuildContext context, {bool force = false}) {
     try {
-      if (code.text.isEmpty) throw Exception('Code is missing.');
-      if (name.text.isEmpty) throw Exception('Name is missing.');
-
       final item = {
-        "U_ck_comCode": code.text,
-        "U_U_ck_comName": name.text,
-        "U_ck_partNum": part.text,
+        "U_ck_ParthCode": code.text,
+        "U_U_ck_PartName": name.text,
+        "U_ck_PartNum": part.text,
         "U_ck_brand": brand.text,
         "U_ck_model": model.text,
       };
 
       Provider.of<EquipmentCreateProvider>(context, listen: false)
           .addOrEditPart(item, editIndex: isEditPart);
-
+      setState(() {
+        isEditPart = -1;
+      });
       // Reset edit mode
-      isEditPart = -1;
 
       clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -201,7 +259,7 @@ class _PartState extends State<Part> {
     if (index < 0) return;
     MaterialDialog.warningWithRemove(
       context,
-      title: 'Comps (${item['U_ck_comCode']})',
+      title: 'Comps (${item['U_ck_ParthCode']})',
       confirmLabel: "Edit",
       cancelLabel: "Remove",
       onConfirm: () {
@@ -211,9 +269,9 @@ class _PartState extends State<Part> {
           _showCreateComponent(); // Then open edit form dialog
         });
 
-        code.text = getDataFromDynamic(item["U_ck_comCode"]);
-        name.text = getDataFromDynamic(item["U_U_ck_comName"]);
-        part.text = getDataFromDynamic(item["U_ck_partNum"]);
+        code.text = getDataFromDynamic(item["U_ck_ParthCode"]);
+        name.text = getDataFromDynamic(item["U_U_ck_PartName"]);
+        part.text = getDataFromDynamic(item["U_ck_PartNum"]);
         brand.text = getDataFromDynamic(item["U_ck_brand"]);
         model.text = getDataFromDynamic(item["U_ck_model"]);
         FocusScope.of(context).requestFocus(codeFocusNode);
@@ -252,7 +310,7 @@ class _PartState extends State<Part> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Part Removed (${item['U_ck_comCode']})",
+                        "Part Removed (${item['U_ck_ParthCode']})",
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.white,
@@ -283,6 +341,32 @@ class _PartState extends State<Part> {
     part.text = "";
     brand.text = "";
     model.text = "";
+    codeFieldNotifier.value = {
+      "missing": false,
+      "value": "Code is required!",
+      "isAdded": 1,
+    };
+    nameFieldNotifier.value = {
+      "missing": false,
+      "value": "Name is required!",
+      "isAdded": 1,
+    };
+    partFieldNotifier.value = {
+      "missing": false,
+      "value": "Part is required!",
+      "isAdded": 1,
+    };
+
+    brandFieldNotifier.value = {
+      "missing": false,
+      "value": "Brand is required!",
+      "isAdded": 1,
+    };
+    modelFieldNotifier.value = {
+      "missing": false,
+      "value": "Model is required!",
+      "isAdded": 1,
+    };
   }
 
   @override
@@ -349,6 +433,9 @@ class _PartState extends State<Part> {
                 child: ElevatedButton(
                   onPressed: () async {
                     // onAddComponent();
+                    setState(() {
+                      isEditPart = -1;
+                    });
                     _showCreateComponent();
                   },
                   style: ElevatedButton.styleFrom(
@@ -358,10 +445,10 @@ class _PartState extends State<Part> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     // 'Add Component',
                     "Add Part",
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
@@ -482,7 +569,7 @@ class _PartState extends State<Part> {
                                     SizedBox(
                                       // width: 104,
                                       child: Text(
-                                        "${item["U_ck_comCode"]} - ${item["U_U_ck_comName"]}",
+                                        "${item["U_ck_ParthCode"]} - ${item["U_U_ck_PartName"]}",
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
@@ -533,7 +620,7 @@ class _PartState extends State<Part> {
                                           child: Text("Part",
                                               style: TextStyle(fontSize: 13)),
                                         ),
-                                        Text(": ${item["U_ck_partNum"]}",
+                                        Text(": ${item["U_ck_PartNum"]}",
                                             style:
                                                 const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0),

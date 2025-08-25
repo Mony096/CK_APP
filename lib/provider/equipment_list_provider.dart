@@ -20,6 +20,27 @@ class EquipmentListProvider extends ChangeNotifier {
   bool get isLoadingSetFilter => _isLoadingSetFilter;
 
   String get currentFilter => _currentFilter;
+  Future<void> resfreshFetchDocuments() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await dio.get(
+          "/CK_CUSEQUI?\$top=$_limit&\$skip=$_skip&\$select=U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry &\$orderby=DocEntry desc");
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data["value"];
+
+        _documents = data;
+      } else {
+        throw Exception("Failed to load documents");
+      }
+    } catch (e) {
+      print("Error fetching documents: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchDocuments(
       {bool loadMore = false, bool isSetFilter = false}) async {
@@ -33,11 +54,11 @@ class EquipmentListProvider extends ChangeNotifier {
 
     final String filterCondition = _currentFilter == ""
         ? ""
-        : "&\$filter=contains(Code,'${_currentFilter}')";
+        : "&\$filter=contains(Code,'$_currentFilter')";
 
     try {
       final response = await dio.get(
-          "/CK_CUSEQUI?\$top=$_limit&\$skip=$_skip$filterCondition &\$select=U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name");
+          "/CK_CUSEQUI?\$top=$_limit&\$skip=$_skip$filterCondition &\$select=U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry &\$orderby=DocEntry desc");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];
