@@ -152,6 +152,78 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
   }
 
   void onCreateEQ() async {
+    if (equipCode.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Equipment Code is required!",
+      );
+      return;
+    }
+    if (equipName.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Equipment Name is required!",
+      );
+      return;
+    }
+    if (customerCode.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Customer is required!",
+      );
+      return;
+    }
+    if (equipType.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Status is required!",
+      );
+      return;
+    }
+    if (brand.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Brand is required!",
+      );
+      return;
+    }
+    if (serialNumber.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Serial Number is required!",
+      );
+      return;
+    }
+    if (installedDate.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, Installed Date is required!",
+      );
+      return;
+    }
+    if (warrantyDate.text.isEmpty) {
+      MaterialDialog.requiredFielDialog(
+        context,
+        title: 'Required Field',
+        cancelLabel: "Ok",
+        body: "Oops, warranty Expire Date is required!",
+      );
+      return;
+    }
     await Provider.of<EquipmentCreateProvider>(context, listen: false)
         .postToSAP(data: {
       "U_ck_eqStatus": equipType.text,
@@ -170,6 +242,29 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       "U_ck_NsvDate": nextDate.text,
       "U_ck_WarExpDate": warrantyDate.text
     }, context: context);
+  }
+
+  void clearAllFields() {
+    equipType.clear();
+    customerCode.clear();
+    customerName.clear();
+    site.clear();
+    brand.clear();
+    equipName.clear();
+    equipCode.clear();
+    serialNumber.clear();
+    model.clear();
+    condition.clear();
+    remark.clear();
+    component.clear();
+    uploadImg.clear();
+    installedDate.clear();
+    nextDate.clear();
+    warrantyDate.clear();
+    final provider =
+        Provider.of<EquipmentCreateProvider>(context, listen: false);
+    provider.setComponents([]);
+    provider.setParts([]);
   }
 
   @override
@@ -223,12 +318,11 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                           children: [
                             IconButton(
                               onPressed: () async {
-                                Future.microtask(() {
-                                  final provider =
-                                      Provider.of<DeliveryNoteProvider>(context,
-                                          listen: false);
-                                  provider.fetchDocuments();
-                                });
+                                if (widget.data.isNotEmpty) {
+                                  _init();
+                                } else {
+                                  clearAllFields();
+                                }
                               },
                               icon: const Icon(
                                 Icons.refresh,
@@ -292,7 +386,8 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                             ],
                           ),
                           GestureDetector(
-                            onTap: () => widget.data.isEmpty ? onCreateEQ() : null,
+                            onTap: () =>
+                                widget.data.isEmpty ? onCreateEQ() : null,
                             child: Container(
                               width: 65,
                               height: 35,
@@ -314,7 +409,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                 padding: EdgeInsets.fromLTRB(0, 0, 3, 3),
                                 child: Center(
                                   child: Text(
-                                    widget.data.isEmpty ? "Save":"Detail",
+                                    widget.data.isEmpty ? "Save" : "Detail",
                                     style: TextStyle(
                                         fontSize: 15,
                                         color:
@@ -492,11 +587,11 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                   },
                 ),
                 Component(
-                   data: widget.data,
+                  data: widget.data,
                   controller: {"equipCode": equipCode, "equipName": equipName},
                 ),
                 Part(
-                   data: widget.data,
+                  data: widget.data,
                   controller: {"equipCode": equipCode, "equipName": equipName},
                 ),
               ],

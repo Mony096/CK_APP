@@ -555,6 +555,80 @@ class MaterialDialog {
       },
     );
   }
+  static Future<void> requiredFielDialog(
+    BuildContext context, {
+    String? title,
+    String? body,
+    Function()? onCancel,
+    String cancelLabel = 'Close',
+    IconData icon = Icons.info_outline,
+    Color iconColor = Colors.red,
+  }) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          backgroundColor: Colors.white,
+          titlePadding: const EdgeInsets.fromLTRB(15, 15, 0, 0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          actionsPadding: const EdgeInsets.only(right: 12, bottom: 8),
+          title: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(3),
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title ?? 'Detail View',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Text(
+              body ?? "Check equipment information?",
+              style: TextStyle(
+                fontSize: size(context).width * 0.038,
+                color: const Color.fromARGB(221, 110, 110, 115),
+              ),
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onCancel != null) onCancel();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(cancelLabel),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   static close(BuildContext context) {
     if (context.mounted && Navigator.canPop(context)) {
