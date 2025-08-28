@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ServiceByIdScreen extends StatefulWidget {
+  const ServiceByIdScreen({super.key});
+
   @override
   __ServiceByIdScreenState createState() => __ServiceByIdScreenState();
 }
@@ -16,49 +18,51 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 115, 117, 122),
+        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
         // Leading menu icon on the left
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.of(context).pop();
             // Handle menu button press or keep it empty for default Drawer action
           },
         ),
         // Centered title
-        title: Center(
-          child: Text('Service Task',
-              style: TextStyle(fontSize: 17), textScaleFactor: 1.0),
+        title: const Center(
+          child: Text('Service Infomation',
+              style: TextStyle(fontSize: 17, color: Colors.white),
+              textScaleFactor: 1.0),
         ),
         // Right-aligned actions (scan barcode)
         actions: [
-          IconButton(
-            icon: Row(
-              children: [
-                Icon(Icons.refresh_rounded),
-                SizedBox(
-                  width: 7,
-                ),
-                Icon(Icons.qr_code_scanner),
-              ],
-            ),
-            onPressed: () {
-              // Handle scan barcode action
-            },
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  // refresh();
+                },
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              ),
+              // SizedBox(width: 3),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.logout, color: Colors.white),
+              )
+            ],
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(4),
-        child: Container(
+        child: SizedBox(
             width: double.infinity,
             height: double.infinity,
             child: Column(
               children: [
                 Container(
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   height: 80,
-                  color: Color.fromARGB(255, 33, 107, 243),
+                  color: const Color.fromARGB(255, 66, 83, 100),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -66,7 +70,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 33, 107, 243),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -75,13 +79,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                               width: 2.0, // Border width
                             ),
                           ),
-                          child: Center(
+                          child: const Center(
                               child: Icon(
                             Icons.check,
                             size: 20,
                             color: Colors.white,
                           ))),
-                      Text("- - - - - - -",
+                      const Text("- - - - - - -",
                           style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 13.5,
@@ -91,7 +95,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 33, 107, 243),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -100,12 +104,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                               width: 2.0, // Border width
                             ),
                           ),
-                          child: Center(
+                          child: const Center(
                               child: Icon(
                             Icons.car_crash,
                             color: Colors.white,
                           ))),
-                      Text("- - - - - - -",
+                      const Text("- - - - - - -",
                           style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 13.5,
@@ -115,7 +119,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 33, 107, 243),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -141,7 +145,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 33, 107, 243),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -150,7 +154,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                               width: 2.0, // Border width
                             ),
                           ),
-                          child: Center(
+                          child: const Center(
                               child: Icon(
                             Icons.flag,
                             color: Colors.white,
@@ -158,7 +162,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Expanded(
@@ -166,19 +170,19 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 255, 255, 255),
                     border: Border.all(
-                      color: Color.fromARGB(255, 33, 107, 243), // Border color
+                      color: Colors.green, // Border color
                       width: 1.0, // Border width
                     ),
                     borderRadius: BorderRadius.circular(5.0), // Rounded corners
                   ),
                   child: ListView(children: [
-                    Container(
+                    SizedBox(
                       // margin: EdgeInsets.only(bottom: 1),
                       width: double.infinity,
                       height: 240,
                       child: Column(
                         children: [
-                          Container(
+                          SizedBox(
                             width: double.infinity,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,8 +198,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             width:
                                                 45, // Ensure the width and height are equal for a perfect circle
                                             decoration: BoxDecoration(
-                                              color: const Color.fromARGB(
-                                                  255, 33, 107, 243),
+                                              color: Colors.green,
                                               shape: BoxShape
                                                   .circle, // Makes the container circular
                                               border: Border.all(
@@ -224,8 +227,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                     flex: 4,
                                     child: Container(
                                         padding:
-                                            EdgeInsets.fromLTRB(4, 10, 4, 10),
-                                        child: Column(
+                                            const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                                        child: const Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
@@ -246,7 +249,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                 textScaleFactor: 1.0),
                                           ],
                                         ))),
-                                Expanded(
+                                const Expanded(
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
@@ -259,7 +262,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                         ),
                                         Padding(
                                           padding:
-                                              const EdgeInsets.only(right: 10),
+                                              EdgeInsets.only(right: 10),
                                           child: Text(
                                             "SVT00001",
                                             style: TextStyle(
@@ -275,8 +278,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           ),
                           Container(
                             height: 130,
-                            padding: EdgeInsets.all(10),
-                            color: Color.fromARGB(255, 33, 107, 243),
+                            padding: const EdgeInsets.all(10),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             width: double.infinity,
                             child: Row(
                               children: [
@@ -292,20 +295,20 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text("Date : Monday , January 15",
+                                              const Text("Date : Monday , January 15",
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
                                                   textScaleFactor: 1.0),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
-                                              Text("Time 04:30 - 06:30",
+                                              const Text("Time 04:30 - 06:30",
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
                                                   textScaleFactor: 1.0),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 15,
                                               ),
                                               Container(
@@ -331,7 +334,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                               5.0),
                                                     ),
                                                   ),
-                                                  child: Text("Repair",
+                                                  child: const Text("Repair",
                                                       style: TextStyle(
                                                           color: Colors.black,
                                                           fontSize: 12),
@@ -340,13 +343,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                               ),
                                             ],
                                           )),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 5,
                                       ),
                                     ],
                                   ),
                                 ),
-                                Expanded(
+                                const Expanded(
                                   flex: 2,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -366,30 +369,30 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       ),
                     ),
                     Container(
-                        child: Center(
+                        child: const Center(
                       child: Icon(
                         Icons.keyboard_arrow_up,
-                        color: Color.fromARGB(255, 33, 107, 243),
+                        color: Colors.green,
                         size: 30,
                       ),
                     )),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
                       child: Row(
                         children: [
-                          Expanded(
+                          const Expanded(
                               flex: 1,
                               child: Padding(
-                                padding: const EdgeInsets.all(10.0),
+                                padding: EdgeInsets.all(10.0),
                                 child: Column(
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       height: 45,
                                       width:
                                           45, // Ensure the width and height are equal for a perfect circle
 
                                       child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
+                                          padding: EdgeInsets.all(8.0),
                                           child: Icon(
                                             Icons.build,
                                             size: 25,
@@ -401,8 +404,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           Expanded(
                               flex: 5,
                               child: Container(
-                                  padding: EdgeInsets.fromLTRB(4, 10, 4, 10),
-                                  child: Column(
+                                  padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                                  child: const Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
@@ -421,13 +424,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                           textScaleFactor: 1.0),
                                     ],
                                   ))),
-                          SizedBox(
+                          const SizedBox(
                             width: 10,
                           ),
                         ],
                       ),
                     ), ////
-                    SizedBox(
+                    const SizedBox(
                       height: 2,
                     ),
                     DetailRow(
@@ -440,7 +443,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       title: "Customer :",
                       row1: "The Pizza Company",
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
@@ -454,7 +457,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       row1: "Mr. Jossep Alpha",
                       row2: "092 555 444",
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
@@ -468,10 +471,10 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       row1: "A/C Cleaning",
                       rowRight1: "USD 50.00",
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
-                    DetailRow(
+                    const DetailRow(
                       svg: Icon(
                         Icons.build,
                         size: 25,
@@ -480,7 +483,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       row1: "Equipment Name",
                       rowRight1: "SN: 100020000300",
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
@@ -516,7 +519,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         height: 25,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
 
@@ -535,7 +538,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       row3: "Material Item 3",
                       rowRight3: "30",
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
@@ -553,10 +556,10 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       row3: "Tools Item 3",
                       rowRight3: "2",
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
-                    Row(
+                    const Row(
                       children: [
                         SizedBox(
                           width: 27,
@@ -568,8 +571,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         )
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 10, 5, 10),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(30, 10, 5, 10),
                       child: Text("Service task remark for technician",
                           style: TextStyle(fontSize: 12.5),
                           textScaleFactor: 1.0),
@@ -592,9 +595,9 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                               ),
-                              child: Text("Reject",
+                              child: const Text("Reject",
                                   style: TextStyle(
-                                      color: const Color.fromARGB(
+                                      color: Color.fromARGB(
                                           255, 255, 255, 255),
                                       fontSize: 12),
                                   textScaleFactor: 1.0),
@@ -607,15 +610,14 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 // Define your button's action here
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor:
-                                    Color.fromARGB(255, 33, 107, 243),
+                                backgroundColor: Colors.green,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                               ),
-                              child: Text("Accept",
+                              child: const Text("Accept",
                                   style: TextStyle(
-                                      color: const Color.fromARGB(
+                                      color: Color.fromARGB(
                                           255, 255, 255, 255),
                                       fontSize: 12),
                                   textScaleFactor: 1.0),
@@ -625,7 +627,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 30,
                     )
                     /////do somthing

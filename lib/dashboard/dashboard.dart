@@ -1,7 +1,7 @@
-import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
 import 'package:bizd_tech_service/screens/service/service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class Dashboard extends StatefulWidget {
   Dashboard({super.key, this.fromNotification = false});
@@ -28,9 +28,26 @@ class _DashboardState extends State<Dashboard>
     super.dispose();
   }
 
+
   // void init(BuildContext context) async {
   //   // Initialization logic here
   // }
+  Widget _buildDrawerItem(
+      IconData icon, String title, int index, Widget screen) {
+    return Container(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: Icon(icon, color: Colors.black87),
+        title: Text(title, style: TextStyle(color: Colors.black87)),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => screen),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,74 +125,48 @@ class _DashboardState extends State<Dashboard>
         ),
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 33, 107, 243),
+        child: Column(
+          children: [
+            // Profile Section
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(color: Color.fromARGB(255, 66, 83, 100)),
+              currentAccountPicture: SvgPicture.asset(
+                color: const Color.fromARGB(255, 102, 103, 104),
+                'images/svg/reply.svg',
+                width: 15,
               ),
-              child: Text(
-                'Bizd Service',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-                textScaleFactor: 1.0,
+              accountName: Text(
+                'Sandra Adams',
+                style:
+                    TextStyle(color: const Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
+              ),
+              accountEmail: Text(
+                'sandra_a88@gmail.com',
+                style: TextStyle(color: const Color.fromARGB(137, 255, 255, 255)),
               ),
             ),
-            ListTile(
-              title: Row(
+
+            // Navigation Items
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
                 children: [
-                  Icon(Icons.settings,
-                      color: const Color.fromARGB(255, 64, 65, 67)),
-                  SizedBox(width: 10),
-                  Text(
-                    'Service',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                    textScaleFactor: 1.0,
-                  ),
+                  _buildDrawerItem(Icons.settings, "Service", 0, ServiceScreen()),
+                  _buildDrawerItem(
+                      Icons.build, "Equipment", 1, EquipmentListScreen()),
+                  // _buildDrawerItem(
+                  //     Icons.star_border, "Starred", 2, SomeOtherScreen()),
                 ],
               ),
-              onTap: () {
-                goTo(context, ServiceScreen());
-              },
             ),
+
+            Divider(),
+
+            // Bottom Settings
             ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.build,
-                      color: const Color.fromARGB(255, 64, 65, 67)),
-                  SizedBox(width: 10),
-                  Text(
-                    'Equipment',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                    textScaleFactor: 1.0,
-                  ),
-                ],
-              ),
-              onTap: () {
-                goTo(context, EquipmentListScreen());
-              },
-            ),
-            ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.logout,
-                      color: const Color.fromARGB(255, 64, 65, 67)),
-                  SizedBox(width: 10),
-                  Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                    textScaleFactor: 1.0,
-                  ),
-                ],
-              ),
-              onTap: () {
-                // _logout(context);
-                // goTo(context, LoginScreen());
-              },
+              leading: Icon(Icons.logout, color: Colors.black54),
+              title: Text("Log out"),
+              onTap: () {},
             ),
           ],
         ),

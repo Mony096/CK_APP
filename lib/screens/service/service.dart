@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/serviceById.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
@@ -12,11 +12,11 @@ import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ServiceScreen extends StatefulWidget {
-  ServiceScreen({super.key});
+  const ServiceScreen({super.key});
   @override
   _ServiceScreenState createState() => _ServiceScreenState();
 }
@@ -44,11 +44,14 @@ class _ServiceScreenState extends State<ServiceScreen> {
       _isLoading = true;
     });
     await _loadUserName();
-    final dnProvider =
-        Provider.of<DeliveryNoteProvider>(context, listen: false);
-    if (dnProvider.documents.isEmpty) {
-      await dnProvider.fetchDocuments();
+
+    final svProvider = Provider.of<ServiceListProvider>(context, listen: false);
+    if (svProvider.documents.isEmpty) {
+      await svProvider.fetchDocuments();
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _loadUserName() async {
@@ -58,349 +61,99 @@ class _ServiceScreenState extends State<ServiceScreen> {
     });
   }
 
-  void makePhoneCall(BuildContext context, String phoneNumber) {
-    _showConfirmationDialog(
-      context: context,
-      title: "Call $phoneNumber ?",
-      content: "Are you want to call this number ?",
-      onConfirm: () async {
-        final Uri phoneUri = Uri.parse("tel:$phoneNumber");
-
-        try {
-          await launchUrl(phoneUri, mode: LaunchMode.externalApplication);
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Cannot make phone call on this device')),
-          );
-        }
-      },
-    );
-  }
-
-  void onCompletedSkip(dynamic entry, List<dynamic> documents) async {
-    MaterialDialog.loading(context); // Show loading dialog
-    await Provider.of<UpdateStatusProvider>(context, listen: false)
-        .updateDocumentAndStatus(
-            docEntry: entry,
-            status: "Delivered",
-            remarks: "",
-            context: context);
-    await Future.microtask(() {
-      final provider =
-          Provider.of<DeliveryNoteProvider>(context, listen: false);
-      provider.fetchDocuments();
-    });
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
-  }
-
-  void onFailedDelivery(dynamic entry, List<dynamic> documents) async {
-    MaterialDialog.loading(context); // Show loading dialog
-    await Provider.of<UpdateStatusProvider>(context, listen: false)
-        .updateDocumentAndStatus(
-            docEntry: entry, status: "Failed", remarks: "", context: context);
-    await Future.microtask(() {
-      final provider =
-          Provider.of<DeliveryNoteProvider>(context, listen: false);
-      provider.fetchDocuments();
-    });
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
-  }
-
   Future<String?> getName() async {
     return await LocalStorageManger.getString('UserName');
   }
 
-  dynamic numa = 0;
-  void showPODDialog(BuildContext context, dynamic entry, dynamic doc) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          title: Container(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Color.fromARGB(255, 184, 186, 192),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: const Row(
-              children: [
-                Icon(
-                  Icons.pin_drop,
-                  size: 20,
-                  color: Color.fromARGB(255, 81, 81, 84),
-                ),
-                SizedBox(
-                  width: 7,
-                ),
-                Text(
-                  'Proof of Delivery (POD)',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Color.fromARGB(255, 81, 81, 84)),
-                ),
-              ],
-            ),
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 5),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // Get the provider BEFORE popping the context
-                    final dnProvider = Provider.of<DeliveryNoteProvider>(
-                        context,
-                        listen: false);
-                    Navigator.pop(context); // Dismiss the dialog
-                    // await goTo(
-                    //     context,
-                    //     ProofOfServiceScreen(
-                    //         entry: entry, documents: documents));
-                    await dnProvider.fetchDocuments();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 40),
-                    backgroundColor: const Color.fromARGB(255, 78, 178, 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    "Take Proof of Delivery",
-                    style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 5),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: ElevatedButton(
-                  onPressed: () {
-                    onFailedDelivery(entry, documents);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 40),
-                    backgroundColor: Colors.redAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    "Failed Delivery",
-                    style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 5),
-                    child: OutlinedButton(
-                      onPressed: () {
-                        onCompletedSkip(entry, documents);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 37), // ⬅️ height = 35
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Skip POD",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 82, 84, 85),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context); // Close dialog
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        "Close",
-                        style: TextStyle(color: Colors.black, fontSize: 15),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeliveryNoteProvider>(
+    return Consumer<ServiceListProvider>(
       builder: (context, deliveryProvider, _) {
         final documents = deliveryProvider.documents;
         final isLoading = deliveryProvider.isLoading;
-
         return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+            // Leading menu icon on the left
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Handle menu button press or keep it empty for default Drawer action
+              },
+            ),
+            // Centered title
+            title: Center(
+              child: Text(
+                "$userName' Service",
+                style: TextStyle(fontSize: 17, color: Colors.white),
+                textScaleFactor: 1.0,
+              ),
+            ),
+            // Right-aligned actions (scan barcode)
+            actions: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      // refresh();
+                    },
+                    icon: Icon(Icons.refresh_rounded, color: Colors.white),
+                  ),
+                  // SizedBox(width: 3),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.logout, color: Colors.white),
+                  )
+                ],
+              ),
+            ],
+          ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // HEADER (not scrollable)
-              Container(
-                height: 180,
-                color: const Color.fromARGB(255, 33, 107, 243),
-                width: MediaQuery.of(context).size.width,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      top: 55,
-                      left: 20,
-                      right: 5,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              GestureDetector(
-                                  onTap: () => Navigator.of(context).pop(),
-                                  child: Icon(
-                                    Icons.arrow_back,
-                                    color: Colors.white,
-                                    size: 25,
-                                  )),
-                              SizedBox(
-                                width: 15,
-                              ),
-                              Text(
-                                "${userName ?? 'Loading'}'s Delivery",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () async {
-                                  Future.microtask(() {
-                                    final provider =
-                                        Provider.of<DeliveryNoteProvider>(
-                                            context,
-                                            listen: false);
-                                    provider.fetchDocuments();
-                                  });
-                                },
-                                icon: const Icon(
-                                  Icons.refresh,
-                                  size: 27,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () async {
-                                  MaterialDialog.loading(context);
-                                  await Provider.of<AuthProvider>(context,
-                                          listen: false)
-                                      .logout();
-                                  Navigator.of(context).pop(); // Close loading
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (_) => const LoginScreen()),
-                                    (route) => false,
-                                  );
-                                },
-                                icon: const Icon(
-                                  Icons.logout,
-                                  size: 27,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 115,
-                      left: 10,
-                      right: 10,
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 238, 239, 241),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.note_alt,
-                                      size: 20,
-                                      color: Color.fromARGB(255, 85, 73, 73)),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Your List of Assigned Service",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color.fromARGB(255, 85, 73, 73),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Icon(Icons.arrow_downward,
-                                  size: 21,
-                                  color: Color.fromARGB(255, 78, 64, 64)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // TextFormField(
 
-              // CONTENT
+              //   controller: null,
+              //   decoration: InputDecoration(
+              //     enabledBorder: OutlineInputBorder(
+              //       borderSide: const BorderSide(
+              //         color: Colors.grey,
+              //         width: 1.0, // Border color and width when not focused
+              //       ),
+              //       borderRadius: BorderRadius.circular(5.0), // Rounded corners
+              //     ),
+              //     focusedBorder: OutlineInputBorder(
+              //       borderSide: BorderSide(
+              //         color: const Color.fromARGB(255, 123, 125, 126),
+              //         width: 1.0, // Border color and width when focused
+              //       ),
+              //       borderRadius: BorderRadius.circular(5.0), // Rounded corners
+              //     ),
+              //     contentPadding: const EdgeInsets.only(top: 12),
+              //     hintText: 'Search...', // Placeholder text
+              //     hintStyle: TextStyle(
+              //       fontSize: 14.0, // Placeholder font size
+              //       color: Colors.grey,
+              //       // Placeholder text color
+              //     ),
+              //     prefixIcon: Icon(Icons.search),
+              //     suffixIcon: IconButton(
+              //       icon: Icon(
+              //         Icons.list,
+              //       ),
+              //       onPressed: null,
+              //     ),
+              //   ),
+              // ),
+              SizedBox(
+                height: 10,
+              ),
+              DateSelector(),
+              // SizedBox(
+              //   height: 7,
+              // ),
+              // // CONTENT
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.only(top: 5),
@@ -409,7 +162,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                           height: MediaQuery.of(context).size.height * 0.65,
                           child: const Center(
                             child: SpinKitFadingCircle(
-                              color: Colors.blue,
+                              color: Colors.green,
                               size: 50.0,
                             ),
                           ),
@@ -426,17 +179,29 @@ class _ServiceScreenState extends State<ServiceScreen> {
                               ),
                             )
                           : Column(children: [
+                              SizedBox(
+                                height: 5,
+                              ),
                               ...documents.map(
                                 (travel) => Container(
-                                  margin: EdgeInsets.only(bottom: 8),
+                                  margin: const EdgeInsets.only(bottom: 10),
                                   width: double.infinity,
                                   height: 370,
                                   decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color.fromARGB(
+                                                255, 133, 136, 138)
+                                            .withOpacity(0.2),
+                                        spreadRadius: 2,
+                                        blurRadius: 2,
+                                        offset: const Offset(1, 1),
+                                      )
+                                    ],
                                     color: const Color.fromARGB(
                                         255, 255, 255, 255),
                                     border: Border.all(
-                                      color: Color.fromARGB(
-                                          255, 33, 107, 243), // Border color
+                                      color: Colors.green, // Border color
                                       width: 1.0, // Border width
                                     ),
                                     borderRadius: BorderRadius.circular(
@@ -446,7 +211,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                     children: [
                                       Expanded(
                                         flex: 2,
-                                        child: Container(
+                                        child: SizedBox(
                                           width: double.infinity,
                                           child: Row(
                                             children: [
@@ -464,9 +229,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               45, // Ensure the width and height are equal for a perfect circle
                                                           decoration:
                                                               BoxDecoration(
-                                                            color: const Color
-                                                                .fromARGB(255,
-                                                                33, 107, 243),
+                                                            color: Colors
+                                                                .green, /////////Icon Right
                                                             shape: BoxShape
                                                                 .circle, // Makes the container circular
                                                             border: Border.all(
@@ -489,6 +253,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               'images/svg/key.svg',
                                                               width: 30,
                                                               height: 30,
+                                                              color: const Color
+                                                                  .fromARGB(
+                                                                  255,
+                                                                  255,
+                                                                  255,
+                                                                  255),
                                                             ),
                                                           ),
                                                         ),
@@ -498,10 +268,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                               Expanded(
                                                   flex: 4,
                                                   child: Container(
-                                                      padding:
-                                                          EdgeInsets.fromLTRB(
-                                                              4, 10, 4, 10),
-                                                      child: Column(
+                                                      padding: const EdgeInsets
+                                                          .fromLTRB(
+                                                          4, 10, 4, 10),
+                                                      child: const Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
@@ -529,7 +299,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                   1.0),
                                                         ],
                                                       ))),
-                                              Expanded(
+                                              const Expanded(
                                                   flex: 2,
                                                   child: Column(
                                                     crossAxisAlignment:
@@ -542,10 +312,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                       ),
                                                       Padding(
                                                         padding:
-                                                            const EdgeInsets
-                                                                .only(
+                                                            EdgeInsets.only(
                                                                 right: 10),
-                                                        child: Text("SVT00001",
+                                                        child: Text(
+                                                            "SVT00001 #",
                                                             style: TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
@@ -563,9 +333,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                       Expanded(
                                         flex: 3,
                                         child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          color:
-                                              Color.fromARGB(255, 33, 107, 243),
+                                          padding: const EdgeInsets.all(10),
+                                          color: const Color.fromARGB(
+                                              255, 66, 83, 100),
                                           width: double.infinity,
                                           child: Column(
                                             crossAxisAlignment:
@@ -587,31 +357,27 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               color: Color
                                                                   .fromARGB(
                                                                       255,
-                                                                      33,
-                                                                      107,
-                                                                      243),
+                                                                      66,
+                                                                      83,
+                                                                      100),
                                                               shape: BoxShape
                                                                   .circle, // Makes the container circular
                                                               border:
                                                                   Border.all(
-                                                                color: const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    255,
-                                                                    255,
-                                                                    255), // Optional: Add a border if needed
+                                                                color: Colors
+                                                                    .green, // Optional: Add a border if needed
                                                                 width:
                                                                     2.0, // Border width
                                                               ),
                                                             ),
-                                                            child: Center(
+                                                            child: const Center(
                                                                 child: Icon(
                                                               Icons.check,
                                                               size: 20,
                                                               color:
-                                                                  Colors.white,
+                                                                  Colors.green,
                                                             ))),
-                                                        Text("- - - - -",
+                                                        const Text("- - - - -",
                                                             style: TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
@@ -629,9 +395,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               color: Color
                                                                   .fromARGB(
                                                                       255,
-                                                                      33,
-                                                                      107,
-                                                                      243),
+                                                                      66,
+                                                                      83,
+                                                                      100),
                                                               shape: BoxShape
                                                                   .circle, // Makes the container circular
                                                               border:
@@ -646,13 +412,17 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                     2.0, // Border width
                                                               ),
                                                             ),
-                                                            child: Center(
+                                                            child: const Center(
                                                                 child: Icon(
                                                               Icons.car_crash,
-                                                              color:
-                                                                  Colors.white,
+                                                              color: Color
+                                                                  .fromARGB(
+                                                                      255,
+                                                                      255,
+                                                                      255,
+                                                                      255),
                                                             ))),
-                                                        Text("- - - - -",
+                                                        const Text("- - - - -",
                                                             style: TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
@@ -670,9 +440,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               color: Color
                                                                   .fromARGB(
                                                                       255,
-                                                                      33,
-                                                                      107,
-                                                                      243),
+                                                                      66,
+                                                                      83,
+                                                                      100),
                                                               shape: BoxShape
                                                                   .circle, // Makes the container circular
                                                               border:
@@ -688,12 +458,16 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               ),
                                                             ),
                                                             child: Center(
-                                                              child: SvgPicture
-                                                                  .asset(
-                                                                'images/svg/key.svg',
-                                                                width: 23,
-                                                                height: 23,
-                                                              ),
+                                                              child: SvgPicture.asset(
+                                                                  'images/svg/key.svg',
+                                                                  width: 23,
+                                                                  height: 23,
+                                                                  color: Color
+                                                                      .fromARGB(
+                                                                          255,
+                                                                          255,
+                                                                          255,
+                                                                          255)),
                                                             )),
                                                         const Text("- - - - -",
                                                             style: TextStyle(
@@ -713,9 +487,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               color: Color
                                                                   .fromARGB(
                                                                       255,
-                                                                      33,
-                                                                      107,
-                                                                      243),
+                                                                      66,
+                                                                      83,
+                                                                      100),
                                                               shape: BoxShape
                                                                   .circle, // Makes the container circular
                                                               border:
@@ -730,22 +504,25 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                     2.0, // Border width
                                                               ),
                                                             ),
-                                                            child: Center(
+                                                            child: const Center(
                                                                 child: Icon(
-                                                              Icons.flag,
-                                                              color:
-                                                                  Colors.white,
-                                                            ))),
+                                                                    Icons.flag,
+                                                                    color: Color
+                                                                        .fromARGB(
+                                                                            255,
+                                                                            255,
+                                                                            255,
+                                                                            255)))),
                                                       ],
                                                     ),
                                                   )),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                               Expanded(
                                                   flex: 2,
                                                   child: Container(
-                                                    child: Text(
+                                                    child: const Text(
                                                         "Time 04:30 - 06:30",
                                                         style: TextStyle(
                                                             color: Colors.white,
@@ -783,7 +560,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                       5.0),
                                                         ),
                                                       ),
-                                                      child: Text("Repair",
+                                                      child: const Text(
+                                                          "Repair",
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.black,
@@ -793,7 +571,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 5,
                                               ),
                                             ],
@@ -819,32 +597,31 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                         goTo(context,
                                                             ServiceByIdScreen());
                                                       },
-                                                      child: Icon(
+                                                      child: const Icon(
                                                         Icons.keyboard_arrow_up,
-                                                        color: Color.fromARGB(
-                                                            255, 33, 107, 243),
+                                                        color: Colors.green,
                                                         size: 30,
                                                       ),
                                                     ),
                                                   ))),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 5,
                                               ),
                                               Expanded(
                                                 flex: 5,
-                                                child: Container(
+                                                child: SizedBox(
                                                   width: double.infinity,
                                                   child: Row(
                                                     children: [
-                                                      Expanded(
+                                                      const Expanded(
                                                           flex: 1,
                                                           child: Padding(
                                                             padding:
-                                                                const EdgeInsets
-                                                                    .all(10.0),
+                                                                EdgeInsets.all(
+                                                                    10.0),
                                                             child: Column(
                                                               children: [
-                                                                Container(
+                                                                SizedBox(
                                                                   height: 45,
                                                                   width:
                                                                       45, // Ensure the width and height are equal for a perfect circle
@@ -852,8 +629,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                   child:
                                                                       Padding(
                                                                     padding:
-                                                                        const EdgeInsets
-                                                                            .all(
+                                                                        EdgeInsets.all(
                                                                             8.0),
                                                                     child: Icon(
                                                                       Icons
@@ -869,13 +645,14 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                           flex: 4,
                                                           child: Container(
                                                               padding:
-                                                                  EdgeInsets
+                                                                  const EdgeInsets
                                                                       .fromLTRB(
-                                                                          4,
-                                                                          10,
-                                                                          4,
-                                                                          10),
-                                                              child: Column(
+                                                                      4,
+                                                                      10,
+                                                                      4,
+                                                                      10),
+                                                              child:
+                                                                  const Column(
                                                                 crossAxisAlignment:
                                                                     CrossAxisAlignment
                                                                         .start,
@@ -915,7 +692,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                 MainAxisAlignment
                                                                     .end,
                                                             children: [
-                                                              SizedBox(
+                                                              const SizedBox(
                                                                 height: 10,
                                                               ),
                                                               Container(
@@ -923,12 +700,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                 height: 35,
                                                                 decoration:
                                                                     BoxDecoration(
-                                                                  color: Color
-                                                                      .fromARGB(
-                                                                          255,
-                                                                          33,
-                                                                          107,
-                                                                          243),
+                                                                  color: Colors
+                                                                      .green,
                                                                   borderRadius:
                                                                       BorderRadius
                                                                           .circular(
@@ -945,7 +718,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                           .loading(
                                                                               context);
                                                                       Future.delayed(
-                                                                          Duration(
+                                                                          const Duration(
                                                                               seconds: 1),
                                                                           () {
                                                                         Navigator.of(context)
@@ -968,11 +741,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                               5.0),
                                                                     ),
                                                                   ),
-                                                                  child: Text(
+                                                                  child: const Text(
                                                                       "Accept",
                                                                       style: TextStyle(
-                                                                          color: const Color
-                                                                              .fromARGB(
+                                                                          color: Color.fromARGB(
                                                                               255,
                                                                               255,
                                                                               255,
@@ -983,12 +755,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                                           1.0),
                                                                 ),
                                                               ),
-                                                              SizedBox(
+                                                              const SizedBox(
                                                                 height: 10,
                                                               ),
                                                             ],
                                                           )),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         width: 10,
                                                       ),
                                                     ],
@@ -1014,56 +786,82 @@ class _ServiceScreenState extends State<ServiceScreen> {
   }
 }
 
-Future<void> _showConfirmationDialog({
-  required BuildContext context,
-  required String title,
-  required String content,
-  required VoidCallback onConfirm,
-}) async {
-  final result = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+class DateSelector extends StatefulWidget {
+  @override
+  _DateSelectorState createState() => _DateSelectorState();
+}
+
+class _DateSelectorState extends State<DateSelector> {
+  DateTime _selectedDate = DateTime.now(); // Default to the current date
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Format the date to "Monday, January 15"
+    final formattedDate = DateFormat('EEEE, MMMM d').format(_selectedDate);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 255, 255, 255),
+        border: Border.all(
+          color: Colors.green, // Border color
+          width: 1.0, // Border width
         ),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 22),
-        ),
-        content: Text(
-          content,
-          style: const TextStyle(fontSize: 14.5),
-        ),
-        actions: [
-          TextButton(
-            child: const Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(7),
-              ),
-              minimumSize: const Size(
-                  70, 35), // width, height (height smaller than default)
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16), // optional: adjust padding
+        borderRadius: BorderRadius.circular(5.0), // Rounded corners
+      ),
+      width: double.infinity,
+      height: 50,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(flex: 1, child: Icon(Icons.date_range)),
+          Expanded(
+            flex: 4,
+            child: Text(
+              formattedDate, // Display formatted date
+              style: TextStyle(fontSize: 13),
+              textScaleFactor: 1.0,
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("Go"),
+          ),
+          Expanded(
+            flex: 2,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.keyboard_arrow_left,
+                    size: 30,
+                    color: Color.fromARGB(255, 88, 89, 90),
+                  ),
+                  onPressed: () => _selectDate(context),
+                ),
+                SizedBox(width: 3),
+                IconButton(
+                  icon: Icon(
+                    Icons.keyboard_arrow_right,
+                    size: 30,
+                    color: Color.fromARGB(255, 88, 89, 90),
+                  ),
+                  onPressed: () => _selectDate(context),
+                ),
+              ],
+            ),
           ),
         ],
-      );
-    },
-  );
-
-  if (result == true) {
-    onConfirm();
+      ),
+    );
   }
 }

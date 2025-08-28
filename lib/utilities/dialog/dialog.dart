@@ -21,7 +21,7 @@ class MaterialDialog {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           title: Text(
-            title ?? 'Success',
+            title ?? 'Scucess',
             style: TextStyle(
                 color: Colors.black,
                 fontSize: size(context).width * 0.045,
@@ -530,7 +530,7 @@ class MaterialDialog {
             child: Text(
               body ?? "Check equipment information?",
               style: TextStyle(
-                fontSize: size(context).width * 0.038,
+                fontSize:15,
                 color: const Color.fromARGB(221, 110, 110, 115),
               ),
             ),
@@ -604,7 +604,7 @@ class MaterialDialog {
             child: Text(
               body ?? "Check equipment information?",
               style: TextStyle(
-                fontSize: size(context).width * 0.038,
+                fontSize: 15,
                 color: const Color.fromARGB(221, 110, 110, 115),
               ),
             ),
