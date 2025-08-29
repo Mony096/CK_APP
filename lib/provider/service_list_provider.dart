@@ -24,7 +24,7 @@ class ServiceListProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final response = await dio.get(
-          "/CK_JOBORDER?\$filter=U_CK_Status ne 'Open' &\$top=$_limit&\$skip=$_skip");
+          "/CK_JOBORDER?\$filter=U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' &\$top=$_limit&\$skip=$_skip");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];
@@ -57,7 +57,7 @@ class ServiceListProvider extends ChangeNotifier {
 
     try {
       final response = await dio
-          .get("/CK_JOBORDER?\$filter=U_CK_Status ne 'Open' &\$top=$_limit&\$skip=$_skip$filterCondition");
+          .get("/CK_JOBORDER?\$filter=U_CK_Status ne and U_CK_Status ne 'Entry' 'Open' &\$top=$_limit&\$skip=$_skip$filterCondition");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];
