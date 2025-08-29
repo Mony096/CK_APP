@@ -1,18 +1,104 @@
+import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/component/detail_row.dart';
+import 'package:bizd_tech_service/screens/service/screen/sericeEntry.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class ServiceByIdScreen extends StatefulWidget {
-  const ServiceByIdScreen({super.key});
+  const ServiceByIdScreen({super.key, required this.data});
+  final Map<String, dynamic> data;
 
   @override
   __ServiceByIdScreenState createState() => __ServiceByIdScreenState();
 }
 
 class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
-  @override
-  List<dynamic> myTravel = [{}, {}, {}];
+  Future<void> _onReject() async {
+    // if (_pdf.isEmpty) {
+    // print(currentStatus);
+    // return;
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('Please provide a signature')),
+    //   );
+    //   return;
+    // }
+    MaterialDialog.loading(context);
+
+    try {
+      await Provider.of<UpdateStatusProvider>(context, listen: false)
+          .updateDocumentAndStatus(
+        docEntry: widget.data["DocEntry"],
+        status: "Open",
+        context: context, // ✅ Corrected here
+      );
+      if (!mounted) return; // <--- Add this check
+
+      Navigator.of(context).pop(); // Go back
+      Navigator.of(context).pop(); // Go back
+
+      await _refreshData();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Update Status Successfully')),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Error: $e')),
+      );
+    }
+  }
+
+  Future<void> _refreshData() async {
+    // setState(() => _initialLoading = true);
+
+    final provider = Provider.of<ServiceListProvider>(context, listen: false);
+    // ✅ Only fetch if not already loaded
+    provider.resetPagination();
+    await provider.resfreshFetchDocuments();
+    // setState(() => _initialLoading = false);
+  }
+
+  Future<void> onUpdateStatus() async {
+    if (widget.data["U_CK_Status"] == "Service") {
+      goTo(context, ServiceEntryScreen(data: widget.data));
+      return;
+    }
+    MaterialDialog.loading(context);
+
+    try {
+      await Provider.of<UpdateStatusProvider>(context, listen: false)
+          .updateDocumentAndStatus(
+        docEntry: widget.data["DocEntry"],
+        status: widget.data["U_CK_Status"] == "Pending"
+            ? "Accept"
+            : widget.data["U_CK_Status"] == "Accept"
+                ? "Travel"
+                : widget.data["U_CK_Status"] == "Travel"
+                    ? "Service"
+                    : "Entry",
+        context: context, // ✅ Corrected here
+      );
+      if (!mounted) return; // <--- Add this check
+
+      Navigator.of(context).pop(); // Go back
+      Navigator.of(context).pop(); // Go back
+      await _refreshData();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Update Status Successfully')),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Error: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,72 +156,32 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
+                            color: Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
-                              color: const Color.fromARGB(255, 255, 255,
-                                  255), // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: const Center(
-                              child: Icon(
-                            Icons.check,
-                            size: 20,
-                            color: Colors.white,
-                          ))),
-                      const Text("- - - - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 255, 255,
-                                  255), // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: const Center(
-                              child: Icon(
-                            Icons.car_crash,
-                            color: Colors.white,
-                          ))),
-                      const Text("- - - - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 255, 255,
-                                  255), // Optional: Add a border if needed
+                              color: widget.data["U_CK_Status"] == "Accept" ||
+                                      widget.data["U_CK_Status"] == "Travel" ||
+                                      widget.data["U_CK_Status"] == "Service" ||
+                                      widget.data["U_CK_Status"] == "Entry"
+                                  ? Colors.green
+                                  : Colors
+                                      .white, // Optional: Add a border if needed
                               width: 2.0, // Border width
                             ),
                           ),
                           child: Center(
-                            child: SvgPicture.asset(
-                              'images/svg/key.svg',
-                              width: 23,
-                              height: 23,
-                            ),
-                          )),
-                      const Text("- - - - - - -",
+                              child: Icon(
+                            Icons.check,
+                            size: 20,
+                            color: widget.data["U_CK_Status"] == "Accept" ||
+                                    widget.data["U_CK_Status"] == "Travel" ||
+                                    widget.data["U_CK_Status"] == "Service" ||
+                                    widget.data["U_CK_Status"] == "Entry"
+                                ? Colors.green
+                                : Colors.white,
+                          ))),
+                      const Text("- - - - -",
                           style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 13.5,
@@ -145,20 +191,86 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
+                            color: Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
-                              color: const Color.fromARGB(255, 255, 255,
-                                  255), // Optional: Add a border if needed
+                              color: widget.data["U_CK_Status"] == "Travel" ||
+                                      widget.data["U_CK_Status"] == "Service" ||
+                                      widget.data["U_CK_Status"] == "Entry"
+                                  ? Colors.green
+                                  : Colors
+                                      .white, // Optional: Add a border if needed
                               width: 2.0, // Border width
                             ),
                           ),
-                          child: const Center(
+                          child: Center(
                               child: Icon(
-                            Icons.flag,
-                            color: Colors.white,
+                            Icons.car_crash,
+                            color: widget.data["U_CK_Status"] == "Travel" ||
+                                    widget.data["U_CK_Status"] == "Service" ||
+                                    widget.data["U_CK_Status"] == "Entry"
+                                ? Colors.green
+                                : Colors.white,
                           ))),
+                      const Text("- - - - -",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13.5,
+                              color: Colors.white),
+                          textScaleFactor: 1.0),
+                      Container(
+                          width: 37,
+                          height: 37,
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 66, 83, 100),
+                            shape:
+                                BoxShape.circle, // Makes the container circular
+                            border: Border.all(
+                              color: widget.data["U_CK_Status"] == "Service" ||
+                                      widget.data["U_CK_Status"] == "Entry"
+                                  ? Colors.green
+                                  : Colors
+                                      .white, // Optional: Add a border if needed
+                              width: 2.0, // Border width
+                            ),
+                          ),
+                          child: Center(
+                            child: SvgPicture.asset('images/svg/key.svg',
+                                width: 23,
+                                height: 23,
+                                color: widget.data["U_CK_Status"] ==
+                                            "Service" ||
+                                        widget.data["U_CK_Status"] == "Entry"
+                                    ? Colors.green
+                                    : Colors.white),
+                          )),
+                      const Text("- - - - -",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13.5,
+                              color: Colors.white),
+                          textScaleFactor: 1.0),
+                      Container(
+                          width: 37,
+                          height: 37,
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 66, 83, 100),
+                            shape:
+                                BoxShape.circle, // Makes the container circular
+                            border: Border.all(
+                              color: widget.data["U_CK_Status"] == "Entry"
+                                  ? Colors.green
+                                  : Colors
+                                      .white, // Optional: Add a border if needed
+                              width: 2.0, // Border width
+                            ),
+                          ),
+                          child: Center(
+                              child: Icon(Icons.flag,
+                                  color: widget.data["U_CK_Status"] == "Entry"
+                                      ? Colors.green
+                                      : Colors.white))),
                     ],
                   ),
                 ),
@@ -226,8 +338,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 Expanded(
                                     flex: 4,
                                     child: Container(
-                                        padding:
-                                            const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4, 10, 4, 10),
                                         child: const Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -261,8 +373,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                           height: 10,
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsets.only(right: 10),
+                                          padding: EdgeInsets.only(right: 10),
                                           child: Text(
                                             "SVT00001",
                                             style: TextStyle(
@@ -295,7 +406,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Text("Date : Monday , January 15",
+                                              const Text(
+                                                  "Date : Monday , January 15",
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
@@ -404,7 +516,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           Expanded(
                               flex: 5,
                               child: Container(
-                                  padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 10, 4, 10),
                                   child: const Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -585,29 +698,32 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         children: [
                           Expanded(flex: 1, child: Container()),
                           Expanded(
-                            child: TextButton(
-                              onPressed: () {
-                                // Define your button's action here
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                              ),
-                              child: const Text("Reject",
-                                  style: TextStyle(
-                                      color: Color.fromARGB(
-                                          255, 255, 255, 255),
-                                      fontSize: 12),
-                                  textScaleFactor: 1.0),
-                            ),
+                            child: widget.data["U_CK_Status"] == "Pending"
+                                ? TextButton(
+                                    onPressed: () {
+                                      _onReject();
+                                    },
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
+                                    ),
+                                    child: const Text("Reject",
+                                        style: TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 255, 255, 255),
+                                            fontSize: 12),
+                                        textScaleFactor: 1.0),
+                                  )
+                                : Container(),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: TextButton(
                               onPressed: () {
-                                // Define your button's action here
+                                onUpdateStatus();
                               },
                               style: TextButton.styleFrom(
                                 backgroundColor: Colors.green,
@@ -615,10 +731,17 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                               ),
-                              child: const Text("Accept",
+                              child: Text(
+                                  widget.data["U_CK_Status"] == "Pending"
+                                      ? "Accept"
+                                      : widget.data["U_CK_Status"] == "Accept"
+                                          ? "Travel"
+                                          : widget.data["U_CK_Status"] ==
+                                                  "Travel"
+                                              ? "Service"
+                                              : "Entry",
                                   style: TextStyle(
-                                      color: Color.fromARGB(
-                                          255, 255, 255, 255),
+                                      color: Color.fromARGB(255, 255, 255, 255),
                                       fontSize: 12),
                                   textScaleFactor: 1.0),
                             ),

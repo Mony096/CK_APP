@@ -9,53 +9,51 @@ class UpdateStatusProvider extends ChangeNotifier {
   final DioClient dio = DioClient(); // Custom Dio wrapper
 
   Future<void> updateDocumentAndStatus({
-    required BuildContext context, // ✅ Add BuildContext for UI
     required int docEntry,
     required String status,
-    required dynamic remarks,
-    dynamic attachmentEntry,
+    required BuildContext context, // ✅ Add BuildContext for UI
   }) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final now = DateTime.now();
-      final timeStamp = DateFormat("HH:mm:ss").format(now); // 24-hour format
+      // final now = DateTime.now();
+      // final timeStamp = DateFormat("HH:mm:ss").format(now); // 24-hour format
 
       final data = {
         "DocEntry": docEntry,
-        "U_lk_delstat": status,
+        "U_CK_Status": status,
       };
 
-      if (remarks != null) {
-        data["U_lk_podremark"] = remarks;
-      }
-      if (attachmentEntry != null) {
-        data["AttachmentEntry"] = attachmentEntry;
-      }
-      if (status == "Started") {
-        data["U_lk_delacctim"] = timeStamp; // fixed timestamp format
-      }
-      if (status == "On the Way") {
-        data["U_lk_delpictim"] = timeStamp; // fixed timestamp format
-      }
-      if (status == "Delivered") {
-        data["U_lk_delcomtim"] = timeStamp; // fixed timestamp format
-      }
-      final documentStatus = await dio.post(
-        "/script/test/LK_Status_Update",
+      // if (remarks != null) {
+      //   data["U_lk_podremark"] = remarks;
+      // }
+      // if (attachmentEntry != null) {
+      //   data["AttachmentEntry"] = attachmentEntry;
+      // }
+      // if (status == "Started") {
+      //   data["U_lk_delacctim"] = timeStamp; // fixed timestamp format
+      // }
+      // if (status == "On the Way") {
+      //   data["U_lk_delpictim"] = timeStamp; // fixed timestamp format
+      // }
+      // if (status == "Delivered") {
+      //   data["U_lk_delcomtim"] = timeStamp; // fixed timestamp format
+      // }
+      final documentStatus = await dio.patch(
+        "/CK_JOBORDER($docEntry)",
         false,
         false,
         data: data,
       );
 
-      final alertToWebData = {
-        "ReceiveType": 'Status',
-        "DocEntry": docEntry,
-      };
+      // final alertToWebData = {
+      //   "ReceiveType": 'Status',
+      //   "DocEntry": docEntry,
+      // };
 
       if (documentStatus.statusCode == 201) {
-        await dio.postNotification("", data: alertToWebData);
+        // await dio.postNotification("", data: alertToWebData);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Status updated successfully!"),

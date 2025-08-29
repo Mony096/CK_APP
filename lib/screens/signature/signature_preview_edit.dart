@@ -17,7 +17,7 @@ class PDFViewerScreen extends StatelessWidget {
       appBar: AppBar(
         iconTheme:
             const IconThemeData(color: Colors.white), // 👈 back arrow color
-        backgroundColor: Color.fromARGB(255, 33, 107, 243),
+        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
         title: const Text(
           "Signature Here",
           style: TextStyle(

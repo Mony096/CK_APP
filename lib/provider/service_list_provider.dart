@@ -1,5 +1,4 @@
 import 'package:bizd_tech_service/utilities/dio_client.dart';
-import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 
 class ServiceListProvider extends ChangeNotifier {
@@ -25,7 +24,7 @@ class ServiceListProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final response = await dio.get(
-          "/CK_CUSEQUI?\$top=$_limit&\$skip=$_skip&\$select=U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry &\$orderby=DocEntry desc");
+          "/CK_JOBORDER?\$filter=U_CK_Status ne 'Open' &\$top=$_limit&\$skip=$_skip");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];
@@ -57,8 +56,8 @@ class ServiceListProvider extends ChangeNotifier {
         : "&\$filter=contains(Code,'$_currentFilter')";
 
     try {
-      final response = await dio.get(
-          "/CK_CUSEQUI?\$top=$_limit&\$skip=$_skip$filterCondition &\$select=U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry &\$orderby=DocEntry desc");
+      final response = await dio
+          .get("/CK_JOBORDER?\$filter=U_CK_Status ne 'Open' &\$top=$_limit&\$skip=$_skip$filterCondition");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];

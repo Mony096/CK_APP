@@ -4,7 +4,10 @@ import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/screens/service/serviceById.dart';
+import 'package:bizd_tech_service/provider/update_status_provider.dart';
+import 'package:bizd_tech_service/screens/service/component/block_service.dart';
+import 'package:bizd_tech_service/screens/service/screen/sericeEntry.dart';
+import 'package:bizd_tech_service/screens/service/screen/serviceById.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
@@ -65,18 +68,67 @@ class _ServiceScreenState extends State<ServiceScreen> {
     return await LocalStorageManger.getString('UserName');
   }
 
+  Future<void> onUpdateStatus(entry, currentStatus) async {
+    // if (_pdf.isEmpty) {
+    // print(currentStatus);
+    // return;
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('Please provide a signature')),
+    //   );
+    //   return;
+    // }
+    MaterialDialog.loading(context);
+
+    try {
+      await Provider.of<UpdateStatusProvider>(context, listen: false)
+          .updateDocumentAndStatus(
+        docEntry: entry,
+        status: currentStatus == "Pending"
+            ? "Accept"
+            : currentStatus == "Accept"
+                ? "Travel"
+                : currentStatus == "Travel"
+                    ? "Service"
+                    : "Entry",
+        context: context, // ✅ Corrected here
+      );
+      Navigator.of(context).pop(); // Go back
+
+      await _refreshData();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Update Status Successfully')),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Error: $e')),
+      );
+    }
+  }
+
+  Future<void> _refreshData() async {
+    // setState(() => _initialLoading = true);
+
+    final provider = Provider.of<ServiceListProvider>(context, listen: false);
+    // ✅ Only fetch if not already loaded
+    provider.resetPagination();
+    await provider.resfreshFetchDocuments();
+    // setState(() => _initialLoading = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ServiceListProvider>(
-      builder: (context, deliveryProvider, _) {
-        final documents = deliveryProvider.documents;
-        final isLoading = deliveryProvider.isLoading;
+      builder: (context, serviceProvider, _) {
+        final documents = serviceProvider.documents;
+        final isLoading = serviceProvider.isLoading;
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
             // Leading menu icon on the left
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
                 Navigator.of(context).pop();
                 // Handle menu button press or keep it empty for default Drawer action
@@ -86,7 +138,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
             title: Center(
               child: Text(
                 "$userName' Service",
-                style: TextStyle(fontSize: 17, color: Colors.white),
+                style: const TextStyle(fontSize: 17, color: Colors.white),
                 textScaleFactor: 1.0,
               ),
             ),
@@ -96,14 +148,15 @@ class _ServiceScreenState extends State<ServiceScreen> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      // refresh();
+                      _refreshData();
                     },
-                    icon: Icon(Icons.refresh_rounded, color: Colors.white),
+                    icon:
+                        const Icon(Icons.refresh_rounded, color: Colors.white),
                   ),
                   // SizedBox(width: 3),
                   IconButton(
                     onPressed: () {},
-                    icon: Icon(Icons.logout, color: Colors.white),
+                    icon: const Icon(Icons.logout, color: Colors.white),
                   )
                 ],
               ),
@@ -146,10 +199,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
               //     ),
               //   ),
               // ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
-              DateSelector(),
+              const DateSelector(),
               // SizedBox(
               //   height: 7,
               // ),
@@ -172,609 +225,56 @@ class _ServiceScreenState extends State<ServiceScreen> {
                               height: MediaQuery.of(context).size.height * 0.5,
                               child: const Center(
                                 child: Text(
-                                  "No Deliveries Available",
+                                  "No Service Available",
                                   style: TextStyle(
                                       fontSize: 16, color: Colors.grey),
                                 ),
                               ),
                             )
                           : Column(children: [
-                              SizedBox(
+                              const SizedBox(
                                 height: 5,
                               ),
-                              ...documents.map(
-                                (travel) => Container(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  width: double.infinity,
-                                  height: 370,
-                                  decoration: BoxDecoration(
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color.fromARGB(
-                                                255, 133, 136, 138)
-                                            .withOpacity(0.2),
-                                        spreadRadius: 2,
-                                        blurRadius: 2,
-                                        offset: const Offset(1, 1),
-                                      )
-                                    ],
-                                    color: const Color.fromARGB(
-                                        255, 255, 255, 255),
-                                    border: Border.all(
-                                      color: Colors.green, // Border color
-                                      width: 1.0, // Border width
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                        5.0), // Rounded corners
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                  flex: 1,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10.0),
-                                                    child: Column(
-                                                      children: [
-                                                        Container(
-                                                          height: 45,
-                                                          width:
-                                                              45, // Ensure the width and height are equal for a perfect circle
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors
-                                                                .green, /////////Icon Right
-                                                            shape: BoxShape
-                                                                .circle, // Makes the container circular
-                                                            border: Border.all(
-                                                              color: const Color
-                                                                  .fromARGB(
-                                                                  255,
-                                                                  79,
-                                                                  78,
-                                                                  78), // Optional: Add a border if needed
-                                                              width:
-                                                                  1.0, // Border width
-                                                            ),
-                                                          ),
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(8.0),
-                                                            child: SvgPicture
-                                                                .asset(
-                                                              'images/svg/key.svg',
-                                                              width: 30,
-                                                              height: 30,
-                                                              color: const Color
-                                                                  .fromARGB(
-                                                                  255,
-                                                                  255,
-                                                                  255,
-                                                                  255),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )),
-                                              Expanded(
-                                                  flex: 4,
-                                                  child: Container(
-                                                      padding: const EdgeInsets
-                                                          .fromLTRB(
-                                                          4, 10, 4, 10),
-                                                      child: const Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                              "The Pizza Comapny - Sen Sok",
-                                                              style: TextStyle(
-                                                                  fontSize:
-                                                                      12.5),
-                                                              textScaleFactor:
-                                                                  1.0),
-                                                          SizedBox(
-                                                            height: 6,
-                                                          ),
-                                                          Text(
-                                                              "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                                              style: TextStyle(
-                                                                fontSize: 12.5,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                height: 2,
-                                                              ),
-                                                              textScaleFactor:
-                                                                  1.0),
-                                                        ],
-                                                      ))),
-                                              const Expanded(
-                                                  flex: 2,
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                right: 10),
-                                                        child: Text(
-                                                            "SVT00001 #",
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 13),
-                                                            textScaleFactor:
-                                                                1.0),
-                                                      ),
-                                                    ],
-                                                  ))
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(10),
-                                          color: const Color.fromARGB(
-                                              255, 66, 83, 100),
-                                          width: double.infinity,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                  flex: 3,
-                                                  child: Container(
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Container(
-                                                            width: 37,
-                                                            height: 37,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      66,
-                                                                      83,
-                                                                      100),
-                                                              shape: BoxShape
-                                                                  .circle, // Makes the container circular
-                                                              border:
-                                                                  Border.all(
-                                                                color: Colors
-                                                                    .green, // Optional: Add a border if needed
-                                                                width:
-                                                                    2.0, // Border width
-                                                              ),
-                                                            ),
-                                                            child: const Center(
-                                                                child: Icon(
-                                                              Icons.check,
-                                                              size: 20,
-                                                              color:
-                                                                  Colors.green,
-                                                            ))),
-                                                        const Text("- - - - -",
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w900,
-                                                                fontSize: 13.5,
-                                                                color: Colors
-                                                                    .white),
-                                                            textScaleFactor:
-                                                                1.0),
-                                                        Container(
-                                                            width: 37,
-                                                            height: 37,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      66,
-                                                                      83,
-                                                                      100),
-                                                              shape: BoxShape
-                                                                  .circle, // Makes the container circular
-                                                              border:
-                                                                  Border.all(
-                                                                color: const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    255,
-                                                                    255,
-                                                                    255), // Optional: Add a border if needed
-                                                                width:
-                                                                    2.0, // Border width
-                                                              ),
-                                                            ),
-                                                            child: const Center(
-                                                                child: Icon(
-                                                              Icons.car_crash,
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      255,
-                                                                      255,
-                                                                      255),
-                                                            ))),
-                                                        const Text("- - - - -",
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w900,
-                                                                fontSize: 13.5,
-                                                                color: Colors
-                                                                    .white),
-                                                            textScaleFactor:
-                                                                1.0),
-                                                        Container(
-                                                            width: 37,
-                                                            height: 37,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      66,
-                                                                      83,
-                                                                      100),
-                                                              shape: BoxShape
-                                                                  .circle, // Makes the container circular
-                                                              border:
-                                                                  Border.all(
-                                                                color: const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    255,
-                                                                    255,
-                                                                    255), // Optional: Add a border if needed
-                                                                width:
-                                                                    2.0, // Border width
-                                                              ),
-                                                            ),
-                                                            child: Center(
-                                                              child: SvgPicture.asset(
-                                                                  'images/svg/key.svg',
-                                                                  width: 23,
-                                                                  height: 23,
-                                                                  color: Color
-                                                                      .fromARGB(
-                                                                          255,
-                                                                          255,
-                                                                          255,
-                                                                          255)),
-                                                            )),
-                                                        const Text("- - - - -",
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w900,
-                                                                fontSize: 13.5,
-                                                                color: Colors
-                                                                    .white),
-                                                            textScaleFactor:
-                                                                1.0),
-                                                        Container(
-                                                            width: 37,
-                                                            height: 37,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      66,
-                                                                      83,
-                                                                      100),
-                                                              shape: BoxShape
-                                                                  .circle, // Makes the container circular
-                                                              border:
-                                                                  Border.all(
-                                                                color: const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    255,
-                                                                    255,
-                                                                    255), // Optional: Add a border if needed
-                                                                width:
-                                                                    2.0, // Border width
-                                                              ),
-                                                            ),
-                                                            child: const Center(
-                                                                child: Icon(
-                                                                    Icons.flag,
-                                                                    color: Color
-                                                                        .fromARGB(
-                                                                            255,
-                                                                            255,
-                                                                            255,
-                                                                            255)))),
-                                                      ],
-                                                    ),
-                                                  )),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Expanded(
-                                                  flex: 2,
-                                                  child: Container(
-                                                    child: const Text(
-                                                        "Time 04:30 - 06:30",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 13),
-                                                        textScaleFactor: 1.0),
-                                                  )),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          0, 0, 0, 0),
-                                                  child: Container(
-                                                    width: 100,
-                                                    height: 35,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.yellow,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5.0),
-                                                    ),
-                                                    child: TextButton(
-                                                      onPressed: () {
-                                                        // Define your button's action here
-                                                      },
-                                                      style:
-                                                          TextButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      5.0),
-                                                        ),
-                                                      ),
-                                                      child: const Text(
-                                                          "Repair",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black,
-                                                              fontSize: 12),
-                                                          textScaleFactor: 1.0),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                          color: const Color.fromARGB(
-                                              255, 255, 255, 255),
-                                          width: double.infinity,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                  flex: 1,
-                                                  child: Container(
-                                                      child: Center(
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        goTo(context,
-                                                            ServiceByIdScreen());
-                                                      },
-                                                      child: const Icon(
-                                                        Icons.keyboard_arrow_up,
-                                                        color: Colors.green,
-                                                        size: 30,
-                                                      ),
-                                                    ),
-                                                  ))),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              Expanded(
-                                                flex: 5,
-                                                child: SizedBox(
-                                                  width: double.infinity,
-                                                  child: Row(
-                                                    children: [
-                                                      const Expanded(
-                                                          flex: 1,
-                                                          child: Padding(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    10.0),
-                                                            child: Column(
-                                                              children: [
-                                                                SizedBox(
-                                                                  height: 45,
-                                                                  width:
-                                                                      45, // Ensure the width and height are equal for a perfect circle
+                              ...documents.map((travel) => BlockService(
+                                    data: travel,
+                                    onTap: () async {
+                                      if (travel["U_CK_Status"] == "Service") {
+                                        goTo(context,
+                                            ServiceEntryScreen(data: travel));
+                                        return;
+                                      }
+                                      onUpdateStatus(travel["DocEntry"],
+                                          travel["U_CK_Status"]);
+                                      // if (doc["U_lk_delstat"] == "On the Way") {
+                                      //   showPODDialog(context, doc["DocEntry"],
+                                      //       "Delivered");
+                                      // } else {
+                                      //   MaterialDialog.loading(
+                                      //       context); // Show loading dialog
 
-                                                                  child:
-                                                                      Padding(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            8.0),
-                                                                    child: Icon(
-                                                                      Icons
-                                                                          .build,
-                                                                      size: 25,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          )),
-                                                      Expanded(
-                                                          flex: 4,
-                                                          child: Container(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .fromLTRB(
-                                                                      4,
-                                                                      10,
-                                                                      4,
-                                                                      10),
-                                                              child:
-                                                                  const Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                      "The Pizza Comapny - Sen Sok",
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              12.5),
-                                                                      textScaleFactor:
-                                                                          1.0),
-                                                                  SizedBox(
-                                                                    height: 6,
-                                                                  ),
-                                                                  Text(
-                                                                      "SN: 10003000400",
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            12.5,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                        height:
-                                                                            2,
-                                                                      ),
-                                                                      textScaleFactor:
-                                                                          1.0),
-                                                                ],
-                                                              ))),
-                                                      Expanded(
-                                                          flex: 2,
-                                                          child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .end,
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .end,
-                                                            children: [
-                                                              const SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              Container(
-                                                                width: 100,
-                                                                height: 35,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: Colors
-                                                                      .green,
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              5.0),
-                                                                ),
-                                                                child:
-                                                                    TextButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    if (travel[
-                                                                            "isActive"] !=
-                                                                        true) {
-                                                                      MaterialDialog
-                                                                          .loading(
-                                                                              context);
-                                                                      Future.delayed(
-                                                                          const Duration(
-                                                                              seconds: 1),
-                                                                          () {
-                                                                        Navigator.of(context)
-                                                                            .pop();
-                                                                        // goTo(
-                                                                        //     context,
-                                                                        //     AcceptedScreen());
-                                                                      });
-                                                                    }
-                                                                  },
-                                                                  style: TextButton
-                                                                      .styleFrom(
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    shape:
-                                                                        RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              5.0),
-                                                                    ),
-                                                                  ),
-                                                                  child: const Text(
-                                                                      "Accept",
-                                                                      style: TextStyle(
-                                                                          color: Color.fromARGB(
-                                                                              255,
-                                                                              255,
-                                                                              255,
-                                                                              255),
-                                                                          fontSize:
-                                                                              12),
-                                                                      textScaleFactor:
-                                                                          1.0),
-                                                                ),
-                                                              ),
-                                                              const SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                            ],
-                                                          )),
-                                                      const SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ), ////
-                                              ),
-                                            ],
-                                          ),
-                                        ), /////
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
+                                      //   await Provider.of<UpdateStatusProvider>(
+                                      //           context,
+                                      //           listen: false)
+                                      //       .updateDocumentAndStatus(
+                                      //           docEntry: doc["DocEntry"],
+                                      //           status: doc["U_lk_delstat"] ==
+                                      //                   "Started"
+                                      //               ? "On the Way"
+                                      //               : "",
+                                      //           remarks: "",
+                                      //           context: context);
+                                      //   Future.microtask(() {
+                                      //     final provider =
+                                      //         Provider.of<DeliveryNoteProvider>(
+                                      //             context,
+                                      //             listen: false);
+                                      //     provider.fetchDocuments();
+                                      //   });
+                                      //   Navigator.of(context)
+                                      //       .pop(); // Close loading dialog AFTER logout finishes
+                                      // }
+                                    },
+                                  )),
                             ]),
                 ),
               ),
@@ -787,6 +287,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
 }
 
 class DateSelector extends StatefulWidget {
+  const DateSelector({super.key});
+
   @override
   _DateSelectorState createState() => _DateSelectorState();
 }
@@ -827,12 +329,12 @@ class _DateSelectorState extends State<DateSelector> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(flex: 1, child: Icon(Icons.date_range)),
+          const Expanded(flex: 1, child: Icon(Icons.date_range)),
           Expanded(
             flex: 4,
             child: Text(
               formattedDate, // Display formatted date
-              style: TextStyle(fontSize: 13),
+              style: const TextStyle(fontSize: 13),
               textScaleFactor: 1.0,
             ),
           ),
@@ -841,16 +343,16 @@ class _DateSelectorState extends State<DateSelector> {
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.keyboard_arrow_left,
                     size: 30,
                     color: Color.fromARGB(255, 88, 89, 90),
                   ),
                   onPressed: () => _selectDate(context),
                 ),
-                SizedBox(width: 3),
+                const SizedBox(width: 3),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.keyboard_arrow_right,
                     size: 30,
                     color: Color.fromARGB(255, 88, 89, 90),
