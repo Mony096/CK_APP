@@ -17,10 +17,11 @@ class _TimeScreenState extends State<TimeScreen> {
   int isAdded = 0;
   final travelTime = TextEditingController();
   final travelEndTime = TextEditingController();
-  final ServiceTime = TextEditingController();
-  final ServiceEndTime = TextEditingController();
+  final serviceTime = TextEditingController();
+  final serviceEndTime = TextEditingController();
   final breakTime = TextEditingController();
   final breakEndTime = TextEditingController();
+  bool isValidTime = false;
   final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
       ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> nameFieldNotifier =
@@ -52,7 +53,7 @@ class _TimeScreenState extends State<TimeScreen> {
               child: Container(
                   child: ListView(
                 children: [
-                   const Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
@@ -68,6 +69,15 @@ class _TimeScreenState extends State<TimeScreen> {
                           Text(
                             "Travel Time",
                             style: TextStyle(fontSize: 15, color: Colors.black),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "*",
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Color.fromARGB(255, 255, 0, 0)),
                           ),
                         ],
                       ),
@@ -85,7 +95,7 @@ class _TimeScreenState extends State<TimeScreen> {
                           isMissingFieldNotifier: codeFieldNotifier,
                           controller: travelTime,
                           label: 'Start Time',
-                          star: true,
+                          star: false,
                           // focusNode: codeFocusNode,
                         ),
                       ),
@@ -95,9 +105,10 @@ class _TimeScreenState extends State<TimeScreen> {
                       Expanded(
                         child: CustomTimeFieldDialog(
                           isMissingFieldNotifier: codeFieldNotifier,
-                          controller: travelTime,
+                          controller: travelEndTime,
                           label: 'End Time',
-                          star: true,
+                          star: false,
+
                           // focusNode: codeFocusNode,
                         ),
                       ),
@@ -121,6 +132,15 @@ class _TimeScreenState extends State<TimeScreen> {
                             "Service Time",
                             style: TextStyle(fontSize: 15, color: Colors.black),
                           ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "*",
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Color.fromARGB(255, 255, 0, 0)),
+                          ),
                         ],
                       ),
                       Icon(Icons.arrow_drop_down,
@@ -135,9 +155,10 @@ class _TimeScreenState extends State<TimeScreen> {
                       Expanded(
                         child: CustomTimeFieldDialog(
                           isMissingFieldNotifier: codeFieldNotifier,
-                          controller: travelTime,
+                          controller: serviceTime,
                           label: 'Start Time',
-                          star: true,
+                          star: false,
+
                           // focusNode: codeFocusNode,
                         ),
                       ),
@@ -147,16 +168,17 @@ class _TimeScreenState extends State<TimeScreen> {
                       Expanded(
                         child: CustomTimeFieldDialog(
                           isMissingFieldNotifier: codeFieldNotifier,
-                          controller: travelTime,
+                          controller: serviceEndTime,
                           label: 'End Time',
-                          star: true,
+                          star: false,
+
                           // focusNode: codeFocusNode,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 25),
-                        const Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
@@ -173,6 +195,15 @@ class _TimeScreenState extends State<TimeScreen> {
                             "Break Time",
                             style: TextStyle(fontSize: 15, color: Colors.black),
                           ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "*",
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Color.fromARGB(255, 255, 0, 0)),
+                          ),
                         ],
                       ),
                       Icon(Icons.arrow_drop_down,
@@ -187,9 +218,10 @@ class _TimeScreenState extends State<TimeScreen> {
                       Expanded(
                         child: CustomTimeFieldDialog(
                           isMissingFieldNotifier: codeFieldNotifier,
-                          controller: travelTime,
+                          controller: breakTime,
                           label: 'Start Time',
-                          star: true,
+                          star: false,
+
                           // focusNode: codeFocusNode,
                         ),
                       ),
@@ -199,9 +231,10 @@ class _TimeScreenState extends State<TimeScreen> {
                       Expanded(
                         child: CustomTimeFieldDialog(
                           isMissingFieldNotifier: codeFieldNotifier,
-                          controller: travelTime,
+                          controller: breakEndTime,
                           label: 'End Time',
-                          star: true,
+                          star: false,
+
                           // focusNode: codeFocusNode,
                         ),
                       ),
@@ -270,6 +303,9 @@ class _TimeScreenState extends State<TimeScreen> {
                             // }
 
                             // _onAddComponent(context);
+                            setState(() {
+                              isValidTime = true;
+                            });
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
@@ -284,11 +320,11 @@ class _TimeScreenState extends State<TimeScreen> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          child: const Padding(
+                          child: Padding(
                             padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
                             child: Text(
                               // isEditComp >= 0 ? "Edit" : "Add",
-                              "Add Time",
+                              !isValidTime ? "Add Time" : "Edit Time",
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -801,6 +837,13 @@ class _TimeScreenState extends State<TimeScreen> {
                     ),
                     DetailTime(
                       onTap: _showCreateTime,
+                      isValidTime: isValidTime,
+                      serviceTime: serviceTime,
+                      serviceEndTime: serviceEndTime,
+                      travelTime: travelTime,
+                      travelEndTime: travelEndTime,
+                      breakTime: breakTime,
+                      breakEndTime: breakEndTime,
                     ),
                     /////do somthing
                   ]),
@@ -859,8 +902,22 @@ class DetailTime extends StatefulWidget {
   const DetailTime({
     super.key,
     this.onTap,
+    required this.isValidTime,
+    required this.serviceTime,
+    required this.serviceEndTime,
+    required this.travelTime,
+    required this.travelEndTime,
+    required this.breakTime,
+    required this.breakEndTime,
   });
   final VoidCallback? onTap;
+  final bool isValidTime;
+  final TextEditingController serviceTime;
+  final TextEditingController serviceEndTime;
+  final TextEditingController travelTime;
+  final TextEditingController travelEndTime;
+  final TextEditingController breakTime;
+  final TextEditingController breakEndTime;
 
   @override
   State<DetailTime> createState() => _DetailTimeState();
@@ -874,396 +931,441 @@ class _DetailTimeState extends State<DetailTime> {
         color: Colors.white,
         child: Column(
           children: [
-            Row(
-              children: [
-                const Expanded(
-                    flex: 3,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Text(
-                        textScaleFactor: 1.0,
-                        "Travel Time:",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 13),
+            widget.isValidTime
+                ? Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(
+                              flex: 3,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 20),
+                                child: Text(
+                                  textScaleFactor: 1.0,
+                                  "Travel Time:",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
+                                ),
+                              )),
+                          Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Start Time:",
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey, // Border color
+                                        width: 1.0, // Border width
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          3.0), // Optional: Rounded corners
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Text(
+                                            widget.travelTime.text,
+                                            style: TextStyle(fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
+                                        ),
+                                        SvgPicture.asset(
+                                          color: const Color.fromARGB(
+                                              255, 29, 30, 29),
+                                          'images/svg/schedule.svg',
+                                          width: 20,
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("End Time:",
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey, // Border color
+                                        width: 1.0, // Border width
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          3.0), // Optional: Rounded corners
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Text(
+                                            widget.travelEndTime.text,
+                                            style: TextStyle(fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
+                                        ),
+                                        SvgPicture.asset(
+                                          color: const Color.fromARGB(
+                                              255, 29, 30, 29),
+                                          'images/svg/schedule.svg',
+                                          width: 20,
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Expanded(
+                              flex: 1,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    textScaleFactor: 1.0,
+                                    "Eff.T",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13),
+                                  ),
+                                  SizedBox(
+                                    height: 6,
+                                  ),
+                                  Text(
+                                    "1 Hr",
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ],
+                              )),
+                        ],
                       ),
-                    )),
-                Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Start Time:",
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          width: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                3.0), // Optional: Rounded corners
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 3),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Row(
+                        children: [
+                          const Expanded(
+                              flex: 3,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 20),
                                 child: Text(
-                                  "08:00",
-                                  style: TextStyle(fontSize: 13),
                                   textScaleFactor: 1.0,
+                                  "Service Time:",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
                                 ),
-                              ),
-                              SvgPicture.asset(
-                                color: const Color.fromARGB(255, 29, 30, 29),
-                                'images/svg/schedule.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ],
+                              )),
+                          Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Start Time:",
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey, // Border color
+                                        width: 1.0, // Border width
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          3.0), // Optional: Rounded corners
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Text(
+                                            widget.serviceTime.text,
+                                            style: TextStyle(fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
+                                        ),
+                                        SvgPicture.asset(
+                                          color: const Color.fromARGB(
+                                              255, 29, 30, 29),
+                                          'images/svg/schedule.svg',
+                                          width: 20,
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const SizedBox(
+                            width: 10,
                           ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("End Time:",
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          width: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                3.0), // Optional: Rounded corners
+                          Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("End Time:",
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey, // Border color
+                                        width: 1.0, // Border width
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          3.0), // Optional: Rounded corners
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Text(
+                                            widget.serviceEndTime.text,
+                                            style: TextStyle(fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
+                                        ),
+                                        SvgPicture.asset(
+                                          color: const Color.fromARGB(
+                                              255, 29, 30, 29),
+                                          'images/svg/schedule.svg',
+                                          width: 20,
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const SizedBox(
+                            width: 10,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 3),
+                          const Expanded(
+                              flex: 1,
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 25,
+                                  ),
+                                  Text(
+                                    "1 Hr",
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ],
+                              )),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Row(
+                        children: [
+                          const Expanded(
+                              flex: 3,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 20),
                                 child: Text(
-                                  "09:00",
-                                  style: TextStyle(fontSize: 13),
                                   textScaleFactor: 1.0,
+                                  "Break Time:",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
                                 ),
-                              ),
-                              SvgPicture.asset(
-                                color: const Color.fromARGB(255, 29, 30, 29),
-                                'images/svg/schedule.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ],
+                              )),
+                          Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Start Time:",
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey, // Border color
+                                        width: 1.0, // Border width
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          3.0), // Optional: Rounded corners
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Text(
+                                            widget.breakEndTime.text,
+                                            style: TextStyle(fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
+                                        ),
+                                        SvgPicture.asset(
+                                          color: const Color.fromARGB(
+                                              255, 29, 30, 29),
+                                          'images/svg/schedule.svg',
+                                          width: 20,
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const SizedBox(
+                            width: 10,
                           ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Expanded(
-                    flex: 1,
-                    child: Column(
+                          Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("End Time:",
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey, // Border color
+                                        width: 1.0, // Border width
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          3.0), // Optional: Rounded corners
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Text(
+                                            widget.breakEndTime.text,
+                                            style: TextStyle(fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
+                                        ),
+                                        SvgPicture.asset(
+                                          color: const Color.fromARGB(
+                                              255, 29, 30, 29),
+                                          'images/svg/schedule.svg',
+                                          width: 20,
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Expanded(
+                              flex: 1,
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 25,
+                                  ),
+                                  Text(
+                                    "1 Hr",
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ],
+                              )),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                    ],
+                  )
+                : Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
                       children: [
-                        Text(
-                          textScaleFactor: 1.0,
-                          "Eff.T",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13),
+                        Icon(
+                          Icons.alarm,
+                          size: 23,
                         ),
                         SizedBox(
-                          height: 6,
+                          width: 10,
                         ),
-                        Text(
-                          "1 Hr",
-                          textScaleFactor: 1.0,
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            Row(
-              children: [
-                const Expanded(
-                    flex: 3,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Text(
-                        textScaleFactor: 1.0,
-                        "Service Time:",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 13),
-                      ),
-                    )),
-                Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Start Time:",
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          width: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                3.0), // Optional: Rounded corners
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 3),
-                                child: Text(
-                                  "09:00",
-                                  style: TextStyle(fontSize: 13),
-                                  textScaleFactor: 1.0,
-                                ),
-                              ),
-                              SvgPicture.asset(
-                                color: const Color.fromARGB(255, 29, 30, 29),
-                                'images/svg/schedule.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ],
-                          ),
+                        const Text(
+                          "No Time Added",
+                          style: TextStyle(fontSize: 14),
                         ),
                       ],
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("End Time:",
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          width: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                3.0), // Optional: Rounded corners
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 3),
-                                child: Text(
-                                  "10:00",
-                                  style: TextStyle(fontSize: 13),
-                                  textScaleFactor: 1.0,
-                                ),
-                              ),
-                              SvgPicture.asset(
-                                color: const Color.fromARGB(255, 29, 30, 29),
-                                'images/svg/schedule.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Expanded(
-                    flex: 1,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 25,
-                        ),
-                        Text(
-                          "1 Hr",
-                          textScaleFactor: 1.0,
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            Row(
-              children: [
-                const Expanded(
-                    flex: 3,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Text(
-                        textScaleFactor: 1.0,
-                        "Break Time:",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 13),
-                      ),
-                    )),
-                Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Start Time:",
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          width: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                3.0), // Optional: Rounded corners
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 3),
-                                child: Text(
-                                  "12:30",
-                                  style: TextStyle(fontSize: 13),
-                                  textScaleFactor: 1.0,
-                                ),
-                              ),
-                              SvgPicture.asset(
-                                color: const Color.fromARGB(255, 29, 30, 29),
-                                'images/svg/schedule.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("End Time:",
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          width: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                3.0), // Optional: Rounded corners
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 3),
-                                child: Text(
-                                  "01:00",
-                                  style: TextStyle(fontSize: 13),
-                                  textScaleFactor: 1.0,
-                                ),
-                              ),
-                              SvgPicture.asset(
-                                color: const Color.fromARGB(255, 29, 30, 29),
-                                'images/svg/schedule.svg',
-                                width: 20,
-                                height: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Expanded(
-                    flex: 1,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 25,
-                        ),
-                        Text(
-                          "1 Hr",
-                          textScaleFactor: 1.0,
-                          style: TextStyle(fontSize: 13),
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-            const SizedBox(
-              height: 15,
-            ),
+                    ),
+                  ),
             Container(
               color: const Color.fromARGB(255, 255, 255, 255),
               height: 70,
@@ -1281,8 +1383,8 @@ class _DetailTimeState extends State<DetailTime> {
                           borderRadius: BorderRadius.circular(5.0),
                         ),
                       ),
-                      child: const Text(
-                        "Add Time",
+                      child: Text(
+                        !widget.isValidTime ? "Add Time" : "Edit Time",
                         style: TextStyle(
                             color: Color.fromARGB(255, 255, 255, 255),
                             fontSize: 13),
