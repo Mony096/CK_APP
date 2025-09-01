@@ -1,6 +1,15 @@
+import 'package:bizd_tech_service/component/DatePicker.dart';
+import 'package:bizd_tech_service/component/DatePickerDialog.dart';
 import 'package:bizd_tech_service/component/text_field_dialog.dart';
+import 'package:bizd_tech_service/component/text_remark.dart';
+import 'package:bizd_tech_service/component/text_remark_dialog.dart';
+import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class OpenIssueScreen extends StatefulWidget {
   const OpenIssueScreen({super.key, required this.data});
@@ -14,205 +23,256 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
   int isEditComp = -1;
   List<dynamic> componentList = [];
   int isAdded = 0;
-  final code = TextEditingController();
-  final name = TextEditingController();
-  final part = TextEditingController();
-  final brand = TextEditingController();
+  final area = TextEditingController();
+  final desc = TextEditingController();
+  final critical = TextEditingController();
+  final date = TextEditingController();
   final model = TextEditingController();
-  final FocusNode codeFocusNode = FocusNode();
-  final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
-      ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
-  final ValueNotifier<Map<String, dynamic>> nameFieldNotifier =
-      ValueNotifier({"missing": false, "value": "Name required", "isAdded": 0});
-
-  final ValueNotifier<Map<String, dynamic>> partFieldNotifier =
-      ValueNotifier({"missing": false, "value": "Part required", "isAdded": 0});
-
-  final ValueNotifier<Map<String, dynamic>> brandFieldNotifier = ValueNotifier(
-      {"missing": false, "value": "Brand required", "isAdded": 0});
-  final ValueNotifier<Map<String, dynamic>> modelFieldNotifier = ValueNotifier(
-      {"missing": false, "value": "Model required", "isAdded": 0});
+  final status = TextEditingController();
+  final handleBy = TextEditingController();
+  final remark = TextEditingController();
+  final ValueNotifier<Map<String, dynamic>> areaFieldNotifier =
+      ValueNotifier({"missing": false, "value": "Area required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> descFieldNotifier = ValueNotifier(
+      {"missing": false, "value": "Description required", "isAdded": 0});
 
   void _showCreateIssue() async {
     await showDialog<String>(
-      barrierDismissible: false, // user must tap button!
-
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(13.0), // Rounded corners
+            borderRadius: BorderRadius.circular(13.0),
           ),
-          // title: Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 0),
-          //   child: Row(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Icon(
-          //         Icons.task_outlined,
-          //         color: Colors.blueGrey[800],
-          //       ),
-          //       const SizedBox(
-          //         width: 7,
-          //       ),
-          //       Text(
-          //         "Create Component",
-          //         style: TextStyle(
-          //           fontSize: 16,
-          //           fontWeight: FontWeight.bold,
-          //           color: Colors.blueGrey[800],
-          //         ),
-          //         textAlign: TextAlign.left,
-          //       ),
-          //     ],
-          //   ),
-          // ),
           content: Container(
-              padding: const EdgeInsets.only(top: 7),
-              // decoration: const BoxDecoration(
-              //     // border: Border(
-              //     //     top: BorderSide(
-              //     //         color: Color.fromARGB(255, 219, 221, 224),
-              //     //         width: 1))
-              //     ),
-              // color: Colors.red,
-              width: double.maxFinite, // Use full width of the dialog
-              constraints: const BoxConstraints(
-                maxHeight: 465, // Limit the height to prevent overflow
-              ),
-              child: Container(
-                  child: ListView(
+            width: double.maxFinite,
+            constraints: const BoxConstraints(
+              maxHeight: 400,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: codeFieldNotifier,
-                    controller: code,
-                    label: 'Code',
-                    star: true,
-                    focusNode: codeFocusNode,
-                  ),
-                  const SizedBox(height: 8),
-                  CustomTextFieldDialog(
-                    isMissingFieldNotifier: nameFieldNotifier,
-                    controller: name,
-                    label: 'Name',
+                    isMissingFieldNotifier: areaFieldNotifier,
+                    controller: area,
+                    label: 'Area',
                     star: true,
                   ),
                   const SizedBox(height: 8),
-                  CustomTextFieldDialog(
-                    isMissingFieldNotifier: partFieldNotifier,
-                    controller: part,
-                    label: 'Part Number',
-                    star: true,
-                  ),
+                  CustomTextRemarkDialog(
+                      controller: desc,
+                      label: 'Description',
+                      star: true,
+                      detail: false,
+                      isMissingFieldNotifier: descFieldNotifier),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: brandFieldNotifier,
-                    controller: brand,
-                    label: 'Brand',
-                    star: true,
+                    isMissingFieldNotifier: null,
+                    controller: critical,
+                    label: 'Critical',
+                    star: false,
                   ),
                   const SizedBox(height: 8),
+                  CustomDatePickerFieldDialog(
+                      label: 'Date',
+                      star: false,
+                      controller: date,
+                      detail: false),
+                  const SizedBox(height: 8),
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: modelFieldNotifier,
-                    controller: model,
-                    label: 'Model',
-                    star: true,
+                    isMissingFieldNotifier: null,
+                    controller: status,
+                    label: 'Status',
+                    star: false,
                   ),
-                  const SizedBox(height: 21),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isEditComp = -1;
-                          });
-                          // clear();
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 66, 83, 100)),
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      SizedBox(
-                        height: 35,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // if (onConfirm != null) {
-                            //   onConfirm();
-                            // }
-                            if (code.text.isEmpty ||
-                                name.text.isEmpty ||
-                                part.text.isEmpty ||
-                                brand.text.isEmpty ||
-                                model.text.isEmpty) {
-                              codeFieldNotifier.value = {
-                                "missing": code.text.isEmpty,
-                                "value": "Code is required!",
-                                "isAdded": 1,
-                              };
-                              nameFieldNotifier.value = {
-                                "missing": name.text.isEmpty,
-                                "value": "Name is required!",
-                                "isAdded": 1,
-                              };
-                              partFieldNotifier.value = {
-                                "missing": part.text.isEmpty,
-                                "value": "Part is required!",
-                                "isAdded": 1,
-                              };
-
-                              brandFieldNotifier.value = {
-                                "missing": brand.text.isEmpty,
-                                "value": "Brand is required!",
-                                "isAdded": 1,
-                              };
-                              modelFieldNotifier.value = {
-                                "missing": model.text.isEmpty,
-                                "value": "Model is required!",
-                                "isAdded": 1,
-                              };
-                              return;
-                            }
-
-                            // _onAddComponent(context);
-                            Navigator.of(context).pop();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 66, 83, 100),
-                            foregroundColor: Colors.white,
-                            elevation: 3,
-                            // Adjust the padding to make the button smaller
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                            child: Text(
-                              isEditComp >= 0 ? "Edit" : "Add",
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
+                  CustomTextFieldDialog(
+                    isMissingFieldNotifier: null,
+                    controller: handleBy,
+                    label: 'Handle By',
+                    star: false,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTextRemarkDialog(
+                      controller: remark,
+                      label: 'Remarks',
+                      star: false,
+                      detail: false),
                 ],
-              ))),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  isEditComp = -1;
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Color.fromARGB(255, 66, 83, 100)),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (area.text.isEmpty || desc.text.isEmpty) {
+                  areaFieldNotifier.value = {
+                    "missing": area.text.isEmpty,
+                    "value": "Area is required!",
+                    "isAdded": 1,
+                  };
+                  descFieldNotifier.value = {
+                    "missing": desc.text.isEmpty,
+                    "value": "Description is required!",
+                    "isAdded": 1,
+                  };
+
+                  return;
+                }
+                _onAddIssue(context);
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+                foregroundColor: Colors.white,
+                elevation: 3,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: Text(
+                isEditComp >= 0 ? "Edit" : "Add",
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
           backgroundColor: Colors.white,
           elevation: 4.0,
         );
       },
+    );
+  }
+
+  void _onAddIssue(BuildContext context, {bool force = false}) {
+    try {
+      // if (name.text.isEmpty) throw Exception('Name is missing.');
+      // if (brand.text.isEmpty) throw Exception('Brand is missing.');
+
+      final item = {
+        "U_CK_IssueType": area.text,
+        "U_CK_IssueDesc": desc.text,
+        "U_CK_RaisedBy": critical.text,
+        "U_CK_CreatedDate": date.text,
+        "U_CK_Status": status.text,
+        "U_CK_HandledBy": handleBy.text,
+        "U_CK_Comment": remark.text,
+      };
+
+      Provider.of<CompletedServiceProvider>(context, listen: false)
+          .addOrEditOpenIssue(item, editIndex: isEditComp);
+
+      // Reset edit mode
+      setState(() {
+        isEditComp = -1;
+      });
+      // clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
+      });
+    } catch (err) {
+      if (err is Exception) {
+        // Sh SnackBar
+        MaterialDialog.success(context, title: 'Warning', body: err.toString());
+      }
+    }
+  }
+
+  void onEditComp(dynamic item, int index) {
+    if (index < 0) return;
+    MaterialDialog.warningWithRemove(
+      context,
+      title: 'Issue (${item['U_CK_IssueType']})',
+      confirmLabel: "Edit",
+      cancelLabel: "Remove",
+      onConfirm: () {
+        // Navigator.of(context).pop(); // Close warning dialog first
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showCreateIssue(); // Then open edit form dialog
+        });
+
+        area.text = getDataFromDynamic(item["U_CK_IssueType"]);
+        desc.text = getDataFromDynamic(item["U_CK_IssueDesc"]);
+        critical.text = getDataFromDynamic(item["U_CK_RaisedBy"]);
+        date.text = getDataFromDynamic(item["U_CK_CreatedDate"]);
+        status.text = getDataFromDynamic(item["U_CK_Status"]);
+        handleBy.text = getDataFromDynamic(item["U_CK_HandledBy"]);
+        remark.text = getDataFromDynamic(item["U_CK_Comment"]);
+
+        // FocusScope.of(context).requestFocus(codeFocusNode);
+
+        setState(() {
+          isEditComp = index;
+        });
+      },
+
+      onCancel: () {
+        // Remove using Provider
+        Provider.of<CompletedServiceProvider>(context, listen: false)
+            .removeOpenIssue(index);
+
+        // Reset edit state
+        isEditComp = -1;
+
+        // Show SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: Row(
+              children: [
+                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Open Issue Removed (${item['U_CK_IssueType']})",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+
+        // Unfocus keyboard
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).unfocus();
+        });
+      },
+
+      icon: Icons.question_mark, // 👈 Pass the icon here
     );
   }
 
@@ -233,7 +293,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
         title: const Center(
           child: Text(
             'Open Issue',
-            style: TextStyle(fontSize: 17,color: Colors.white),
+            style: TextStyle(fontSize: 17, color: Colors.white),
             textScaleFactor: 1.0,
           ),
         ),
@@ -707,36 +767,77 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    DetailMenu(
-                      title: 'communi  cation',
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: SvgPicture.asset(
-                          color: const Color.fromARGB(255, 67, 70, 72),
-                          'images/svg/check_cicle.svg',
-                          width: 22,
-                          height: 22,
+                    const SizedBox(height: 4),
+                    ////list----------------------------------------------------------------
+                    context.watch<CompletedServiceProvider>().openIssues.isEmpty
+                        ? SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: 100,
+                            child: Container(
+                              color: Colors.white,
+                              child: Center(
+                                  child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    color: const Color.fromARGB(
+                                        221, 184, 182, 182),
+                                    'images/svg/kjav3.svg',
+                                    width: 25,
+                                  ),
+                                  const Text(
+                                    "No Open Issues",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      // fontWeight: FontWeight.w500,
+                                      color: Color.fromARGB(221, 168, 168, 171),
+                                    ),
+                                  ),
+                                ],
+                              )),
+                            ),
+                          )
+                        : Container(),
+                    ...context
+                        .watch<CompletedServiceProvider>()
+                        .openIssues
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                      final index = entry.key;
+                      final item = entry.value;
+                      // if (itemKeys.length < componentList.length) {
+                      //   itemKeys.add(GlobalKey());
+                      // }
+
+                      return GestureDetector(
+                        // key: itemKeys[index],
+                        onTap: () {
+                          onEditComp(item, index);
+                        },
+                        child: DetailMenu(
+                          title: 'communi  cation',
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: SvgPicture.asset(
+                              color: const Color.fromARGB(255, 67, 70, 72),
+                              'images/svg/check_cicle.svg',
+                              width: 22,
+                              height: 22,
+                            ),
+                          ),
+                          desc: 'house owner is very difficult to conatct',
                         ),
-                      ),
-                      desc: 'house owner is very difficult to conatct',
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    DetailMenu(
-                      title: 'Equipment',
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: SvgPicture.asset(
-                          color: const Color.fromARGB(255, 67, 70, 72),
-                          'images/svg/check_cicle.svg',
-                          width: 22,
-                          height: 22,
-                        ),
-                      ),
-                      desc: 'Divice is electrical malfunction, need to replace',
-                    ),
-                    const SizedBox(height: 10),
+                      );
+                    }),
+
+                    SizedBox(
+                        height: context
+                                .watch<CompletedServiceProvider>()
+                                .openIssues
+                                .isEmpty
+                            ? 0
+                            : 5),
                     Container(
                       color: const Color.fromARGB(255, 255, 255, 255),
                       height: 70,
@@ -819,6 +920,7 @@ class _DetailMenuState extends State<DetailMenu> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(

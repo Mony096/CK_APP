@@ -1,9 +1,10 @@
 import 'dart:io';
-
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class ImageScreen extends StatefulWidget {
   const ImageScreen({super.key, required this.data});
@@ -13,10 +14,7 @@ class ImageScreen extends StatefulWidget {
 }
 
 class _ImageScreenState extends State<ImageScreen> {
-  @override
-  late final List<File> _images = [];
-
-  Future<void> _pickImage() async {
+  Future<void> pickImage() async {
     final picker = ImagePicker();
 
     // Show dialog to choose source
@@ -71,8 +69,9 @@ class _ImageScreenState extends State<ImageScreen> {
       final newHash = sha256.convert(newBytes).toString();
 
       bool isDuplicate = false;
+      final provider = context.read<CompletedServiceProvider>();
 
-      for (final file in _images) {
+      for (final file in provider.imagesList) {
         final existingBytes = await file.readAsBytes();
         final existingHash = sha256.convert(existingBytes).toString();
         if (existingHash == newHash) {
@@ -100,10 +99,13 @@ class _ImageScreenState extends State<ImageScreen> {
         );
         return;
       }
+      Provider.of<CompletedServiceProvider>(context, listen: false)
+          .setImages([newFile]); // Pass as list
 
-      setState(() {
-        _images.add(newFile);
-      });
+      // setState(() {
+      //   _images.add(newFile);
+      // });
+      // print(provider.imagesList);
     }
   }
 
@@ -582,7 +584,7 @@ class _ImageScreenState extends State<ImageScreen> {
                       height: 10,
                     ),
                     Menu(
-                      onTap: _pickImage,
+                      onTap: pickImage,
                       title: 'Upload Image',
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 5),
@@ -597,7 +599,10 @@ class _ImageScreenState extends State<ImageScreen> {
                     const SizedBox(
                       height: 7,
                     ),
-                    ImageShow(image: _images)
+                    ImageShow(
+                        image: context
+                            .watch<CompletedServiceProvider>()
+                            .imagesList)
                     /////do somthing
                   ]),
                 )),

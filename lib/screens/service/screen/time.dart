@@ -1,6 +1,13 @@
+import 'dart:developer';
+
 import 'package:bizd_tech_service/component/text_time_dialog.dart';
+import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TimeScreen extends StatefulWidget {
   const TimeScreen({super.key, required this.data});
@@ -21,7 +28,6 @@ class _TimeScreenState extends State<TimeScreen> {
   final serviceEndTime = TextEditingController();
   final breakTime = TextEditingController();
   final breakEndTime = TextEditingController();
-  bool isValidTime = false;
   final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
       ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> nameFieldNotifier =
@@ -34,7 +40,7 @@ class _TimeScreenState extends State<TimeScreen> {
       {"missing": false, "value": "Brand required", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> modelFieldNotifier = ValueNotifier(
       {"missing": false, "value": "Model required", "isAdded": 0});
-  void _showCreateTime() async {
+  void _showCreateTimeEntry() async {
     await showDialog<String>(
       barrierDismissible: false, // user must tap button!
 
@@ -302,10 +308,9 @@ class _TimeScreenState extends State<TimeScreen> {
                             //   return;
                             // }
 
-                            // _onAddComponent(context);
-                            setState(() {
-                              isValidTime = true;
-                            });
+                            isEditTime == -1
+                                ? _onAddTimeEntry(context)
+                                : onEditTimeEntry();
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
@@ -321,11 +326,12 @@ class _TimeScreenState extends State<TimeScreen> {
                             ),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                             child: Text(
                               // isEditComp >= 0 ? "Edit" : "Add",
-                              !isValidTime ? "Add Time" : "Edit Time",
-                              style: TextStyle(
+                        // final item = provider.timeEntry;
+                       context.read<CompletedServiceProvider>().timeEntry.isEmpty ? "Add Time" : "Edit Time",
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -344,6 +350,80 @@ class _TimeScreenState extends State<TimeScreen> {
     );
   }
 
+  void _onAddTimeEntry(BuildContext context, {bool force = false}) {
+    try {
+      // if (name.text.isEmpty) throw Exception('Name is missing.');
+      // if (brand.text.isEmpty) throw Exception('Brand is missing.');
+
+      final item = {
+        "U_CK_TraveledTime": travelTime.text,
+        "U_CK_TraveledEndTime": travelEndTime.text,
+        "U_CK_ServiceStartTime": serviceTime.text,
+        "U_CK_SerEndTime": serviceEndTime.text,
+        "U_CK_BreakTime": breakTime.text,
+        "U_CK_BreakEndTime": breakEndTime.text,
+      };
+
+      Provider.of<CompletedServiceProvider>(context, listen: false)
+          .addOrEditTimeEntry(item, editIndex: isEditTime);
+
+      // Reset edit mode
+      setState(() {
+        isEditTime = -1;
+      });
+      // clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).unfocus();
+      });
+      final provider = context.read<CompletedServiceProvider>();
+
+      print(provider.timeEntry);
+    } catch (err) {
+      if (err is Exception) {
+        // Sh SnackBar
+        MaterialDialog.success(context, title: 'Warning', body: err.toString());
+      }
+    }
+  }
+
+  void onEditTimeEntry() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showCreateTimeEntry(); // Then open edit form dialog
+    });
+    final provider = context.read<CompletedServiceProvider>();
+    final item = provider.timeEntry[0];
+    print(item);
+    print("1212");
+    travelTime.text = getDataFromDynamic(item["U_CK_TraveledTime"]);
+    travelEndTime.text = getDataFromDynamic(item["U_CK_TraveledEndTime"]);
+    serviceTime.text = getDataFromDynamic(item["U_CK_ServiceStartTime"]);
+    serviceEndTime.text = getDataFromDynamic(item["U_CK_SerEndTime"]);
+    breakTime.text = getDataFromDynamic(item["U_CK_BreakTime"]);
+    breakEndTime.text = getDataFromDynamic(item["U_CK_BreakEndTime"]);
+
+    // FocusScope.of(context).requestFocus(codeFocusNode);
+
+    // setState(() {
+    //   isEditTime = 0;
+    // });
+  }
+// String calculateSpentTime(String start, String end) {
+//     final dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+
+//     final startTime = dateFormat.parse("2025-09-01 $start:00");
+//     var endTime = dateFormat.parse("2025-09-01 $end:00");
+
+//     // Handle overnight time (end < start)
+//     if (endTime.isBefore(startTime)) {
+//       endTime = endTime.add(Duration(days: 1));
+//     }
+
+//     final duration = endTime.difference(startTime);
+//     final hours = duration.inHours;
+//     final minutes = duration.inMinutes.remainder(60);
+
+//     return "${hours}h ${minutes}m";
+//   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -358,11 +438,19 @@ class _TimeScreenState extends State<TimeScreen> {
           },
         ),
         // Centered title
-        title: const Center(
-          child: Text(
-            'Time Entry',
-            style: TextStyle(fontSize: 17, color: Colors.white),
-            textScaleFactor: 1.0,
+        title: GestureDetector(
+          // onTap: () {
+          //      print(calculateSpentTime(
+          //     "2:00",
+          //     "5:30",
+          //   ));
+          // },
+          child: const Center(
+            child: Text(
+              'Time Entry',
+              style: TextStyle(fontSize: 17, color: Colors.white),
+              textScaleFactor: 1.0,
+            ),
           ),
         ),
         // Right-aligned actions (scan barcode)
@@ -836,14 +924,23 @@ class _TimeScreenState extends State<TimeScreen> {
                       height: 10,
                     ),
                     DetailTime(
-                      onTap: _showCreateTime,
-                      isValidTime: isValidTime,
-                      serviceTime: serviceTime,
-                      serviceEndTime: serviceEndTime,
-                      travelTime: travelTime,
-                      travelEndTime: travelEndTime,
-                      breakTime: breakTime,
-                      breakEndTime: breakEndTime,
+                      onTap: () {
+                        final provider = context.read<CompletedServiceProvider>();
+                        // final item = provider.timeEntry;
+                        provider.timeEntry.isEmpty ? _showCreateTimeEntry() : onEditTimeEntry();
+                      },
+                      isValidTime: context
+                          .read<CompletedServiceProvider>()
+                          .timeEntry
+                          .isNotEmpty,
+                      timeEntry: context
+                              .read<CompletedServiceProvider>()
+                              .timeEntry
+                              .isNotEmpty
+                          ? context
+                              .read<CompletedServiceProvider>()
+                              .timeEntry[0]
+                          : {},
                     ),
                     /////do somthing
                   ]),
@@ -903,21 +1000,11 @@ class DetailTime extends StatefulWidget {
     super.key,
     this.onTap,
     required this.isValidTime,
-    required this.serviceTime,
-    required this.serviceEndTime,
-    required this.travelTime,
-    required this.travelEndTime,
-    required this.breakTime,
-    required this.breakEndTime,
+    required this.timeEntry,
   });
   final VoidCallback? onTap;
   final bool isValidTime;
-  final TextEditingController serviceTime;
-  final TextEditingController serviceEndTime;
-  final TextEditingController travelTime;
-  final TextEditingController travelEndTime;
-  final TextEditingController breakTime;
-  final TextEditingController breakEndTime;
+  final Map<String, dynamic> timeEntry;
 
   @override
   State<DetailTime> createState() => _DetailTimeState();
@@ -925,9 +1012,15 @@ class DetailTime extends StatefulWidget {
 
 class _DetailTimeState extends State<DetailTime> {
   @override
+  void initState() {
+    super.initState();
+    print(widget.timeEntry);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(13),
+        padding: const EdgeInsets.fromLTRB(13, 13, 13, 13),
         color: Colors.white,
         child: Column(
           children: [
@@ -977,10 +1070,13 @@ class _DetailTimeState extends State<DetailTime> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.only(left: 3),
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
                                           child: Text(
-                                            widget.travelTime.text,
-                                            style: TextStyle(fontSize: 13),
+                                            widget
+                                                .timeEntry["U_CK_TraveledTime"],
+                                            style:
+                                                const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -997,7 +1093,7 @@ class _DetailTimeState extends State<DetailTime> {
                                 ],
                               )),
                           const SizedBox(
-                            width: 10,
+                            width: 15,
                           ),
                           Expanded(
                               flex: 3,
@@ -1028,10 +1124,13 @@ class _DetailTimeState extends State<DetailTime> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.only(left: 3),
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
                                           child: Text(
-                                            widget.travelEndTime.text,
-                                            style: TextStyle(fontSize: 13),
+                                            widget.timeEntry[
+                                                "U_CK_TraveledEndTime"],
+                                            style:
+                                                const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1047,27 +1146,65 @@ class _DetailTimeState extends State<DetailTime> {
                                   ),
                                 ],
                               )),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Expanded(
-                              flex: 1,
+                          // const SizedBox(
+                          //   width: 10,
+                          // ),
+                          Expanded(
+                              flex: 3,
                               child: Column(
                                 children: [
-                                  Text(
+                                  const Text(
                                     textScaleFactor: 1.0,
                                     "Eff.T",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 6,
                                   ),
-                                  Text(
-                                    "1 Hr",
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(fontSize: 13),
+                                  // Row(
+                                  //   children: [
+                                  //     Text(
+                                  //         widget.timeEntry["total_travel_time"],
+                                  //         textScaleFactor: 1.0,
+                                  //         style: const TextStyle(
+                                  //             fontSize: 14,
+                                  //             color: Colors.green,
+                                  //             fontWeight: FontWeight.bold)),
+                                  //     const SizedBox(
+                                  //       width: 4,
+                                  //     ),
+                                  //     const Icon(Icons.timelapse,
+                                  //         size: 18, color: Colors.green),
+                                  //   ],
+                                  // ),
+                                  SizedBox(
+                                    width: 85,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                            widget
+                                                .timeEntry["total_travel_time"],
+                                            textScaleFactor: 1.0,
+                                            style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.green,
+                                                )),
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                        const Icon(Icons.timelapse,
+                                            size: 18, color: Colors.green),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               )),
@@ -1119,10 +1256,13 @@ class _DetailTimeState extends State<DetailTime> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.only(left: 3),
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
                                           child: Text(
-                                            widget.serviceTime.text,
-                                            style: TextStyle(fontSize: 13),
+                                            widget.timeEntry[
+                                                "U_CK_ServiceStartTime"],
+                                            style:
+                                                const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1139,7 +1279,7 @@ class _DetailTimeState extends State<DetailTime> {
                                 ],
                               )),
                           const SizedBox(
-                            width: 10,
+                            width: 15,
                           ),
                           Expanded(
                               flex: 3,
@@ -1170,10 +1310,12 @@ class _DetailTimeState extends State<DetailTime> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.only(left: 3),
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
                                           child: Text(
-                                            widget.serviceEndTime.text,
-                                            style: TextStyle(fontSize: 13),
+                                            widget.timeEntry["U_CK_SerEndTime"],
+                                            style:
+                                                const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1189,20 +1331,48 @@ class _DetailTimeState extends State<DetailTime> {
                                   ),
                                 ],
                               )),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Expanded(
-                              flex: 1,
+                          // const SizedBox(
+                          //   width: 5,
+                          // ),
+                          Expanded(
+                              flex: 3,
                               child: Column(
                                 children: [
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 25,
                                   ),
-                                  Text(
-                                    "1 Hr",
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(fontSize: 13),
+                                  // Text(widget.timeEntry["total_service_time"],
+                                  //     textScaleFactor: 1.0,
+                                  //     style: const TextStyle(
+                                  //         fontSize: 14,
+                                  //         color: Colors.green,
+                                  //         fontWeight: FontWeight.bold)),
+                                  SizedBox(
+                                    width: 85,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                            widget.timeEntry[
+                                                "total_service_time"],
+                                            textScaleFactor: 1.0,
+                                            style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.green,
+                                              )),
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                        const Icon(Icons.timelapse,
+                                            size: 18, color: Colors.green),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               )),
@@ -1254,10 +1424,12 @@ class _DetailTimeState extends State<DetailTime> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.only(left: 3),
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
                                           child: Text(
-                                            widget.breakEndTime.text,
-                                            style: TextStyle(fontSize: 13),
+                                            widget.timeEntry["U_CK_BreakTime"],
+                                            style:
+                                                const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1274,7 +1446,7 @@ class _DetailTimeState extends State<DetailTime> {
                                 ],
                               )),
                           const SizedBox(
-                            width: 10,
+                            width: 15,
                           ),
                           Expanded(
                               flex: 3,
@@ -1305,10 +1477,13 @@ class _DetailTimeState extends State<DetailTime> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.only(left: 3),
+                                          padding:
+                                              const EdgeInsets.only(left: 3),
                                           child: Text(
-                                            widget.breakEndTime.text,
-                                            style: TextStyle(fontSize: 13),
+                                            widget
+                                                .timeEntry["U_CK_BreakEndTime"],
+                                            style:
+                                                const TextStyle(fontSize: 13),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1324,20 +1499,43 @@ class _DetailTimeState extends State<DetailTime> {
                                   ),
                                 ],
                               )),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Expanded(
-                              flex: 1,
+                          // const SizedBox(
+                          //   width: 10,
+                          // ),
+                          Expanded(
+                              flex: 3,
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 25,
                                   ),
-                                  Text(
-                                    "1 Hr",
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(fontSize: 13),
+                                  SizedBox(
+                                    width: 85,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                            widget
+                                                .timeEntry["total_break_time"],
+                                            textScaleFactor: 1.0,
+                                            style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.green,
+                                              )),
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                        const Icon(Icons.timelapse,
+                                            size: 18, color: Colors.green),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               )),
@@ -1349,19 +1547,25 @@ class _DetailTimeState extends State<DetailTime> {
                     ],
                   )
                 : Container(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.alarm,
                           size: 23,
+                          color: Color.fromARGB(221, 168, 168, 171),
                         ),
                         SizedBox(
                           width: 10,
                         ),
-                        const Text(
+                        Text(
                           "No Time Added",
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(
+                              fontSize: 14,
+                              // fontWeight: FontWeight.w500,
+                              color: Color.fromARGB(221, 168, 168, 171)),
                         ),
                       ],
                     ),
@@ -1385,7 +1589,7 @@ class _DetailTimeState extends State<DetailTime> {
                       ),
                       child: Text(
                         !widget.isValidTime ? "Add Time" : "Edit Time",
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: Color.fromARGB(255, 255, 255, 255),
                             fontSize: 13),
                       ),

@@ -136,7 +136,7 @@ class _GeneralState extends State<General> {
               CustomTextRemark(
                   controller: widget.controller?['remark'],
                   label: 'Remark',
-                  detail: widget.data.isNotEmpty),
+                  detail: widget.data.isNotEmpty, star: false,),
               const SizedBox(height: 28),
               const ComponentTitle(
                 label: "Date & images",

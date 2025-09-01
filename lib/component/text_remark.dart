@@ -86,13 +86,14 @@ class CustomTextRemark extends StatefulWidget {
     super.key,
     required this.label,
     required this.controller,
+    required this.star,
     this.detail = false, // add detail flag
   });
 
   final String label;
   final TextEditingController? controller;
   final bool detail;
-
+  final bool star;
   @override
   State<CustomTextRemark> createState() => _CustomTextRemarkState();
 }
@@ -110,13 +111,28 @@ class _CustomTextRemarkState extends State<CustomTextRemark> {
         // Label row
         Padding(
           padding: const EdgeInsets.only(left: 20),
-          child: Text(
-            widget.label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color.fromARGB(221, 58, 58, 59),
-            ),
+          child: Row(
+            children: [
+              Text(
+                widget.label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color.fromARGB(221, 58, 58, 59),
+                ),
+              ),
+               const SizedBox(width: 5),
+              // Hide star in detail mode
+              if (widget.star && !widget.detail)
+                const Text(
+                  "*",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromARGB(221, 255, 0, 0),
+                  ),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 8),

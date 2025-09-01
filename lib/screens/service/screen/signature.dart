@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/screens/signature/signature.dart';
 import 'package:bizd_tech_service/screens/signature/signature_preview_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
 
 class SignatureScreen extends StatefulWidget {
@@ -15,24 +17,30 @@ class SignatureScreen extends StatefulWidget {
 
 class _SignatureScreenState extends State<SignatureScreen> {
   @override
-  late List<File> _pdf = [];
+  // late List<File> _pdf = [];
   final SignatureController _signatureController =
       SignatureController(penStrokeWidth: 3);
   Future<void> _goToSignature() async {
+    final provider = context.read<CompletedServiceProvider>();
+
     final file = await Navigator.push<File?>(
       context,
       MaterialPageRoute(
         builder: (_) => SignatureCaptureScreen(
-          prevFile: _pdf.isNotEmpty ? _pdf[0] : null,
-          existingSignature: _pdf.isNotEmpty ? _pdf.first : null,
+          prevFile: provider.signatureList.isNotEmpty
+              ? provider.signatureList[0]
+              : null,
+          existingSignature: provider.signatureList.isNotEmpty
+              ? provider.signatureList.first
+              : null,
         ),
       ),
     );
 
     if (file != null) {
       setState(() {
-        _pdf = [file];
-        print(_pdf);
+        provider.setSignature(file);
+        print(provider.signatureList);
       });
     }
   }
@@ -517,6 +525,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                       height: 10,
                     ),
                     Menu(
+                      signature: context.watch<CompletedServiceProvider>().signatureList,
                         title: 'Upload Signature',
                         icon: Padding(
                           padding: const EdgeInsets.only(right: 5),
@@ -542,7 +551,10 @@ class _SignatureScreenState extends State<SignatureScreen> {
                           Expanded(
                               flex: 5,
                               child: Text(
-                                  _pdf.isNotEmpty
+                                  context
+                                          .watch<CompletedServiceProvider>()
+                                          .signatureList
+                                          .isNotEmpty
                                       ? "Signature Captured Successfully"
                                       : "Opps, Not Signature yet",
                                   style: const TextStyle(
@@ -553,20 +565,28 @@ class _SignatureScreenState extends State<SignatureScreen> {
                             flex: 2,
                             child: TextButton(
                               onPressed: () {
-                                if (_pdf.isNotEmpty) {
+                                final provider =
+                                    context.read<CompletedServiceProvider>();
+
+                                if (provider.signatureList.isNotEmpty) {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => PDFViewerScreen(
                                         filePath:
-                                            _pdf.isNotEmpty ? _pdf[0].path : '',
+                                            provider.signatureList.isNotEmpty
+                                                ? provider.signatureList[0].path
+                                                : '',
                                       ),
                                     ),
                                   );
                                 }
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor: _pdf.isNotEmpty
+                                backgroundColor: context
+                                        .watch<CompletedServiceProvider>()
+                                        .signatureList
+                                        .isNotEmpty
                                     ? Colors.green
                                     : Colors.grey,
                                 shape: RoundedRectangleBorder(
@@ -595,10 +615,16 @@ class _SignatureScreenState extends State<SignatureScreen> {
 }
 
 class Menu extends StatefulWidget {
-  const Menu({super.key, this.icon, required this.title, this.onTap});
+  const Menu(
+      {super.key,
+      this.icon,
+      required this.title,
+      this.onTap,
+      required this.signature});
   final dynamic icon;
   final String title;
   final VoidCallback? onTap;
+  final List<dynamic> signature;
 
   @override
   State<Menu> createState() => _MenuState();
@@ -629,8 +655,10 @@ class _MenuState extends State<Menu> {
                   borderRadius: BorderRadius.circular(5.0),
                 ),
               ),
-              child: const Text(
-                "Add Signature",
+              child: Text(
+                widget.signature.isNotEmpty
+                    ? "Edit Signature"
+                    : "Add Signature",
                 style: TextStyle(
                     color: Color.fromARGB(255, 255, 255, 255), fontSize: 13),
               ),
