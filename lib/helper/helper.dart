@@ -42,6 +42,7 @@ String getDataFromDynamic(dynamic value, {bool isDate = false}) {
     return '';
   }
 }
+
 String formatCustomShortDate(String inputDate) {
   // Parse your original date string
   final parsedDate = DateFormat('dd-MM-yyyy').parse(inputDate);
@@ -51,6 +52,7 @@ String formatCustomShortDate(String inputDate) {
 
   return formattedDate;
 }
+
 String formatCustomTime(String time) {
   // Parse the time string
   final parsedTime = DateFormat("HH:mm:ss").parse(time);
@@ -60,6 +62,7 @@ String formatCustomTime(String time) {
 
   return formattedTime;
 }
+
 String formatCustomTimePlusMinutes(String time, int minutesToAdd) {
   // Parse the time string (HH:mm:ss)
   final parsedTime = DateFormat("HH:mm:ss").parse(time);
@@ -71,4 +74,17 @@ String formatCustomTimePlusMinutes(String time, int minutesToAdd) {
   final formattedTime = DateFormat("h:mm a").format(newTime);
 
   return formattedTime;
+}
+
+
+String showDateOnService(String? date) {
+  if (date == null || date.isEmpty) {
+    return "No Date";
+  }
+  try {
+    final parsedDate = DateTime.parse(date);
+    return DateFormat("dd MMMM yyyy").format(parsedDate);
+  } catch (e) {
+    return "No Date";
+  }
 }

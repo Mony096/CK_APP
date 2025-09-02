@@ -360,14 +360,29 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 Expanded(
                                     flex: 4,
                                     child: Container(
-                                        padding: EdgeInsets.fromLTRB(
-                                            4, 10, 4, 10),
+                                        padding:
+                                            EdgeInsets.fromLTRB(4, 10, 4, 10),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(context.watch<HelperProvider>().customer[0]["CardName"] ?? "",
-                                                style: TextStyle(fontSize: 12.5),
+                                            Text(
+                                                context
+                                                        .read<HelperProvider>()
+                                                        .customer
+                                                        .firstWhere(
+                                                          (e) =>
+                                                              e["CardCode"] ==
+                                                              widget.data[
+                                                                  "U_CK_CardCode"],
+                                                          orElse: () => {
+                                                            "CardCode":
+                                                                "Not Found"
+                                                          },
+                                                        )["CardName"] ??
+                                                    "N/A", //////aaaaaaaaaaaaa
+                                                style:
+                                                    TextStyle(fontSize: 12.5),
                                                 textScaleFactor: 1.0),
                                             SizedBox(
                                               height: 6,
@@ -382,7 +397,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                 textScaleFactor: 1.0),
                                           ],
                                         ))),
-                                const Expanded(
+                                Expanded(
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
@@ -396,7 +411,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                         Padding(
                                           padding: EdgeInsets.only(right: 10),
                                           child: Text(
-                                            "SVT00001",
+                                            "${widget.data["DocEntry"]}",
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 13),
@@ -427,8 +442,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Text(
-                                                  "Date : Monday , January 15",
+                                              Text(
+                                                  "Date : ${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")}",
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
@@ -436,7 +451,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                              const Text("Time 04:30 - 06:30",
+                                              Text(
+                                                  "Time ${widget.data["U_CK_Time"]} - ${widget.data["U_CK_EndTime"]}",
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
@@ -575,7 +591,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         height: 30,
                       ),
                       title: "Customer :",
-                      row1: "The Pizza Company",
+                      row1:
+                          "${context.read<HelperProvider>().customer.firstWhere(
+                                (e) =>
+                                    e["CardCode"] ==
+                                    widget.data["U_CK_CardCode"],
+                                orElse: () => {"CardCode": "Not Found"},
+                              )["CardName"] ?? "N/A"}",
                     ),
                     const SizedBox(
                       height: 15,

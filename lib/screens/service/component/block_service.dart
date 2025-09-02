@@ -1,7 +1,9 @@
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/screens/service/screen/serviceById.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class BlockService extends StatelessWidget {
   const BlockService({super.key, this.onTap, required this.data});
@@ -9,10 +11,6 @@ class BlockService extends StatelessWidget {
   final Map<String, dynamic> data;
   @override
   Widget build(BuildContext context) {
-
-
-    
-
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       width: double.infinity,
@@ -79,10 +77,16 @@ class BlockService extends StatelessWidget {
                       flex: 4,
                       child: Container(
                           padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                          child: const Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("The Pizza Comapny - Sen Sok",
+                              Text(
+                                  "${context.read<HelperProvider>().customer.firstWhere(
+                                        (e) =>
+                                            e["CardCode"] ==
+                                            data["U_CK_CardCode"],
+                                        orElse: () => {"CardCode": "Not Found"},
+                                      )["CardName"] ?? "N/A"}",
                                   style: TextStyle(fontSize: 12.5),
                                   textScaleFactor: 1.0),
                               SizedBox(
