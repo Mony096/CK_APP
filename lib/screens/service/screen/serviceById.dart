@@ -1,9 +1,12 @@
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/component/detail_row.dart';
 import 'package:bizd_tech_service/screens/service/screen/sericeEntry.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +20,14 @@ class ServiceByIdScreen extends StatefulWidget {
 }
 
 class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
   Future<void> _onReject() async {
     // if (_pdf.isEmpty) {
     // print(currentStatus);
@@ -98,6 +109,17 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
         SnackBar(content: Text('❌ Error: $e')),
       );
     }
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await getName();
+    setState(() {
+      userName = name;
+    });
+  }
+
+  Future<String?> getName() async {
+    return await LocalStorageManger.getString('FullName');
   }
 
   @override
@@ -338,15 +360,14 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 Expanded(
                                     flex: 4,
                                     child: Container(
-                                        padding: const EdgeInsets.fromLTRB(
+                                        padding: EdgeInsets.fromLTRB(
                                             4, 10, 4, 10),
-                                        child: const Column(
+                                        child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text("The Pizza Comapny - Sen Sok",
-                                                style:
-                                                    TextStyle(fontSize: 12.5),
+                                            Text(context.watch<HelperProvider>().customer[0]["CardName"] ?? "",
+                                                style: TextStyle(fontSize: 12.5),
                                                 textScaleFactor: 1.0),
                                             SizedBox(
                                               height: 6,
@@ -461,12 +482,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                     ],
                                   ),
                                 ),
-                                const Expanded(
+                                Expanded(
                                   flex: 2,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text("Thomas Wagner",
+                                      Text(userName ?? "...",
                                           style: TextStyle(
                                               fontSize: 12.5,
                                               color: Colors.white),

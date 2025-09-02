@@ -1,5 +1,4 @@
 import 'package:bizd_tech_service/utilities/dio_client.dart';
-import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 
 class CustomerListProvider extends ChangeNotifier {

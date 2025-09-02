@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
@@ -52,6 +53,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
     if (svProvider.documents.isEmpty) {
       await svProvider.fetchDocuments();
     }
+    final customerProvider =
+        Provider.of<HelperProvider>(context, listen: false);
+    if (customerProvider.customer.isEmpty) {
+      await customerProvider.fetchCustomer();
+    }
     setState(() {
       _isLoading = false;
     });
@@ -95,9 +101,39 @@ class _ServiceScreenState extends State<ServiceScreen> {
       Navigator.of(context).pop(); // Go back
 
       await _refreshData();
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Update Status Successfully')),
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: Row(
+            children: [
+              const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Status updated successfully!",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
       );
     } catch (e) {
       Navigator.of(context).pop(); // Close loading
@@ -239,8 +275,17 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                     data: travel,
                                     onTap: () async {
                                       if (travel["U_CK_Status"] == "Service") {
-                                        goTo(context,
-                                            ServiceEntryScreen(data: travel));
+                                        goTo(
+                                                context,
+                                                ServiceEntryScreen(
+                                                    data: travel))
+                                            .then((e) {
+                                          if (e == true) {
+                                            _refreshData();
+                                          }
+
+                                          // Handle any actions after returning from ServiceEntryScreen
+                                        });
                                         return;
                                       }
                                       onUpdateStatus(travel["DocEntry"],

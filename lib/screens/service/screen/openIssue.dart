@@ -6,6 +6,7 @@ import 'package:bizd_tech_service/component/text_remark_dialog.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,6 +24,15 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
   int isEditComp = -1;
   List<dynamic> componentList = [];
   int isAdded = 0;
+
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
   final area = TextEditingController();
   final desc = TextEditingController();
   final critical = TextEditingController();
@@ -181,7 +191,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
       setState(() {
         isEditComp = -1;
       });
-      // clear();
+      clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).unfocus();
       });
@@ -274,6 +284,37 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
 
       icon: Icons.question_mark, // 👈 Pass the icon here
     );
+  }
+
+  void clear() {
+    area.text = "";
+    desc.text = "";
+    critical.text = "";
+    date.text = "";
+    status.text = "";
+    handleBy.text = "";
+    remark.text = "";
+    areaFieldNotifier.value = {
+      "missing": false,
+      "value": "Code is required!",
+      "isAdded": 1,
+    };
+    descFieldNotifier.value = {
+      "missing": false,
+      "value": "Name is required!",
+      "isAdded": 1,
+    };
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await getName();
+    setState(() {
+      userName = name;
+    });
+  }
+
+  Future<String?> getName() async {
+    return await LocalStorageManger.getString('FullName');
   }
 
   @override
@@ -753,7 +794,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                       height: 10,
                     ),
                     Menu(
-                      title: 'Thomas Wagner',
+                      title: userName ?? '...',
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 5),
                         child: SvgPicture.asset(
@@ -816,7 +857,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                           onEditComp(item, index);
                         },
                         child: DetailMenu(
-                          title: 'communi  cation',
+                          title: item["U_CK_IssueType"],
                           icon: Padding(
                             padding: const EdgeInsets.only(right: 5),
                             child: SvgPicture.asset(
@@ -826,7 +867,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                               height: 22,
                             ),
                           ),
-                          desc: 'house owner is very difficult to conatct',
+                          desc: item["U_CK_IssueDesc"],
                         ),
                       );
                     }),

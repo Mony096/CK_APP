@@ -4,6 +4,7 @@ import 'package:bizd_tech_service/component/text_time_dialog.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,13 @@ class TimeScreen extends StatefulWidget {
 
 class _TimeScreenState extends State<TimeScreen> {
   @override
-  final List<dynamic> times = [];
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  String? userName;
+
   int updateIndexTime = -1;
   int isEditTime = -1;
   int isAdded = 0;
@@ -28,18 +35,30 @@ class _TimeScreenState extends State<TimeScreen> {
   final serviceEndTime = TextEditingController();
   final breakTime = TextEditingController();
   final breakEndTime = TextEditingController();
-  final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
-      ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
-  final ValueNotifier<Map<String, dynamic>> nameFieldNotifier =
-      ValueNotifier({"missing": false, "value": "Name required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> travelTimeNotifier = ValueNotifier(
+      {"missing": false, "value": "Travel time required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> travelEndTimeNotifier =
+      ValueNotifier({
+    "missing": false,
+    "value": "Travel end time required",
+    "isAdded": 0
+  });
 
-  final ValueNotifier<Map<String, dynamic>> partFieldNotifier =
-      ValueNotifier({"missing": false, "value": "Part required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> serviceTimeNotifier = ValueNotifier(
+      {"missing": false, "value": "Service time required", "isAdded": 0});
 
-  final ValueNotifier<Map<String, dynamic>> brandFieldNotifier = ValueNotifier(
-      {"missing": false, "value": "Brand required", "isAdded": 0});
-  final ValueNotifier<Map<String, dynamic>> modelFieldNotifier = ValueNotifier(
-      {"missing": false, "value": "Model required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> serviceEndTimeNotifier =
+      ValueNotifier({
+    "missing": false,
+    "value": "Service end time required",
+    "isAdded": 0
+  });
+
+  final ValueNotifier<Map<String, dynamic>> breakTimeNotifier = ValueNotifier(
+      {"missing": false, "value": "Break time required", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> breakEndTimeNotifier =
+      ValueNotifier(
+          {"missing": false, "value": "Break end time required", "isAdded": 0});
   void _showCreateTimeEntry() async {
     await showDialog<String>(
       barrierDismissible: false, // user must tap button!
@@ -98,7 +117,7 @@ class _TimeScreenState extends State<TimeScreen> {
                     children: [
                       Expanded(
                         child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: codeFieldNotifier,
+                          isMissingFieldNotifier: travelTimeNotifier,
                           controller: travelTime,
                           label: 'Start Time',
                           star: false,
@@ -110,7 +129,7 @@ class _TimeScreenState extends State<TimeScreen> {
                       ),
                       Expanded(
                         child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: codeFieldNotifier,
+                          isMissingFieldNotifier: travelEndTimeNotifier,
                           controller: travelEndTime,
                           label: 'End Time',
                           star: false,
@@ -160,7 +179,7 @@ class _TimeScreenState extends State<TimeScreen> {
                     children: [
                       Expanded(
                         child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: codeFieldNotifier,
+                          isMissingFieldNotifier: serviceTimeNotifier,
                           controller: serviceTime,
                           label: 'Start Time',
                           star: false,
@@ -173,7 +192,7 @@ class _TimeScreenState extends State<TimeScreen> {
                       ),
                       Expanded(
                         child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: codeFieldNotifier,
+                          isMissingFieldNotifier: serviceEndTimeNotifier,
                           controller: serviceEndTime,
                           label: 'End Time',
                           star: false,
@@ -223,7 +242,7 @@ class _TimeScreenState extends State<TimeScreen> {
                     children: [
                       Expanded(
                         child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: codeFieldNotifier,
+                          isMissingFieldNotifier: breakTimeNotifier,
                           controller: breakTime,
                           label: 'Start Time',
                           star: false,
@@ -236,7 +255,7 @@ class _TimeScreenState extends State<TimeScreen> {
                       ),
                       Expanded(
                         child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: codeFieldNotifier,
+                          isMissingFieldNotifier: breakEndTimeNotifier,
                           controller: breakEndTime,
                           label: 'End Time',
                           star: false,
@@ -274,39 +293,45 @@ class _TimeScreenState extends State<TimeScreen> {
                             // if (onConfirm != null) {
                             //   onConfirm();
                             // }
-                            // if (code.text.isEmpty ||
-                            //     name.text.isEmpty ||
-                            //     part.text.isEmpty ||
-                            //     brand.text.isEmpty ||
-                            //     model.text.isEmpty) {
-                            //   codeFieldNotifier.value = {
-                            //     "missing": code.text.isEmpty,
-                            //     "value": "Code is required!",
-                            //     "isAdded": 1,
-                            //   };
-                            //   nameFieldNotifier.value = {
-                            //     "missing": name.text.isEmpty,
-                            //     "value": "Name is required!",
-                            //     "isAdded": 1,
-                            //   };
-                            //   partFieldNotifier.value = {
-                            //     "missing": part.text.isEmpty,
-                            //     "value": "Part is required!",
-                            //     "isAdded": 1,
-                            //   };
+                            if (travelTime.text.isEmpty ||
+                                travelEndTime.text.isEmpty ||
+                                serviceTime.text.isEmpty ||
+                                serviceEndTime.text.isEmpty ||
+                                breakTime.text.isEmpty ||
+                                breakEndTime.text.isEmpty) {
+                              travelTimeNotifier.value = {
+                                "missing": travelTime.text.isEmpty,
+                                "value": "Travel Time is required!",
+                                "isAdded": 1,
+                              };
+                              travelEndTimeNotifier.value = {
+                                "missing": travelEndTime.text.isEmpty,
+                                "value": "Travel End Time is required!",
+                                "isAdded": 1,
+                              };
+                              serviceTimeNotifier.value = {
+                                "missing": serviceTime.text.isEmpty,
+                                "value": "Service Time is required!",
+                                "isAdded": 1,
+                              };
+                              serviceEndTimeNotifier.value = {
+                                "missing": serviceEndTime.text.isEmpty,
+                                "value": "Service End Time is required!",
+                                "isAdded": 1,
+                              };
+                              breakTimeNotifier.value = {
+                                "missing": breakTime.text.isEmpty,
+                                "value": "Break Time is required!",
+                                "isAdded": 1,
+                              };
+                              breakEndTimeNotifier.value = {
+                                "missing": breakEndTime.text.isEmpty,
+                                "value": "Break End Time is required!",
+                                "isAdded": 1,
+                              };
 
-                            //   brandFieldNotifier.value = {
-                            //     "missing": brand.text.isEmpty,
-                            //     "value": "Brand is required!",
-                            //     "isAdded": 1,
-                            //   };
-                            //   modelFieldNotifier.value = {
-                            //     "missing": model.text.isEmpty,
-                            //     "value": "Model is required!",
-                            //     "isAdded": 1,
-                            //   };
-                            //   return;
-                            // }
+                              return;
+                            }
 
                             isEditTime == -1
                                 ? _onAddTimeEntry(context)
@@ -329,8 +354,13 @@ class _TimeScreenState extends State<TimeScreen> {
                             padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                             child: Text(
                               // isEditComp >= 0 ? "Edit" : "Add",
-                        // final item = provider.timeEntry;
-                       context.read<CompletedServiceProvider>().timeEntry.isEmpty ? "Add Time" : "Edit Time",
+                              // final item = provider.timeEntry;
+                              context
+                                      .read<CompletedServiceProvider>()
+                                      .timeEntry
+                                      .isEmpty
+                                  ? "Add Time"
+                                  : "Edit Time",
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -372,6 +402,7 @@ class _TimeScreenState extends State<TimeScreen> {
         isEditTime = -1;
       });
       // clear();
+      clearValidation();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).unfocus();
       });
@@ -392,8 +423,6 @@ class _TimeScreenState extends State<TimeScreen> {
     });
     final provider = context.read<CompletedServiceProvider>();
     final item = provider.timeEntry[0];
-    print(item);
-    print("1212");
     travelTime.text = getDataFromDynamic(item["U_CK_TraveledTime"]);
     travelEndTime.text = getDataFromDynamic(item["U_CK_TraveledEndTime"]);
     serviceTime.text = getDataFromDynamic(item["U_CK_ServiceStartTime"]);
@@ -406,6 +435,17 @@ class _TimeScreenState extends State<TimeScreen> {
     // setState(() {
     //   isEditTime = 0;
     // });
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await getName();
+    setState(() {
+      userName = name;
+    });
+  }
+
+  Future<String?> getName() async {
+    return await LocalStorageManger.getString('FullName');
   }
 // String calculateSpentTime(String start, String end) {
 //     final dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
@@ -424,6 +464,40 @@ class _TimeScreenState extends State<TimeScreen> {
 
 //     return "${hours}h ${minutes}m";
 //   }
+  void clearValidation() {
+    travelTimeNotifier.value = {
+      "missing": false,
+      "value": "Code is required!",
+      "isAdded": 1,
+    };
+    travelEndTimeNotifier.value = {
+      "missing": false,
+      "value": "Name is required!",
+      "isAdded": 1,
+    };
+    serviceTimeNotifier.value = {
+      "missing": false,
+      "value": "Part is required!",
+      "isAdded": 1,
+    };
+
+    serviceEndTimeNotifier.value = {
+      "missing": false,
+      "value": "Brand is required!",
+      "isAdded": 1,
+    };
+    breakTimeNotifier.value = {
+      "missing": false,
+      "value": "Model is required!",
+      "isAdded": 1,
+    };
+    breakEndTimeNotifier.value = {
+      "missing": false,
+      "value": "Model is required!",
+      "isAdded": 1,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -908,7 +982,7 @@ class _TimeScreenState extends State<TimeScreen> {
                       height: 10,
                     ),
                     Menu(
-                      title: 'Thomas Wager',
+                      title: userName ?? "...",
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 5),
                         child: SvgPicture.asset(
@@ -925,9 +999,12 @@ class _TimeScreenState extends State<TimeScreen> {
                     ),
                     DetailTime(
                       onTap: () {
-                        final provider = context.read<CompletedServiceProvider>();
+                        final provider =
+                            context.read<CompletedServiceProvider>();
                         // final item = provider.timeEntry;
-                        provider.timeEntry.isEmpty ? _showCreateTimeEntry() : onEditTimeEntry();
+                        provider.timeEntry.isEmpty
+                            ? _showCreateTimeEntry()
+                            : onEditTimeEntry();
                       },
                       isValidTime: context
                           .read<CompletedServiceProvider>()
@@ -1195,9 +1272,9 @@ class _DetailTimeState extends State<DetailTime> {
                                                 .timeEntry["total_travel_time"],
                                             textScaleFactor: 1.0,
                                             style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.green,
-                                                )),
+                                              fontSize: 14,
+                                              color: Colors.green,
+                                            )),
                                         const SizedBox(
                                           width: 4,
                                         ),
@@ -1363,9 +1440,9 @@ class _DetailTimeState extends State<DetailTime> {
                                                 "total_service_time"],
                                             textScaleFactor: 1.0,
                                             style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.green,
-                                              )),
+                                              fontSize: 14,
+                                              color: Colors.green,
+                                            )),
                                         const SizedBox(
                                           width: 4,
                                         ),
@@ -1526,9 +1603,9 @@ class _DetailTimeState extends State<DetailTime> {
                                                 .timeEntry["total_break_time"],
                                             textScaleFactor: 1.0,
                                             style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.green,
-                                              )),
+                                              fontSize: 14,
+                                              color: Colors.green,
+                                            )),
                                         const SizedBox(
                                           width: 4,
                                         ),

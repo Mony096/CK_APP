@@ -4,13 +4,15 @@ import 'dart:io';
 
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 class CompletedServiceProvider extends ChangeNotifier {
   bool _submit = false;
   List<dynamic> _openIssues = [];
-  final List<dynamic> _imagesList = [];
+  List<dynamic> _imagesList = [];
   List<dynamic> _signatureList = [];
   List<dynamic> _timeEntry = [];
   bool get submit => _submit;
@@ -53,7 +55,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
- String calculateSpentTime(String start, String end) {
+  String calculateSpentTime(String start, String end) {
     try {
       final now = DateTime.now();
       final dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
@@ -124,56 +126,324 @@ class CompletedServiceProvider extends ChangeNotifier {
     }
   }
 
-  // void removePart(int index) {
-  //   if (index >= 0 && index < _parts.length) {
-  //     _parts.removeAt(index);
-  //     notifyListeners();
-  //   }
-  // }
+  void clearData() {
+    _openIssues = [];
+    _imagesList = [];
+    _signatureList = [];
+    _timeEntry = [];
+    notifyListeners();
+  }
 
   void clearOpenIssues() {
     _openIssues.clear();
     notifyListeners();
   }
 
-  Future<void> postToSAP({
+  Future<int?> uploadAttachmentsToSAP(
+      List<File> files, int? existingAttachmentEntry) async {
+    // print(existingAttachmentEntry);
+    // return 0;
+    try {
+      final formData = FormData();
+      const uuid = Uuid();
+
+      for (var file in files) {
+        final extension = file.path.split('.').last;
+        final newFileName = '${uuid.v4()}.$extension';
+        formData.files.add(MapEntry(
+          'file',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: newFileName,
+          ),
+        ));
+      }
+
+      late Response response;
+      if (existingAttachmentEntry != null) {
+        // PATCH request to update existing
+        response = await dio.patch(
+          '/Attachments2($existingAttachmentEntry)',
+          true,
+          false,
+          data: formData,
+          options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+        );
+      } else {
+        // POST request to create new
+        response = await dio.post(
+          '/Attachments2',
+          false,
+          true,
+          data: formData,
+          options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+        );
+      }
+
+      if ([200, 201].contains(response.statusCode)) {
+        final absEntry =
+            response.data['AbsEntry'] ?? response.data['AbsoluteEntry'];
+        return absEntry is int ? absEntry : int.tryParse('$absEntry');
+      }
+
+      if (response.statusCode == 204 && existingAttachmentEntry != null) {
+        return existingAttachmentEntry;
+      }
+
+      debugPrint(
+          "Upload failed: ${response.statusCode} ${response.statusMessage}");
+    } catch (e, stack) {
+      debugPrint("Upload failed: $e");
+      debugPrint(stack.toString());
+    }
+
+    return null;
+  }
+
+  Future<bool> onCompletedService({
     required BuildContext context, // ✅ Add BuildContext for UI
-    required Map<String, dynamic> data,
+    required int? attachmentEntryExisting,
+    required dynamic docEntry,
   }) async {
+    if (_imagesList.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: Row(
+            children: [
+              const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Please provide an image",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
+    if (_timeEntry.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: Row(
+            children: [
+              const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Please provide a Time Entry",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
+    if (_signatureList.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: Row(
+            children: [
+              const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Please provide a signature",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
+
     _submit = true;
     notifyListeners();
     MaterialDialog.loading(context); // Show loading dialog
 
     try {
+      List<File> allFiles = [..._imagesList, ..._signatureList];
+
+      final int? attachmentEntry =
+          await uploadAttachmentsToSAP(allFiles, attachmentEntryExisting);
+      if (attachmentEntry == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: Row(
+              children: [
+                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Failed to upload attachments",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return false;
+      }
       final payload = {
-        ...data,
+        "U_CK_Status": "Entry",
+        "U_CK_AttachmentEntry": attachmentEntry,
+        "CK_JOB_TIMECollection": [
+          {
+            "U_CK_Description": "Travel Time",
+            "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
+            "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
+            "U_CK_Effort": _timeEntry[0]["total_travel_time"],
+          },
+          {
+            "U_CK_Description": "Service Time",
+            "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
+            "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
+            "U_CK_Effort": _timeEntry[0]["total_service_time"],
+          },
+          {
+            "U_CK_Description": "Break Time",
+            "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
+            "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
+            "U_CK_Effort": _timeEntry[0]["total_break_time"],
+          }
+        ],
         "CK_JOB_ISSUECollection": _openIssues,
       };
+
+      // print(payload);
+      // return true;
       final completed = await dio.patch(
-        "/CK_JOBORDER(${data["DocEntry"]})",
+        "/CK_JOBORDER($docEntry)",
         false,
         false,
         data: payload,
       );
 
       if (completed.statusCode == 204) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //     content: Text("Status updated successfully!"),
-        //     backgroundColor: Color.fromARGB(255, 53, 55, 53),
-        //     duration: Duration(seconds: 2),
-        //   ),
-        // );
-        await MaterialDialog.createdSuccess(
-          context,
+        clearData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: Row(
+              children: [
+                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Service Completed!",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
+      clearData();
+      return true;
     } catch (e) {
       await MaterialDialog.warning(
         context,
         title: "Error",
         body: e.toString(),
       );
+      return false;
     } finally {
       _submit = false;
       _openIssues = [];

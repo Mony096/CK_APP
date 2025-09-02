@@ -9,6 +9,10 @@ class BlockService extends StatelessWidget {
   final Map<String, dynamic> data;
   @override
   Widget build(BuildContext context) {
+
+
+    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       width: double.infinity,
@@ -94,7 +98,7 @@ class BlockService extends StatelessWidget {
                                   textScaleFactor: 1.0),
                             ],
                           ))),
-                  const Expanded(
+                  Expanded(
                       flex: 2,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -105,7 +109,7 @@ class BlockService extends StatelessWidget {
                           ),
                           Padding(
                             padding: EdgeInsets.only(right: 10),
-                            child: Text("SVT00001 #",
+                            child: Text("${data["DocEntry"]}",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 13),
                                 textScaleFactor: 1.0),
@@ -312,7 +316,7 @@ class BlockService extends StatelessWidget {
                           child: Center(
                         child: GestureDetector(
                           onTap: () {
-                            goTo(context, ServiceByIdScreen(data:data));
+                            goTo(context, ServiceByIdScreen(data: data));
                           },
                           child: const Icon(
                             Icons.keyboard_arrow_up,

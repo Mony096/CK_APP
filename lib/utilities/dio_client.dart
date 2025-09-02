@@ -118,7 +118,7 @@ class DioClient {
       }
 
       log('dio ${e.response?.statusCode}');
-
+      log('dio ${e.response?.data}');
       if (e.response?.statusCode == null) {
         throw const ConnectionRefuse(message: "Invalid Server Configuration");
       }

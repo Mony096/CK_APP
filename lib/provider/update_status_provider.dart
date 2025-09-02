@@ -55,10 +55,37 @@ class UpdateStatusProvider extends ChangeNotifier {
       if (documentStatus.statusCode == 201) {
         // await dio.postNotification("", data: alertToWebData);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Status updated successfully!"),
-            backgroundColor: Color.fromARGB(255, 53, 55, 53),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: Row(
+              children: [
+                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Status updated successfully!",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
