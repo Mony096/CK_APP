@@ -1,5 +1,7 @@
+import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class ServiceCheckListScreen extends StatefulWidget {
   const ServiceCheckListScreen({super.key, required this.data});
@@ -214,9 +216,10 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                         borderRadius:
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
-                      child: Column(
+                      child: 
+                     Column(
                         children: [
-                          Container(
+                          SizedBox(
                             width: double.infinity,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,27 +263,39 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                 Expanded(
                                     flex: 4,
                                     child: Container(
-                                        padding:
-                                            EdgeInsets.fromLTRB(4, 10, 4, 10),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4, 10, 4, 10),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
-                                          children: [
-                                            Text("The Pizza Comapny - Sen Sok",
-                                                style:
-                                                    TextStyle(fontSize: 12.5),
-                                                textScaleFactor: 1.0),
-                                            SizedBox(
+                                            children: [
+                                            Text(
+                                              "${widget.data["CustomerName"] ?? "N/A"}",
+                                              style: const TextStyle(
+                                                  fontSize: 12.5),
+                                              textScaleFactor: 1.0,
+                                            ),
+                                            const SizedBox(
                                               height: 6,
                                             ),
                                             Text(
-                                                "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                                style: TextStyle(
-                                                  fontSize: 12.5,
-                                                  fontWeight: FontWeight.bold,
-                                                  height: 2,
-                                                ),
-                                                textScaleFactor: 1.0),
+                                              ((widget.data["CustomerAddress"]
+                                                              as List?)
+                                                          ?.isNotEmpty ==
+                                                      true)
+                                                  ? (widget
+                                                          .data[
+                                                              "CustomerAddress"]
+                                                          .first["StreetNo"] ??
+                                                      "N/A")
+                                                  : "N/A",
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.bold,
+                                                height: 2,
+                                              ),
+                                              textScaleFactor: 1.0,
+                                            ),
                                           ],
                                         ))),
                                 Expanded(
@@ -291,17 +306,19 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 10,
                                         ),
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text("SVT00001",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13),
-                                              textScaleFactor: 1.0),
+                                          child: Text(
+                                            "${widget.data["DocNum"]}",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
                                         ),
                                       ],
                                     ))
@@ -310,8 +327,8 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                           ),
                           Container(
                               // height: 150,
-                              padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
-                              color: Color.fromARGB(255, 66, 83, 100),
+                              padding: const EdgeInsets.fromLTRB(10, 15, 10, 8),
+                              color: const Color.fromARGB(255, 66, 83, 100),
                               width: double.infinity,
                               child: Column(
                                 children: [
@@ -335,62 +352,83 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 children: [
                                                   Expanded(
-                                                      child: Text("Service:",
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Service:",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 13.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   Expanded(
-                                                      child: Text("Status:",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Status:",
+                                                    textAlign: TextAlign.end,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 13.5,
+                                                        color: Colors.white),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   SizedBox(
                                                     width: 5,
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                               Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Expanded(
+                                                      child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: (widget
+                                                                          .data[
+                                                                      "CK_JOB_SERVICESCollection"]
+                                                                  as List)
+                                                              .map(
+                                                                  (e) =>
+                                                                      Container(
+                                                                        margin: const EdgeInsets
+                                                                            .only(
+                                                                            bottom:
+                                                                                8),
+                                                                        child:
+                                                                            Text(
+                                                                          "${e["U_CK_ServiceName"]}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.white,
+                                                                              fontSize: 12.5),
+                                                                          textScaleFactor:
+                                                                              1.0,
+                                                                        ),
+                                                                      ))
+                                                              .toList())),
+                                                  const Expanded(
                                                       child: Text(
-                                                          "A/C Cleaning",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  Expanded(
-                                                      child: Text("Open",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  SizedBox(
+                                                    "Open",
+                                                    textAlign: TextAlign.end,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                 ],
@@ -399,16 +437,15 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                           ))
                                     ],
                                   ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
+                                  // SizedBox(
+                                  //   height: 10,
+                                  // ),
                                   Row(
                                     children: [
-                                      Expanded(
+                                      const Expanded(
                                         flex: 1,
                                         child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(right: 6),
+                                            padding: EdgeInsets.only(right: 6),
                                             child: Icon(
                                               Icons.build,
                                               color: Colors.white,
@@ -419,19 +456,18 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 children: [
                                                   Expanded(
-                                                      child: Text("Equipment:",
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Equipment:",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 13.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   Expanded(
                                                       child: Text("",
                                                           textAlign:
@@ -447,36 +483,44 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                          "Equipment Name",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "SN: 10002000300",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  SizedBox(
-                                                    width: 5,
+                                              ...(widget.data[
+                                                          "CK_JOB_EQUIPMENTCollection"]
+                                                      as List)
+                                                  .map(
+                                                (item) => Container(
+                                                  margin: const EdgeInsets.only(
+                                                      bottom: 10),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: Text(
+                                                        "${item["U_CK_EquipName"]}",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      Expanded(
+                                                          child: Text(
+                                                        "SN: ${item["U_CK_SerialNum"]}",
+                                                        textAlign:
+                                                            TextAlign.end,
+                                                        style: TextStyle(
+                                                            fontSize: 12.5,
+                                                            color:
+                                                                Colors.white),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              )
+                                                ),
+                                              ),
                                             ],
                                           ))
                                     ],
@@ -486,7 +530,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                         ],
                       ),
                     ), //
-
+                    //////Enddddddddddddddddddddddddddddddddddddddddddddd
                     SizedBox(
                       height: 10,
                     ),

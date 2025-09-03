@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:bizd_tech_service/component/DateForServiceList.dart';
+import 'package:bizd_tech_service/component/DatePickerDialog.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
@@ -31,8 +33,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
   bool _isLoading = false;
   List<dynamic> documents = [];
   List<dynamic> warehouses = [];
-  List<dynamic> customers = [];
   String? userName;
+  final TextEditingController _dateController = TextEditingController();
 
   @override
   void initState() {
@@ -42,21 +44,21 @@ class _ServiceScreenState extends State<ServiceScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _dateController.dispose(); // Always dispose controllers
+    super.dispose();
+  }
+
   Future<void> _init() async {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
     await _loadUserName();
-
     final svProvider = Provider.of<ServiceListProvider>(context, listen: false);
     if (svProvider.documents.isEmpty) {
-      await svProvider.fetchDocuments();
-    }
-    final customerProvider =
-        Provider.of<HelperProvider>(context, listen: false);
-    if (customerProvider.customer.isEmpty) {
-      await customerProvider.fetchCustomer();
+      await svProvider.fetchDocuments(context: context);
     }
     setState(() {
       _isLoading = false;
@@ -111,10 +113,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
             borderRadius: BorderRadius.circular(9),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          content: Row(
+          content: const Row(
             children: [
-              const Icon(Icons.remove_circle, color: Colors.white, size: 28),
-              const SizedBox(width: 16),
+              Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -122,7 +124,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                   children: [
                     Text(
                       "Status updated successfully!",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: Colors.white,
                       ),
@@ -144,13 +146,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
   }
 
   Future<void> _refreshData() async {
-    // setState(() => _initialLoading = true);
-
-    final provider = Provider.of<ServiceListProvider>(context, listen: false);
-    // ✅ Only fetch if not already loaded
+    _dateController.clear(); // Clear the date controller
+    final provider = context.read<ServiceListProvider>();
     provider.resetPagination();
-    await provider.resfreshFetchDocuments();
-    // setState(() => _initialLoading = false);
+    provider.clearCurrentDate();
+    await provider.resfreshFetchDocuments(context);
   }
 
   @override
@@ -201,48 +201,52 @@ class _ServiceScreenState extends State<ServiceScreen> {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // TextFormField(
-
-              //   controller: null,
-              //   decoration: InputDecoration(
-              //     enabledBorder: OutlineInputBorder(
-              //       borderSide: const BorderSide(
-              //         color: Colors.grey,
-              //         width: 1.0, // Border color and width when not focused
-              //       ),
-              //       borderRadius: BorderRadius.circular(5.0), // Rounded corners
-              //     ),
-              //     focusedBorder: OutlineInputBorder(
-              //       borderSide: BorderSide(
-              //         color: const Color.fromARGB(255, 123, 125, 126),
-              //         width: 1.0, // Border color and width when focused
-              //       ),
-              //       borderRadius: BorderRadius.circular(5.0), // Rounded corners
-              //     ),
-              //     contentPadding: const EdgeInsets.only(top: 12),
-              //     hintText: 'Search...', // Placeholder text
-              //     hintStyle: TextStyle(
-              //       fontSize: 14.0, // Placeholder font size
-              //       color: Colors.grey,
-              //       // Placeholder text color
-              //     ),
-              //     prefixIcon: Icon(Icons.search),
-              //     suffixIcon: IconButton(
-              //       icon: Icon(
-              //         Icons.list,
-              //       ),
-              //       onPressed: null,
-              //     ),
-              //   ),
-              // ),
               const SizedBox(
                 height: 10,
               ),
-              const DateSelector(),
-              // SizedBox(
-              //   height: 7,
-              // ),
-              // // CONTENT
+              Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: DateForServiceList(
+                      controller: _dateController,
+                      star: true,
+                      detail: false, // set true if you want read-only mode
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                                    width: 50,
+                                    height: 46,
+                                    decoration: BoxDecoration(
+                                      color
+                                          : Colors.green,
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: (){},
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                        ),
+                                      ),
+                                      child: Text(
+                                         "GO",
+                                          style: TextStyle(
+                                              color:const Color.fromARGB(
+                                                      255, 255, 255, 255),
+                                              fontSize: 15),
+                                          textScaleFactor: 1.0),
+                                    ),
+                                  ),
+                                  
+                  ),
+                  SizedBox(width: 5,)
+                ],
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.only(top: 5),
@@ -290,34 +294,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                       }
                                       onUpdateStatus(travel["DocEntry"],
                                           travel["U_CK_Status"]);
-                                      // if (doc["U_lk_delstat"] == "On the Way") {
-                                      //   showPODDialog(context, doc["DocEntry"],
-                                      //       "Delivered");
-                                      // } else {
-                                      //   MaterialDialog.loading(
-                                      //       context); // Show loading dialog
-
-                                      //   await Provider.of<UpdateStatusProvider>(
-                                      //           context,
-                                      //           listen: false)
-                                      //       .updateDocumentAndStatus(
-                                      //           docEntry: doc["DocEntry"],
-                                      //           status: doc["U_lk_delstat"] ==
-                                      //                   "Started"
-                                      //               ? "On the Way"
-                                      //               : "",
-                                      //           remarks: "",
-                                      //           context: context);
-                                      //   Future.microtask(() {
-                                      //     final provider =
-                                      //         Provider.of<DeliveryNoteProvider>(
-                                      //             context,
-                                      //             listen: false);
-                                      //     provider.fetchDocuments();
-                                      //   });
-                                      //   Navigator.of(context)
-                                      //       .pop(); // Close loading dialog AFTER logout finishes
-                                      // }
                                     },
                                   )),
                             ]),
@@ -332,42 +308,44 @@ class _ServiceScreenState extends State<ServiceScreen> {
 }
 
 class DateSelector extends StatefulWidget {
-  const DateSelector({super.key});
+  final void Function(DateTime)? onDateChanged;
+
+  const DateSelector({super.key, this.onDateChanged});
 
   @override
   _DateSelectorState createState() => _DateSelectorState();
 }
 
 class _DateSelectorState extends State<DateSelector> {
-  DateTime _selectedDate = DateTime.now(); // Default to the current date
+  DateTime? _selectedDate; // 👈 start as null
 
   Future<void> _selectDate(BuildContext context) async {
+    final DateTime initialDate = _selectedDate ?? DateTime.now();
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: initialDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
+
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      setState(() => _selectedDate = picked);
+      widget.onDateChanged?.call(_selectedDate!);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Format the date to "Monday, January 15"
-    final formattedDate = DateFormat('EEEE, MMMM d').format(_selectedDate);
+    final formattedDate = _selectedDate != null
+        ? DateFormat('dd MMMM yyyy').format(_selectedDate!)
+        : "No Date Selection"; // 👈 show placeholder when empty
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 255, 255, 255),
-        border: Border.all(
-          color: Colors.green, // Border color
-          width: 1.0, // Border width
-        ),
-        borderRadius: BorderRadius.circular(5.0), // Rounded corners
+        color: Colors.white,
+        border: Border.all(color: Colors.green, width: 1.0),
+        borderRadius: BorderRadius.circular(5.0),
       ),
       width: double.infinity,
       height: 50,
@@ -378,7 +356,7 @@ class _DateSelectorState extends State<DateSelector> {
           Expanded(
             flex: 4,
             child: Text(
-              formattedDate, // Display formatted date
+              formattedDate,
               style: const TextStyle(fontSize: 13),
               textScaleFactor: 1.0,
             ),
@@ -388,20 +366,14 @@ class _DateSelectorState extends State<DateSelector> {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(
-                    Icons.keyboard_arrow_left,
-                    size: 30,
-                    color: Color.fromARGB(255, 88, 89, 90),
-                  ),
+                  icon: const Icon(Icons.keyboard_arrow_left,
+                      size: 30, color: Color.fromARGB(255, 88, 89, 90)),
                   onPressed: () => _selectDate(context),
                 ),
                 const SizedBox(width: 3),
                 IconButton(
-                  icon: const Icon(
-                    Icons.keyboard_arrow_right,
-                    size: 30,
-                    color: Color.fromARGB(255, 88, 89, 90),
-                  ),
+                  icon: const Icon(Icons.keyboard_arrow_right,
+                      size: 30, color: Color.fromARGB(255, 88, 89, 90)),
                   onPressed: () => _selectDate(context),
                 ),
               ],

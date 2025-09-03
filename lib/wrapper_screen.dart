@@ -27,7 +27,7 @@ class WrapperScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SpinKitFadingCircle(
-                      color: Colors.blue,
+                      color: Colors.green,
                       size: 60.0,
                     ),
                     SizedBox(

@@ -1,14 +1,18 @@
+import 'dart:math';
+
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/component/detail_row.dart';
+import 'package:bizd_tech_service/screens/service/component/row_item.dart';
 import 'package:bizd_tech_service/screens/service/screen/sericeEntry.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ServiceByIdScreen extends StatefulWidget {
@@ -70,7 +74,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
     final provider = Provider.of<ServiceListProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
     provider.resetPagination();
-    await provider.resfreshFetchDocuments();
+    await provider.resfreshFetchDocuments(context);
     // setState(() => _initialLoading = false);
   }
 
@@ -121,6 +125,9 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   Future<String?> getName() async {
     return await LocalStorageManger.getString('FullName');
   }
+
+  final numberFormatCurrency = NumberFormat("#,##0.00", "en_US");
+  final numberQty = NumberFormat("#,##0", "en_US");
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +185,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -213,7 +220,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -245,7 +252,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -277,7 +284,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -360,36 +367,33 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 Expanded(
                                     flex: 4,
                                     child: Container(
-                                        padding:
-                                            EdgeInsets.fromLTRB(4, 10, 4, 10),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4, 10, 4, 10),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                                context
-                                                        .read<HelperProvider>()
-                                                        .customer
-                                                        .firstWhere(
-                                                          (e) =>
-                                                              e["CardCode"] ==
-                                                              widget.data[
-                                                                  "U_CK_CardCode"],
-                                                          orElse: () => {
-                                                            "CardCode":
-                                                                "Not Found"
-                                                          },
-                                                        )["CardName"] ??
+                                                widget.data["CustomerName"] ??
                                                     "N/A", //////aaaaaaaaaaaaa
-                                                style:
-                                                    TextStyle(fontSize: 12.5),
+                                                style: const TextStyle(
+                                                    fontSize: 12.5),
                                                 textScaleFactor: 1.0),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 6,
                                             ),
                                             Text(
-                                                "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                                style: TextStyle(
+                                                ((widget.data["CustomerAddress"]
+                                                                as List?)
+                                                            ?.isNotEmpty ==
+                                                        true)
+                                                    ? (widget
+                                                            .data[
+                                                                "CustomerAddress"]
+                                                            .first["StreetNo"] ??
+                                                        "N/A")
+                                                    : "N/A",
+                                                style: const TextStyle(
                                                   fontSize: 12.5,
                                                   fontWeight: FontWeight.bold,
                                                   height: 2,
@@ -405,14 +409,15 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 10,
                                         ),
                                         Padding(
-                                          padding: EdgeInsets.only(right: 10),
+                                          padding:
+                                              const EdgeInsets.only(right: 10),
                                           child: Text(
-                                            "${widget.data["DocEntry"]}",
-                                            style: TextStyle(
+                                            "${widget.data["DocNum"]}",
+                                            style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 13),
                                             textScaleFactor: 1.0,
@@ -444,7 +449,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             children: [
                                               Text(
                                                   "Date : ${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")}",
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
                                                   textScaleFactor: 1.0),
@@ -453,7 +458,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                               ),
                                               Text(
                                                   "Time ${widget.data["U_CK_Time"]} - ${widget.data["U_CK_EndTime"]}",
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),
                                                   textScaleFactor: 1.0),
@@ -504,7 +509,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(userName ?? "...",
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontSize: 12.5,
                                               color: Colors.white),
                                           textScaleFactor: 1.0),
@@ -584,134 +589,176 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       height: 2,
                     ),
                     DetailRow(
+                      title: "Customer:",
                       svg: SvgPicture.asset(
-                        color: Colors.black,
                         'images/svg/building.svg',
+                        color: Colors.black,
                         width: 30,
                         height: 30,
                       ),
-                      title: "Customer :",
-                      row1:
-                          "${context.read<HelperProvider>().customer.firstWhere(
-                                (e) =>
-                                    e["CardCode"] ==
-                                    widget.data["U_CK_CardCode"],
-                                orElse: () => {"CardCode": "Not Found"},
-                              )["CardName"] ?? "N/A"}",
+                      rows: [
+                        RowItem(
+                            left: "${widget.data["CustomerName"] ?? "N/A"}",
+                            right: ""),
+                      ],
                     ),
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
+                      title: "Contact:",
                       svg: SvgPicture.asset(
                         color: Colors.black,
                         'images/svg/contact.svg',
                         width: 30,
                         height: 30,
                       ),
-                      title: "Contact :",
-                      row1: "Mr. Jossep Alpha",
-                      row2: "092 555 444",
+                      rows: (widget.data["CustomerContact"] as List)
+                          .expand<RowItem>((e) => [
+                                RowItem(
+                                  left: e["Name"] ?? "N/A",
+                                  right: "",
+                                ),
+                                RowItem(
+                                  left: e["MobilePhone"] ?? "N/A",
+                                  right: "",
+                                ),
+                              ])
+                          .toList(),
                     ),
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
+                      title: "Service:",
                       svg: SvgPicture.asset(
                         color: Colors.black,
                         'images/svg/dolla.svg',
                         width: 30,
                         height: 30,
                       ),
-                      title: "Service :",
-                      row1: "A/C Cleaning",
-                      rowRight1: "USD 50.00",
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    const DetailRow(
-                      svg: Icon(
-                        Icons.build,
-                        size: 25,
-                      ),
-                      title: "Equipment",
-                      row1: "Equipment Name",
-                      rowRight1: "SN: 100020000300",
+                      rows: (widget.data["CK_JOB_SERVICESCollection"] as List)
+                          .expand<RowItem>((e) => [
+                                RowItem(
+                                  left: e["U_CK_ServiceName"] ?? "N/A",
+                                  right: 'USD ${numberFormatCurrency.format(
+                                    double.tryParse(
+                                            e["U_CK_UnitPrice"].toString()) ??
+                                        0,
+                                  )} ',
+                                ),
+                              ])
+                          .toList(),
                     ),
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
+                      title: "Equipment:",
+                      svg: const Icon(
+                        Icons.build,
+                        size: 25,
+                      ),
+                      rows: (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
+                          .expand<RowItem>((e) => [
+                                RowItem(
+                                  left: e["U_CK_EquipName"] ?? "N/A",
+                                  right: 'SN: ${e["U_CK_SerialNum"] ?? "N/A"}',
+                                ),
+                              ])
+                          .toList(),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    DetailRow(
+                      title: "Activity:",
                       svg: SvgPicture.asset(
                         color: Colors.black,
                         'images/svg/activity.svg',
                         width: 30,
                         height: 30,
                       ),
-                      title: "Activity :",
-                      row1: "Activity Name 1",
-                      isRowRight1Icon: true,
-                      rowRight1: SvgPicture.asset(
-                        color: Colors.black,
-                        'images/svg/task_check.svg',
-                        width: 25,
-                        height: 25,
-                      ),
-                      row2: "Activity Name 2",
-                      isRowRight2Icon: true,
-                      rowRight2: SvgPicture.asset(
-                        color: Colors.black,
-                        'images/svg/task_check.svg',
-                        width: 25,
-                        height: 25,
-                      ),
-                      row3: "Activity Name 3",
-                      isRowRight3Icon: true,
-                      rowRight3: SvgPicture.asset(
-                        color: Colors.black,
-                        'images/svg/task_check.svg',
-                        width: 25,
-                        height: 25,
-                      ),
+                      rows: [
+                        RowItem(
+                            left: "Activity Name1",
+                            right: SvgPicture.asset(
+                              color: Colors.black,
+                              'images/svg/task_check.svg',
+                              width: 25,
+                              height: 25,
+                            ),
+                            isRightIcon: true),
+                        RowItem(
+                            left: "Activity Name2",
+                            right: SvgPicture.asset(
+                              color: Colors.black,
+                              'images/svg/task_check.svg',
+                              width: 25,
+                              height: 25,
+                            ),
+                            isRightIcon: true),
+                        RowItem(
+                            left: "Activity Name3",
+                            right: SvgPicture.asset(
+                              color: Colors.black,
+                              'images/svg/task_check.svg',
+                              width: 25,
+                              height: 25,
+                            ),
+                            isRightIcon: true),
+                      ],
                     ),
                     const SizedBox(
                       height: 15,
                     ),
-
                     DetailRow(
+                      title: "Material Reserve:",
                       svg: SvgPicture.asset(
                         color: Colors.black,
                         'images/svg/material.svg',
                         width: 30,
                         height: 30,
                       ),
-                      title: "Material Reserve",
-                      row1: "Material Item 1",
-                      rowRight1: "10",
-                      row2: "Material Item 2",
-                      rowRight2: "20",
-                      row3: "Material Item 3",
-                      rowRight3: "30",
+                      rows: (widget.data["CK_JOB_MATERIALCollection"] as List)
+                          .expand<RowItem>((e) => [
+                                RowItem(
+                                  left: e["U_CK_ItemName"] ?? "N/A",
+                                  right: '${numberQty.format(
+                                    double.tryParse(e["U_CK_Qty"].toString()) ??
+                                        0,
+                                  )} ',
+                                ),
+                              ])
+                          .toList(),
                     ),
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
+                      title: "Tool & Assets:",
                       svg: SvgPicture.asset(
                         color: Colors.black,
                         'images/svg/tool.svg',
                         width: 30,
                         height: 30,
                       ),
-                      title: "Tool & Assets",
-                      row1: "Tools Item 1",
-                      rowRight1: "2",
-                      row2: "Tools Item 2",
-                      rowRight2: "1",
-                      row3: "Tools Item 3",
-                      rowRight3: "2",
+                      rows: [
+                        RowItem(
+                          left: "Tools Item 1",
+                          right: "10",
+                        ),
+                        RowItem(
+                          left: "Tools Item 2",
+                          right: "20",
+                        ),
+                        RowItem(
+                          left: "Tools Item 3",
+                          right: "30",
+                        ),
+                      ],
                     ),
+
                     const SizedBox(
                       height: 10,
                     ),
@@ -769,7 +816,9 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 onUpdateStatus();
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor: Colors.green,
+                                backgroundColor: widget.data["U_CK_Status"] == "Accept"
+                                    ? Colors.yellow
+                                    : Colors.green,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
@@ -784,7 +833,10 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                               ? "Service"
                                               : "Entry",
                                   style: TextStyle(
-                                      color: Color.fromARGB(255, 255, 255, 255),
+                                      color: widget.data["U_CK_Status"] == "Accept"
+                                          ? const Color.fromARGB(255, 8, 8, 8)
+                                          : const Color.fromARGB(
+                                              255, 255, 255, 255),
                                       fontSize: 12),
                                   textScaleFactor: 1.0),
                             ),

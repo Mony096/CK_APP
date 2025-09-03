@@ -356,28 +356,40 @@ class _ImageScreenState extends State<ImageScreen> {
                                     child: Container(
                                         padding: const EdgeInsets.fromLTRB(
                                             4, 10, 4, 10),
-                                        child: const Column(
+                                        child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text("The Pizza Comapny - Sen Sok",
-                                                style:
-                                                    TextStyle(fontSize: 12.5),
-                                                textScaleFactor: 1.0),
-                                            SizedBox(
+                                            Text(
+                                              "${widget.data["CustomerName"] ?? "N/A"}",
+                                              style: const TextStyle(
+                                                  fontSize: 12.5),
+                                              textScaleFactor: 1.0,
+                                            ),
+                                            const SizedBox(
                                               height: 6,
                                             ),
                                             Text(
-                                                "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                                style: TextStyle(
-                                                  fontSize: 12.5,
-                                                  fontWeight: FontWeight.bold,
-                                                  height: 2,
-                                                ),
-                                                textScaleFactor: 1.0),
+                                              ((widget.data["CustomerAddress"]
+                                                              as List?)
+                                                          ?.isNotEmpty ==
+                                                      true)
+                                                  ? (widget
+                                                          .data[
+                                                              "CustomerAddress"]
+                                                          .first["StreetNo"] ??
+                                                      "N/A")
+                                                  : "N/A",
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.bold,
+                                                height: 2,
+                                              ),
+                                              textScaleFactor: 1.0,
+                                            ),
                                           ],
                                         ))),
-                                const Expanded(
+                                Expanded(
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
@@ -385,16 +397,19 @@ class _ImageScreenState extends State<ImageScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 10,
                                         ),
                                         Padding(
-                                          padding: EdgeInsets.only(right: 10),
-                                          child: Text("SVT00001",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13),
-                                              textScaleFactor: 1.0),
+                                          padding:
+                                              const EdgeInsets.only(right: 10),
+                                          child: Text(
+                                            "${widget.data["DocNum"]}",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
                                         ),
                                       ],
                                     ))
@@ -403,8 +418,7 @@ class _ImageScreenState extends State<ImageScreen> {
                           ),
                           Container(
                               // height: 150,
-                              padding:
-                                  const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                              padding: const EdgeInsets.fromLTRB(10, 15, 10, 8),
                               color: const Color.fromARGB(255, 66, 83, 100),
                               width: double.infinity,
                               child: Column(
@@ -425,66 +439,87 @@ class _ImageScreenState extends State<ImageScreen> {
                                           ),
                                         ),
                                       ),
-                                      const Expanded(
+                                      Expanded(
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 children: [
                                                   Expanded(
-                                                      child: Text("Service:",
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Service:",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 13.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   Expanded(
-                                                      child: Text("Status:",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Status:",
+                                                    textAlign: TextAlign.end,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 13.5,
+                                                        color: Colors.white),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   SizedBox(
                                                     width: 5,
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                               Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Expanded(
+                                                      child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: (widget
+                                                                          .data[
+                                                                      "CK_JOB_SERVICESCollection"]
+                                                                  as List)
+                                                              .map(
+                                                                  (e) =>
+                                                                      Container(
+                                                                        margin: const EdgeInsets
+                                                                            .only(
+                                                                            bottom:
+                                                                                8),
+                                                                        child:
+                                                                            Text(
+                                                                          "${e["U_CK_ServiceName"]}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.white,
+                                                                              fontSize: 12.5),
+                                                                          textScaleFactor:
+                                                                              1.0,
+                                                                        ),
+                                                                      ))
+                                                              .toList())),
+                                                  const Expanded(
                                                       child: Text(
-                                                          "A/C Cleaning",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  Expanded(
-                                                      child: Text("Open",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  SizedBox(
+                                                    "Open",
+                                                    textAlign: TextAlign.end,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                 ],
@@ -493,12 +528,12 @@ class _ImageScreenState extends State<ImageScreen> {
                                           ))
                                     ],
                                   ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  const Row(
+                                  // SizedBox(
+                                  //   height: 10,
+                                  // ),
+                                  Row(
                                     children: [
-                                      Expanded(
+                                      const Expanded(
                                         flex: 1,
                                         child: Padding(
                                             padding: EdgeInsets.only(right: 6),
@@ -512,19 +547,18 @@ class _ImageScreenState extends State<ImageScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 children: [
                                                   Expanded(
-                                                      child: Text("Equipment:",
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Equipment:",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 13.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   Expanded(
                                                       child: Text("",
                                                           textAlign:
@@ -540,36 +574,44 @@ class _ImageScreenState extends State<ImageScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                          "Equipment Name",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "SN: 10002000300",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  SizedBox(
-                                                    width: 5,
+                                              ...(widget.data[
+                                                          "CK_JOB_EQUIPMENTCollection"]
+                                                      as List)
+                                                  .map(
+                                                (item) => Container(
+                                                  margin: const EdgeInsets.only(
+                                                      bottom: 10),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: Text(
+                                                        "${item["U_CK_EquipName"]}",
+                                                        style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      Expanded(
+                                                          child: Text(
+                                                        "SN: ${item["U_CK_SerialNum"]}",
+                                                        textAlign:
+                                                            TextAlign.end,
+                                                        style: const TextStyle(
+                                                            fontSize: 12.5,
+                                                            color:
+                                                                Colors.white),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      const SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              )
+                                                ),
+                                              ),
                                             ],
                                           ))
                                     ],
@@ -694,7 +736,7 @@ class _ImageShowState extends State<ImageShow> {
         ),
         margin: const EdgeInsets.all(4),
         padding: const EdgeInsets.all(5),
-        height: 258,
+        height: 265,
         child: widget.image.isEmpty
             ? const Center(
                 child: Icon(

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/screens/signature/signature.dart';
 import 'package:bizd_tech_service/screens/signature/signature_preview_edit.dart';
 import 'package:flutter/material.dart';
@@ -249,7 +250,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
                         borderRadius:
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
-                      child: Column(
+                      child:
+                       Column(
                         children: [
                           SizedBox(
                             width: double.infinity,
@@ -297,28 +299,40 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                     child: Container(
                                         padding: const EdgeInsets.fromLTRB(
                                             4, 10, 4, 10),
-                                        child: const Column(
+                                        child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
-                                          children: [
-                                            Text("The Pizza Comapny - Sen Sok",
-                                                style:
-                                                    TextStyle(fontSize: 12.5),
-                                                textScaleFactor: 1.0),
-                                            SizedBox(
+                                            children: [
+                                            Text(
+                                              "${widget.data["CustomerName"] ?? "N/A"}",
+                                              style: const TextStyle(
+                                                  fontSize: 12.5),
+                                              textScaleFactor: 1.0,
+                                            ),
+                                            const SizedBox(
                                               height: 6,
                                             ),
                                             Text(
-                                                "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                                style: TextStyle(
-                                                  fontSize: 12.5,
-                                                  fontWeight: FontWeight.bold,
-                                                  height: 2,
-                                                ),
-                                                textScaleFactor: 1.0),
+                                              ((widget.data["CustomerAddress"]
+                                                              as List?)
+                                                          ?.isNotEmpty ==
+                                                      true)
+                                                  ? (widget
+                                                          .data[
+                                                              "CustomerAddress"]
+                                                          .first["StreetNo"] ??
+                                                      "N/A")
+                                                  : "N/A",
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.bold,
+                                                height: 2,
+                                              ),
+                                              textScaleFactor: 1.0,
+                                            ),
                                           ],
                                         ))),
-                                const Expanded(
+                                Expanded(
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
@@ -326,16 +340,19 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 10,
                                         ),
                                         Padding(
-                                          padding: EdgeInsets.only(right: 10),
-                                          child: Text("SVT00001",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13),
-                                              textScaleFactor: 1.0),
+                                          padding:
+                                              const EdgeInsets.only(right: 10),
+                                          child: Text(
+                                            "${widget.data["DocNum"]}",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13),
+                                            textScaleFactor: 1.0,
+                                          ),
                                         ),
                                       ],
                                     ))
@@ -344,8 +361,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                           ),
                           Container(
                               // height: 150,
-                              padding:
-                                  const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                              padding: const EdgeInsets.fromLTRB(10, 15, 10, 8),
                               color: const Color.fromARGB(255, 66, 83, 100),
                               width: double.infinity,
                               child: Column(
@@ -366,66 +382,87 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                           ),
                                         ),
                                       ),
-                                      const Expanded(
+                                      Expanded(
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 children: [
                                                   Expanded(
-                                                      child: Text("Service:",
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Service:",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 13.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   Expanded(
-                                                      child: Text("Status:",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Status:",
+                                                    textAlign: TextAlign.end,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 13.5,
+                                                        color: Colors.white),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   SizedBox(
                                                     width: 5,
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                               Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Expanded(
+                                                      child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: (widget
+                                                                          .data[
+                                                                      "CK_JOB_SERVICESCollection"]
+                                                                  as List)
+                                                              .map(
+                                                                  (e) =>
+                                                                      Container(
+                                                                        margin: const EdgeInsets
+                                                                            .only(
+                                                                            bottom:
+                                                                                8),
+                                                                        child:
+                                                                            Text(
+                                                                          "${e["U_CK_ServiceName"]}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.white,
+                                                                              fontSize: 12.5),
+                                                                          textScaleFactor:
+                                                                              1.0,
+                                                                        ),
+                                                                      ))
+                                                              .toList())),
+                                                  const Expanded(
                                                       child: Text(
-                                                          "A/C Cleaning",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  Expanded(
-                                                      child: Text("Open",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  SizedBox(
+                                                    "Open",
+                                                    textAlign: TextAlign.end,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                 ],
@@ -434,12 +471,12 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                           ))
                                     ],
                                   ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  const Row(
+                                  // SizedBox(
+                                  //   height: 10,
+                                  // ),
+                                  Row(
                                     children: [
-                                      Expanded(
+                                      const Expanded(
                                         flex: 1,
                                         child: Padding(
                                             padding: EdgeInsets.only(right: 6),
@@ -453,19 +490,18 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 children: [
                                                   Expanded(
-                                                      child: Text("Equipment:",
-                                                          style: TextStyle(
-                                                              fontSize: 13.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
+                                                      child: Text(
+                                                    "Equipment:",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 13.5),
+                                                    textScaleFactor: 1.0,
+                                                  )),
                                                   Expanded(
                                                       child: Text("",
                                                           textAlign:
@@ -481,36 +517,44 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                          "Equipment Name",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "SN: 10002000300",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              color:
-                                                                  Colors.white),
-                                                          textScaleFactor:
-                                                              1.0)),
-                                                  SizedBox(
-                                                    width: 5,
+                                              ...(widget.data[
+                                                          "CK_JOB_EQUIPMENTCollection"]
+                                                      as List)
+                                                  .map(
+                                                (item) => Container(
+                                                  margin: const EdgeInsets.only(
+                                                      bottom: 10),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: Text(
+                                                        "${item["U_CK_EquipName"]}",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      Expanded(
+                                                          child: Text(
+                                                        "SN: ${item["U_CK_SerialNum"]}",
+                                                        textAlign:
+                                                            TextAlign.end,
+                                                        style: TextStyle(
+                                                            fontSize: 12.5,
+                                                            color:
+                                                                Colors.white),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              )
+                                                ),
+                                              ),
                                             ],
                                           ))
                                     ],
@@ -520,12 +564,12 @@ class _SignatureScreenState extends State<SignatureScreen> {
                         ],
                       ),
                     ), //
-
+/////endddddddddddddddddddddddddddddd
                     const SizedBox(
                       height: 10,
                     ),
                     Menu(
-                      signature: context.watch<CompletedServiceProvider>().signatureList,
+                      signature: context.read<CompletedServiceProvider>().signatureList,
                         title: 'Upload Signature',
                         icon: Padding(
                           padding: const EdgeInsets.only(right: 5),
@@ -552,7 +596,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                               flex: 5,
                               child: Text(
                                   context
-                                          .watch<CompletedServiceProvider>()
+                                          .read<CompletedServiceProvider>()
                                           .signatureList
                                           .isNotEmpty
                                       ? "Signature Captured Successfully"
@@ -584,7 +628,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                               },
                               style: TextButton.styleFrom(
                                 backgroundColor: context
-                                        .watch<CompletedServiceProvider>()
+                                        .read<CompletedServiceProvider>()
                                         .signatureList
                                         .isNotEmpty
                                     ? Colors.green

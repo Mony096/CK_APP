@@ -1,5 +1,6 @@
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/screens/service/screen/image.dart';
 import 'package:bizd_tech_service/screens/service/screen/materialReserve.dart';
 import 'package:bizd_tech_service/screens/service/screen/openIssue.dart';
@@ -42,10 +43,10 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
         child: Scaffold(
           backgroundColor: const Color.fromARGB(255, 236, 238, 240),
           appBar: AppBar(
-            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
             // Leading menu icon on the left
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
                 context.read<CompletedServiceProvider>().clearData();
                 Navigator.of(context).pop();
@@ -53,7 +54,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               },
             ),
             // Centered title
-            title: Center(
+            title: const Center(
               child: Text(
                 'Service Entry',
                 style: TextStyle(fontSize: 17, color: Colors.white),
@@ -82,15 +83,15 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           ),
           body: Padding(
             padding: const EdgeInsets.all(4),
-            child: Container(
+            child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                       height: 80,
-                      color: Color.fromARGB(255, 66, 83, 100),
+                      color: const Color.fromARGB(255, 66, 83, 100),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -98,7 +99,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               width: 37,
                               height: 37,
                               decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 66, 83, 100),
+                                color: const Color.fromARGB(255, 66, 83, 100),
                                 shape: BoxShape
                                     .circle, // Makes the container circular
                                 border: Border.all(
@@ -138,7 +139,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               width: 37,
                               height: 37,
                               decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 66, 83, 100),
+                                color: const Color.fromARGB(255, 66, 83, 100),
                                 shape: BoxShape
                                     .circle, // Makes the container circular
                                 border: Border.all(
@@ -173,7 +174,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               width: 37,
                               height: 37,
                               decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 66, 83, 100),
+                                color: const Color.fromARGB(255, 66, 83, 100),
                                 shape: BoxShape
                                     .circle, // Makes the container circular
                                 border: Border.all(
@@ -207,7 +208,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               width: 37,
                               height: 37,
                               decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 66, 83, 100),
+                                color: const Color.fromARGB(255, 66, 83, 100),
                                 shape: BoxShape
                                     .circle, // Makes the container circular
                                 border: Border.all(
@@ -227,7 +228,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 5,
                     ),
                     Expanded(
@@ -241,7 +242,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                       child: ListView(children: [
                         Container(
                           // margin: EdgeInsets.only(bottom: 1),
-                          padding: EdgeInsets.only(bottom: 6),
+                          padding: const EdgeInsets.only(bottom: 6),
                           width: double.infinity,
                           // height: 250,
                           decoration: BoxDecoration(
@@ -253,9 +254,10 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             borderRadius:
                                 BorderRadius.circular(5.0), // Rounded corners
                           ),
-                          child: Column(
+                          child: 
+                          Column(
                             children: [
-                              Container(
+                              SizedBox(
                                 width: double.infinity,
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,24 +301,33 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                     Expanded(
                                         flex: 4,
                                         child: Container(
-                                            padding: EdgeInsets.fromLTRB(
+                                            padding: const EdgeInsets.fromLTRB(
                                                 4, 10, 4, 10),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  "The Pizza Comapny - Sen Sok",
-                                                  style:
-                                                      TextStyle(fontSize: 12.5),
+                                                  "${widget.data["CustomerName"] ?? "N/A"}",
+                                                  style: const TextStyle(
+                                                      fontSize: 12.5),
                                                   textScaleFactor: 1.0,
                                                 ),
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 6,
                                                 ),
                                                 Text(
-                                                  "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                                  style: TextStyle(
+                                                  ((widget.data["CustomerAddress"]
+                                                                  as List?)
+                                                              ?.isNotEmpty ==
+                                                          true)
+                                                      ? (widget
+                                                              .data[
+                                                                  "CustomerAddress"]
+                                                              .first["StreetNo"] ??
+                                                          "N/A")
+                                                      : "N/A",
+                                                  style: const TextStyle(
                                                     fontSize: 12.5,
                                                     fontWeight: FontWeight.bold,
                                                     height: 2,
@@ -333,15 +344,15 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.start,
                                           children: [
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 10,
                                             ),
                                             Padding(
                                               padding: const EdgeInsets.only(
                                                   right: 10),
                                               child: Text(
-                                                "SVT00001",
-                                                style: TextStyle(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 13),
                                                 textScaleFactor: 1.0,
@@ -354,8 +365,9 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               ),
                               Container(
                                   // height: 150,
-                                  padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
-                                  color: Color.fromARGB(255, 66, 83, 100),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 15, 10, 8),
+                                  color: const Color.fromARGB(255, 66, 83, 100),
                                   width: double.infinity,
                                   child: Column(
                                     children: [
@@ -379,7 +391,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               flex: 6,
                                               child: Column(
                                                 children: [
-                                                  Row(
+                                                  const Row(
                                                     children: [
                                                       Expanded(
                                                           child: Text(
@@ -409,20 +421,46 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                       ),
                                                     ],
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     height: 10,
                                                   ),
                                                   Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Expanded(
-                                                          child: Text(
-                                                        "A/C Cleaning",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 12.5),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      Expanded(
+                                                          child: Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: (widget
+                                                                              .data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
+                                                                      Container(
+                                                                        margin: const EdgeInsets
+                                                                            .only(
+                                                                            bottom:
+                                                                                8),
+                                                                        child:
+                                                                            Text(
+                                                                          "${e["U_CK_ServiceName"]}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.white,
+                                                                              fontSize: 12.5),
+                                                                          textScaleFactor:
+                                                                              1.0,
+                                                                        ),
+                                                                      ))
+                                                                  .toList())),
+                                                      const Expanded(
                                                           child: Text(
                                                         "Open",
                                                         textAlign:
@@ -432,7 +470,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                             fontSize: 12.5),
                                                         textScaleFactor: 1.0,
                                                       )),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         width: 5,
                                                       ),
                                                     ],
@@ -441,16 +479,16 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               ))
                                         ],
                                       ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
+                                      // SizedBox(
+                                      //   height: 10,
+                                      // ),
                                       Row(
                                         children: [
-                                          Expanded(
+                                          const Expanded(
                                             flex: 1,
                                             child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 6),
+                                                padding:
+                                                    EdgeInsets.only(right: 6),
                                                 child: Icon(
                                                   Icons.build,
                                                   color: Colors.white,
@@ -461,7 +499,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               flex: 6,
                                               child: Column(
                                                 children: [
-                                                  Row(
+                                                  const Row(
                                                     children: [
                                                       Expanded(
                                                           child: Text(
@@ -488,35 +526,48 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                       ),
                                                     ],
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     height: 10,
                                                   ),
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: Text(
-                                                        "Equipment Name",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 12.5),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      Expanded(
-                                                          child: Text(
-                                                        "SN: 10002000300",
-                                                        textAlign:
-                                                            TextAlign.end,
-                                                        style: TextStyle(
-                                                            fontSize: 12.5,
-                                                            color:
-                                                                Colors.white),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      SizedBox(
-                                                        width: 5,
+                                                  ...(widget.data[
+                                                              "CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .map(
+                                                    (item) => Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 10),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Text(
+                                                            "${item["U_CK_EquipName"]}",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 12.5),
+                                                            textScaleFactor:
+                                                                1.0,
+                                                          )),
+                                                          Expanded(
+                                                              child: Text(
+                                                            "SN: ${item["U_CK_SerialNum"]}",
+                                                            textAlign:
+                                                                TextAlign.end,
+                                                            style: TextStyle(
+                                                                fontSize: 12.5,
+                                                                color: Colors
+                                                                    .white),
+                                                            textScaleFactor:
+                                                                1.0,
+                                                          )),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  )
+                                                    ),
+                                                  ),
                                                 ],
                                               ))
                                         ],
@@ -526,8 +577,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             ],
                           ),
                         ),
-
-                        SizedBox(
+                        //////Enddddddddddddddddddddddddddddddddddddddddddddd
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -551,7 +602,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -575,7 +626,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -599,7 +650,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -619,7 +670,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -639,7 +690,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -660,7 +711,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                           ),
                         ),
                         /////do somthing
-                        SizedBox(
+                        const SizedBox(
                           height: 7,
                         ),
                       ]),
@@ -688,10 +739,10 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                         borderRadius: BorderRadius.circular(5.0),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       "Complete",
                       style: TextStyle(
-                          color: const Color.fromARGB(255, 255, 255, 255),
+                          color: Color.fromARGB(255, 255, 255, 255),
                           fontSize: 13),
                     ),
                   ),
@@ -716,7 +767,7 @@ class _MenuState extends State<Menu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(13),
+      padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(
         children: [
@@ -725,10 +776,11 @@ class _MenuState extends State<Menu> {
               flex: 6,
               child: Text(
                 widget.title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 textScaleFactor: 1.0,
               )),
-          Expanded(
+          const Expanded(
               flex: 1,
               child: Icon(
                 Icons.keyboard_arrow_right,

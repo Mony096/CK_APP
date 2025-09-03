@@ -81,25 +81,26 @@ class BlockService extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  "${context.read<HelperProvider>().customer.firstWhere(
-                                        (e) =>
-                                            e["CardCode"] ==
-                                            data["U_CK_CardCode"],
-                                        orElse: () => {"CardCode": "Not Found"},
-                                      )["CardName"] ?? "N/A"}",
-                                  style: TextStyle(fontSize: 12.5),
-                                  textScaleFactor: 1.0),
-                              SizedBox(
-                                height: 6,
+                                data["CustomerName"] ?? "N/A",
+                                style: const TextStyle(fontSize: 12.5),
+                                textScaleFactor: 1.0,
                               ),
+                              const SizedBox(height: 6),
                               Text(
-                                  "#23, Street 598 -Khan Sen Sok Phnom Penh, Cambodia",
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                    height: 2,
-                                  ),
-                                  textScaleFactor: 1.0),
+                                ((data["CustomerAddress"] as List?)
+                                            ?.isNotEmpty ==
+                                        true)
+                                    ? (data["CustomerAddress"]
+                                            .first["StreetNo"] ??
+                                        "N/A")
+                                    : "N/A",
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                  height: 2,
+                                ),
+                                textScaleFactor: 1.0,
+                              ),
                             ],
                           ))),
                   Expanded(
@@ -108,13 +109,13 @@ class BlockService extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: Text("${data["DocEntry"]}",
-                                style: TextStyle(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Text("${data["DocNum"]}",
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 13),
                                 textScaleFactor: 1.0),
                           ),
@@ -128,7 +129,7 @@ class BlockService extends StatelessWidget {
             flex: 3,
             child: Container(
               padding: const EdgeInsets.all(10),
-              color: Color.fromARGB(255, 66, 83, 100),
+              color: const Color.fromARGB(255, 66, 83, 100),
               width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +144,7 @@ class BlockService extends StatelessWidget {
                                 width: 37,
                                 height: 37,
                                 decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 66, 83, 100),
+                                  color: const Color.fromARGB(255, 66, 83, 100),
                                   shape: BoxShape
                                       .circle, // Makes the container circular
                                   border: Border.all(
@@ -178,7 +179,7 @@ class BlockService extends StatelessWidget {
                                 width: 37,
                                 height: 37,
                                 decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 66, 83, 100),
+                                  color: const Color.fromARGB(255, 66, 83, 100),
                                   shape: BoxShape
                                       .circle, // Makes the container circular
                                   border: Border.all(
@@ -210,7 +211,7 @@ class BlockService extends StatelessWidget {
                                 width: 37,
                                 height: 37,
                                 decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 66, 83, 100),
+                                  color: const Color.fromARGB(255, 66, 83, 100),
                                   shape: BoxShape
                                       .circle, // Makes the container circular
                                   border: Border.all(
@@ -241,7 +242,7 @@ class BlockService extends StatelessWidget {
                                 width: 37,
                                 height: 37,
                                 decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 66, 83, 100),
+                                  color: const Color.fromARGB(255, 66, 83, 100),
                                   shape: BoxShape
                                       .circle, // Makes the container circular
                                   border: Border.all(
@@ -266,8 +267,10 @@ class BlockService extends StatelessWidget {
                   Expanded(
                       flex: 2,
                       child: Container(
-                        child: const Text("Time 04:30 - 06:30",
-                            style: TextStyle(color: Colors.white, fontSize: 13),
+                        child: Text(
+                            "Time ${data["U_CK_Time"]} - ${data["U_CK_EndTime"]}",
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
                             textScaleFactor: 1.0),
                       )),
                   Expanded(
@@ -397,7 +400,9 @@ class BlockService extends StatelessWidget {
                                     width: 100,
                                     height: 35,
                                     decoration: BoxDecoration(
-                                      color: Colors.green,
+                                      color: data["U_CK_Status"] == "Accept"
+                                          ? Colors.yellow
+                                          : Colors.green,
                                       borderRadius: BorderRadius.circular(5.0),
                                     ),
                                     child: TextButton(
@@ -419,8 +424,12 @@ class BlockService extends StatelessWidget {
                                                       ? "Service"
                                                       : "Entry",
                                           style: TextStyle(
-                                              color: Color.fromARGB(
-                                                  255, 255, 255, 255),
+                                              color: data["U_CK_Status"] ==
+                                                      "Accept"
+                                                  ? const Color.fromARGB(
+                                                      255, 8, 8, 8)
+                                                  : const Color.fromARGB(
+                                                      255, 255, 255, 255),
                                               fontSize: 13),
                                           textScaleFactor: 1.0),
                                     ),
