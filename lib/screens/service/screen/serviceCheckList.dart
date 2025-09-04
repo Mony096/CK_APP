@@ -1,4 +1,7 @@
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +50,16 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
               ),
               // SizedBox(width: 3),
               IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  MaterialDialog.loading(context);
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .logout();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
                 icon: const Icon(Icons.logout, color: Colors.white),
               )
             ],

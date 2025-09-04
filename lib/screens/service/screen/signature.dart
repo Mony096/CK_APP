@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/screens/signature/signature.dart';
 import 'package:bizd_tech_service/screens/signature/signature_preview_edit.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -73,19 +76,29 @@ class _SignatureScreenState extends State<SignatureScreen> {
         ),
         // Right-aligned actions (scan barcode)
         actions: [
-          IconButton(
-            icon: const Row(
-              children: [
-                Icon(Icons.refresh_rounded, color: Colors.white),
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(Icons.qr_code_scanner, color: Colors.white),
-              ],
-            ),
-            onPressed: () {
-              // Handle scan barcode action
-            },
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  // refresh();
+                },
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              ),
+              // SizedBox(width: 3),
+              IconButton(
+                onPressed: () async {
+                  MaterialDialog.loading(context);
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .logout();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout, color: Colors.white),
+              )
+            ],
           ),
         ],
       ),
@@ -250,8 +263,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                         borderRadius:
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
-                      child:
-                        Column(
+                      child: Column(
                         children: [
                           SizedBox(
                             width: double.infinity,
@@ -605,7 +617,9 @@ class _SignatureScreenState extends State<SignatureScreen> {
                       height: 10,
                     ),
                     Menu(
-                      signature: context.read<CompletedServiceProvider>().signatureList,
+                        signature: context
+                            .read<CompletedServiceProvider>()
+                            .signatureList,
                         title: 'Upload Signature',
                         icon: Padding(
                           padding: const EdgeInsets.only(right: 5),

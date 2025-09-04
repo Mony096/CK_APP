@@ -363,8 +363,6 @@ class CompletedServiceProvider extends ChangeNotifier {
         );
         return false;
       }
-      print(attachmentEntry);
-      print(openIssues);
       final payload = {
         "U_CK_Status": "Entry",
         "U_CK_AttachmentEntry": attachmentEntry,

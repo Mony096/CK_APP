@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,41 +24,51 @@ class _ImageScreenState extends State<ImageScreen> {
     final ImageSource? source = await showDialog<ImageSource>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
         title: const Row(
           children: [
-            Icon(
-              Icons.library_add,
-              size: 18,
-            ),
-            SizedBox(
-              width: 7,
-            ),
+            // SizedBox(width: 15),
+            // Icon(
+            //   Icons.add_box,
+            //   size: 25,
+            //   color: Color.fromARGB(255, 118, 121, 123),
+            // ),
+            // SizedBox(width: 15),
             Text(
-              'Image Option',
-              style: TextStyle(fontSize: 19),
+              'Select Image Source',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(ImageSource.camera),
-            child: const Text(
-              'Camera',
-              style: TextStyle(fontSize: 15),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(
+                Icons.camera_alt,
+                color: Colors.blue,
+                size: 25,
+              ),
+              title: const Text("Take Photo",style: TextStyle(fontSize: 16),),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(ImageSource.gallery),
-            child: const Text(
-              'Gallery',
-              style: TextStyle(fontSize: 15),
+            ListTile(
+              leading: const Icon(
+                Icons.photo_library,
+                color: Colors.green,
+                size: 25,
+              ),
+              title: const Text("Choose from Gallery",
+                  style: TextStyle(fontSize: 16)),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
             ),
-          ),
-          // TextButton(
-          //   onPressed: () => Navigator.of(ctx).pop(null),
-          //   child: const Text('Cancel'),
-          // ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -131,19 +144,29 @@ class _ImageScreenState extends State<ImageScreen> {
         ),
         // Right-aligned actions (scan barcode)
         actions: [
-          IconButton(
-            icon: const Row(
-              children: [
-                Icon(Icons.refresh_rounded, color: Colors.white),
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(Icons.qr_code_scanner, color: Colors.white),
-              ],
-            ),
-            onPressed: () {
-              // Handle scan barcode action
-            },
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  // refresh();
+                },
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              ),
+              // SizedBox(width: 3),
+              IconButton(
+                onPressed: () async {
+                  MaterialDialog.loading(context);
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .logout();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout, color: Colors.white),
+              )
+            ],
           ),
         ],
       ),
@@ -308,8 +331,7 @@ class _ImageScreenState extends State<ImageScreen> {
                         borderRadius:
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
-                      child:
-                         Column(
+                      child: Column(
                         children: [
                           SizedBox(
                             width: double.infinity,

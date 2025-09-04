@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:bizd_tech_service/component/text_time_dialog.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -530,19 +532,29 @@ class _TimeScreenState extends State<TimeScreen> {
         ),
         // Right-aligned actions (scan barcode)
         actions: [
-          IconButton(
-            icon: const Row(
-              children: [
-                Icon(Icons.refresh_rounded, color: Colors.white),
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(Icons.qr_code_scanner, color: Colors.white),
-              ],
-            ),
-            onPressed: () {
-              // Handle scan barcode action
-            },
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  // refresh();
+                },
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              ),
+              // SizedBox(width: 3),
+              IconButton(
+                onPressed: () async {
+                  MaterialDialog.loading(context);
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .logout();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout, color: Colors.white),
+              )
+            ],
           ),
         ],
       ),

@@ -18,6 +18,7 @@ import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -96,6 +97,12 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
   }
 
   Future<void> _init() async {
+    if (widget.data.isEmpty) {
+      installedDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      nextDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      warrantyDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+
     // Check if widget.data exists and is not empty
     if (widget.data.isEmpty) return;
     if (!mounted) return;

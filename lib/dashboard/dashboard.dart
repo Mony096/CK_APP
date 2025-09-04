@@ -1,10 +1,15 @@
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
 import 'package:bizd_tech_service/screens/service/service.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class Dashboard extends StatefulWidget {
-  Dashboard({super.key, this.fromNotification = false});
+  const Dashboard({super.key, this.fromNotification = false});
   final bool fromNotification;
   @override
   _DashboardState createState() => _DashboardState();
@@ -15,10 +20,11 @@ class _DashboardState extends State<Dashboard>
   bool isLoading = true;
   late final TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  String? userName;
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -28,6 +34,16 @@ class _DashboardState extends State<Dashboard>
     super.dispose();
   }
 
+  Future<void> _loadUserName() async {
+    final name = await getName();
+    setState(() {
+      userName = name;
+    });
+  }
+
+  Future<String?> getName() async {
+    return await LocalStorageManger.getString('FullName');
+  }
 
   // void init(BuildContext context) async {
   //   // Initialization logic here
@@ -38,7 +54,7 @@ class _DashboardState extends State<Dashboard>
       color: Colors.transparent,
       child: ListTile(
         leading: Icon(icon, color: Colors.black87),
-        title: Text(title, style: TextStyle(color: Colors.black87)),
+        title: Text(title, style: const TextStyle(color: Colors.black87)),
         onTap: () {
           Navigator.push(
             context,
@@ -56,12 +72,12 @@ class _DashboardState extends State<Dashboard>
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 115, 117, 122),
         leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.white),
+          icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer(); // Open the drawer
           },
         ),
-        title: Center(
+        title: const Center(
           child: Text(
             'Bizd Service Mobile',
             style: TextStyle(fontSize: 17),
@@ -70,7 +86,7 @@ class _DashboardState extends State<Dashboard>
         ),
         actions: [
           IconButton(
-            icon: Row(
+            icon: const Row(
               children: [
                 Icon(Icons.refresh_rounded, color: Colors.white),
               ],
@@ -81,16 +97,16 @@ class _DashboardState extends State<Dashboard>
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(55.0),
+          preferredSize: const Size.fromHeight(55.0),
           child: Container(
             color: Colors.white, // Background color of the TabBar
             child: TabBar(
               controller: _tabController,
-              indicator: BoxDecoration(
+              indicator: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: const Color.fromARGB(
-                        255, 56, 56, 61), // Active border color
+                    color:
+                        Color.fromARGB(255, 56, 56, 61), // Active border color
                     width: 2.0, // Border width
                   ),
                 ),
@@ -98,25 +114,23 @@ class _DashboardState extends State<Dashboard>
               indicatorSize: TabBarIndicatorSize.label,
               tabs: [
                 Container(
-                    padding: EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
                     width: MediaQuery.of(context).size.width,
-                    child: Text(
+                    child: const Text(
                       "Ticket",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 16,
-                          color: const Color.fromARGB(255, 62, 62, 67)),
+                          fontSize: 16, color: Color.fromARGB(255, 62, 62, 67)),
                       textScaleFactor: 1.0,
                     )),
                 Container(
-                    padding: EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
                     width: MediaQuery.of(context).size.width,
-                    child: Text(
+                    child: const Text(
                       "KPI",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 16,
-                          color: const Color.fromARGB(255, 62, 62, 67)),
+                          fontSize: 16, color: Color.fromARGB(255, 62, 62, 67)),
                       textScaleFactor: 1.0,
                     )),
               ],
@@ -129,20 +143,26 @@ class _DashboardState extends State<Dashboard>
           children: [
             // Profile Section
             UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Color.fromARGB(255, 66, 83, 100)),
-              currentAccountPicture: SvgPicture.asset(
-                color: const Color.fromARGB(255, 102, 103, 104),
-                'images/svg/reply.svg',
-                width: 15,
+              decoration:
+                  const BoxDecoration(color: Color.fromARGB(255, 66, 83, 100)),
+              currentAccountPicture: SizedBox(
+                width: 20, // control size here
+                height: 20,
+                child: SvgPicture.asset(
+                  'images/svg/key.svg',
+                  color: const Color.fromARGB(255, 49, 134, 69),
+                  fit: BoxFit.contain,
+                ),
               ),
               accountName: Text(
-                'Sandra Adams',
-                style:
-                    TextStyle(color: const Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
+                userName ?? '...',
+                style: const TextStyle(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    fontWeight: FontWeight.bold),
               ),
-              accountEmail: Text(
-                'sandra_a88@gmail.com',
-                style: TextStyle(color: const Color.fromARGB(137, 255, 255, 255)),
+              accountEmail: const Text(
+                'George_Keeng88@gmail.com',
+                style: TextStyle(color: Color.fromARGB(137, 255, 255, 255)),
               ),
             ),
 
@@ -151,22 +171,32 @@ class _DashboardState extends State<Dashboard>
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _buildDrawerItem(Icons.settings, "Service", 0, ServiceScreen()),
                   _buildDrawerItem(
-                      Icons.build, "Equipment", 1, EquipmentListScreen()),
+                      Icons.settings, "Service", 0, const ServiceScreen()),
+                  _buildDrawerItem(
+                      Icons.build, "Equipment", 1, const EquipmentListScreen()),
                   // _buildDrawerItem(
                   //     Icons.star_border, "Starred", 2, SomeOtherScreen()),
                 ],
               ),
             ),
 
-            Divider(),
+            const Divider(),
 
             // Bottom Settings
             ListTile(
-              leading: Icon(Icons.logout, color: Colors.black54),
-              title: Text("Log out"),
-              onTap: () {},
+              leading: const Icon(Icons.logout, color: Colors.black54),
+              title: const Text("Log out"),
+              onTap: () async {
+                MaterialDialog.loading(context);
+                await Provider.of<AuthProvider>(context, listen: false)
+                    .logout();
+                Navigator.of(context).pop(); // Close loading
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
             ),
           ],
         ),
@@ -176,12 +206,12 @@ class _DashboardState extends State<Dashboard>
         children: [
           Center(
             child: Container(
-              child: Text("Content for Ticket"),
+              child: const Text("Content for Ticket"),
             ),
           ),
           Center(
             child: Container(
-              child: Text("Content for KPI"),
+              child: const Text("Content for KPI"),
             ),
           ),
         ],

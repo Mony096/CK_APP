@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
@@ -160,7 +162,16 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
               ),
               // SizedBox(width: 3),
               IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  MaterialDialog.loading(context);
+                  await Provider.of<AuthProvider>(context, listen: false)
+                      .logout();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
                 icon: const Icon(Icons.logout, color: Colors.white),
               )
             ],
@@ -448,7 +459,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                  "Date : ${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")}",
+                                                  "Date : ${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")} ",
                                                   style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12.5),

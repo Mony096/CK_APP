@@ -4,6 +4,7 @@ import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
+import 'package:bizd_tech_service/screens/equipment/select/equipmentImage.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -134,9 +135,11 @@ class _GeneralState extends State<General> {
                   detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextRemark(
-                  controller: widget.controller?['remark'],
-                  label: 'Remark',
-                  detail: widget.data.isNotEmpty, star: false,),
+                controller: widget.controller?['remark'],
+                label: 'Remark',
+                detail: widget.data.isNotEmpty,
+                star: false,
+              ),
               const SizedBox(height: 28),
               const ComponentTitle(
                 label: "Date & images",
@@ -152,7 +155,10 @@ class _GeneralState extends State<General> {
                     size: 28,
                   ),
                   onclickIcon: () {
-                    print("Scan icon tapped!");
+                    goTo(context, EquipmentImageScreen(data: {})).then((e) {
+                      // Handle any actions after returning from ServiceEntryScreen
+                    });
+                    return;
                   },
                   detail: widget.data.isNotEmpty),
               const SizedBox(height: 10),

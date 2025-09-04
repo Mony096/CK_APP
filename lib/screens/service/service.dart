@@ -191,7 +191,16 @@ class _ServiceScreenState extends State<ServiceScreen> {
                   ),
                   // SizedBox(width: 3),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      MaterialDialog.loading(context);
+                      await Provider.of<AuthProvider>(context, listen: false)
+                          .logout();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    },
                     icon: const Icon(Icons.logout, color: Colors.white),
                   )
                 ],
@@ -217,34 +226,43 @@ class _ServiceScreenState extends State<ServiceScreen> {
                   Expanded(
                     flex: 1,
                     child: Container(
-                                    width: 50,
-                                    height: 46,
-                                    decoration: BoxDecoration(
-                                      color
-                                          : Colors.green,
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                    child: TextButton(
-                                      onPressed: (){},
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                        ),
-                                      ),
-                                      child: Text(
-                                         "GO",
-                                          style: TextStyle(
-                                              color:const Color.fromARGB(
-                                                      255, 255, 255, 255),
-                                              fontSize: 15),
-                                          textScaleFactor: 1.0),
-                                    ),
-                                  ),
-                                  
+                      width: 50,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      child: TextButton(
+                        onPressed: () {
+                          final provider = context.read<ServiceListProvider>();
+
+                          if (_dateController.text.isNotEmpty) {
+                            print(_dateController.text);
+
+                            // Parse using the correct format
+                            final parsedDate = DateFormat("dd MMMM yyyy")
+                                .parse(_dateController.text);
+
+                            provider.setDate(parsedDate, context);
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                        child: Text("GO",
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                fontSize: 15),
+                            textScaleFactor: 1.0),
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 5,)
+                  SizedBox(
+                    width: 5,
+                  )
                 ],
               ),
               Expanded(
