@@ -75,6 +75,61 @@ class DioClient {
     }
   }
 
+  Future<Response> getAttachment(String uri,
+      {Options? options, Map<String, dynamic>? query}) async {
+    try {
+      final token = await LocalStorageManger.getString('SessionId');
+      final host = await LocalStorageManger.getString('host');
+      final port = await LocalStorageManger.getString('port');
+
+      final res = await _dio.get(
+        'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/sapIntegration/Attachments2',
+        queryParameters: query,
+        options: Options(
+          headers: {
+            'Content-Type': "application/json",
+            "Authorization": 'Bearer $token',
+            'sapUrl': uri
+          },
+        ),
+        cancelToken: cancelToken,
+      );
+      return res;
+    } on DioException catch (e) {
+      log(e.requestOptions.method);
+      log(e.requestOptions.uri.toString());
+      log(jsonEncode(e.requestOptions.data));
+      log('dio ${e.response?.statusCode}');
+      log(jsonEncode(e.requestOptions.headers));
+      if (e.response?.statusCode == null) {
+        throw const ConnectionRefuse(
+          message: "Invalid Server Configuration",
+        );
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        throw const ConnectionRefuse(
+          message: "Invalid server host name.",
+        );
+      }
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw const ConnectionRefuse(
+          message:
+              "Sorry, our server is currently unavailable. Please contact our support.",
+        );
+      }
+      if (e.response?.statusCode == 401) {
+        throw const UnauthorizeFailure(message: 'Session already timeout');
+      }
+
+      throw ServerFailure(
+        message: e.response?.data['error']['message']['value'] ??
+            "An unexpected error occurred.",
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Response> post(
     dynamic uri,
     bool isLogin,

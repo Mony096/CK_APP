@@ -115,6 +115,10 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = response.data;
+        // final attachment = await dio.getAttachment(
+        //     "/Attachments2(${data["U_ck_AttachmentEntry"]})");
+            
+        // print(attachment.data);
 
         // Prevent setState if widget unmounted after await
         if (!mounted) return;
