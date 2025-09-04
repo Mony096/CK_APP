@@ -251,7 +251,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
                       child:
-                       Column(
+                        Column(
                         children: [
                           SizedBox(
                             width: double.infinity,
@@ -302,7 +302,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
-                                            children: [
+                                          children: [
                                             Text(
                                               "${widget.data["CustomerName"] ?? "N/A"}",
                                               style: const TextStyle(
@@ -431,12 +431,31 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                          children: (widget
-                                                                          .data[
-                                                                      "CK_JOB_SERVICESCollection"]
-                                                                  as List)
-                                                              .map(
-                                                                  (e) =>
+                                                          children: (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .isEmpty
+                                                              ? [
+                                                                  Container(
+                                                                    margin: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            8),
+                                                                    child:
+                                                                        const Text(
+                                                                      "No Services Available",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              12.5),
+                                                                    ),
+                                                                  )
+                                                                ]
+                                                              : (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
@@ -452,7 +471,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                                               1.0,
                                                                         ),
                                                                       ))
-                                                              .toList())),
+                                                                  .toList())),
                                                   const Expanded(
                                                       child: Text(
                                                     "Open",
@@ -489,6 +508,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                       Expanded(
                                           flex: 6,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Row(
                                                 children: [
@@ -520,6 +541,21 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
+                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .isEmpty
+                                                  ? Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8),
+                                                      child: const Text(
+                                                        "No Equipment Available",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                      ),
+                                                    )
+                                                  : Container(),
                                               ...(widget.data[
                                                           "CK_JOB_EQUIPMENTCollection"]
                                                       as List)
@@ -532,7 +568,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                       Expanded(
                                                           child: Text(
                                                         "${item["U_CK_EquipName"]}",
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 12.5),
                                                         textScaleFactor: 1.0,
@@ -542,13 +578,13 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                         "SN: ${item["U_CK_SerialNum"]}",
                                                         textAlign:
                                                             TextAlign.end,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             fontSize: 12.5,
                                                             color:
                                                                 Colors.white),
                                                         textScaleFactor: 1.0,
                                                       )),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         width: 5,
                                                       ),
                                                     ],

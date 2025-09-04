@@ -393,12 +393,31 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                          children: (widget
-                                                                          .data[
-                                                                      "CK_JOB_SERVICESCollection"]
-                                                                  as List)
-                                                              .map(
-                                                                  (e) =>
+                                                          children: (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .isEmpty
+                                                              ? [
+                                                                  Container(
+                                                                    margin: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            8),
+                                                                    child:
+                                                                        const Text(
+                                                                      "No Services Available",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              12.5),
+                                                                    ),
+                                                                  )
+                                                                ]
+                                                              : (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
@@ -414,7 +433,7 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                                                               1.0,
                                                                         ),
                                                                       ))
-                                                              .toList())),
+                                                                  .toList())),
                                                   const Expanded(
                                                       child: Text(
                                                     "Open",
@@ -451,6 +470,8 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                       Expanded(
                                           flex: 6,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Row(
                                                 children: [
@@ -482,6 +503,21 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
+                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .isEmpty
+                                                  ? Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8),
+                                                      child: const Text(
+                                                        "No Equipment Available",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                      ),
+                                                    )
+                                                  : Container(),
                                               ...(widget.data[
                                                           "CK_JOB_EQUIPMENTCollection"]
                                                       as List)
@@ -545,7 +581,42 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    ...(widget.data["CK_JOB_MATERIALCollection"] as dynamic)
+                    (widget.data["CK_JOB_MATERIALCollection"] as List<dynamic>)
+                            .isNotEmpty
+                        ? Container()
+                        : Container(
+                            height: 90,
+                            padding: const EdgeInsets.all(13),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            color: Colors.white,
+                            child: const Center(
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 2,
+                                  ),
+                                  Icon(
+                                    Icons.warning,
+                                    size: 25,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    "No Material Reserved Available",
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color:
+                                            Color.fromARGB(255, 122, 126, 130)),
+                                    textScaleFactor: 1.0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                    ...(widget.data["CK_JOB_MATERIALCollection"]
+                            as List<dynamic>)
                         .map((item) => DetailMenu(
                               title: item["U_CK_ItemCode"] ?? "N/A",
                               name: item["U_CK_ItemName"] ?? "N/A",
@@ -563,8 +634,7 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                 double.tryParse(item["U_CK_Qty"].toString()) ??
                                     0,
                               )} ',
-                            ))
-                        .toList(),
+                            )),
 
                     /////do somthing
                   ]),

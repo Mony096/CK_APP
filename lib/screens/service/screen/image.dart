@@ -308,7 +308,8 @@ class _ImageScreenState extends State<ImageScreen> {
                         borderRadius:
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
-                      child: Column(
+                      child:
+                         Column(
                         children: [
                           SizedBox(
                             width: double.infinity,
@@ -488,12 +489,31 @@ class _ImageScreenState extends State<ImageScreen> {
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                          children: (widget
-                                                                          .data[
-                                                                      "CK_JOB_SERVICESCollection"]
-                                                                  as List)
-                                                              .map(
-                                                                  (e) =>
+                                                          children: (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .isEmpty
+                                                              ? [
+                                                                  Container(
+                                                                    margin: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            8),
+                                                                    child:
+                                                                        const Text(
+                                                                      "No Services Available",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              12.5),
+                                                                    ),
+                                                                  )
+                                                                ]
+                                                              : (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
@@ -509,7 +529,7 @@ class _ImageScreenState extends State<ImageScreen> {
                                                                               1.0,
                                                                         ),
                                                                       ))
-                                                              .toList())),
+                                                                  .toList())),
                                                   const Expanded(
                                                       child: Text(
                                                     "Open",
@@ -546,6 +566,8 @@ class _ImageScreenState extends State<ImageScreen> {
                                       Expanded(
                                           flex: 6,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Row(
                                                 children: [
@@ -577,6 +599,21 @@ class _ImageScreenState extends State<ImageScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
+                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .isEmpty
+                                                  ? Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8),
+                                                      child: const Text(
+                                                        "No Equipment Available",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                      ),
+                                                    )
+                                                  : Container(),
                                               ...(widget.data[
                                                           "CK_JOB_EQUIPMENTCollection"]
                                                       as List)
@@ -621,7 +658,7 @@ class _ImageScreenState extends State<ImageScreen> {
                         ],
                       ),
                     ), //
-
+////bbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     const SizedBox(
                       height: 10,
                     ),

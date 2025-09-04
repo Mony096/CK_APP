@@ -216,8 +216,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                         borderRadius:
                             BorderRadius.circular(5.0), // Rounded corners
                       ),
-                      child: 
-                     Column(
+                      child: Column(
                         children: [
                           SizedBox(
                             width: double.infinity,
@@ -268,7 +267,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
-                                            children: [
+                                          children: [
                                             Text(
                                               "${widget.data["CustomerName"] ?? "N/A"}",
                                               style: const TextStyle(
@@ -397,12 +396,31 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                          children: (widget
-                                                                          .data[
-                                                                      "CK_JOB_SERVICESCollection"]
-                                                                  as List)
-                                                              .map(
-                                                                  (e) =>
+                                                          children: (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .isEmpty
+                                                              ? [
+                                                                  Container(
+                                                                    margin: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            8),
+                                                                    child:
+                                                                        const Text(
+                                                                      "No Services Available",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              12.5),
+                                                                    ),
+                                                                  )
+                                                                ]
+                                                              : (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
@@ -418,7 +436,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                                               1.0,
                                                                         ),
                                                                       ))
-                                                              .toList())),
+                                                                  .toList())),
                                                   const Expanded(
                                                       child: Text(
                                                     "Open",
@@ -455,6 +473,8 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                       Expanded(
                                           flex: 6,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Row(
                                                 children: [
@@ -486,6 +506,21 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
+                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .isEmpty
+                                                  ? Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8),
+                                                      child: const Text(
+                                                        "No Equipment Available",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                      ),
+                                                    )
+                                                  : Container(),
                                               ...(widget.data[
                                                           "CK_JOB_EQUIPMENTCollection"]
                                                       as List)
@@ -498,7 +533,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                       Expanded(
                                                           child: Text(
                                                         "${item["U_CK_EquipName"]}",
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 12.5),
                                                         textScaleFactor: 1.0,
@@ -508,13 +543,13 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                         "SN: ${item["U_CK_SerialNum"]}",
                                                         textAlign:
                                                             TextAlign.end,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             fontSize: 12.5,
                                                             color:
                                                                 Colors.white),
                                                         textScaleFactor: 1.0,
                                                       )),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         width: 5,
                                                       ),
                                                     ],
@@ -549,37 +584,85 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                     SizedBox(
                       height: 10,
                     ),
-                    DetailMenu(
-                      title: 'Noise and heater check',
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: SvgPicture.asset(
-                          color: const Color.fromARGB(255, 67, 70, 72),
-                          'images/svg/check_cicle.svg',
-                          width: 22,
-                          height: 22,
+                    (widget.data["checklistLine"] as List<dynamic>).isNotEmpty
+                        ? Container()
+                        : Container(
+                            height: 90,
+                            padding: const EdgeInsets.all(13),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            color: Colors.white,
+                            child: const Center(
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 2,
+                                  ),
+                                  Icon(
+                                    Icons.warning,
+                                    size: 25,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    "No CheckLists Available",
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color:
+                                            Color.fromARGB(255, 122, 126, 130)),
+                                    textScaleFactor: 1.0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                    ...(widget.data["checklistLine"] as List<dynamic>).map(
+                      (item) => DetailMenu(
+                        title: '${item["U_CK_ChecklistTitle"] ?? "N/A"}',
+                        icon: Padding(
+                          padding: const EdgeInsets.only(right: 5),
+                          child: SvgPicture.asset(
+                            color: const Color.fromARGB(255, 67, 70, 72),
+                            'images/svg/check_cicle.svg',
+                            width: 22,
+                            height: 22,
+                          ),
                         ),
+                        desc: '${item["U_CK_TextInput"] ?? "N/A"}',
                       ),
-                      desc:
-                          'Description or notation input will be display here',
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    DetailMenu(
-                      title: 'dust vacuuming',
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: SvgPicture.asset(
-                          color: const Color.fromARGB(255, 67, 70, 72),
-                          'images/svg/check_cicle.svg',
-                          width: 22,
-                          height: 22,
-                        ),
-                      ),
-                      desc:
-                          'Description or notation input will be display here',
-                    ),
+                    // DetailMenu(
+                    //   title: 'Noise and heater check',
+                    //   icon: Padding(
+                    //     padding: const EdgeInsets.only(right: 5),
+                    //     child: SvgPicture.asset(
+                    //       color: const Color.fromARGB(255, 67, 70, 72),
+                    //       'images/svg/check_cicle.svg',
+                    //       width: 22,
+                    //       height: 22,
+                    //     ),
+                    //   ),
+                    //   desc:
+                    //       'Description or notation input will be display here',
+                    // ),
+                    // SizedBox(
+                    //   height: 10,
+                    // ),
+                    // DetailMenu(
+                    //   title: 'dust vacuuming',
+                    //   icon: Padding(
+                    //     padding: const EdgeInsets.only(right: 5),
+                    //     child: SvgPicture.asset(
+                    //       color: const Color.fromARGB(255, 67, 70, 72),
+                    //       'images/svg/check_cicle.svg',
+                    //       width: 22,
+                    //       height: 22,
+                    //     ),
+                    //   ),
+                    //   desc:
+                    //       'Description or notation input will be display here',
+                    // ),
                     /////do somthing
                   ]),
                 )),
@@ -633,6 +716,7 @@ class _DetailMenuState extends State<DetailMenu> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(13),
+      margin: EdgeInsets.only(bottom: 10),
       color: Colors.white,
       child: Row(
         children: [

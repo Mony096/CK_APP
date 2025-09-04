@@ -560,17 +560,19 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                               child: Container(
                                   padding:
                                       const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                                  child: const Column(
+                                  child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text("The Pizza Comapny - Sen Sok",
+                                      Text(
+                                          "${widget.data["U_CK_CardCode"] ?? "N/A"} - ${widget.data["CustomerName"] ?? "N/A"}",
                                           style: TextStyle(fontSize: 12.5),
                                           textScaleFactor: 1.0),
                                       SizedBox(
                                         height: 6,
                                       ),
-                                      Text("SN: 10003000400",
+                                      Text(
+                                          "SN: ${(widget.data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? widget.data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
                                           style: TextStyle(
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.bold,
@@ -613,18 +615,25 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         width: 30,
                         height: 30,
                       ),
-                      rows: (widget.data["CustomerContact"] as List)
-                          .expand<RowItem>((e) => [
-                                RowItem(
-                                  left: e["Name"] ?? "N/A",
-                                  right: "",
-                                ),
-                                RowItem(
-                                  left: e["MobilePhone"] ?? "N/A",
-                                  right: "",
-                                ),
-                              ])
-                          .toList(),
+                      rows: (widget.data["CustomerContact"] as List).isEmpty
+                          ? [
+                              RowItem(
+                                left: "No Contact Available",
+                                right: "",
+                              ),
+                            ]
+                          : (widget.data["CustomerContact"] as List)
+                              .expand<RowItem>((e) => [
+                                    RowItem(
+                                      left: e["Name"] ?? "N/A",
+                                      right: "",
+                                    ),
+                                    RowItem(
+                                      left: e["MobilePhone"] ?? "N/A",
+                                      right: "",
+                                    ),
+                                  ])
+                              .toList(),
                     ),
                     const SizedBox(
                       height: 15,
@@ -638,17 +647,25 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         height: 30,
                       ),
                       rows: (widget.data["CK_JOB_SERVICESCollection"] as List)
-                          .expand<RowItem>((e) => [
-                                RowItem(
-                                  left: e["U_CK_ServiceName"] ?? "N/A",
-                                  right: 'USD ${numberFormatCurrency.format(
-                                    double.tryParse(
-                                            e["U_CK_UnitPrice"].toString()) ??
-                                        0,
-                                  )} ',
-                                ),
-                              ])
-                          .toList(),
+                              .isEmpty
+                          ? [
+                              RowItem(
+                                left: "No Service Available",
+                                right: "",
+                              ),
+                            ]
+                          : (widget.data["CK_JOB_SERVICESCollection"] as List)
+                              .expand<RowItem>((e) => [
+                                    RowItem(
+                                      left: e["U_CK_ServiceName"] ?? "N/A",
+                                      right: 'USD ${numberFormatCurrency.format(
+                                        double.tryParse(e["U_CK_UnitPrice"]
+                                                .toString()) ??
+                                            0,
+                                      )} ',
+                                    ),
+                                  ])
+                              .toList(),
                     ),
                     const SizedBox(
                       height: 15,
@@ -660,55 +677,84 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         size: 25,
                       ),
                       rows: (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
-                          .expand<RowItem>((e) => [
-                                RowItem(
-                                  left: e["U_CK_EquipName"] ?? "N/A",
-                                  right: 'SN: ${e["U_CK_SerialNum"] ?? "N/A"}',
-                                ),
-                              ])
-                          .toList(),
+                              .isEmpty
+                          ? [
+                              RowItem(
+                                left: "No Equipment Available",
+                                right: "",
+                              ),
+                            ]
+                          : (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
+                              .expand<RowItem>((e) => [
+                                    RowItem(
+                                      left: e["U_CK_EquipName"] ?? "N/A",
+                                      right:
+                                          'SN: ${e["U_CK_SerialNum"] ?? "N/A"}',
+                                    ),
+                                  ])
+                              .toList(),
                     ),
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
-                      title: "Activity:",
-                      svg: SvgPicture.asset(
-                        color: Colors.black,
-                        'images/svg/activity.svg',
-                        width: 30,
-                        height: 30,
-                      ),
-                      rows: [
-                        RowItem(
-                            left: "Activity Name1",
-                            right: SvgPicture.asset(
-                              color: Colors.black,
-                              'images/svg/task_check.svg',
-                              width: 25,
-                              height: 25,
-                            ),
-                            isRightIcon: true),
-                        RowItem(
-                            left: "Activity Name2",
-                            right: SvgPicture.asset(
-                              color: Colors.black,
-                              'images/svg/task_check.svg',
-                              width: 25,
-                              height: 25,
-                            ),
-                            isRightIcon: true),
-                        RowItem(
-                            left: "Activity Name3",
-                            right: SvgPicture.asset(
-                              color: Colors.black,
-                              'images/svg/task_check.svg',
-                              width: 25,
-                              height: 25,
-                            ),
-                            isRightIcon: true),
-                      ],
-                    ),
+                        title: "Activity:",
+                        svg: SvgPicture.asset(
+                          color: Colors.black,
+                          'images/svg/activity.svg',
+                          width: 30,
+                          height: 30,
+                        ),
+                        rows: (widget.data["activityLine"] as List).isEmpty
+                            ? [
+                                RowItem(
+                                  left: "No Activity Available",
+                                  right: "",
+                                ),
+                              ]
+                            : (widget.data["activityLine"] as List)
+                                .expand<RowItem>((e) => [
+                                      RowItem(
+                                          left: "${e["Activity"] ?? "N/A"}",
+                                          right: SvgPicture.asset(
+                                            color: Colors.black,
+                                            'images/svg/task_check.svg',
+                                            width: 25,
+                                            height: 25,
+                                          ),
+                                          isRightIcon: true),
+                                    ])
+                                .toList()
+                        //  [
+                        //     RowItem(
+                        //         left: "Activity Name1",
+                        //         right: SvgPicture.asset(
+                        //           color: Colors.black,
+                        //           'images/svg/task_check.svg',
+                        //           width: 25,
+                        //           height: 25,
+                        //         ),
+                        //         isRightIcon: true),
+                        //     RowItem(
+                        //         left: "Activity Name2",
+                        //         right: SvgPicture.asset(
+                        //           color: Colors.black,
+                        //           'images/svg/task_check.svg',
+                        //           width: 25,
+                        //           height: 25,
+                        //         ),
+                        //         isRightIcon: true),
+                        //     RowItem(
+                        //         left: "Activity Name3",
+                        //         right: SvgPicture.asset(
+                        //           color: Colors.black,
+                        //           'images/svg/task_check.svg',
+                        //           width: 25,
+                        //           height: 25,
+                        //         ),
+                        //         isRightIcon: true),
+                        //   ],
+                        ),
                     const SizedBox(
                       height: 15,
                     ),
@@ -721,16 +767,25 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         height: 30,
                       ),
                       rows: (widget.data["CK_JOB_MATERIALCollection"] as List)
-                          .expand<RowItem>((e) => [
-                                RowItem(
-                                  left: e["U_CK_ItemName"] ?? "N/A",
-                                  right: '${numberQty.format(
-                                    double.tryParse(e["U_CK_Qty"].toString()) ??
-                                        0,
-                                  )} ',
-                                ),
-                              ])
-                          .toList(),
+                              .isEmpty
+                          ? [
+                              RowItem(
+                                left: "No Material Available",
+                                right: "",
+                              ),
+                            ]
+                          : (widget.data["CK_JOB_MATERIALCollection"] as List)
+                              .expand<RowItem>((e) => [
+                                    RowItem(
+                                      left: e["U_CK_ItemName"] ?? "N/A",
+                                      right: '${numberQty.format(
+                                        double.tryParse(
+                                                e["U_CK_Qty"].toString()) ??
+                                            0,
+                                      )} ',
+                                    ),
+                                  ])
+                              .toList(),
                     ),
                     const SizedBox(
                       height: 15,
@@ -743,20 +798,27 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         width: 30,
                         height: 30,
                       ),
-                      rows: [
-                        RowItem(
-                          left: "Tools Item 1",
-                          right: "10",
-                        ),
-                        RowItem(
-                          left: "Tools Item 2",
-                          right: "20",
-                        ),
-                        RowItem(
-                          left: "Tools Item 3",
-                          right: "30",
-                        ),
-                      ],
+                      rows: [{}].isEmpty
+                          ? [
+                              RowItem(
+                                left: "Tool & Assets Available",
+                                right: "",
+                              ),
+                            ]
+                          : [
+                              RowItem(
+                                left: "Tools Item 1",
+                                right: "10",
+                              ),
+                              RowItem(
+                                left: "Tools Item 2",
+                                right: "20",
+                              ),
+                              RowItem(
+                                left: "Tools Item 3",
+                                right: "30",
+                              ),
+                            ],
                     ),
 
                     const SizedBox(
@@ -816,9 +878,10 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 onUpdateStatus();
                               },
                               style: TextButton.styleFrom(
-                                backgroundColor: widget.data["U_CK_Status"] == "Accept"
-                                    ? Colors.yellow
-                                    : Colors.green,
+                                backgroundColor:
+                                    widget.data["U_CK_Status"] == "Accept"
+                                        ? Colors.yellow
+                                        : Colors.green,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
@@ -833,7 +896,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                               ? "Service"
                                               : "Entry",
                                   style: TextStyle(
-                                      color: widget.data["U_CK_Status"] == "Accept"
+                                      color: widget.data["U_CK_Status"] ==
+                                              "Accept"
                                           ? const Color.fromARGB(255, 8, 8, 8)
                                           : const Color.fromARGB(
                                               255, 255, 255, 255),

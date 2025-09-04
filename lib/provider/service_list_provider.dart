@@ -1,5 +1,6 @@
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -27,7 +28,7 @@ class ServiceListProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final query = _buildQuery();
+      final query = await _buildQuery();
       final response = await dio.get(query);
 
       if (response.statusCode == 200) {
@@ -63,7 +64,7 @@ class ServiceListProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final query = _buildQuery();
+      final query = await _buildQuery();
       final response = await dio.get(query);
 
       if (response.statusCode == 200) {
@@ -94,8 +95,10 @@ class ServiceListProvider extends ChangeNotifier {
   }
 
   /// Build query dynamically
-  String _buildQuery() {
-    String filter = "U_CK_TechnicianId eq 1";
+  Future<String> _buildQuery() async {
+    final userId = await LocalStorageManger.getString('UserId');
+    String filter =
+        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
 
     // Add text filter
     if (_currentFilter.isNotEmpty) {
@@ -107,6 +110,7 @@ class ServiceListProvider extends ChangeNotifier {
       final dateStr = DateFormat("yyyy-MM-dd").format(_currentDate!);
       filter += " and U_CK_Date eq '$dateStr'";
     }
+
     print("Final Filter: $filter");
     return "/script/test/GetCkServiceLists?\$filter=$filter&\$top=$_limit&\$skip=$_skip";
   }
@@ -128,7 +132,8 @@ class ServiceListProvider extends ChangeNotifier {
     resetPagination();
     fetchDocuments(isSetFilter: true, context: context);
   }
-   void clearCurrentDate() {
+
+  void clearCurrentDate() {
     _currentDate = null;
   }
 }

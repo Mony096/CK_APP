@@ -887,12 +887,31 @@ class _TimeScreenState extends State<TimeScreen> {
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                          children: (widget
-                                                                          .data[
-                                                                      "CK_JOB_SERVICESCollection"]
-                                                                  as List)
-                                                              .map(
-                                                                  (e) =>
+                                                          children: (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .isEmpty
+                                                              ? [
+                                                                  Container(
+                                                                    margin: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            8),
+                                                                    child:
+                                                                        const Text(
+                                                                      "No Services Available",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              12.5),
+                                                                    ),
+                                                                  )
+                                                                ]
+                                                              : (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
@@ -908,7 +927,7 @@ class _TimeScreenState extends State<TimeScreen> {
                                                                               1.0,
                                                                         ),
                                                                       ))
-                                                              .toList())),
+                                                                  .toList())),
                                                   const Expanded(
                                                       child: Text(
                                                     "Open",
@@ -945,6 +964,8 @@ class _TimeScreenState extends State<TimeScreen> {
                                       Expanded(
                                           flex: 6,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Row(
                                                 children: [
@@ -976,6 +997,21 @@ class _TimeScreenState extends State<TimeScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
+                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .isEmpty
+                                                  ? Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8),
+                                                      child: const Text(
+                                                        "No Equipment Available",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                      ),
+                                                    )
+                                                  : Container(),
                                               ...(widget.data[
                                                           "CK_JOB_EQUIPMENTCollection"]
                                                       as List)
@@ -1035,7 +1071,8 @@ class _TimeScreenState extends State<TimeScreen> {
                           height: 30,
                         ),
                       ),
-                      date: "${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")}",
+                      date: showDateOnService(
+                          widget.data["U_CK_Date"]?.split("T")[0] ?? ""),
                     ),
                     const SizedBox(
                       height: 10,
@@ -1125,7 +1162,6 @@ class DetailTime extends StatefulWidget {
   final VoidCallback? onTap;
   final bool isValidTime;
   final Map<String, dynamic> timeEntry;
-
   @override
   State<DetailTime> createState() => _DetailTimeState();
 }
@@ -1667,8 +1703,8 @@ class _DetailTimeState extends State<DetailTime> {
                     ],
                   )
                 : Container(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-                    child: const Row(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 30),
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1678,7 +1714,7 @@ class _DetailTimeState extends State<DetailTime> {
                           color: Color.fromARGB(221, 168, 168, 171),
                         ),
                         SizedBox(
-                          width: 10,
+                          height: 10,
                         ),
                         Text(
                           "No Time Added",

@@ -76,6 +76,14 @@ class BlockService extends StatelessWidget {
                   Expanded(
                       flex: 4,
                       child: Container(
+                          // decoration: const BoxDecoration(
+                          //   border: Border(
+                          //     left: BorderSide(
+                          //       color: Color.fromARGB(255, 108, 110, 112),
+                          //       width: 0.5,
+                          //     ),
+                          //   ),
+                          // ),
                           padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,19 +327,18 @@ class BlockService extends StatelessWidget {
                 children: [
                   Expanded(
                       flex: 1,
-                      child: Container(
-                          child: Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            goTo(context, ServiceByIdScreen(data: data));
-                          },
-                          child: const Icon(
+                      child: GestureDetector(
+                        onTap: () {
+                          goTo(context, ServiceByIdScreen(data: data));
+                        },
+                        child: const Center(
+                          child: Icon(
                             Icons.keyboard_arrow_up,
                             color: Colors.green,
                             size: 30,
                           ),
                         ),
-                      ))),
+                      )),
                   const SizedBox(
                     height: 5,
                   ),
@@ -368,23 +375,27 @@ class BlockService extends StatelessWidget {
                               child: Container(
                                   padding:
                                       const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                                  child: const Column(
+                                  child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text("The Pizza Comapny - Sen Sok",
-                                          style: TextStyle(fontSize: 12.5),
+                                      Text(
+                                          "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
+                                          style:
+                                              const TextStyle(fontSize: 12.5),
                                           textScaleFactor: 1.0),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 6,
                                       ),
-                                      Text("SN: 10003000400",
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.bold,
-                                            height: 2,
-                                          ),
-                                          textScaleFactor: 1.0),
+                                      Text(
+                                        "SN: ${(data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
+                                        style: const TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.bold,
+                                          height: 2,
+                                        ),
+                                        textScaleFactor: 1.0,
+                                      )
                                     ],
                                   ))),
                           Expanded(

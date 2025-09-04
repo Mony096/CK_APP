@@ -254,8 +254,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             borderRadius:
                                 BorderRadius.circular(5.0), // Rounded corners
                           ),
-                          child: 
-                          Column(
+                          child:
+                           Column(
                             children: [
                               SizedBox(
                                 width: double.infinity,
@@ -439,27 +439,40 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                               crossAxisAlignment:
                                                                   CrossAxisAlignment
                                                                       .start,
-                                                              children: (widget
-                                                                              .data[
-                                                                          "CK_JOB_SERVICESCollection"]
-                                                                      as List)
-                                                                  .map((e) =>
+                                                              children: (widget.data[
+                                                                              "CK_JOB_SERVICESCollection"]
+                                                                          as List)
+                                                                      .isEmpty
+                                                                  ? [
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
                                                                             bottom:
                                                                                 8),
                                                                         child:
-                                                                            Text(
-                                                                          "${e["U_CK_ServiceName"]}",
-                                                                          style: const TextStyle(
+                                                                            const Text(
+                                                                          "No Services Available",
+                                                                          style: TextStyle(
                                                                               color: Colors.white,
                                                                               fontSize: 12.5),
-                                                                          textScaleFactor:
-                                                                              1.0,
                                                                         ),
-                                                                      ))
-                                                                  .toList())),
+                                                                      )
+                                                                    ]
+                                                                  : (widget.data[
+                                                                              "CK_JOB_SERVICESCollection"]
+                                                                          as List)
+                                                                      .map((e) =>
+                                                                          Container(
+                                                                            margin:
+                                                                                const EdgeInsets.only(bottom: 8),
+                                                                            child:
+                                                                                Text(
+                                                                              "${e["U_CK_ServiceName"]}",
+                                                                              style: const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                              textScaleFactor: 1.0,
+                                                                            ),
+                                                                          ))
+                                                                      .toList())),
                                                       const Expanded(
                                                           child: Text(
                                                         "Open",
@@ -498,6 +511,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                           Expanded(
                                               flex: 6,
                                               child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   const Row(
                                                     children: [
@@ -529,6 +544,23 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                   const SizedBox(
                                                     height: 10,
                                                   ),
+                                                  (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                              as List)
+                                                          .isEmpty
+                                                      ? Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 8),
+                                                          child: const Text(
+                                                            "No Equipment Available",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 12.5),
+                                                          ),
+                                                        )
+                                                      : Container(),
                                                   ...(widget.data[
                                                               "CK_JOB_EQUIPMENTCollection"]
                                                           as List)
@@ -542,10 +574,12 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                           Expanded(
                                                               child: Text(
                                                             "${item["U_CK_EquipName"]}",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 12.5),
+                                                            style:
+                                                                const TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                        12.5),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -554,14 +588,16 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                             "SN: ${item["U_CK_SerialNum"]}",
                                                             textAlign:
                                                                 TextAlign.end,
-                                                            style: TextStyle(
-                                                                fontSize: 12.5,
-                                                                color: Colors
-                                                                    .white),
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        12.5,
+                                                                    color: Colors
+                                                                        .white),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
-                                                          SizedBox(
+                                                          const SizedBox(
                                                             width: 5,
                                                           ),
                                                         ],

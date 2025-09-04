@@ -570,7 +570,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
-                                            children: [
+                                          children: [
                                             Text(
                                               "${widget.data["CustomerName"] ?? "N/A"}",
                                               style: const TextStyle(
@@ -699,12 +699,31 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                          children: (widget
-                                                                          .data[
-                                                                      "CK_JOB_SERVICESCollection"]
-                                                                  as List)
-                                                              .map(
-                                                                  (e) =>
+                                                          children: (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .isEmpty
+                                                              ? [
+                                                                  Container(
+                                                                    margin: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            8),
+                                                                    child:
+                                                                        const Text(
+                                                                      "No Services Available",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              12.5),
+                                                                    ),
+                                                                  )
+                                                                ]
+                                                              : (widget.data[
+                                                                          "CK_JOB_SERVICESCollection"]
+                                                                      as List)
+                                                                  .map((e) =>
                                                                       Container(
                                                                         margin: const EdgeInsets
                                                                             .only(
@@ -720,7 +739,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                                               1.0,
                                                                         ),
                                                                       ))
-                                                              .toList())),
+                                                                  .toList())),
                                                   const Expanded(
                                                       child: Text(
                                                     "Open",
@@ -757,6 +776,8 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                       Expanded(
                                           flex: 6,
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Row(
                                                 children: [
@@ -788,6 +809,21 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
+                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .isEmpty
+                                                  ? Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8),
+                                                      child: const Text(
+                                                        "No Equipment Available",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.5),
+                                                      ),
+                                                    )
+                                                  : Container(),
                                               ...(widget.data[
                                                           "CK_JOB_EQUIPMENTCollection"]
                                                       as List)
@@ -800,7 +836,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                       Expanded(
                                                           child: Text(
                                                         "${item["U_CK_EquipName"]}",
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 12.5),
                                                         textScaleFactor: 1.0,
@@ -810,13 +846,13 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                         "SN: ${item["U_CK_SerialNum"]}",
                                                         textAlign:
                                                             TextAlign.end,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             fontSize: 12.5,
                                                             color:
                                                                 Colors.white),
                                                         textScaleFactor: 1.0,
                                                       )),
-                                                      SizedBox(
+                                                      const SizedBox(
                                                         width: 5,
                                                       ),
                                                     ],
@@ -842,7 +878,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                         padding: const EdgeInsets.only(right: 5),
                         child: SvgPicture.asset(
                           color: const Color.fromARGB(255, 0, 0, 0),
-                          'images/svg/clock.svg',
+                          'images/svg/report.svg',
                           width: 30,
                           height: 30,
                         ),
@@ -856,7 +892,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                     context.read<CompletedServiceProvider>().openIssues.isEmpty
                         ? SizedBox(
                             width: MediaQuery.of(context).size.width,
-                            height: 100,
+                            height: 105,
                             child: Container(
                               color: Colors.white,
                               child: Center(
@@ -864,10 +900,13 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   SvgPicture.asset(
-                                    color: const Color.fromARGB(
-                                        221, 184, 182, 182),
-                                    'images/svg/kjav3.svg',
-                                    width: 25,
+                                    color: Colors.grey,
+                                    'images/svg/report.svg',
+                                    width: 28,
+                                    height: 28,
+                                  ),
+                                  const SizedBox(
+                                    height: 8,
                                   ),
                                   const Text(
                                     "No Open Issues",
@@ -1004,7 +1043,7 @@ class _DetailMenuState extends State<DetailMenu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(

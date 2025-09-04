@@ -105,17 +105,17 @@ class _DateForServiceListState extends State<DateForServiceList> {
               child: Text(
                 _selectedDate != null
                     ? DateFormat("dd MMMM yyyy").format(_selectedDate!)
-                    : "Select Date",
-                style: TextStyle(fontSize: 15, color: textColor),
+                    : "Document Date",
+                style: TextStyle(fontSize: 14, color: textColor),
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.keyboard_arrow_left, color: Colors.green, size: 28),
+            icon: const Icon(Icons.keyboard_arrow_left, color: Color.fromARGB(255, 130, 131, 130), size: 28),
             onPressed: () => _changeDate(-1),
           ),
           IconButton(
-            icon: const Icon(Icons.keyboard_arrow_right, color: Colors.green, size: 28),
+            icon: const Icon(Icons.keyboard_arrow_right, color: Color.fromARGB(255, 130, 131, 130), size: 28),
             onPressed: () => _changeDate(1),
           ),
         ],
