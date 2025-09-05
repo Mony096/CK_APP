@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 20,
                           ),
                           Text(
-                            "Service Portal",
+                            "Service Mobile",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color.fromARGB(255, 238, 239, 241),
@@ -246,7 +246,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   MaterialStateProperty.resolveWith<Color>(
                                       (states) {
                                 if (states.contains(MaterialState.selected)) {
-                                  return const Color.fromARGB(255, 66, 83, 100); // blue when checked
+                                  return const Color.fromARGB(
+                                      255, 66, 83, 100); // blue when checked
                                 }
                                 return Colors
                                     .transparent; // no fill when unchecked
@@ -313,7 +314,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           }
                         },
-
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor:

@@ -1152,6 +1152,7 @@ class _MenuState extends State<Menu> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 30),
                 child: Text(
+                  textAlign: TextAlign.right,
                   textScaleFactor: 1.0,
                   widget.date,
                   style: const TextStyle(

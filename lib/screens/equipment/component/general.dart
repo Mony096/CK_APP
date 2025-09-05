@@ -3,10 +3,12 @@ import 'package:bizd_tech_service/component/text_field.dart';
 import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
 import 'package:bizd_tech_service/screens/equipment/select/equipmentImage.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
 
 class General extends StatefulWidget {
   const General({super.key, this.controller, required this.data});
@@ -145,22 +147,42 @@ class _GeneralState extends State<General> {
                 label: "Date & images",
               ),
               const SizedBox(height: 10),
-              CustomTextField(
-                  controller: widget.controller?['uploadImg'],
-                  label: 'Upload Image',
-                  star: true,
-                  icon: const Icon(
-                    Icons.image,
-                    color: Colors.grey,
-                    size: 28,
-                  ),
-                  onclickIcon: () {
-                    goTo(context, EquipmentImageScreen(data: {})).then((e) {
-                      // Handle any actions after returning from ServiceEntryScreen
-                    });
-                    return;
+              // CustomTextField(
+              //     controller: widget.controller?['uploadImg'],
+              //     label: 'Upload Image',
+              //     star: true,
+              //     icon: const Icon(
+              //       Icons.image,
+              //       color: Colors.grey,
+              //       size: 28,
+              //     ),
+              //     onclickIcon: () {
+              //       goTo(context, EquipmentImageScreen(data: {})).then((e) {
+              //         // Handle any actions after returning from ServiceEntryScreen
+              //       });
+              //       return;
+              //     },
+              //     detail: false),
+              Container(
+                margin: EdgeInsets.fromLTRB(20, 0, 20, 10),
+                width: MediaQuery.of(context).size.width,
+                child: TextButton(
+                  onPressed: () {
+                    goTo(context, EquipmentImageScreen(data: widget.data)).then((e) {});
                   },
-                  detail: widget.data.isNotEmpty),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  child: Text(
+                    widget.data.isNotEmpty ? "View ( ${context.read<EquipmentCreateProvider>().imagesList.length} / Image )": "Add Image",
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255), fontSize: 13),
+                  ),
+                ),
+              ),
               const SizedBox(height: 10),
 
               CustomDatePickerField(

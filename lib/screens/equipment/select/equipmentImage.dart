@@ -30,7 +30,6 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
         ),
         title: const Row(
           children: [
-
             Text(
               'Select Image Source',
               style: TextStyle(
@@ -184,7 +183,8 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                   ),
                   child: ListView(children: [
                     Menu(
-                      onTap: pickImage,
+                      data: widget.data,
+                      onTap: widget.data.isEmpty ? pickImage : () {},
                       title: 'Upload Image',
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 5),
@@ -200,9 +200,9 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                       height: 7,
                     ),
                     ImageShow(
-                        image: context
-                            .watch<EquipmentCreateProvider>()
-                            .imagesList)
+                        data: widget.data,
+                        image:
+                            context.watch<EquipmentCreateProvider>().imagesList)
                     /////do somthing
                   ]),
                 )),
@@ -214,10 +214,16 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
 }
 
 class Menu extends StatefulWidget {
-  const Menu({super.key, this.icon, required this.title, this.onTap});
+  const Menu(
+      {super.key,
+      this.icon,
+      required this.title,
+      this.onTap,
+      required this.data});
   final dynamic icon;
   final VoidCallback? onTap;
   final String title;
+  final Map<String, dynamic> data;
   @override
   State<Menu> createState() => _MenuState();
 }
@@ -226,20 +232,40 @@ class _MenuState extends State<Menu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(13),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Expanded(flex: 1, child: widget.icon),
-          Expanded(
-              flex: 4,
-              child: Text(widget.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13),
-                  textScaleFactor: 1.0)),
-          Expanded(
-            flex: 2,
-            child: TextButton(
+        padding: const EdgeInsets.all(13),
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icon
+         
+
+            // Title (will take remaining space automatically if wrapped in Flexible)
+            Flexible(
+              child: Row(
+                children: [
+                     Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: widget.icon,
+                  ),
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                    overflow: TextOverflow.ellipsis, // avoid overflow
+                    textScaleFactor: 1.0,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8), // spacing between text and button
+
+            // Button
+            TextButton(
               onPressed: widget.onTap,
               style: TextButton.styleFrom(
                 backgroundColor: Colors.green,
@@ -247,16 +273,16 @@ class _MenuState extends State<Menu> {
                   borderRadius: BorderRadius.circular(5.0),
                 ),
               ),
-              child: const Text(
-                "Add Image",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 255, 255, 255), fontSize: 13),
+              child: Text(
+                widget.data.isEmpty ? "Add Image" : "Equipment Photos",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ));
   }
 }
 
@@ -264,8 +290,11 @@ class ImageShow extends StatefulWidget {
   const ImageShow({
     super.key,
     required this.image,
+    required this.data,
   });
   final List<dynamic> image;
+  final Map<String, dynamic> data;
+
   @override
   State<ImageShow> createState() => _ImageShowState();
 }
@@ -294,7 +323,7 @@ class _ImageShowState extends State<ImageShow> {
         ),
         margin: const EdgeInsets.all(4),
         padding: const EdgeInsets.all(5),
-        height: 265,
+        height: 595,
         child: widget.image.isEmpty
             ? const Center(
                 child: Icon(
@@ -304,7 +333,7 @@ class _ImageShowState extends State<ImageShow> {
                 ),
               )
             : GridView.count(
-                crossAxisCount: 3,
+                crossAxisCount: 2,
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
                 children: List.generate(widget.image.length, (index) {
@@ -330,24 +359,26 @@ class _ImageShowState extends State<ImageShow> {
                           child: Image.file(file,
                               fit: BoxFit.cover,
                               width: double.infinity,
-                              height: double.infinity),
+                              height: 300),
                         ),
                       ),
                       Positioned(
                         top: 4,
                         right: 4,
-                        child: GestureDetector(
-                          onTap: () => _removeImage(index),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            child: const Icon(Icons.close,
-                                size: 16, color: Colors.white),
-                          ),
-                        ),
+                        child: widget.data.isEmpty
+                            ? GestureDetector(
+                                onTap: () => _removeImage(index),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: const Icon(Icons.close,
+                                      size: 16, color: Colors.white),
+                                ),
+                              )
+                            : Container(),
                       ),
                     ],
                   );

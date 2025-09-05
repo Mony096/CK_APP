@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:bizd_tech_service/component/text_field.dart';
 import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
@@ -14,13 +17,16 @@ import 'package:bizd_tech_service/screens/equipment/component/part.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
+import 'package:dio/dio.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 class EquipmentCreateScreen extends StatefulWidget {
   EquipmentCreateScreen({super.key, required this.data});
@@ -101,26 +107,72 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       installedDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       nextDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       warrantyDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      uploadImg.text = "";
     }
 
-    // Check if widget.data exists and is not empty
     if (widget.data.isEmpty) return;
     if (!mounted) return;
 
     MaterialDialog.loading(context); // Show loading dialog
 
     try {
-      // Fetch data from API
+      // --- Fetch equipment ---
       final response = await dio.get("/CK_CUSEQUI('${widget.data["Code"]}')");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = response.data;
-        // final attachment = await dio.getAttachment(
-        //     "/Attachments2(${data["U_ck_AttachmentEntry"]})");
-            
-        // print(attachment.data);
 
-        // Prevent setState if widget unmounted after await
+        // --- Fetch attachments as Files ---
+        List<File> sapFiles = [];
+        final attachmentEntry = data["U_ck_AttachmentEntry"];
+
+        if (attachmentEntry != null) {
+          final attachmentRes =
+              await dio.getAttachment("/Attachments2($attachmentEntry)");
+
+          if (attachmentRes.statusCode == 200) {
+            final attData = attachmentRes.data;
+            final lines = attData["Attachments2_Lines"] as List<dynamic>;
+            final token = await LocalStorageManger.getString('SessionId');
+
+            for (var line in lines) {
+              final url =
+                  "/Attachments2(${line["AbsoluteEntry"]})/\$value?filename='${line["FileName"]}.${line["FileExtension"]}'";
+
+              try {
+                // download bytes
+                final imgRes = await http.get(
+                  Uri.parse(
+                      "http://192.168.1.10:9093/api/sapIntegration/Attachments2"),
+                  headers: {
+                    'Content-Type': "application/json",
+                    "Authorization": 'Bearer $token',
+                    'sapUrl': url
+                  },
+                );
+                if (imgRes.statusCode == 200) {
+                  // Ensure bytes are valid
+
+                  // Save file to temp directory
+                  final tempDir = await getTemporaryDirectory();
+                  final fileName =
+                      "${line["FileName"]}.${line["FileExtension"]}";
+                  final filePath = "${tempDir.path}/$fileName";
+                  final file = File(filePath);
+
+                  await file.writeAsBytes(imgRes.bodyBytes);
+                  sapFiles.add(file);
+
+                  print(
+                      "Downloaded file: $filePath, size: ${imgRes.bodyBytes.length}");
+                }
+              } catch (e) {
+                print("Failed to fetch image ${line["FileName"]}: $e");
+              }
+            }
+          }
+        }
+
         if (!mounted) return;
 
         setState(() {
@@ -136,28 +188,27 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
           model.text = getDataFromDynamic(data["U_ck_eqModel"]);
 
           installedDate.text = getDataFromDynamic(
-            data['U_ck_InstalDate']?.toString().split("T").first,
-          );
+              data['U_ck_InstalDate']?.toString().split("T").first);
           nextDate.text = getDataFromDynamic(
-            data["U_ck_NsvDate"]?.toString().split("T").first,
-          );
+              data["U_ck_NsvDate"]?.toString().split("T").first);
           warrantyDate.text = getDataFromDynamic(
-            data["U_ck_WarExpDate"]?.toString().split("T").first,
-          );
+              data["U_ck_WarExpDate"]?.toString().split("T").first);
         });
 
-        // Update provider with components and parts collection
+        // --- Update provider ---
         final provider =
             Provider.of<EquipmentCreateProvider>(context, listen: false);
         provider.setComponents(data["CK_CUSEQUI01Collection"] ?? []);
         provider.setParts(data["CK_CUSEQUI02Collection"] ?? []);
+        provider.setImages(sapFiles); // store list of Files
+
+        print("Fetched SAP images: ${sapFiles.length}");
       } else {
         throw Exception("Failed to load documents");
       }
     } catch (e) {
       print("Error fetching documents: $e");
     } finally {
-      // Close loading dialog only if widget is still mounted
       if (mounted) MaterialDialog.close(context);
     }
   }
@@ -284,8 +335,8 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       onWillPop: () async {
         final provider =
             Provider.of<EquipmentCreateProvider>(context, listen: false);
-        provider.setComponents([]);
-        provider.setParts([]);
+        provider.clearCollection();
+
         return true; // Allow navigation to pop
       },
       child: Scaffold(

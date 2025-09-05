@@ -34,8 +34,14 @@ class EquipmentCreateProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setImages(List<File> images) {
+  void setImages(List<dynamic> images) {
     _imagesList.addAll(images);
+    // Correct for single file
+    notifyListeners();
+  }
+
+  void clearImages() {
+    _imagesList.clear();
     // Correct for single file
     notifyListeners();
   }
@@ -48,6 +54,7 @@ class EquipmentCreateProvider with ChangeNotifier {
   void clearCollection() {
     _components = [];
     _parts = [];
+    _imagesList = [];
     notifyListeners();
   }
 
