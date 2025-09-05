@@ -541,65 +541,109 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         size: 30,
                       ),
                     )),
-                    SizedBox(
-                      width: double.infinity,
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   child: Row(
+                    //     children: [
+                    //       const Expanded(
+                    //           flex: 1,
+                    //           child: Padding(
+                    //             padding: EdgeInsets.all(10.0),
+                    //             child: Column(
+                    //               children: [
+                    //                 SizedBox(
+                    //                   height: 45,
+                    //                   width:
+                    //                       45, // Ensure the width and height are equal for a perfect circle
+
+                    //                   child: Padding(
+                    //                       padding: EdgeInsets.all(8.0),
+                    //                       child: Icon(
+                    //                         Icons.build,
+                    //                         size: 25,
+                    //                       )),
+                    //                 )
+                    //               ],
+                    //             ),
+                    //           )),
+                    //       Expanded(
+                    //           flex: 5,
+                    //           child: Container(
+                    //               padding:
+                    //                   const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                    //               child: Column(
+                    //                 crossAxisAlignment:
+                    //                     CrossAxisAlignment.start,
+                    //                 children: [
+                    //                   Text(
+                    //                       "${widget.data["U_CK_CardCode"] ?? "N/A"} - ${widget.data["CustomerName"] ?? "N/A"}",
+                    //                       style: const TextStyle(fontSize: 12.5),
+                    //                       textScaleFactor: 1.0),
+                    //                   const SizedBox(
+                    //                     height: 6,
+                    //                   ),
+                    //                   Text(
+                    //                       "SN: ${(widget.data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? widget.data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
+                    //                       style: const TextStyle(
+                    //                         fontSize: 12.5,
+                    //                         fontWeight: FontWeight.bold,
+                    //                         height: 2,
+                    //                       ),
+                    //                       textScaleFactor: 1.0),
+                    //                 ],
+                    //               ))),
+                    //       const SizedBox(
+                    //         width: 10,
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ), ////
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Expanded(
                               flex: 1,
-                              child: Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      height: 45,
-                                      width:
-                                          45, // Ensure the width and height are equal for a perfect circle
-
-                                      child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Icon(
-                                            Icons.build,
-                                            size: 25,
-                                          )),
-                                    )
-                                  ],
-                                ),
+                              child: Icon(
+                                Icons.build,
+                                size: 25,
                               )),
                           Expanded(
-                              flex: 5,
-                              child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                          "${widget.data["U_CK_CardCode"] ?? "N/A"} - ${widget.data["CustomerName"] ?? "N/A"}",
-                                          style: TextStyle(fontSize: 12.5),
-                                          textScaleFactor: 1.0),
-                                      SizedBox(
-                                        height: 6,
+                            flex: 7,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${widget.data["U_CK_CardCode"] ?? "N/A"} - ${widget.data["CustomerName"] ?? "N/A"}",
+                                    style: const TextStyle(
+                                        // fontWeight: FontWeight.bold,
+                                        fontSize: 13.5),
+                                    textScaleFactor: 1.0,
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                      "SN: ${(widget.data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? widget.data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        height: 2,
                                       ),
-                                      Text(
-                                          "SN: ${(widget.data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? widget.data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.bold,
-                                            height: 2,
-                                          ),
-                                          textScaleFactor: 1.0),
-                                    ],
-                                  ))),
-                          const SizedBox(
-                            width: 10,
+                                      textScaleFactor: 1.0),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    ), ////
+                    ),
+
                     const SizedBox(
-                      height: 2,
+                      height: 15,
                     ),
                     DetailRow(
                       title: "Customer:",
