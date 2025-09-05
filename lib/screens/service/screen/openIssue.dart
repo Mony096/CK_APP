@@ -64,7 +64,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
           content: Container(
             width: double.maxFinite,
             constraints: const BoxConstraints(
-              maxHeight: 400,
+              maxHeight: 650,
             ),
             child: SingleChildScrollView(
               child: Column(

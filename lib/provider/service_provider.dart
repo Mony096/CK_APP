@@ -20,8 +20,7 @@ class DeliveryNoteProvider extends ChangeNotifier {
     try {
       // final response = await dio.get(
       //     "/DeliveryNotes?\$filter=(U_lk_delstat eq 'Started' or U_lk_delstat eq 'On the Way') and U_lk_driver eq $userId & \$select=$select");
-      final response = await dio.get(
-          "/DeliveryNotes?\$top=3");
+      final response = await dio.get("/DeliveryNotes?\$top=3");
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"];
         _documents = data;

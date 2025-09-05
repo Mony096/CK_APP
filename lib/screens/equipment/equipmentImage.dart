@@ -239,13 +239,12 @@ class _MenuState extends State<Menu> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Icon
-         
 
             // Title (will take remaining space automatically if wrapped in Flexible)
             Flexible(
               child: Row(
                 children: [
-                     Padding(
+                  Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: widget.icon,
                   ),
@@ -309,80 +308,88 @@ class _ImageShowState extends State<ImageShow> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(4),
-          boxShadow: [
-            BoxShadow(
-              color: const Color.fromARGB(255, 41, 84, 185).withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 2,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        margin: const EdgeInsets.all(4),
-        padding: const EdgeInsets.all(5),
-        height: 595,
-        child: widget.image.isEmpty
-            ? const Center(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 41, 84, 185).withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(5),
+      child: widget.image.isEmpty
+          ? SizedBox(
+            height: 300,
+            child: const Center(
                 child: Icon(
                   Icons.image,
                   size: 100,
                   color: Color.fromARGB(115, 63, 65, 67),
                 ),
-              )
-            : GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                children: List.generate(widget.image.length, (index) {
-                  final file = widget.image[index];
-                  return Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.grey.shade300),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(file,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: 300),
+              ),
+          )
+          : GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              shrinkWrap: true, // 👈 makes height auto-fit
+              physics:
+                  const NeverScrollableScrollPhysics(), // 👈 disable inner scroll
+              children: List.generate(widget.image.length, (index) {
+                final file = widget.image[index];
+                return Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey.shade300),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          file,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 300,
                         ),
                       ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: widget.data.isEmpty
-                            ? GestureDetector(
-                                onTap: () => _removeImage(index),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.5),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  padding: const EdgeInsets.all(4),
-                                  child: const Icon(Icons.close,
-                                      size: 16, color: Colors.white),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: widget.data.isEmpty
+                          ? GestureDetector(
+                              onTap: () => _removeImage(index),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  shape: BoxShape.circle,
                                 ),
-                              )
-                            : Container(),
-                      ),
-                    ],
-                  );
-                }),
-              ));
+                                padding: const EdgeInsets.all(4),
+                                child: const Icon(Icons.close,
+                                    size: 16, color: Colors.white),
+                              ),
+                            )
+                          : Container(),
+                    ),
+                  ],
+                );
+              }),
+            ),
+    );
   }
 }

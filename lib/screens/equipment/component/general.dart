@@ -5,7 +5,7 @@ import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
-import 'package:bizd_tech_service/screens/equipment/select/equipmentImage.dart';
+import 'package:bizd_tech_service/screens/equipment/equipmentImage.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
