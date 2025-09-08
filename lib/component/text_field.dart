@@ -125,6 +125,8 @@ class CustomTextField extends StatefulWidget {
     this.icon, // optional custom icon widget
     this.focusNode,
     required this.detail,
+    this.readOnly = false, // 👈 optional readOnly
+    this.disabled = false, // 👈 optional disabled
   });
 
   final VoidCallback? onclickIcon;
@@ -134,6 +136,8 @@ class CustomTextField extends StatefulWidget {
   final Widget? icon; // icon provided by parent
   final FocusNode? focusNode;
   final bool detail;
+  final bool readOnly;
+  final bool disabled;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -142,8 +146,8 @@ class CustomTextField extends StatefulWidget {
 class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.detail
-        ? Colors.grey[50]
+    final borderColor = (widget.detail || widget.disabled)
+        ? Colors.grey[200]
         : const Color.fromARGB(255, 203, 203, 203);
 
     return Column(
@@ -163,8 +167,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 ),
               ),
               const SizedBox(width: 5),
-              // Hide star in detail mode
-              if (widget.star && !widget.detail)
+              if (widget.star && !widget.detail && !widget.disabled)
                 const Text(
                   "*",
                   style: TextStyle(
@@ -178,82 +181,65 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         const SizedBox(height: 8),
 
-        // TextField with optional parent-provided icon
+        // TextField
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
           child: SizedBox(
             height: 43,
             child: TextField(
-              enabled: !widget.detail,
+              enabled: !(widget.detail ||
+                  widget.disabled), // 👈 disabled if detail OR disabled
+              readOnly: widget.readOnly, // 👈 only blocks editing
               focusNode: widget.focusNode,
               controller: widget.controller,
               style: TextStyle(
                 fontSize: 16,
-                color: widget.detail
-                    ? Colors.black
-                    : null, // black text in detail mode
+                color: (widget.detail || widget.disabled)
+                    ? Colors.black54
+                    : Colors.black,
               ),
-              decoration: !widget.detail
-                  ? InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7),
-                        borderSide: BorderSide(
-                          color: borderColor!,
-                          width: 0.5,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7),
-                        borderSide: BorderSide(
-                          color: borderColor,
-                          width: 0.5,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(7),
-                        borderSide: BorderSide(
-                          color: widget.detail
-                              ? Colors.grey[50]!
-                              : const Color.fromARGB(255, 96, 126, 105),
-                          width: 0.5,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: widget.detail
-                          ? Colors.grey[100] // gray background in detail mode
-                          : Colors.white,
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: BorderSide(
+                    color: borderColor!,
+                    width: 0.5,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: BorderSide(
+                    color: borderColor,
+                    width: 0.5,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: BorderSide(
+                    color: widget.detail || widget.disabled
+                        ? Colors.grey[200]!
+                        : const Color.fromARGB(255, 96, 126, 105),
+                    width: 0.5,
+                  ),
+                ),
+                filled: true,
+                fillColor: (widget.detail || widget.disabled)
+                    ? Colors.grey[100]
+                    : Colors.white,
 
-                      // Hide icon in detail mode
-                      suffixIcon: (!widget.detail && widget.icon != null)
-                          ? GestureDetector(
-                              onTap: widget.onclickIcon,
-                              child: widget.icon,
-                            )
-                          : null,
-                    )
-                  : InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 12,
-                      ),
-
-                      filled: true,
-                      fillColor: widget.detail
-                          ? Colors.grey[90] // gray background in detail mode
-                          : Colors.white,
-
-                      // Hide icon in detail mode
-                      suffixIcon: (!widget.detail && widget.icon != null)
-                          ? GestureDetector(
-                              onTap: widget.onclickIcon,
-                              child: widget.icon,
-                            )
-                          : null,
-                    ),
+                // Hide icon if disabled or detail
+                suffixIcon:
+                    (!(widget.detail || widget.disabled) && widget.icon != null)
+                        ? GestureDetector(
+                            onTap: widget.onclickIcon,
+                            child: widget.icon,
+                          )
+                        : null,
+              ),
             ),
           ),
         ),

@@ -6,19 +6,23 @@ class CustomTextFieldDialog extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.star,
-    this.isMissingFieldNotifier, // made optional
+    this.isMissingFieldNotifier,
     this.icon,
     this.onclickIcon,
     this.focusNode,
+    this.readOnly = false,
+    this.disabled = false,
   });
 
   final String label;
   final bool star;
   final TextEditingController controller;
-  final ValueNotifier<Map<String, dynamic>>? isMissingFieldNotifier; // nullable
+  final ValueNotifier<Map<String, dynamic>>? isMissingFieldNotifier;
   final Widget? icon;
   final VoidCallback? onclickIcon;
   final FocusNode? focusNode;
+  final bool readOnly;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,7 @@ class CustomTextFieldDialog extends StatelessWidget {
                   color: Color.fromARGB(221, 58, 58, 59),
                 ),
               ),
-              if (star)
+              if (star && !disabled)
                 const Padding(
                   padding: EdgeInsets.only(left: 5),
                   child: Text(
@@ -65,6 +69,8 @@ class CustomTextFieldDialog extends StatelessWidget {
       );
     }
 
+    final isDisabled = disabled;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,7 +88,12 @@ class CustomTextFieldDialog extends StatelessWidget {
           child: TextField(
             focusNode: focusNode,
             controller: controller,
-            style: const TextStyle(fontSize: 16),
+            enabled: !isDisabled,
+            readOnly: readOnly,
+            style: TextStyle(
+              fontSize: 16,
+              color: isDisabled ? Colors.black54 : Colors.black,
+            ),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 4,
@@ -90,28 +101,34 @@ class CustomTextFieldDialog extends StatelessWidget {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(7),
-                borderSide: const BorderSide(
-                  color: Color.fromARGB(255, 206, 206, 208),
-                  width: 1,
+                borderSide: BorderSide(
+                  color: isDisabled
+                      ? Colors.grey
+                      : const Color.fromARGB(255, 206, 206, 208),
+                  width: isDisabled ? 0 : 1, // 👈 smaller border for disabled
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(7),
-                borderSide: const BorderSide(
-                  color: Color.fromARGB(255, 203, 203, 203),
-                  width: 1,
+                borderSide: BorderSide(
+                  color: isDisabled
+                      ? const Color.fromARGB(255, 255, 255, 255)
+                      : const Color.fromARGB(255, 203, 203, 203),
+                  width: isDisabled ? 0 : 1, // 👈 smaller border
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(7),
-                borderSide: const BorderSide(
-                  color: Color.fromARGB(255, 96, 126, 105),
-                  width: 1.5,
+                borderSide: BorderSide(
+                  color: isDisabled
+                      ? const Color.fromARGB(255, 255, 255, 255)
+                      : const Color.fromARGB(255, 96, 126, 105),
+                  width: isDisabled ? 0 : 1.5, // 👈 smaller border
                 ),
               ),
               filled: true,
-              fillColor: Colors.white,
-              suffixIcon: icon != null
+              fillColor: isDisabled ? Colors.grey[100] : Colors.white,
+              suffixIcon: (!isDisabled && icon != null)
                   ? GestureDetector(
                       onTap: onclickIcon,
                       child: icon,

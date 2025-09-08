@@ -275,11 +275,24 @@ class BlockService extends StatelessWidget {
                   Expanded(
                       flex: 2,
                       child: Container(
-                        child: Text(
-                            "Time ${data["U_CK_Time"]} - ${data["U_CK_EndTime"]}",
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 13),
-                            textScaleFactor: 1.0),
+                        margin: EdgeInsets.only(bottom: 20),
+                        child: Row(
+                          children: [
+                             const Icon(
+                              Icons.timer,
+                              size: 19,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                                "${data["U_CK_Time"]} - ${data["U_CK_EndTime"]}",
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 13),
+                                textScaleFactor: 1.0),
+                          ],
+                        ),
                       )),
                   Expanded(
                     flex: 2,

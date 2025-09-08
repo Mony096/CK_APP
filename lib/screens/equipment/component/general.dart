@@ -7,6 +7,7 @@ import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
 import 'package:bizd_tech_service/screens/equipment/equipmentImage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 
@@ -86,6 +87,7 @@ class _GeneralState extends State<General> {
                   controller: widget.controller?['customerName'],
                   label: 'Customer',
                   star: true,
+                  readOnly: true,
                   icon: const Icon(
                     Icons.keyboard_arrow_right,
                     color: Colors.grey,
@@ -100,6 +102,8 @@ class _GeneralState extends State<General> {
                   controller: widget.controller?['equipType'],
                   label: 'Status',
                   star: true,
+                  readOnly: true, // 👈 new usage
+
                   icon: const Icon(
                     Icons.keyboard_arrow_down,
                     color: Colors.grey,
@@ -126,10 +130,12 @@ class _GeneralState extends State<General> {
                   controller: widget.controller?['serialNumber'],
                   label: 'Serial Number',
                   star: true,
-                  icon: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Colors.grey,
-                    size: 25,
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    child: SvgPicture.asset('images/svg/document-barcode.svg',
+                        width: 10,
+                        height: 10,
+                        color: const Color.fromARGB(255, 159, 161, 166)),
                   ),
                   onclickIcon: () {
                     _scanBarcode(context);
@@ -164,22 +170,26 @@ class _GeneralState extends State<General> {
               //     },
               //     detail: false),
               Container(
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 10),
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
                 width: MediaQuery.of(context).size.width,
                 child: TextButton(
                   onPressed: () {
-                    goTo(context, EquipmentImageScreen(data: widget.data)).then((e) {});
+                    goTo(context, EquipmentImageScreen(data: widget.data))
+                        .then((e) {});
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                    backgroundColor: const Color.fromARGB(255, 66, 83, 100),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
                   child: Text(
-                    widget.data.isNotEmpty ? "View ( ${context.read<EquipmentCreateProvider>().imagesList.length} / Image )": "Add Image",
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255), fontSize: 13),
+                    widget.data.isNotEmpty
+                        ? "View ( ${context.read<EquipmentCreateProvider>().imagesList.length} / Image )"
+                        : "Add Image",
+                    style: const TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        fontSize: 13),
                   ),
                 ),
               ),

@@ -1,3 +1,5 @@
+import 'package:bizd_tech_service/component/title_break%20copy.dart';
+import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
@@ -16,6 +18,159 @@ class ServiceCheckListScreen extends StatefulWidget {
 class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
   @override
   List<dynamic> myTravel = [{}, {}, {}];
+  void _showDetail(data) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                const Row(
+                  children: [
+                    Icon(Icons.assignment_turned_in,
+                        color: Colors.green, size: 25),
+                    SizedBox(width: 10),
+                    Text(
+                      "Checklist - Activity",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Divider(
+                    thickness: 1, color: Color.fromARGB(255, 213, 215, 217)),
+                // const SizedBox(height: 5),
+
+                // Items
+                _buildRow(
+                    "Checklist Type", "${data["U_CK_ChecklistType"] ?? "N/A"}"),
+                _buildRow("Checklist Title",
+                    "${data["U_CK_ChecklistTitle"] ?? "N/A"}"),
+                _buildRow("Text Input", "${data["U_CK_TextInput"] ?? "N/A"}"),
+                _buildRow("Number Input", "${data["U_CK_NumInput"] ?? "N/A"}"),
+                _buildRowCheck("True Output", "Yes", true),
+                _buildRowCheck("False Output", "No", false),
+                _buildRow("Active Output",
+                    data["U_CK_Active"] == "N" ? "Inactive" : "Active"),
+
+                const SizedBox(height: 20),
+
+                // Action button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.redAccent,
+                    ),
+                    child: const Text("Close"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRow(String title, String value) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Color.fromARGB(255, 213, 215, 217), // light grey
+            width: 0.5,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(0, 13, 0, 10), // spacing inside
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 150, // fixed width for labels
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.5, // line height for label
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+                height:
+                    1.8, // 👈 line height (10px if font size=10, scale accordingly)
+              ),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRowCheck(String title, String value, bool checked) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Color.fromARGB(255, 213, 215, 217), // light grey
+            width: 0.5,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(0, 13, 0, 10), // spacing inside
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 150, // fixed width for labels
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.5, // line height for label
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: checked ? Colors.green : Colors.red,
+                fontWeight: FontWeight.w500,
+                height:
+                    1.8, // 👈 line height (10px if font size=10, scale accordingly)
+              ),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +180,13 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
         // Leading menu icon on the left
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         // Centered title
-        title: Center(
+        title: const Center(
           child: Text(
             'Service CheckList',
             style: TextStyle(fontSize: 17, color: Colors.white),
@@ -68,16 +223,16 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(4),
-        child: Container(
+        child: SizedBox(
             width: double.infinity,
             height: double.infinity,
             child: Column(
               children: [
                 ///////////
                 Container(
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   height: 80,
-                  color: Color.fromARGB(255, 66, 83, 100),
+                  color: const Color.fromARGB(255, 66, 83, 100),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -85,7 +240,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -120,7 +275,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -152,7 +307,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -184,7 +339,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                           width: 37,
                           height: 37,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 66, 83, 100),
+                            color: const Color.fromARGB(255, 66, 83, 100),
                             shape:
                                 BoxShape.circle, // Makes the container circular
                             border: Border.all(
@@ -203,7 +358,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Expanded(
@@ -216,7 +371,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                   child: ListView(children: [
                     Container(
                       // margin: EdgeInsets.only(bottom: 1),
-                      padding: EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.only(bottom: 6),
                       width: double.infinity,
                       // height: 250,
                       decoration: BoxDecoration(
@@ -578,11 +733,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                       ),
                     ), //
                     //////Enddddddddddddddddddddddddddddddddddddddddddddd
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Menu(
-                      title: 'Checklist - Activity',
+                      title: 'CheckList - Activity',
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 5),
                         child: SvgPicture.asset(
@@ -593,7 +748,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     (widget.data["checklistLine"] as List<dynamic>).isNotEmpty
@@ -612,7 +767,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                   Icon(
                                     Icons.warning,
                                     size: 25,
-                                    color: Colors.grey,
+                                    color: Color.fromARGB(255, 120, 120, 125),
                                   ),
                                   SizedBox(
                                     height: 10,
@@ -622,7 +777,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                     style: TextStyle(
                                         fontSize: 13,
                                         color:
-                                            Color.fromARGB(255, 122, 126, 130)),
+                                            Color.fromARGB(255, 122, 126, 150)),
                                     textScaleFactor: 1.0,
                                   ),
                                 ],
@@ -630,20 +785,34 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                             ),
                           ),
                     ...(widget.data["checklistLine"] as List<dynamic>).map(
-                      (item) => DetailMenu(
-                        title: '${item["U_CK_ChecklistTitle"] ?? "N/A"}',
-                        icon: Padding(
-                          padding: const EdgeInsets.only(right: 5),
-                          child: SvgPicture.asset(
-                            color: const Color.fromARGB(255, 67, 70, 72),
-                            'images/svg/check_cicle.svg',
-                            width: 22,
-                            height: 22,
-                          ),
-                        ),
-                        desc: '${item["U_CK_TextInput"] ?? "N/A"}',
-                      ),
-                    ),
+                      (item) {
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            bool isChecked = item["U_CK_Checked"] == true;
+                            return DetailMenu(
+                              onTap: () => _showDetail(item),
+                              title: '${item["U_CK_ChecklistTitle"] ?? "N/A"}',
+                              icon: Padding(
+                                padding: const EdgeInsets.fromLTRB(18, 5, 0, 0),
+                                child: Checkbox(
+                                  value: isChecked,
+                                  activeColor:
+                                      Colors.green, // color when checked
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      item["U_CK_Checked"] =
+                                          value; // update your data
+                                    });
+                                  },
+                                ),
+                              ),
+                              desc: '${item["U_CK_TextInput"] ?? "N/A"}',
+                            );
+                          },
+                        );
+                      },
+                    )
+
                     // DetailMenu(
                     //   title: 'Noise and heater check',
                     //   icon: Padding(
@@ -697,7 +866,7 @@ class _MenuState extends State<Menu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(13),
+      padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(
         children: [
@@ -705,7 +874,8 @@ class _MenuState extends State<Menu> {
           Expanded(
               flex: 6,
               child: Text(widget.title,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 13),
                   textScaleFactor: 1.0)),
         ],
       ),
@@ -714,11 +884,17 @@ class _MenuState extends State<Menu> {
 }
 
 class DetailMenu extends StatefulWidget {
-  const DetailMenu(
-      {super.key, this.icon, required this.title, required this.desc});
+  DetailMenu(
+      {super.key,
+      this.icon,
+      required this.title,
+      required this.desc,
+      this.onTap});
   final dynamic icon;
   final String title;
   final String desc;
+  VoidCallback? onTap;
+
   @override
   State<DetailMenu> createState() => _DetailMenuState();
 }
@@ -727,8 +903,8 @@ class _DetailMenuState extends State<DetailMenu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(13),
-      margin: EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(0),
+      margin: const EdgeInsets.only(bottom: 10),
       color: Colors.white,
       child: Row(
         children: [
@@ -737,26 +913,37 @@ class _DetailMenuState extends State<DetailMenu> {
               child: Column(
                 children: [
                   widget.icon,
-                  SizedBox(
+                  const SizedBox(
                     height: 23,
                   )
                 ],
               )),
+          SizedBox(
+            width: 8,
+          ),
           Expanded(
               flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.title,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                      textScaleFactor: 1.0),
-                  SizedBox(
-                    height: 5,
+              child: GestureDetector(
+                onTap: widget.onTap,
+                child: Container(
+                  color: Colors.white,
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                          textScaleFactor: 1.0),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(widget.desc,
+                          style: const TextStyle(fontSize: 12.5),
+                          textScaleFactor: 1.0),
+                    ],
                   ),
-                  Text(widget.desc,
-                      style: TextStyle(fontSize: 12.5), textScaleFactor: 1.0),
-                ],
+                ),
               )),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:bizd_tech_service/component/text_field_dialog.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
+import 'package:bizd_tech_service/screens/equipment/select/itemMasterPage.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,6 +30,8 @@ class _PartState extends State<Part> {
   final part = TextEditingController();
   final brand = TextEditingController();
   final model = TextEditingController();
+    final brandName = TextEditingController();
+
   final FocusNode codeFocusNode = FocusNode();
   final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
       ValueNotifier({"missing": false, "value": "Code required", "isAdded": 0});
@@ -98,6 +101,15 @@ class _PartState extends State<Part> {
                     controller: code,
                     label: 'Code',
                     star: true,
+                     readOnly: true,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_right,
+                      color: Colors.grey,
+                      size: 28,
+                    ),
+                    onclickIcon: () {
+                      _itemSelect();
+                    },
                     focusNode: codeFocusNode,
                   ),
                   const SizedBox(height: 8),
@@ -105,6 +117,7 @@ class _PartState extends State<Part> {
                     isMissingFieldNotifier: nameFieldNotifier,
                     controller: name,
                     label: 'Name',
+                    disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 8),
@@ -112,13 +125,15 @@ class _PartState extends State<Part> {
                     isMissingFieldNotifier: partFieldNotifier,
                     controller: part,
                     label: 'Part Number',
+                     disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
                     isMissingFieldNotifier: brandFieldNotifier,
-                    controller: brand,
+                    controller: brandName,
                     label: 'Brand',
+                     disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 8),
@@ -126,6 +141,7 @@ class _PartState extends State<Part> {
                     isMissingFieldNotifier: modelFieldNotifier,
                     controller: model,
                     label: 'Model',
+                     disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 21),
@@ -645,5 +661,26 @@ class _PartState extends State<Part> {
         ),
       ),
     );
+  }
+
+  void _itemSelect() async {
+    goTo(context, const ItemMasterPageBusiness()).then((value) => {
+          if (value != null)
+            {
+             setState(() {
+                print(value);
+                code.text = getDataFromDynamic(value["ItemCode"]);
+                name.text = getDataFromDynamic(value["ItemName"]);
+                part.text = "A";
+                brand.text = getDataFromDynamic(value["BrandId"]);
+                brandName.text = getDataFromDynamic(value["BrandName"]);
+                model.text = getDataFromDynamic(value["Model"]);
+                // widget.controller?["customerName"].text =
+                //     getDataFromDynamic(value["CardName"]);
+                // customerCode.text = getDataFromDynamic(value["CardCode"]);
+                // customerName.text = getDataFromDynamic(value["CardName"]);
+              })
+            }
+        });
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
@@ -458,21 +459,47 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                  "Date : ${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")} ",
-                                                  style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12.5),
-                                                  textScaleFactor: 1.0),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.date_range,
+                                                    size: 19,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                      "${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")} ",
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12.5),
+                                                      textScaleFactor: 1.0),
+                                                ],
+                                              ),
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                              Text(
-                                                  "Time ${widget.data["U_CK_Time"]} - ${widget.data["U_CK_EndTime"]}",
-                                                  style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12.5),
-                                                  textScaleFactor: 1.0),
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.timer,
+                                                    size: 19,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                      "${widget.data["U_CK_Time"]} - ${widget.data["U_CK_EndTime"]}",
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12.5),
+                                                      textScaleFactor: 1.0),
+                                                ],
+                                              ),
                                               const SizedBox(
                                                 height: 15,
                                               ),
@@ -519,11 +546,23 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text(userName ?? "...",
-                                          style: const TextStyle(
-                                              fontSize: 12.5,
-                                              color: Colors.white),
-                                          textScaleFactor: 1.0),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.person,
+                                            size: 20,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(userName ?? "...",
+                                              style: const TextStyle(
+                                                  fontSize: 12.5,
+                                                  color: Colors.white),
+                                              textScaleFactor: 1.0),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -533,6 +572,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         ],
                       ),
                     ),
+
                     Container(
                         child: const Center(
                       child: Icon(
@@ -541,117 +581,21 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         size: 30,
                       ),
                     )),
-                    // SizedBox(
-                    //   width: double.infinity,
-                    //   child: Row(
-                    //     children: [
-                    //       const Expanded(
-                    //           flex: 1,
-                    //           child: Padding(
-                    //             padding: EdgeInsets.all(10.0),
-                    //             child: Column(
-                    //               children: [
-                    //                 SizedBox(
-                    //                   height: 45,
-                    //                   width:
-                    //                       45, // Ensure the width and height are equal for a perfect circle
-
-                    //                   child: Padding(
-                    //                       padding: EdgeInsets.all(8.0),
-                    //                       child: Icon(
-                    //                         Icons.build,
-                    //                         size: 25,
-                    //                       )),
-                    //                 )
-                    //               ],
-                    //             ),
-                    //           )),
-                    //       Expanded(
-                    //           flex: 5,
-                    //           child: Container(
-                    //               padding:
-                    //                   const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                    //               child: Column(
-                    //                 crossAxisAlignment:
-                    //                     CrossAxisAlignment.start,
-                    //                 children: [
-                    //                   Text(
-                    //                       "${widget.data["U_CK_CardCode"] ?? "N/A"} - ${widget.data["CustomerName"] ?? "N/A"}",
-                    //                       style: const TextStyle(fontSize: 12.5),
-                    //                       textScaleFactor: 1.0),
-                    //                   const SizedBox(
-                    //                     height: 6,
-                    //                   ),
-                    //                   Text(
-                    //                       "SN: ${(widget.data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? widget.data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
-                    //                       style: const TextStyle(
-                    //                         fontSize: 12.5,
-                    //                         fontWeight: FontWeight.bold,
-                    //                         height: 2,
-                    //                       ),
-                    //                       textScaleFactor: 1.0),
-                    //                 ],
-                    //               ))),
-                    //       const SizedBox(
-                    //         width: 10,
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ), ////
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Expanded(
-                              flex: 1,
-                              child: Icon(
-                                Icons.build,
-                                size: 25,
-                              )),
-                          Expanded(
-                            flex: 7,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${widget.data["U_CK_CardCode"] ?? "N/A"} - ${widget.data["CustomerName"] ?? "N/A"}",
-                                    style: const TextStyle(
-                                        // fontWeight: FontWeight.bold,
-                                        fontSize: 13.5),
-                                    textScaleFactor: 1.0,
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                      "SN: ${(widget.data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? widget.data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
-                                      style: const TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.bold,
-                                        height: 2,
-                                      ),
-                                      textScaleFactor: 1.0),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(
+                      height: 7,
                     ),
-
+                    const ComponentTitle(
+                      label: "Infomation",
+                    ),
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
                       title: "Customer:",
-                      svg: SvgPicture.asset(
-                        'images/svg/building.svg',
-                        color: Colors.black,
-                        width: 30,
-                        height: 30,
+                      svg: const Icon(
+                        Icons.person,
+                        size: 30,
+                        color: Colors.green,
                       ),
                       rows: [
                         RowItem(
@@ -730,6 +674,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       svg: const Icon(
                         Icons.build,
                         size: 25,
+                        color: Colors.black,
                       ),
                       rows: (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
                               .isEmpty

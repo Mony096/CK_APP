@@ -108,6 +108,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       nextDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       warrantyDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       uploadImg.text = "";
+      equipType.text = "Active";
     }
 
     if (widget.data.isEmpty) return;

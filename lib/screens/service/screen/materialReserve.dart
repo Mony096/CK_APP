@@ -16,6 +16,110 @@ class MaterialReserveScreen extends StatefulWidget {
 
 class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
   final numberQty = NumberFormat("#,##0", "en_US");
+  void _showDetail(data) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                const Row(
+                  children: [
+                    Icon(Icons.assignment_turned_in,
+                        color: Colors.green, size: 25),
+                    SizedBox(width: 10),
+                    Text(
+                      "Material Reserve",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Divider(
+                    thickness: 1, color: Color.fromARGB(255, 213, 215, 217)),
+                // const SizedBox(height: 5),
+
+                // Items
+                _buildRow("Item Code", "${data["U_CK_ItemCode"] ?? "N/A"}"),
+                _buildRow("Item Name", "${data["U_CK_ItemName"] ?? "N/A"}"),
+                _buildRow("UoM Code", "${data["U_CK_UoM"] ?? "N/A"}"),
+                _buildRow("Quantiy", "${data["U_CK_Qty"] ?? "N/A"}"),
+
+                const SizedBox(height: 20),
+
+                // Action button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.redAccent,
+                    ),
+                    child: const Text("Close"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRow(String title, String value) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Color.fromARGB(255, 213, 215, 217), // light grey
+            width: 0.5,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(0, 13, 0, 10), // spacing inside
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 150, // fixed width for labels
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.5, // line height for label
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+                height:
+                    1.8, // 👈 line height (10px if font size=10, scale accordingly)
+              ),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -630,16 +734,27 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                           ),
                     ...(widget.data["CK_JOB_MATERIALCollection"]
                             as List<dynamic>)
-                        .map((item) => DetailMenu(
+                        .map(
+                      (item) {
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            bool isChecked = item["U_CK_Checked"] ==
+                                true; // or use another field
+
+                            return DetailMenu(
+                              onTap: ()=> _showDetail(item),
                               title: item["U_CK_ItemCode"] ?? "N/A",
                               name: item["U_CK_ItemName"] ?? "N/A",
                               icon: Padding(
-                                padding: const EdgeInsets.only(right: 5),
-                                child: SvgPicture.asset(
-                                  color: const Color.fromARGB(255, 67, 70, 72),
-                                  'images/svg/check_cicle.svg',
-                                  width: 22,
-                                  height: 22,
+                                padding: const EdgeInsets.only(right: 3),
+                                child: Checkbox(
+                                  value: true,
+                                  activeColor: Colors.green,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      item["U_CK_Checked"] = value;
+                                    });
+                                  },
                                 ),
                               ),
                               desc: 'Res.Qty | N/A',
@@ -647,7 +762,11 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                 double.tryParse(item["U_CK_Qty"].toString()) ??
                                     0,
                               )} ',
-                            )),
+                            );
+                          },
+                        );
+                      },
+                    )
 
                     /////do somthing
                   ]),
@@ -689,18 +808,21 @@ class _MenuState extends State<Menu> {
 }
 
 class DetailMenu extends StatefulWidget {
-  const DetailMenu(
+  DetailMenu(
       {super.key,
       this.icon,
       required this.title,
       required this.desc,
       required this.name,
+      this.onTap,
       this.qty});
   final dynamic icon;
   final String title;
   final String name;
   final String desc;
   final dynamic qty;
+  VoidCallback? onTap;
+
   @override
   State<DetailMenu> createState() => _DetailMenuState();
 }
@@ -709,7 +831,7 @@ class _DetailMenuState extends State<DetailMenu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.fromLTRB(13, 0, 15, 0),
       margin: const EdgeInsets.only(bottom: 10),
       color: Colors.white,
       child: Row(
@@ -720,66 +842,73 @@ class _DetailMenuState extends State<DetailMenu> {
                 children: [
                   widget.icon,
                   const SizedBox(
-                    height: 23,
+                    height: 38,
                   )
                 ],
               )),
           Expanded(
               flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: GestureDetector(
+                  onTap: widget.onTap,
+                child: Container(
+                  color: Colors.white,
+                   width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 13),
-                        textScaleFactor: 1.0,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.title,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 13),
+                            textScaleFactor: 1.0,
+                          ),
+                          const Text(
+                            "Usage Qty",
+                            style: TextStyle(fontSize: 13),
+                            textScaleFactor: 1.0,
+                          ),
+                        ],
                       ),
-                      const Text(
-                        "Usage Qty",
-                        style: TextStyle(fontSize: 13),
-                        textScaleFactor: 1.0,
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.name,
+                            style: const TextStyle(fontSize: 12.5),
+                            textScaleFactor: 1.0,
+                          ),
+                          Text(
+                            textScaleFactor: 1.0,
+                            widget.qty,
+                            style: const TextStyle(
+                                fontSize: 12.5,
+                                color: Color.fromARGB(255, 0, 0, 0)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            textScaleFactor: 1.0,
+                            widget.desc,
+                            style: const TextStyle(
+                                fontSize: 12.5,
+                                color: Color.fromARGB(255, 122, 126, 130)),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        widget.name,
-                        style: const TextStyle(fontSize: 12.5),
-                        textScaleFactor: 1.0,
-                      ),
-                      Text(
-                        textScaleFactor: 1.0,
-                        widget.qty,
-                        style: const TextStyle(
-                            fontSize: 12.5,
-                            color: Color.fromARGB(255, 0, 0, 0)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        textScaleFactor: 1.0,
-                        widget.desc,
-                        style: const TextStyle(
-                            fontSize: 12.5,
-                            color: Color.fromARGB(255, 122, 126, 130)),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               )),
         ],
       ),

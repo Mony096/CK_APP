@@ -173,7 +173,7 @@ class DetailRow extends StatelessWidget {
           Expanded(
             flex: 7,
             child: Padding(
-              padding: const EdgeInsets.only(left: 10),
+              padding: const EdgeInsets.fromLTRB(10,0,5,0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

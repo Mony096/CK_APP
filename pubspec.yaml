@@ -118,6 +118,8 @@ flutter:
     - images/svg/scann_camera.svg
     - images/svg/images2.svg
     - images/svg/check-cycle.svg
+    - images/svg/document-barcode.svg
+    - images/svg/detail-view.svg
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

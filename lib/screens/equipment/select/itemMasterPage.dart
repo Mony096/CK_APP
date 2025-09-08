@@ -1,17 +1,18 @@
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
+import 'package:bizd_tech_service/provider/item_list_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class BusinessPartnerPage extends StatefulWidget {
-  const BusinessPartnerPage({super.key});
+class ItemMasterPageBusiness extends StatefulWidget {
+  const ItemMasterPageBusiness({super.key});
 
   @override
-  State<BusinessPartnerPage> createState() => _BusinessPartnerPageState();
+  State<ItemMasterPageBusiness> createState() => _ItemMasterPageBusinessState();
 }
 
-class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
+class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
   List<dynamic> warehouses = [];
   List<dynamic> customers = [];
   bool _initialLoading = true;
@@ -25,8 +26,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _init());
 
     _scrollController.addListener(() {
-      final provider =
-          Provider.of<CustomerListProvider>(context, listen: false);
+      final provider = Provider.of<ItemListProvider>(context, listen: false);
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
           provider.hasMore &&
@@ -39,7 +39,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
   Future<void> _init() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<CustomerListProvider>(context, listen: false);
+    final provider = Provider.of<ItemListProvider>(context, listen: false);
 
     if (provider.documents.isEmpty) {
       await provider.fetchDocuments();
@@ -50,10 +50,11 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
     });
   }
 
+// Items?$select=ItemCode,ItemName,InventoryItem,InventoryUoMEntry,InventoryUOM,U_tl_dim1,U_tl_dim2 & $filter=InventoryItem eq 'tYES' ${props.filter ?? ""} &$orderby = ItemCode asc
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<CustomerListProvider>(context, listen: false);
+    final provider = Provider.of<ItemListProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
     provider.resetPagination();
     await provider.resfreshFetchDocuments();
@@ -78,7 +79,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
         title: const Text(
-          "Customer Lists",
+          "Item Lists",
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
         centerTitle: true,
@@ -102,10 +103,10 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
           const SizedBox(width: 12),
         ],
       ),
-      body: Consumer<CustomerListProvider>(
+      body: Consumer<ItemListProvider>(
         builder: (context, deliveryProvider, _) {
           final documents = deliveryProvider.documents;
-          final provider = Provider.of<CustomerListProvider>(context);
+          final provider = Provider.of<ItemListProvider>(context);
           final isLoadingMore = provider.isLoading && provider.hasMore;
 
           // if (isLoading && documents.isEmpty) {
@@ -200,7 +201,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                       width: 1.5,
                                     ),
                                   ),
-                                  hintText: "Customer Code",
+                                  hintText: "Item Code",
                                   hintStyle: const TextStyle(
                                       color: Colors.grey, fontSize: 14),
                                   // Decrease vertical and horizontal padding to shrink the field
@@ -266,7 +267,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                     : documents.isEmpty
                         ? const Center(
                             child: Text(
-                              "No Customer",
+                              "No Item",
                               style:
                                   TextStyle(fontSize: 16, color: Colors.grey),
                             ),
@@ -333,7 +334,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              '${doc["CardCode"]} - ${(doc["CardName"] == null || doc["CardName"].toString().isEmpty) ? "N/A" : doc["CardName"]}',
+                                              '${(doc["ItemCode"] == null || doc["ItemCode"].toString().isEmpty) ? "N/A" : doc["ItemCode"]}',
                                               style: const TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
@@ -351,7 +352,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                           height: 5,
                                         ),
                                         Text(
-                                          '${doc["ShipToDefault"] ?? "N/A"}',
+                                          '${doc["ItemName"] ?? "N/A"}',
                                           style: const TextStyle(
                                               fontSize: 14,
                                               // fontWeight: FontWeight.bold,
