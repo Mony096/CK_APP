@@ -405,10 +405,9 @@ class _ComponentState extends State<Component> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                 Row(
+                Row(
                   children: [
-                    Icon(Icons.assignment,
-                        color: Colors.green, size: 25),
+                    Icon(Icons.assignment, color: Colors.green, size: 25),
                     SizedBox(width: 10),
                     Text(
                       "Component (${data["U_ck_ItemCode"]})",

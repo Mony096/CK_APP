@@ -1,31 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:bizd_tech_service/component/text_field.dart';
-import 'package:bizd_tech_service/component/text_remark.dart';
-import 'package:bizd_tech_service/component/title_break.dart';
+
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
-import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/component/general.dart';
 import 'package:bizd_tech_service/screens/equipment/component/component.dart';
 import 'package:bizd_tech_service/screens/equipment/component/part.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
-import 'package:dio/dio.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
 class EquipmentCreateScreen extends StatefulWidget {
@@ -163,9 +155,24 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
 
                   await file.writeAsBytes(imgRes.bodyBytes);
                   sapFiles.add(file);
+                } else {
+                  String errorMessage = "Unknown error";
+                  try {
+                    final decoded = jsonDecode(imgRes.body);
+                    if (decoded is Map && decoded.containsKey("error")) {
+                      errorMessage =
+                          decoded["error"]["message"]["value"].toString();
+                    }
+                  } catch (_) {
+                    // body was not valid JSON
+                    errorMessage = imgRes.body;
+                  }
 
-                  print(
-                      "Downloaded file: $filePath, size: ${imgRes.bodyBytes.length}");
+                  await MaterialDialog.warning(
+                    context,
+                    title: "Error",
+                    body: "Failed to fetch image: $errorMessage",
+                  );
                 }
               } catch (e) {
                 print("Failed to fetch image ${line["FileName"]}: $e");
