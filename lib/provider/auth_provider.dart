@@ -87,8 +87,8 @@ class AuthProvider with ChangeNotifier {
             'UserId', response.data["employeeID"].toString());
         await LocalStorageManger.setString(
             'UserName', response.data["firstName"].toString());
-        await LocalStorageManger.setString(
-            'FullName', '${response.data["firstName"].toString()} ${response.data["lastName"].toString()}');
+        await LocalStorageManger.setString('FullName',
+            '${response.data["firstName"].toString()} ${response.data["lastName"].toString()}');
         // final FirebaseMessaging messaging = FirebaseMessaging.instance;
         // await messaging.requestPermission(
         //     alert: true, badge: true, sound: true);
@@ -106,7 +106,7 @@ class AuthProvider with ChangeNotifier {
       MaterialDialog.warning(
         context,
         title: 'Error',
-        body: e.toString(),
+        body: "Incorrect username/password or ${e.toString()}",
       );
     }
 
