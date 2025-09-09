@@ -173,7 +173,7 @@ class DetailRow extends StatelessWidget {
           Expanded(
             flex: 7,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(10,0,5,0),
+              padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -189,10 +189,22 @@ class DetailRow extends StatelessWidget {
                           children: [
                             Expanded(
                               flex: 3,
-                              child: Text(
-                                row.left,
-                                textScaleFactor: 1.0,
-                                style: const TextStyle(fontSize: 12.5),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "•",
+                                    style: TextStyle(
+                                        fontSize: 15, color: Colors.grey),
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    row.left,
+                                    textScaleFactor: 1.0,
+                                    style: const TextStyle(fontSize: 12.5),
+                                  ),
+                                ],
                               ),
                             ),
                             Expanded(

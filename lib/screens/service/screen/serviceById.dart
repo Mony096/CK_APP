@@ -669,7 +669,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                     ),
                                     RowItem(
                                       left: e["MobilePhone"] ?? "N/A",
-                                      right: "",
+                                      right: Icon(Icons.phone,size: 20,color: Colors.green,),
+                                      isRightIcon: true
                                     ),
                                   ])
                               .toList(),
