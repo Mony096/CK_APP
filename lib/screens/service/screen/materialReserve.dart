@@ -31,13 +31,12 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.assignment_turned_in,
-                        color: Colors.green, size: 25),
+                    Icon(Icons.assignment, color: Colors.green, size: 25),
                     SizedBox(width: 10),
                     Text(
-                      "Material Reserve",
+                      "Material Reserve (${data["U_CK_ItemCode"] ?? "N/A"})",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -425,12 +424,23 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            "${widget.data["DocNum"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),
-                                            textScaleFactor: 1.0,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Text(
+                                                "No: ",
+                                                style: TextStyle(fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                              Text(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -742,7 +752,7 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                                 true; // or use another field
 
                             return DetailMenu(
-                              onTap: ()=> _showDetail(item),
+                              onTap: () => _showDetail(item),
                               title: item["U_CK_ItemCode"] ?? "N/A",
                               name: item["U_CK_ItemName"] ?? "N/A",
                               icon: Padding(
@@ -793,14 +803,24 @@ class _MenuState extends State<Menu> {
       padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(flex: 1, child: widget.icon),
-          Expanded(
-              flex: 6,
-              child: Text(widget.title,
+          Row(
+            children: [
+              const SizedBox(
+                width: 10,
+              ),
+              widget.icon,
+              const SizedBox(
+                width: 8,
+              ),
+              Text(widget.title,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 13),
-                  textScaleFactor: 1.0)),
+                  textScaleFactor: 1.0)
+            ],
+          ),
+          const Icon(Icons.arrow_drop_down, size: 30, color: Colors.green)
         ],
       ),
     );
@@ -849,10 +869,10 @@ class _DetailMenuState extends State<DetailMenu> {
           Expanded(
               flex: 6,
               child: GestureDetector(
-                  onTap: widget.onTap,
+                onTap: widget.onTap,
                 child: Container(
                   color: Colors.white,
-                   width: MediaQuery.of(context).size.width,
+                  width: MediaQuery.of(context).size.width,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

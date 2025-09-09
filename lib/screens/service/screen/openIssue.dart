@@ -629,12 +629,23 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            "${widget.data["DocNum"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),
-                                            textScaleFactor: 1.0,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Text(
+                                                "No: ",
+                                                style: TextStyle(fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                              Text(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -1030,14 +1041,24 @@ class _MenuState extends State<Menu> {
       padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(flex: 1, child: widget.icon),
-          Expanded(
-              flex: 6,
-              child: Text(widget.title,
+          Row(
+            children: [
+              const SizedBox(
+                width: 10,
+              ),
+              widget.icon,
+              const SizedBox(
+                width: 8,
+              ),
+              Text(widget.title,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 13),
-                  textScaleFactor: 1.0)),
+                  textScaleFactor: 1.0)
+            ],
+          ),
+          const Icon(Icons.arrow_drop_down, size: 30, color: Colors.green)
         ],
       ),
     );

@@ -427,12 +427,23 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            "${widget.data["DocNum"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),
-                                            textScaleFactor: 1.0,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Text(
+                                                "No: ",
+                                                style: TextStyle(fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                              Text(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -459,6 +470,9 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
                                               Row(
                                                 children: [
                                                   const Icon(
@@ -546,7 +560,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
                                       Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           const Icon(
                                             Icons.person,
@@ -572,44 +591,65 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         ],
                       ),
                     ),
-
-                    Container(
+                    const SizedBox(
+                      height: 2,
+                    ),
+                    GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
                         child: const Center(
-                      child: Icon(
-                        Icons.keyboard_arrow_up,
-                        color: Colors.green,
-                        size: 30,
-                      ),
-                    )),
+                          child: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.green,
+                            size: 30,
+                          ),
+                        )),
                     const SizedBox(
-                      height: 7,
+                      height: 10,
                     ),
-                    const ComponentTitle(
-                      label: "Infomation",
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    DetailRow(
-                      title: "Customer:",
-                      svg: const Icon(
-                        Icons.person,
-                        size: 30,
-                        color: Colors.green,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                      child: Row(
+                        children: [
+                          // Left line
+                          Expanded(
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
+                          ),
+
+                          // Center text
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              "${widget.data["CustomerName"] ?? "N/A"}s' Information",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                // fontWeight: FontWeight.w500,
+                                color: Color.fromARGB(221, 85, 81, 81),
+                              ),
+                            ),
+                          ),
+
+                          // Right line
+                          Expanded(
+                            child: Divider(
+                              color: Colors.grey[400],
+                              thickness: 1,
+                            ),
+                          ),
+                        ],
                       ),
-                      rows: [
-                        RowItem(
-                            left: "${widget.data["CustomerName"] ?? "N/A"}",
-                            right: ""),
-                      ],
                     ),
+
                     const SizedBox(
                       height: 15,
                     ),
                     DetailRow(
                       title: "Contact:",
                       svg: SvgPicture.asset(
-                        color: Colors.black,
+                        color: Colors.green,
                         'images/svg/contact.svg',
                         width: 30,
                         height: 30,
@@ -640,7 +680,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     DetailRow(
                       title: "Service:",
                       svg: SvgPicture.asset(
-                        color: Colors.black,
+                        color: Colors.green,
                         'images/svg/dolla.svg',
                         width: 30,
                         height: 30,
@@ -674,7 +714,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       svg: const Icon(
                         Icons.build,
                         size: 25,
-                        color: Colors.black,
+                        color: Colors.green,
                       ),
                       rows: (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
                               .isEmpty
@@ -700,7 +740,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     DetailRow(
                         title: "Activity:",
                         svg: SvgPicture.asset(
-                          color: Colors.black,
+                          color: Colors.green,
                           'images/svg/activity.svg',
                           width: 30,
                           height: 30,
@@ -717,7 +757,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                       RowItem(
                                           left: "${e["Activity"] ?? "N/A"}",
                                           right: SvgPicture.asset(
-                                            color: Colors.black,
+                                            color: Colors.green,
                                             'images/svg/task_check.svg',
                                             width: 25,
                                             height: 25,
@@ -729,7 +769,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         //     RowItem(
                         //         left: "Activity Name1",
                         //         right: SvgPicture.asset(
-                        //           color: Colors.black,
+                        //           color: Colors.green,
                         //           'images/svg/task_check.svg',
                         //           width: 25,
                         //           height: 25,
@@ -761,7 +801,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     DetailRow(
                       title: "Material Reserve:",
                       svg: SvgPicture.asset(
-                        color: Colors.black,
+                        color: Colors.green,
                         'images/svg/material.svg',
                         width: 30,
                         height: 30,
@@ -793,7 +833,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     DetailRow(
                       title: "Tool & Assets:",
                       svg: SvgPicture.asset(
-                        color: Colors.black,
+                        color: Colors.green,
                         'images/svg/tool.svg',
                         width: 30,
                         height: 30,
@@ -832,7 +872,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         Icon(
                           Icons.warning_rounded,
                           size: 25,
-                          color: Colors.red,
+                          color: Color.fromARGB(255, 215, 197, 29),
                         )
                       ],
                     ),

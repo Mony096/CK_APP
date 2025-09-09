@@ -33,14 +33,13 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.assignment_turned_in,
-                        color: Colors.green, size: 25),
-                    SizedBox(width: 10),
+                    const Icon(Icons.assignment, color: Colors.green, size: 25),
+                    const SizedBox(width: 10),
                     Text(
-                      "Checklist - Activity",
-                      style: TextStyle(
+                      "Checklist (${data["U_CK_ChecklistTitle"] ?? "N/A"})",
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
@@ -478,12 +477,23 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                         Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            "${widget.data["DocNum"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),
-                                            textScaleFactor: 1.0,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Text(
+                                                "No: ",
+                                                style: TextStyle(fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                              Text(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -869,14 +879,24 @@ class _MenuState extends State<Menu> {
       padding: const EdgeInsets.all(13),
       color: Colors.white,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(flex: 1, child: widget.icon),
-          Expanded(
-              flex: 6,
-              child: Text(widget.title,
+          Row(
+            children: [
+              const SizedBox(
+                width: 10,
+              ),
+              widget.icon,
+              const SizedBox(
+                width: 8,
+              ),
+              Text(widget.title,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 13),
-                  textScaleFactor: 1.0)),
+                  textScaleFactor: 1.0)
+            ],
+          ),
+          const Icon(Icons.arrow_drop_down, size: 30, color: Colors.green)
         ],
       ),
     );
@@ -918,7 +938,7 @@ class _DetailMenuState extends State<DetailMenu> {
                   )
                 ],
               )),
-          SizedBox(
+          const SizedBox(
             width: 8,
           ),
           Expanded(

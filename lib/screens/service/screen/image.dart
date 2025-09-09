@@ -423,15 +423,26 @@ class _ImageScreenState extends State<ImageScreen> {
                                         const SizedBox(
                                           height: 10,
                                         ),
-                                        Padding(
+                                         Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            "${widget.data["DocNum"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),
-                                            textScaleFactor: 1.0,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Text(
+                                                "No: ",
+                                                style: TextStyle(fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                              Text(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],

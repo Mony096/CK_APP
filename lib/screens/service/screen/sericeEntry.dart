@@ -347,15 +347,28 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                             const SizedBox(
                                               height: 10,
                                             ),
-                                            Padding(
+                                             Padding(
                                               padding: const EdgeInsets.only(
                                                   right: 10),
-                                              child: Text(
-                                                "${widget.data["DocNum"]}",
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13),
-                                                textScaleFactor: 1.0,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  const Text(
+                                                    "No: ",
+                                                    style:
+                                                        TextStyle(fontSize: 13),
+                                                    textScaleFactor: 1.0,
+                                                  ),
+                                                  Text(
+                                                    "${widget.data["DocNum"]}",
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 13),
+                                                    textScaleFactor: 1.0,
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
@@ -630,7 +643,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 5),
                               child: SvgPicture.asset(
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: Colors.green,
                                 'images/svg/activity.svg',
                                 width: 30,
                                 height: 30,
@@ -654,7 +667,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 5),
                               child: SvgPicture.asset(
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: Colors.green,
                                 'images/svg/material.svg',
                                 width: 30,
                                 height: 30,
@@ -678,7 +691,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 5),
                               child: SvgPicture.asset(
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: Colors.green,
                                 'images/svg/image.svg',
                                 width: 30,
                                 height: 30,
@@ -698,7 +711,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 5),
                               child: SvgPicture.asset(
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: Colors.green,
                                 'images/svg/clock.svg',
                                 width: 30,
                                 height: 30,
@@ -718,7 +731,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 5),
                               child: SvgPicture.asset(
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: Colors.green,
                                 'images/svg/signature.svg',
                                 width: 30,
                                 height: 30,
@@ -738,7 +751,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 5),
                               child: SvgPicture.asset(
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: Colors.green,
                                 'images/svg/report.svg',
                                 width: 30,
                                 height: 30,

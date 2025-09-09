@@ -289,7 +289,7 @@ class _PartState extends State<Part> {
         name.text = getDataFromDynamic(item["U_ck_ItemName"]);
         part.text = getDataFromDynamic(item["U_ck_PartNum"]);
         brand.text = getDataFromDynamic(item["U_ck_brand"]);
-        brandName.text = getDataFromDynamic(item["BrandName"]);
+        brandName.text = getDataFromDynamic(item["U_ck_brand"]);
         model.text = getDataFromDynamic(item["U_ck_model"]);
         FocusScope.of(context).requestFocus(codeFocusNode);
 
@@ -401,13 +401,13 @@ class _PartState extends State<Part> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                const Row(
+                 Row(
                   children: [
-                    Icon(Icons.assignment_turned_in,
+                    Icon(Icons.assignment,
                         color: Colors.green, size: 25),
                     SizedBox(width: 10),
                     Text(
-                      "Part - Information",
+                      "Part (${data["U_ck_ItemCode"]})",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

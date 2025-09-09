@@ -811,15 +811,26 @@ class _TimeScreenState extends State<TimeScreen> {
                                         const SizedBox(
                                           height: 10,
                                         ),
-                                        Padding(
+                                       Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            "${widget.data["DocNum"]}",
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),
-                                            textScaleFactor: 1.0,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Text(
+                                                "No: ",
+                                                style: TextStyle(fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                              Text(
+                                                "${widget.data["DocNum"]}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13),
+                                                textScaleFactor: 1.0,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -1075,9 +1086,9 @@ class _TimeScreenState extends State<TimeScreen> {
                     Menu(
                       title: userName ?? "...",
                       icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
+                        padding: const EdgeInsets.only(right: 0),
                         child: SvgPicture.asset(
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: Colors.green,
                           'images/svg/clock.svg',
                           width: 30,
                           height: 30,
@@ -1152,6 +1163,7 @@ class _MenuState extends State<Menu> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 30),
                 child: Text(
+                  
                   textAlign: TextAlign.right,
                   textScaleFactor: 1.0,
                   widget.date,

@@ -122,10 +122,23 @@ class BlockService extends StatelessWidget {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 10),
-                            child: Text("${data["DocNum"]}",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 13),
-                                textScaleFactor: 1.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                const Text(
+                                  "No: ",
+                                  style: TextStyle(fontSize: 13),
+                                  textScaleFactor: 1.0,
+                                ),
+                                Text(
+                                  "${data["DocNum"]}",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
+                                  textScaleFactor: 1.0,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ))
