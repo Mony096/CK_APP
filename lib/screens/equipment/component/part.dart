@@ -30,7 +30,7 @@ class _PartState extends State<Part> {
   final part = TextEditingController();
   final brand = TextEditingController();
   final model = TextEditingController();
-    final brandName = TextEditingController();
+  final brandName = TextEditingController();
 
   final FocusNode codeFocusNode = FocusNode();
   final ValueNotifier<Map<String, dynamic>> codeFieldNotifier =
@@ -101,7 +101,7 @@ class _PartState extends State<Part> {
                     controller: code,
                     label: 'Code',
                     star: true,
-                     readOnly: true,
+                    readOnly: true,
                     icon: const Icon(
                       Icons.keyboard_arrow_right,
                       color: Colors.grey,
@@ -125,7 +125,7 @@ class _PartState extends State<Part> {
                     isMissingFieldNotifier: partFieldNotifier,
                     controller: part,
                     label: 'Part Number',
-                     disabled: true,
+                    disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 8),
@@ -133,7 +133,7 @@ class _PartState extends State<Part> {
                     isMissingFieldNotifier: brandFieldNotifier,
                     controller: brandName,
                     label: 'Brand',
-                     disabled: true,
+                    disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 8),
@@ -141,7 +141,7 @@ class _PartState extends State<Part> {
                     isMissingFieldNotifier: modelFieldNotifier,
                     controller: model,
                     label: 'Model',
-                     disabled: true,
+                    disabled: true,
                     star: true,
                   ),
                   const SizedBox(height: 21),
@@ -245,10 +245,11 @@ class _PartState extends State<Part> {
   void _onAddPart(BuildContext context, {bool force = false}) {
     try {
       final item = {
-        "U_ck_ParthCode": code.text,
-        "U_U_ck_PartName": name.text,
+        "U_ck_ItemCode": code.text,
+        "U_ck_ItemName": name.text,
         "U_ck_PartNum": part.text,
-        "U_ck_brand": brand.text,
+        "U_ck_brand": brandName.text,
+        // "BrandName": brandName.text,
         "U_ck_model": model.text,
       };
 
@@ -274,7 +275,7 @@ class _PartState extends State<Part> {
     if (index < 0) return;
     MaterialDialog.warningWithRemove(
       context,
-      title: 'Comps (${item['U_ck_ParthCode']})',
+      title: 'Comps (${item['U_ck_ItemCode']})',
       confirmLabel: "Edit",
       cancelLabel: "Remove",
       onConfirm: () {
@@ -284,10 +285,11 @@ class _PartState extends State<Part> {
           _showCreateComponent(); // Then open edit form dialog
         });
 
-        code.text = getDataFromDynamic(item["U_ck_ParthCode"]);
-        name.text = getDataFromDynamic(item["U_U_ck_PartName"]);
+        code.text = getDataFromDynamic(item["U_ck_ItemCode"]);
+        name.text = getDataFromDynamic(item["U_ck_ItemName"]);
         part.text = getDataFromDynamic(item["U_ck_PartNum"]);
         brand.text = getDataFromDynamic(item["U_ck_brand"]);
+        brandName.text = getDataFromDynamic(item["BrandName"]);
         model.text = getDataFromDynamic(item["U_ck_model"]);
         FocusScope.of(context).requestFocus(codeFocusNode);
 
@@ -325,7 +327,7 @@ class _PartState extends State<Part> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Part Removed (${item['U_ck_ParthCode']})",
+                        "Part Removed (${item['U_ck_ItemCode']})",
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.white,
@@ -585,28 +587,33 @@ class _PartState extends State<Part> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     SizedBox(
-                                      // width: 104,
+                                      width: 150,
                                       child: Text(
-                                        "${item["U_ck_ParthCode"]} - ${item["U_U_ck_PartName"]}",
+                                        textScaleFactor: 1.0,
+                                        maxLines: 1,
+                                        overflow:
+                                            TextOverflow.ellipsis, // adds ...
+                                        "${item["U_ck_ItemCode"]} - ${item["U_ck_ItemName"]}",
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
                                         ),
-                                        textScaleFactor: 1.0,
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        const SizedBox(
-                                          width: 42,
-                                          child: Text("Model",
-                                              style: TextStyle(fontSize: 13)),
+                                    SizedBox(
+                                      width: 150,
+                                      child: Text(
+                                        textAlign: TextAlign.right,
+                                        textScaleFactor: 1.0,
+                                        maxLines: 1,
+                                        overflow:
+                                            TextOverflow.ellipsis, // adds ...
+                                        // "${item["Model"]}: ${item["U_U_ck_comName"]}",
+                                        "Model: ${item["U_ck_model"]}",
+                                        style: const TextStyle(
+                                          fontSize: 13,
                                         ),
-                                        Text(": ${item["U_ck_model"]}",
-                                            style:
-                                                const TextStyle(fontSize: 13),
-                                            textScaleFactor: 1.0),
-                                      ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -618,31 +625,33 @@ class _PartState extends State<Part> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        const SizedBox(
-                                          width: 40,
-                                          child: Text("Brand",
-                                              style: TextStyle(fontSize: 13)),
+                                    SizedBox(
+                                      width: 150,
+                                      child: Text(
+                                        textScaleFactor: 1.0,
+                                        maxLines: 1,
+                                        overflow:
+                                            TextOverflow.ellipsis, // adds ...
+                                        "Brand : ${item["U_ck_brand"]}",
+                                        style: const TextStyle(
+                                          fontSize: 13,
                                         ),
-                                        Text(": ${item["U_ck_brand"]}",
-                                            style:
-                                                const TextStyle(fontSize: 13),
-                                            textScaleFactor: 1.0),
-                                      ],
+                                      ),
                                     ),
-                                    Row(
-                                      children: [
-                                        const SizedBox(
-                                          width: 30,
-                                          child: Text("Part",
-                                              style: TextStyle(fontSize: 13)),
+                                    SizedBox(
+                                      width: 150,
+                                      child: Text(
+                                        textAlign: TextAlign.right,
+                                        textScaleFactor: 1.0,
+                                        maxLines: 1,
+                                        overflow:
+                                            TextOverflow.ellipsis, // adds ...
+                                        // "${item["Model"]}: ${item["U_U_ck_comName"]}",
+                                        "Part : ${item["U_ck_PartNum"]}",
+                                        style: const TextStyle(
+                                          fontSize: 13,
                                         ),
-                                        Text(": ${item["U_ck_PartNum"]}",
-                                            style:
-                                                const TextStyle(fontSize: 13),
-                                            textScaleFactor: 1.0),
-                                      ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -667,11 +676,11 @@ class _PartState extends State<Part> {
     goTo(context, const ItemMasterPageBusiness()).then((value) => {
           if (value != null)
             {
-             setState(() {
+              setState(() {
                 print(value);
                 code.text = getDataFromDynamic(value["ItemCode"]);
                 name.text = getDataFromDynamic(value["ItemName"]);
-                part.text = "A";
+                 part.text = getDataFromDynamic(value["Part"]);
                 brand.text = getDataFromDynamic(value["BrandId"]);
                 brandName.text = getDataFromDynamic(value["BrandName"]);
                 model.text = getDataFromDynamic(value["Model"]);

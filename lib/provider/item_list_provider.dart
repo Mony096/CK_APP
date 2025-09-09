@@ -23,8 +23,8 @@ class ItemListProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await dio.get(
-          "/script/test/GetCkItemLists?\$top=$_limit&\$skip=$_skip");
+      final response = await dio
+          .get("/script/test/GetCkItemLists?\$top=$_limit&\$skip=$_skip");
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
 

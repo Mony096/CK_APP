@@ -176,10 +176,15 @@ class EquipmentCreateProvider with ChangeNotifier {
             duration: const Duration(seconds: 4),
           ),
         );
+        return;
       }
       final payload = {
         ...data,
         "U_ck_AttachmentEntry": attachmentEntry,
+        // "CK_CUSEQUI01Collection":
+        //     _components.map((e) => Map.from(e)..remove("BrandName")).toList(),
+        // "CK_CUSEQUI02Collection":
+        //     _parts.map((e) => Map.from(e)..remove("BrandName")).toList(),
         "CK_CUSEQUI01Collection": _components,
         "CK_CUSEQUI02Collection": _parts,
       };
