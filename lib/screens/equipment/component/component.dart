@@ -389,6 +389,112 @@ class _ComponentState extends State<Component> {
     };
   }
 
+  void _showDetail(data) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                const Row(
+                  children: [
+                    Icon(Icons.assignment_turned_in,
+                        color: Colors.green, size: 25),
+                    SizedBox(width: 10),
+                    Text(
+                      "Comp - Information",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Divider(
+                    thickness: 1, color: Color.fromARGB(255, 213, 215, 217)),
+                // const SizedBox(height: 5),
+
+                // Items
+                _buildRow("Code", "${data["U_ck_ItemCode"] ?? "N/A"}"),
+                _buildRow("Name", "${data["U_ck_ItemName"] ?? "N/A"}"),
+                _buildRow("Part Number", "${data["U_ck_partNum"] ?? "N/A"}"),
+                _buildRow("Brand", "${data["U_ck_brand"] ?? "N/A"}"),
+                _buildRow("Model", data["U_ck_model"]),
+
+                const SizedBox(height: 20),
+
+                // Action button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.redAccent,
+                    ),
+                    child: const Text("Close"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRow(String title, String value) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Color.fromARGB(255, 213, 215, 217), // light grey
+            width: 0.5,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(0, 13, 0, 10), // spacing inside
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 150, // fixed width for labels
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.5, // line height for label
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+                height:
+                    1.8, // 👈 line height (10px if font size=10, scale accordingly)
+              ),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -416,38 +522,6 @@ class _ComponentState extends State<Component> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CustomTextField(
-              //   controller: code,
-              //   label: 'Code',
-              //   star: true,
-              //   focusNode: codeFocusNode,
-
-              // ),
-              // const SizedBox(height: 8),
-              // CustomTextField(
-              //   controller: name,
-              //   label: 'Name',
-              //   star: true,
-
-              // ),
-              // const SizedBox(height: 8),
-              // CustomTextField(
-              //   controller: part,
-              //   label: 'Part Number',
-              //   star: false,
-              // ),
-              // const SizedBox(height: 8),
-              // CustomTextField(
-              //   controller: brand,
-              //   label: 'Brand',
-              //   star: true,
-              // ),
-              // const SizedBox(height: 8),
-              // CustomTextField(
-              //   controller: model,
-              //   label: 'Model',
-              //   star: false,
-              // ),
               widget.data.isEmpty
                   ? Container(
                       margin: const EdgeInsets.fromLTRB(20, 0, 20, 13),
@@ -520,6 +594,8 @@ class _ComponentState extends State<Component> {
                   onTap: () {
                     if (widget.data.isEmpty) {
                       onEditComp(item, index);
+                    } else {
+                      _showDetail(item);
                     }
                   },
                   child: Container(
