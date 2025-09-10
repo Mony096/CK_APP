@@ -291,7 +291,7 @@ class BlockService extends StatelessWidget {
                         margin: EdgeInsets.only(bottom: 20),
                         child: Row(
                           children: [
-                             const Icon(
+                            const Icon(
                               Icons.timer,
                               size: 19,
                               color: Colors.white,
@@ -314,6 +314,7 @@ class BlockService extends StatelessWidget {
                       child: Container(
                         width: 100,
                         height: 35,
+                        margin: EdgeInsets.only(left: 3),
                         decoration: BoxDecoration(
                           color: Colors.yellow,
                           borderRadius: BorderRadius.circular(5.0),

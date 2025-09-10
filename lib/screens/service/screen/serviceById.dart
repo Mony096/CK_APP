@@ -518,6 +518,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                 height: 15,
                                               ),
                                               Container(
+                                                margin: const EdgeInsets.only(
+                                                    left: 3),
                                                 width: 100,
                                                 height: 35,
                                                 decoration: BoxDecoration(
@@ -668,10 +670,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                       right: "",
                                     ),
                                     RowItem(
-                                      left: e["MobilePhone"] ?? "N/A",
-                                      right: Icon(Icons.phone,size: 20,color: Colors.green,),
-                                      isRightIcon: true
-                                    ),
+                                        left: e["MobilePhone"] ?? "N/A",
+                                        right: const Icon(
+                                          Icons.phone,
+                                          size: 20,
+                                          color: Colors.green,
+                                        ),
+                                        isRightIcon: true),
                                   ])
                               .toList(),
                     ),
@@ -863,7 +868,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     ),
 
                     const SizedBox(
-                      height: 10,
+                      height: 15,
                     ),
                     const Row(
                       children: [
@@ -872,7 +877,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         ),
                         Icon(
                           Icons.warning_rounded,
-                          size: 25,
+                          size: 30,
                           color: Color.fromARGB(255, 215, 197, 29),
                         )
                       ],
