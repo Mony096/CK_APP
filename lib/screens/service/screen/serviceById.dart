@@ -733,7 +733,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           : (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
                               .expand<RowItem>((e) => [
                                     RowItem(
-                                      left: e["U_CK_EquipName"] ?? "N/A",
+                                      left: e["U_CK_EquipName"]??
+                                          "N/A",
                                       right:
                                           'SN: ${e["U_CK_SerialNum"] ?? "N/A"}',
                                     ),

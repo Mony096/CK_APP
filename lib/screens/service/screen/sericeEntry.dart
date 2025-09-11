@@ -254,8 +254,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                             borderRadius:
                                 BorderRadius.circular(5.0), // Rounded corners
                           ),
-                          child:
-                           Column(
+                          child: Column(
                             children: [
                               SizedBox(
                                 width: double.infinity,
@@ -347,7 +346,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                             const SizedBox(
                                               height: 10,
                                             ),
-                                             Padding(
+                                            Padding(
                                               padding: const EdgeInsets.only(
                                                   right: 10),
                                               child: Row(
@@ -437,6 +436,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                   const SizedBox(
                                                     height: 10,
                                                   ),
+                                                  
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
@@ -446,46 +446,88 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                     children: [
                                                       Expanded(
                                                           child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .start,
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: (widget.data[
-                                                                              "CK_JOB_SERVICESCollection"]
-                                                                          as List)
-                                                                      .isEmpty
-                                                                  ? [
-                                                                      Container(
-                                                                        margin: const EdgeInsets
-                                                                            .only(
-                                                                            bottom:
-                                                                                8),
-                                                                        child:
-                                                                            const Text(
-                                                                          "No Services Available",
-                                                                          style: TextStyle(
-                                                                              color: Colors.white,
-                                                                              fontSize: 12.5),
-                                                                        ),
-                                                                      )
-                                                                    ]
-                                                                  : (widget.data[
-                                                                              "CK_JOB_SERVICESCollection"]
-                                                                          as List)
-                                                                      .map((e) =>
-                                                                          Container(
-                                                                            margin:
-                                                                                const EdgeInsets.only(bottom: 8),
-                                                                            child:
-                                                                                Text(
-                                                                              "${e["U_CK_ServiceName"]}",
-                                                                              style: const TextStyle(color: Colors.white, fontSize: 12.5),
-                                                                              textScaleFactor: 1.0,
-                                                                            ),
-                                                                          ))
-                                                                      .toList())),
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: (widget.data[
+                                                                        "CK_JOB_SERVICESCollection"]
+                                                                    as List)
+                                                                .isEmpty
+                                                            ? [
+                                                                Container(
+                                                                  margin:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          bottom:
+                                                                              8),
+                                                                  child:
+                                                                      const Text(
+                                                                    "No Services Available",
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            12.5),
+                                                                  ),
+                                                                )
+                                                              ]
+                                                            : (widget.data["CK_JOB_SERVICESCollection"]
+                                                                            as List)
+                                                                        .length >
+                                                                    2
+                                                                ? [
+                                                                    ...(widget.data["CK_JOB_SERVICESCollection"]
+                                                                            as List)
+                                                                        .take(2)
+                                                                        .map((e) =>
+                                                                            Container(
+                                                                              margin: const EdgeInsets.only(bottom: 8),
+                                                                              child: Text(
+                                                                                "${e["U_CK_ServiceName"]}",
+                                                                                style: const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                textScaleFactor: 1.0,
+                                                                              ),
+                                                                            ))
+                                                                        .toList(),
+                                                                    Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .only(
+                                                                          bottom:
+                                                                              7),
+                                                                      child:
+                                                                          const Text(
+                                                                        "more...",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.white,
+                                                                            fontSize: 12.5),
+                                                                        textScaleFactor:
+                                                                            1.0,
+                                                                      ),
+                                                                    ),
+                                                                  ]
+                                                                : (widget.data[
+                                                                            "CK_JOB_SERVICESCollection"]
+                                                                        as List)
+                                                                    .map((e) =>
+                                                                        Container(
+                                                                          margin: const EdgeInsets
+                                                                              .only(
+                                                                              bottom: 8),
+                                                                          child:
+                                                                              Text(
+                                                                            "${e["U_CK_ServiceName"]}",
+                                                                            style:
+                                                                                const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                            textScaleFactor:
+                                                                                1.0,
+                                                                          ),
+                                                                        ))
+                                                                    .toList(),
+                                                      )),
                                                       const Expanded(
                                                           child: Text(
                                                         "Open",
@@ -505,9 +547,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               ))
                                         ],
                                       ),
-                                      // SizedBox(
-                                      //   height: 10,
-                                      // ),
+                                  ///////////////////////////
                                       Row(
                                         children: [
                                           const Expanded(
@@ -577,50 +617,72 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                   ...(widget.data[
                                                               "CK_JOB_EQUIPMENTCollection"]
                                                           as List)
+                                                      .take(2)
                                                       .map(
-                                                    (item) => Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              bottom: 10),
-                                                      child: Row(
-                                                        children: [
-                                                          Expanded(
-                                                              child: Text(
-                                                            "${item["U_CK_EquipName"]}",
-                                                            style:
-                                                                const TextStyle(
+                                                        (item) => Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 10),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                  child: Text(
+                                                                "${item["U_CK_EquipName"]}",
+                                                                style: const TextStyle(
                                                                     color: Colors
                                                                         .white,
                                                                     fontSize:
                                                                         12.5),
-                                                            textScaleFactor:
-                                                                1.0,
-                                                          )),
-                                                          Expanded(
-                                                              child: Text(
-                                                            "SN: ${item["U_CK_SerialNum"]}",
-                                                            textAlign:
-                                                                TextAlign.end,
-                                                            style:
-                                                                const TextStyle(
+                                                                textScaleFactor:
+                                                                    1.0,
+                                                              )),
+                                                              Expanded(
+                                                                  child: Text(
+                                                                "SN: ${item["U_CK_SerialNum"]}",
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .end,
+                                                                style: const TextStyle(
                                                                     fontSize:
                                                                         12.5,
                                                                     color: Colors
                                                                         .white),
+                                                                textScaleFactor:
+                                                                    1.0,
+                                                              )),
+                                                              const SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                                  as List)
+                                                              .length >
+                                                          2
+                                                      ? Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 7),
+                                                          child: const Text(
+                                                            "more...",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 12.5),
                                                             textScaleFactor:
                                                                 1.0,
-                                                          )),
-                                                          const SizedBox(
-                                                            width: 5,
                                                           ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
+                                                        )
+                                                      : Container(),
                                                 ],
                                               ))
                                         ],
                                       ),
+                                      ///////////////////////////////////////////
                                     ],
                                   )),
                             ],

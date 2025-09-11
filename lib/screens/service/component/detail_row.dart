@@ -197,14 +197,18 @@ class DetailRow extends StatelessWidget {
                               child: Text(
                                 row.left,
                                 textScaleFactor: 1.0,
-                                style: const TextStyle(fontSize: 12.5),
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  height: 1.5, // Added line height
+                                ),
                               ),
                             ),
                             Expanded(
                               flex: 3,
                               child: row.right != null
                                   ? Padding(
-                                      padding: const EdgeInsets.only(right: 5),
+                                      padding: const EdgeInsets.fromLTRB(
+                                          25, 0, 5, 0),
                                       child: row.isRightIcon
                                           ? Align(
                                               alignment: Alignment.centerRight,
@@ -215,14 +219,17 @@ class DetailRow extends StatelessWidget {
                                               textAlign: TextAlign.right,
                                               textScaleFactor: 1.0,
                                               style: const TextStyle(
-                                                  fontSize: 12.5),
+                                                fontSize: 12.5,
+                                                height:
+                                                    1.5, // Added line height
+                                              ),
                                             ),
                                     )
                                   : Container(),
                             ),
                           ],
                         ),
-                      )),
+                      ))
                 ],
               ),
             ),
