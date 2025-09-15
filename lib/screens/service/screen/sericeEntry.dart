@@ -832,8 +832,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           ),
           bottomNavigationBar: Container(
             color: const Color.fromARGB(255, 255, 255, 255),
-            height: 70,
-            padding: const EdgeInsets.all(12),
+            height: 105,
+            padding: const EdgeInsets.fromLTRB(12,0,12,30),
             child: Row(
               children: [
                 Expanded(flex: 2, child: Container()),

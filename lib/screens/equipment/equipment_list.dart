@@ -88,14 +88,15 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   void onDetail(dynamic data, int index) {
     if (index < 0) return;
 
-    MaterialDialog.viewDetailDialog(
-      context,
-      title: 'Equipment (${data['Code']})',
-      cancelLabel: "Go",
-      onCancel: () {
-        goTo(context, EquipmentCreateScreen(data: data));
-      },
-    );
+    // MaterialDialog.viewDetailDialog(
+    //   context,
+    //   title: 'Equipment (${data['Code']})',
+    //   cancelLabel: "Go",
+    //   onCancel: () {
+    //     goTo(context, EquipmentCreateScreen(data: data));
+    //   },
+    // );
+    goTo(context, EquipmentCreateScreen(data: data));
   }
 
   @override
@@ -201,9 +202,10 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   width: 15,
                                 ),
                                 const Text(
+                                   textScaleFactor: 1.0,
                                   "Equipment Overview",
                                   style: TextStyle(
-                                      fontSize: 21,
+                                      fontSize: 19,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 )
@@ -248,6 +250,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                           color: Color.fromARGB(
                                               255, 104, 104, 110)),
                                       Text(
+                                         textScaleFactor: 1.0,
                                         "New",
                                         style: TextStyle(
                                             fontSize: 15,
@@ -286,9 +289,10 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   width: 10,
                                 ),
                                 const Text(
+                                   textScaleFactor: 1.0,
                                   "Matches Your Filter",
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 15,
                                     color: Colors.white,
                                   ),
                                 )
@@ -483,6 +487,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
+                                                     textScaleFactor: 1.0,
                                                     "${item["Code"] ?? "N/A"} - ${item["Name"] ?? "N/A"}",
                                                     style: const TextStyle(
                                                       fontWeight:
@@ -503,11 +508,14 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                 children: [
                                                   const SizedBox(
                                                     width: 104,
-                                                    child: Text("Serial Number",
+                                                    child: Text(
+                                                        textScaleFactor: 1.0,
+                                                        "Serial Number",
                                                         style: TextStyle(
                                                             fontSize: 13)),
                                                   ),
                                                   Text(
+                                                     textScaleFactor: 1.0,
                                                       ": ${item["U_ck_eqSerNum"] ?? "N/A"}",
                                                       style: const TextStyle(
                                                           fontSize: 13)),
@@ -524,11 +532,14 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                       const SizedBox(
                                                         width: 104,
                                                         child: Text(
+                                                           textScaleFactor:
+                                                                1.0,
                                                             "Customer Name",
                                                             style: TextStyle(
                                                                 fontSize: 13)),
                                                       ),
                                                       Text(
+                                                         textScaleFactor: 1.0,
                                                           ": ${item["U_ck_CusName"] ?? "N/A"}",
                                                           style:
                                                               const TextStyle(

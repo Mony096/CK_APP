@@ -28,14 +28,18 @@ class _GeneralState extends State<General> {
   @override
   Widget build(BuildContext context) {
     return Padding(
+      
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Container(
+        margin: EdgeInsets.only(bottom: 40),
         padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(
             topRight: Radius.circular(12),
             topLeft: Radius.circular(12),
+                 bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
           ),
           boxShadow: [
             BoxShadow(

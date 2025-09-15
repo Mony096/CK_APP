@@ -788,13 +788,15 @@ class _SignatureScreenState extends State<SignatureScreen> {
 }
 
 class Menu extends StatefulWidget {
-  const Menu(
-      {super.key,
-      this.icon,
-      required this.title,
-      this.onTap,
-      required this.signature});
-  final dynamic icon;
+  const Menu({
+    super.key,
+    this.icon,
+    required this.title,
+    this.onTap,
+    required this.signature,
+  });
+
+  final Widget? icon;
   final String title;
   final VoidCallback? onTap;
   final List<dynamic> signature;
@@ -811,29 +813,42 @@ class _MenuState extends State<Menu> {
       color: Colors.white,
       child: Row(
         children: [
-          Expanded(flex: 1, child: widget.icon),
+          SizedBox(width: 5,),
+          // icon (keeps natural size)
+          if (widget.icon != null) widget.icon!,
+
+          const SizedBox(width: 10),
+
+          // title text (takes only needed space, then ellipsize if too long)
           Expanded(
-              flex: 4,
-              child: Text(widget.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13),
-                  textScaleFactor: 1.0)),
-          Expanded(
-            flex: 2,
-            child: TextButton(
-              onPressed: widget.onTap,
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
+            child: Text(
+              widget.title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
-              child: Text(
-                widget.signature.isNotEmpty
-                    ? "Edit Signature"
-                    : "Add Signature",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 255, 255, 255), fontSize: 13),
+              textScaleFactor: 1.0,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // button (keeps its own natural size)
+          TextButton(
+            onPressed: widget.onTap,
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            child: Text(
+              widget.signature.isNotEmpty ? "Edit Signature" : "Add Signature",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
               ),
             ),
           ),

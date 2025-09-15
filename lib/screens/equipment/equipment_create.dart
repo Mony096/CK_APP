@@ -136,7 +136,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                 // download bytes
                 final imgRes = await http.get(
                   Uri.parse(
-                      "http://192.168.1.10:9093/api/sapIntegration/Attachments2"),
+                      "https://svr10.biz-dimension.com:9093/api/sapIntegration/Attachments2"),
                   headers: {
                     'Content-Type': "application/json",
                     "Authorization": 'Bearer $token',
@@ -458,7 +458,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                 const Text(
                                   "Equipment Setup",
                                   style: TextStyle(
-                                      fontSize: 21,
+                                      fontSize: 19,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -503,125 +503,107 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                           ],
                         )),
                     Positioned(
-                        top: 175,
-                        left: 28,
-                        right: 28,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => _onTabTapped(0),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(
-                                        milliseconds:
-                                            500), // 1 second animation
-                                    curve: Curves.easeInOut,
-                                    width: 105,
-                                    padding: _selectedIndex != 0
-                                        ? const EdgeInsets.all(9)
-                                        : const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: _selectedIndex == 0
-                                          ? Border(
-                                              bottom: BorderSide(
-                                                color: _selectedIndex == 0
-                                                    ? Colors.green
-                                                    : Colors.transparent,
-                                                width: 5,
-                                              ),
-                                            )
-                                          : null,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: const Center(
-                                      child: Text(
-                                        "General",
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                    ),
+                      top: 175,
+                      left: 28,
+                      right: 28,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _onTabTapped(0),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                                padding: _selectedIndex != 0
+                                    ? const EdgeInsets.all(9)
+                                    : const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: _selectedIndex == 0
+                                      ? const Border(
+                                          bottom: BorderSide(
+                                            color: Colors.green,
+                                            width: 5,
+                                          ),
+                                        )
+                                      : null,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "General",
+                                    style: TextStyle(fontSize: 15),
                                   ),
                                 ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                GestureDetector(
-                                  onTap: () => _onTabTapped(1),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(
-                                        milliseconds:
-                                            500), // 1-second animation
-                                    curve: Curves.easeInOut,
-                                    width: 110,
-                                    padding: _selectedIndex != 1
-                                        ? const EdgeInsets.all(9)
-                                        : const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: _selectedIndex == 1
-                                          ? Border(
-                                              bottom: BorderSide(
-                                                color: _selectedIndex == 1 &&
-                                                        !_isTransitioningBetween0And2
-                                                    ? Colors.green
-                                                    : Colors.transparent,
-                                                width: 5,
-                                              ),
-                                            )
-                                          : null,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: const Center(
-                                      child: Text(
-                                        "Component",
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                GestureDetector(
-                                  onTap: () => _onTabTapped(2),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(
-                                        milliseconds:
-                                            500), // 0.7-second animation
-                                    curve: Curves.easeInOut,
-                                    width: 110,
-                                    padding: _selectedIndex != 2
-                                        ? const EdgeInsets.all(9)
-                                        : const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: _selectedIndex == 2
-                                          ? Border(
-                                              bottom: BorderSide(
-                                                color: _selectedIndex == 2
-                                                    ? Colors.green
-                                                    : Colors.transparent,
-                                                width: 5,
-                                              ),
-                                            )
-                                          : null,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: const Center(
-                                      child: Text(
-                                        "Part",
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
+                              ),
                             ),
-                          ],
-                        )),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _onTabTapped(1),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                                padding: _selectedIndex != 1
+                                    ? const EdgeInsets.all(9)
+                                    : const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: _selectedIndex == 1
+                                      ? const Border(
+                                          bottom: BorderSide(
+                                            color: Colors.green,
+                                            width: 5,
+                                          ),
+                                        )
+                                      : null,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "Component",
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _onTabTapped(2),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                                padding: _selectedIndex != 2
+                                    ? const EdgeInsets.all(9)
+                                    : const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: _selectedIndex == 2
+                                      ? const Border(
+                                          bottom: BorderSide(
+                                            color: Colors.green,
+                                            width: 5,
+                                          ),
+                                        )
+                                      : null,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "Part",
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     Positioned(
                       top: 185,
                       left: 22,

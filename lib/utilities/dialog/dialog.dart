@@ -529,9 +529,9 @@ class MaterialDialog {
           content: SingleChildScrollView(
             child: Text(
               body ?? "Check equipment information?",
-              style: TextStyle(
-                fontSize:15,
-                color: const Color.fromARGB(221, 110, 110, 115),
+              style: const TextStyle(
+                fontSize: 15,
+                color: Color.fromARGB(221, 110, 110, 115),
               ),
             ),
           ),
@@ -555,6 +555,7 @@ class MaterialDialog {
       },
     );
   }
+
   static Future<void> requiredFielDialog(
     BuildContext context, {
     String? title,
@@ -603,9 +604,9 @@ class MaterialDialog {
           content: SingleChildScrollView(
             child: Text(
               body ?? "Check equipment information?",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
-                color: const Color.fromARGB(221, 110, 110, 115),
+                color: Color.fromARGB(221, 110, 110, 115),
               ),
             ),
           ),
@@ -616,7 +617,7 @@ class MaterialDialog {
                 if (onCancel != null) onCancel();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                backgroundColor: const Color.fromARGB(255, 66, 83, 100),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -648,7 +649,7 @@ class MaterialDialog {
           elevation: 3,
           backgroundColor: Colors.white,
           contentPadding: const EdgeInsets.all(16),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 150),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 130),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

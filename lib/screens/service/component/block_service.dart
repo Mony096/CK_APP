@@ -329,7 +329,7 @@ class BlockService extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
-                          child: const Text("Repair",
+                          child: Text("${data["U_CK_JobType"] ?? "N/A"}",
                               style:
                                   TextStyle(color: Colors.black, fontSize: 12),
                               textScaleFactor: 1.0),
@@ -353,17 +353,21 @@ class BlockService extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                      flex: 1,
+                      flex: 2,
                       child: GestureDetector(
                         onTap: () {
                           goTo(context, ServiceByIdScreen(data: data));
                         },
-                        child: const Center(
-                          child: Icon(
-                            Icons.keyboard_arrow_up,
-                            color: Colors.green,
-                            size: 30,
-                          ),
+                        child:  Center(
+                            child: SizedBox(
+                              height: 50,
+                              child: Icon(
+                                Icons.keyboard_arrow_up,
+                                color: Colors.green,
+                                size: 35,
+                              ),
+                            ),
+                          
                         ),
                       )),
                   const SizedBox(

@@ -542,7 +542,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                               5.0),
                                                     ),
                                                   ),
-                                                  child: const Text("Repair",
+                                                  child: Text(
+                                                      "${widget.data["U_CK_JobType"] ?? "N/A"}",
                                                       style: TextStyle(
                                                           color: Colors.black,
                                                           fontSize: 12),
@@ -602,7 +603,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           child: Icon(
                             Icons.keyboard_arrow_down,
                             color: Colors.green,
-                            size: 30,
+                            size: 35,
                           ),
                         )),
                     const SizedBox(

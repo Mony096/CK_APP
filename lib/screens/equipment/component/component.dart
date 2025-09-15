@@ -467,7 +467,7 @@ class _ComponentState extends State<Component> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 150, // fixed width for labels
+            width: 110, // fixed width for labels
             child: Text(
               title,
               style: TextStyle(
@@ -598,149 +598,132 @@ class _ComponentState extends State<Component> {
                       _showDetail(item);
                     }
                   },
-                  child: Container(
-                    margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),
-                    padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
-                    decoration: BoxDecoration(
-                      border: const Border(
-                        left: BorderSide(
-                          color: Color.fromARGB(255, 66, 83, 100),
-                          width: 8,
-                        ),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 133, 136, 138)
-                              .withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: const Offset(1, 1),
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
+                  child:Container(
+  margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),
+  padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
+  decoration: BoxDecoration(
+    border: const Border(
+      left: BorderSide(
+        color: Color.fromARGB(255, 66, 83, 100),
+        width: 8,
+      ),
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: const Color.fromARGB(255, 133, 136, 138).withOpacity(0.2),
+        spreadRadius: 2,
+        blurRadius: 2,
+        offset: const Offset(1, 1),
+      )
+    ],
+    borderRadius: BorderRadius.circular(8),
+    color: Colors.white,
+  ),
+  child: Row(
+    children: [
+      const SizedBox(width: 5),
+      Expanded(
+        flex: 6,
+        child: Column(
+          children: [
+            // ✅ Header row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.settings,
+                        size: 19, color: Color.fromARGB(255, 188, 189, 190)),
+                    const SizedBox(width: 3),
+                    Text(
+                      "Comps Created - No. ${index + 1}",
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      textScaleFactor: 1.0,
                     ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 5),
-                        Expanded(
-                          flex: 6,
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.settings,
-                                          size: 19,
-                                          color: Color.fromARGB(
-                                              255, 188, 189, 190)),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        "Comps Created - No. ${index + 1}",
-                                        style: const TextStyle(
-                                            fontSize: 13, color: Colors.grey),
-                                        textScaleFactor: 1.0,
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 1),
-                                    child: SvgPicture.asset(
-                                      'images/svg/check-cycle.svg',
-                                      width: 20,
-                                      height: 20,
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(
-                                      width: 150,
-                                      child: Text(
-                                        textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        "${item["U_ck_ItemCode"]} - ${item["U_ck_ItemName"]}",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 150,
-                                      child: Text(
-                                        textAlign: TextAlign.right,
-                                        textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        // "${item["Model"]}: ${item["U_ck_ItemName"]}",
-                                        "Model : ${item["U_ck_model"]}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 7.5),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(
-                                      width: 150,
-                                      child: Text(
-                                        textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        "Brand : ${item["U_ck_brand"]}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 150,
-                                      child: Text(
-                                        textAlign: TextAlign.right,
-                                        textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        // "${item["Model"]}: ${item["U_ck_ItemName"]}",
-                                        "Part : ${item["U_ck_partNum"]}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                      ],
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: SvgPicture.asset(
+                    'images/svg/check-cycle.svg',
+                    width: 20,
+                    height: 20,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+
+            // ✅ Item code & model row
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "${item["U_ck_ItemCode"]} - ${item["U_ck_ItemName"]}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textScaleFactor: 1.0,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "Model : ${item["U_ck_model"]}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      textScaleFactor: 1.0,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 7.5),
+
+            // ✅ Brand & part row
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "Brand : ${item["U_ck_brand"]}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textScaleFactor: 1.0,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "Part : ${item["U_ck_partNum"]}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      textScaleFactor: 1.0,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(width: 5),
+    ],
+  ),
+),
+
                 );
               }),
             ],

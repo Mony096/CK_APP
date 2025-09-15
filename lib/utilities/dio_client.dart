@@ -28,7 +28,7 @@ class DioClient {
       final port = await LocalStorageManger.getString('port');
 
       final res = await _dio.get(
-        'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/sapIntegration',
+        'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/sapIntegration',
         queryParameters: query,
         options: Options(
           headers: {
@@ -83,7 +83,7 @@ class DioClient {
       final port = await LocalStorageManger.getString('port');
 
       final res = await _dio.get(
-        'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/sapIntegration/Attachments2',
+        'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/sapIntegration/Attachments2',
         queryParameters: query,
         options: Options(
           headers: {
@@ -145,8 +145,8 @@ class DioClient {
 
       final response = await _dio.post(
         isLogin
-            ? 'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/auth$uri'
-            : 'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/sapIntegration${isFormData ? '/Attachments2' : ""}',
+            ? 'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/auth$uri'
+            : 'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/sapIntegration${isFormData ? '/Attachments2' : ""}',
         data: data,
         options: Options(
           headers: {
@@ -212,7 +212,7 @@ class DioClient {
       final port = await LocalStorageManger.getString('port');
 
       final response = await _dio.post(
-        'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/notifications/sendToWeb',
+        'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/notifications/sendToWeb',
         data: data,
         options: Options(
           headers: {
@@ -258,8 +258,8 @@ class DioClient {
 
       final response = await _dio.patch(
         isChangePassword
-            ? 'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/auth$uri'
-            : 'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/sapIntegration${isFormData ? '/Attachments2' : ""}',
+            ? 'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/auth$uri'
+            : 'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/sapIntegration${isFormData ? '/Attachments2' : ""}',
         data: data,
         options: Options(
           validateStatus: (status) =>
@@ -327,7 +327,7 @@ class DioClient {
       final port = await LocalStorageManger.getString('port');
 
       final response = await _dio.put(
-        'http://${host == '' ? '192.168.1.10' : host}:${port == '' ? '9093' : port}/api/sapIntegration',
+        'https://${host == '' ? 'svr10.biz-dimension.com' : host}:${port == '' ? '9093' : port}/api/sapIntegration',
         data: data,
         options: Options(
           headers: {

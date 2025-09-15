@@ -24,7 +24,8 @@ class SignatureCaptureScreen extends StatefulWidget {
   final File? existingSignature;
   final File? prevFile;
 
-  SignatureCaptureScreen({this.existingSignature, this.prevFile});
+  const SignatureCaptureScreen(
+      {super.key, this.existingSignature, this.prevFile});
 
   @override
   _SignatureCaptureScreenState createState() => _SignatureCaptureScreenState();
@@ -69,7 +70,7 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
     } catch (e) {
       print('PDF generation error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Failed to export PDF")),
+        const SnackBar(content: Text("❌ Failed to export PDF")),
       );
     }
   }
@@ -120,14 +121,14 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
                       ),
                     );
                   },
-                  icon: Icon(Icons.remove_red_eye, size: 22),
+                  icon: const Icon(Icons.remove_red_eye, size: 22),
                 )
-              : SizedBox.shrink(),
+              : const SizedBox.shrink(),
 // returns empty widget
 
           IconButton(
             onPressed: _toggleOrientation,
-            icon: Icon(Icons.screen_rotation, size: 22),
+            icon: const Icon(Icons.screen_rotation, size: 22),
           ),
           IconButton(
             onPressed: () async {
@@ -143,9 +144,9 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
                 (route) => false,
               );
             },
-            icon: Icon(Icons.logout, size: 22),
+            icon: const Icon(Icons.logout, size: 22),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
         ],
       ),
       body: Column(
@@ -158,7 +159,7 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
             ),
           ),
           // SizedBox(height: 10),
-          isLandscape ? SizedBox(height: 5) : SizedBox(height: 10),
+          isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -210,7 +211,7 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
               ),
             ],
           ),
-          isLandscape ? SizedBox(height: 5) : SizedBox(height: 10),
+          isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 50),
         ],
       ),
     );

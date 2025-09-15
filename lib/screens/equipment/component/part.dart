@@ -401,10 +401,9 @@ class _PartState extends State<Part> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                 Row(
+                Row(
                   children: [
-                    Icon(Icons.assignment,
-                        color: Colors.green, size: 25),
+                    Icon(Icons.assignment, color: Colors.green, size: 25),
                     SizedBox(width: 10),
                     Text(
                       "Part (${data["U_ck_ItemCode"]})",
@@ -464,7 +463,7 @@ class _PartState extends State<Part> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 150, // fixed width for labels
+            width: 110, // fixed width for labels
             child: Text(
               title,
               style: TextStyle(
@@ -657,6 +656,7 @@ class _PartState extends State<Part> {
                           flex: 6,
                           child: Column(
                             children: [
+                              // 🔹 Header row
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -688,77 +688,63 @@ class _PartState extends State<Part> {
                                 ],
                               ),
                               const SizedBox(height: 6),
+
+                              // 🔹 Item Code & Model row
                               Padding(
                                 padding: const EdgeInsets.only(left: 20),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    SizedBox(
-                                      width: 150,
+                                    Expanded(
                                       child: Text(
-                                        textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
                                         "${item["U_ck_ItemCode"]} - ${item["U_ck_ItemName"]}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textScaleFactor: 1.0,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 150,
+                                    const SizedBox(width: 10),
+                                    Expanded(
                                       child: Text(
+                                        "Model: ${item["U_ck_model"]}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
                                         textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        // "${item["Model"]}: ${item["U_U_ck_comName"]}",
-                                        "Model: ${item["U_ck_model"]}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                        ),
+                                        style: const TextStyle(fontSize: 13),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                               const SizedBox(height: 7.5),
+
+                              // 🔹 Brand & Part row
                               Padding(
                                 padding: const EdgeInsets.only(left: 20),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    SizedBox(
-                                      width: 150,
+                                    Expanded(
                                       child: Text(
-                                        textScaleFactor: 1.0,
+                                        "Brand: ${item["U_ck_brand"]}",
                                         maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        "Brand : ${item["U_ck_brand"]}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        textScaleFactor: 1.0,
+                                        style: const TextStyle(fontSize: 13),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 150,
+                                    const SizedBox(width: 10),
+                                    Expanded(
                                       child: Text(
+                                        "Part: ${item["U_ck_PartNum"]}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
                                         textScaleFactor: 1.0,
-                                        maxLines: 1,
-                                        overflow:
-                                            TextOverflow.ellipsis, // adds ...
-                                        // "${item["Model"]}: ${item["U_U_ck_comName"]}",
-                                        "Part : ${item["U_ck_PartNum"]}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                        ),
+                                        style: const TextStyle(fontSize: 13),
                                       ),
                                     ),
                                   ],
