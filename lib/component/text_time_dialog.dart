@@ -72,11 +72,12 @@ class CustomTimeFieldDialog extends StatelessWidget {
             SizedBox(
               height: 38,
               child: TextField(
+                
                 focusNode: focusNode,
                 controller: controller,
                 readOnly: true,
                 onTap: () => _selectTime(context),
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 4,

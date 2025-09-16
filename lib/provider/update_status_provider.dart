@@ -15,31 +15,24 @@ class UpdateStatusProvider extends ChangeNotifier {
   }) async {
     _isLoading = true;
     notifyListeners();
-
+    print(status);
     try {
       // final now = DateTime.now();
       // final timeStamp = DateFormat("HH:mm:ss").format(now); // 24-hour format
+
+      final now = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
 
       final data = {
         "DocEntry": docEntry,
         "U_CK_Status": status,
       };
 
-      // if (remarks != null) {
-      //   data["U_lk_podremark"] = remarks;
-      // }
-      // if (attachmentEntry != null) {
-      //   data["AttachmentEntry"] = attachmentEntry;
-      // }
-      // if (status == "Started") {
-      //   data["U_lk_delacctim"] = timeStamp; // fixed timestamp format
-      // }
-      // if (status == "On the Way") {
-      //   data["U_lk_delpictim"] = timeStamp; // fixed timestamp format
-      // }
-      // if (status == "Delivered") {
-      //   data["U_lk_delcomtim"] = timeStamp; // fixed timestamp format
-      // }
+      if (status == "Accept") {
+        data["U_CK_Time"] = now;
+      } else {
+        data["U_CK_EndTime"] = now;
+      }
+
       final documentStatus = await dio.patch(
         "/CK_JOBORDER($docEntry)",
         false,

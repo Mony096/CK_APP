@@ -1282,7 +1282,7 @@ class _DetailTimeState extends State<DetailTime> {
                                   "Travel Time:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13),
+                                      fontSize: 12),
                                 ),
                               )),
                           Expanded(
@@ -1294,7 +1294,7 @@ class _DetailTimeState extends State<DetailTime> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                          fontSize: 12)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1320,7 +1320,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget
                                                 .timeEntry["U_CK_TraveledTime"],
                                             style:
-                                                const TextStyle(fontSize: 13),
+                                                const TextStyle(fontSize: 12),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1337,7 +1337,7 @@ class _DetailTimeState extends State<DetailTime> {
                                 ],
                               )),
                           const SizedBox(
-                            width: 15,
+                            width: 5,
                           ),
                           Expanded(
                               flex: 3,
@@ -1348,7 +1348,7 @@ class _DetailTimeState extends State<DetailTime> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                          fontSize: 12)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1374,7 +1374,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget.timeEntry[
                                                 "U_CK_TraveledEndTime"],
                                             style:
-                                                const TextStyle(fontSize: 13),
+                                                const TextStyle(fontSize: 12),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1402,7 +1402,7 @@ class _DetailTimeState extends State<DetailTime> {
                                     "Eff.T",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13),
+                                        fontSize: 12),
                                   ),
                                   const SizedBox(
                                     height: 6,
@@ -1439,14 +1439,14 @@ class _DetailTimeState extends State<DetailTime> {
                                                 .timeEntry["total_travel_time"],
                                             textScaleFactor: 1.0,
                                             style: const TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Colors.green,
                                             )),
                                         const SizedBox(
                                           width: 4,
                                         ),
                                         const Icon(Icons.timelapse,
-                                            size: 18, color: Colors.green),
+                                            size: 17, color: Colors.green),
                                       ],
                                     ),
                                   ),
@@ -1455,7 +1455,7 @@ class _DetailTimeState extends State<DetailTime> {
                         ],
                       ),
                       const SizedBox(
-                        height: 25,
+                        height: 20,
                       ),
                       Row(
                         children: [
@@ -1468,7 +1468,7 @@ class _DetailTimeState extends State<DetailTime> {
                                   "Service Time:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13),
+                                      fontSize: 12),
                                 ),
                               )),
                           Expanded(
@@ -1480,7 +1480,7 @@ class _DetailTimeState extends State<DetailTime> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                          fontSize: 12)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1506,7 +1506,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget.timeEntry[
                                                 "U_CK_ServiceStartTime"],
                                             style:
-                                                const TextStyle(fontSize: 13),
+                                                const TextStyle(fontSize: 12),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1523,7 +1523,7 @@ class _DetailTimeState extends State<DetailTime> {
                                 ],
                               )),
                           const SizedBox(
-                            width: 15,
+                            width: 5,
                           ),
                           Expanded(
                               flex: 3,
@@ -1534,7 +1534,7 @@ class _DetailTimeState extends State<DetailTime> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                          fontSize: 12)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1559,7 +1559,7 @@ class _DetailTimeState extends State<DetailTime> {
                                           child: Text(
                                             widget.timeEntry["U_CK_SerEndTime"],
                                             style:
-                                                const TextStyle(fontSize: 13),
+                                                const TextStyle(fontSize: 12),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1607,7 +1607,7 @@ class _DetailTimeState extends State<DetailTime> {
                                                 "total_service_time"],
                                             textScaleFactor: 1.0,
                                             style: const TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Colors.green,
                                             )),
                                         const SizedBox(
@@ -1623,7 +1623,7 @@ class _DetailTimeState extends State<DetailTime> {
                         ],
                       ),
                       const SizedBox(
-                        height: 25,
+                        height: 20,
                       ),
                       Row(
                         children: [
@@ -1636,7 +1636,7 @@ class _DetailTimeState extends State<DetailTime> {
                                   "Break Time:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13),
+                                      fontSize: 12),
                                 ),
                               )),
                           Expanded(
@@ -1648,7 +1648,7 @@ class _DetailTimeState extends State<DetailTime> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                          fontSize: 12)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1673,7 +1673,7 @@ class _DetailTimeState extends State<DetailTime> {
                                           child: Text(
                                             widget.timeEntry["U_CK_BreakTime"],
                                             style:
-                                                const TextStyle(fontSize: 13),
+                                                const TextStyle(fontSize: 12),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1690,7 +1690,7 @@ class _DetailTimeState extends State<DetailTime> {
                                 ],
                               )),
                           const SizedBox(
-                            width: 15,
+                            width: 5,
                           ),
                           Expanded(
                               flex: 3,
@@ -1701,7 +1701,7 @@ class _DetailTimeState extends State<DetailTime> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                          fontSize: 12)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1727,7 +1727,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget
                                                 .timeEntry["U_CK_BreakEndTime"],
                                             style:
-                                                const TextStyle(fontSize: 13),
+                                                const TextStyle(fontSize: 12),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1770,7 +1770,7 @@ class _DetailTimeState extends State<DetailTime> {
                                                 .timeEntry["total_break_time"],
                                             textScaleFactor: 1.0,
                                             style: const TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Colors.green,
                                             )),
                                         const SizedBox(

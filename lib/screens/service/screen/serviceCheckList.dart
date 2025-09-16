@@ -1,7 +1,10 @@
+import 'package:bizd_tech_service/component/text_remark_dialog.dart';
 import 'package:bizd_tech_service/component/title_break%20copy.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
+import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +20,137 @@ class ServiceCheckListScreen extends StatefulWidget {
 
 class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
   @override
-  List<dynamic> myTravel = [{}, {}, {}];
+  int isEditComp = -1;
+  List<dynamic> checkLists = [];
+  int isAdded = 0;
+
+  String? userName;
+
+@override
+  void initState() {
+    super.initState();
+    // Defer the provider update until the current frame is finished rendering.
+      final provider =
+          Provider.of<CompletedServiceProvider>(context, listen: false);
+
+      // Check if the list needs to be populated to avoid redundant updates.
+      if (provider.checkListLine.isEmpty) {
+        provider.setCheckList(widget.data["checklistLine"] ?? []);
+      }
+    
+  }
+
+  final remark = TextEditingController();
+
+  void _showEditFeedback(dynamic item, int index) async {
+    remark.text = getDataFromDynamic(item["U_CK_Feedback"]);
+
+    // FocusScope.of(context).requestFocus(codeFocusNode);
+    item["U_CK_Feedback"] = remark.text;
+    setState(() {
+      isEditComp = index;
+    });
+    await showDialog<String>(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13.0),
+          ),
+          content: Container(
+            width: double.maxFinite,
+            constraints: const BoxConstraints(
+              maxHeight: 650,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          // color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(3),
+                        child: const Icon(Icons.feedback,
+                            color: Color.fromARGB(255, 205, 187, 31), size: 25),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Feedback (Admin001)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  CustomTextRemarkDialog(
+                      controller: remark,
+                      label: 'Comments',
+                      star: false,
+                      detail: false),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  isEditComp = -1;
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Color.fromARGB(255, 66, 83, 100)),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (index < 0) return;
+                item["U_CK_Feedback"] = remark.text;
+                context
+                    .read<CompletedServiceProvider>()
+                    .addOrEditOpenCheckList(item, editIndex: index);
+
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+                foregroundColor: Colors.white,
+                elevation: 3,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: Text(
+                remark.text.isNotEmpty ? "Edit Feedback" : "Add Feedback",
+                style:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+          backgroundColor: Colors.white,
+          elevation: 4.0,
+        );
+      },
+    );
+  }
+
   void _showDetail(data) async {
     return showDialog(
       context: context,
@@ -100,7 +233,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 150, // fixed width for labels
+            width: 115, // fixed width for labels
             child: Text(
               title,
               style: TextStyle(
@@ -143,7 +276,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 150, // fixed width for labels
+            width: 115, // fixed width for labels
             child: Text(
               title,
               style: TextStyle(
@@ -559,7 +692,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                                    Row(
+                                              Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 crossAxisAlignment:
@@ -615,16 +748,13 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
-                                                                        ))
-                                                                    .toList(),
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .only(
+                                                                        )),
+                                                                const Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
                                                                           bottom:
                                                                               7),
-                                                                  child:
-                                                                      const Text(
+                                                                  child: Text(
                                                                     "more...",
                                                                     style: TextStyle(
                                                                         color: Colors
@@ -788,11 +918,10 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 7),
-                                                      child: const Text(
+                                                  ? const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: 7),
+                                                      child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,
@@ -829,7 +958,10 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    (widget.data["checklistLine"] as List<dynamic>).isNotEmpty
+                    context
+                            .read<CompletedServiceProvider>()
+                            .checkListLine
+                            .isNotEmpty
                         ? Container()
                         : Container(
                             height: 90,
@@ -862,12 +994,24 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                               ),
                             ),
                           ),
-                    ...(widget.data["checklistLine"] as List<dynamic>).map(
-                      (item) {
+                    ...context
+                        .read<CompletedServiceProvider>()
+                        .checkListLine
+                        .asMap()
+                        .entries
+                        .map(
+                      (entry) {
+                        final index = entry.key; // 👈 index
+                        final item =
+                            entry.value; // 👈 item (your checklist data)
+
                         return StatefulBuilder(
                           builder: (context, setState) {
                             bool isChecked = item["U_CK_Checked"] == true;
+
                             return DetailMenu(
+                              onEditFeedback: () =>
+                                  _showEditFeedback(item, index),
                               onTap: () => _showDetail(item),
                               title: '${item["U_CK_ChecklistTitle"] ?? "N/A"}',
                               icon: Padding(
@@ -881,6 +1025,10 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                       item["U_CK_Checked"] =
                                           value; // update your data
                                     });
+
+                                    // ✅ You can now also access the index
+                                    debugPrint(
+                                        "Checkbox at index $index changed to $value");
                                   },
                                 ),
                               ),
@@ -977,11 +1125,13 @@ class DetailMenu extends StatefulWidget {
       this.icon,
       required this.title,
       required this.desc,
-      this.onTap});
+      this.onTap,
+      this.onEditFeedback});
   final dynamic icon;
   final String title;
   final String desc;
   VoidCallback? onTap;
+  VoidCallback? onEditFeedback;
 
   @override
   State<DetailMenu> createState() => _DetailMenuState();
@@ -997,42 +1147,87 @@ class _DetailMenuState extends State<DetailMenu> {
       child: Row(
         children: [
           Expanded(
-              flex: 1,
-              child: Column(
-                children: [
-                  widget.icon,
-                  const SizedBox(
-                    height: 23,
-                  )
-                ],
-              )),
-          const SizedBox(
-            width: 8,
+            flex: 1,
+            child: Column(
+              children: [
+                widget.icon,
+                const SizedBox(height: 23),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Expanded(
-              flex: 6,
-              child: GestureDetector(
-                onTap: widget.onTap,
-                child: Container(
-                  color: Colors.white,
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13),
-                          textScaleFactor: 1.0),
-                      const SizedBox(
-                        height: 5,
+            flex: 6,
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: Container(
+                color: Colors.white,
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// Title with max width
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 210),
+                          child: Text(
+                            widget.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                            textScaleFactor: 1.0,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              minimumSize: const Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            onPressed: widget.onEditFeedback,
+                            child: const Text(
+                              "Feedback",
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // const SizedBox(height: 5),
+
+                    /// Description with max width
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 210),
+                      child: Text(
+                        "${widget.desc} ",
+                        style: const TextStyle(fontSize: 12.5),
+                        softWrap: true,
+                        overflow: TextOverflow.visible,
+                        textScaleFactor: 1.0,
                       ),
-                      Text(widget.desc,
-                          style: const TextStyle(fontSize: 12.5),
-                          textScaleFactor: 1.0),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              )),
+              ),
+            ),
+          ),
         ],
       ),
     );

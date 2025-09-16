@@ -300,7 +300,7 @@ class BlockService extends StatelessWidget {
                               width: 5,
                             ),
                             Text(
-                                "${data["U_CK_Time"]} - ${data["U_CK_EndTime"]}",
+                                "${data["U_CK_Time"] ?? "No Time"} - ${data["U_CK_EndTime"] ?? "No Time"}",
                                 style: const TextStyle(
                                     color: Colors.white, fontSize: 13),
                                 textScaleFactor: 1.0),

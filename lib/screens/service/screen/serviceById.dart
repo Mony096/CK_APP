@@ -507,7 +507,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                     width: 5,
                                                   ),
                                                   Text(
-                                                      "${widget.data["U_CK_Time"]} - ${widget.data["U_CK_EndTime"]}",
+                                                      "${widget.data["U_CK_Time"] ?? "No Time"} - ${widget.data["U_CK_EndTime"] ?? "No Time"}",
                                                       style: const TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 12.5),

@@ -10,6 +10,7 @@ import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
+import 'package:bizd_tech_service/provider/site_list_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/wrapper_screen.dart';
 import 'package:flutter/material.dart';
@@ -95,7 +96,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => CompletedServiceProvider()),
       ChangeNotifierProvider(create: (_) => HelperProvider()), // <-- Added
       ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- Added
-
+      ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
       // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],
     child: const MyApp(),

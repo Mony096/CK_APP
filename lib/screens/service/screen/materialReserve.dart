@@ -92,7 +92,7 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 150, // fixed width for labels
+            width: 110, // fixed width for labels
             child: Text(
               title,
               style: TextStyle(

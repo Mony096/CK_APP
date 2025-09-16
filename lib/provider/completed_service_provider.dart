@@ -15,11 +15,14 @@ class CompletedServiceProvider extends ChangeNotifier {
   List<dynamic> _imagesList = [];
   List<dynamic> _signatureList = [];
   List<dynamic> _timeEntry = [];
+  List<dynamic> _checkListLine = [];
+
   bool get submit => _submit;
   List<dynamic> get openIssues => _openIssues;
   List<dynamic> get imagesList => _imagesList;
   List<dynamic> get signatureList => _signatureList;
   List<dynamic> get timeEntry => _timeEntry;
+  List<dynamic> get checkListLine => _checkListLine;
   final DioClient dio = DioClient(); // Custom Dio wrapper
 
   void addOrEditOpenIssue(Map<String, dynamic> item, {int editIndex = -1}) {
@@ -28,6 +31,22 @@ class CompletedServiceProvider extends ChangeNotifier {
     } else {
       _openIssues[editIndex] = item;
     }
+    notifyListeners();
+  }
+
+  void addOrEditOpenCheckList(Map<String, dynamic> item, {int editIndex = -1}) {
+    if (editIndex >= 0) {
+      // Edit existing checklist
+      _checkListLine[editIndex] = item;
+    } else {
+      // Add new checklist
+      _checkListLine.add(item);
+    }
+    notifyListeners();
+  }
+
+  void setCheckList(List<dynamic> collection) {
+    _checkListLine = collection;
     notifyListeners();
   }
 
@@ -205,43 +224,43 @@ class CompletedServiceProvider extends ChangeNotifier {
     required int? attachmentEntryExisting,
     required dynamic docEntry,
   }) async {
-    if (_imagesList.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-          behavior: SnackBarBehavior.floating,
-          elevation: 10,
-          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          content: Row(
-            children: [
-              const Icon(Icons.remove_circle, color: Colors.white, size: 28),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Please provide an image",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 4),
-        ),
-      );
-      return false;
-    }
+    // if (_imagesList.isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+    //       behavior: SnackBarBehavior.floating,
+    //       elevation: 10,
+    //       margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+    //       shape: RoundedRectangleBorder(
+    //         borderRadius: BorderRadius.circular(9),
+    //       ),
+    //       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    //       content: Row(
+    //         children: [
+    //           const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+    //           const SizedBox(width: 16),
+    //           Expanded(
+    //             child: Column(
+    //               mainAxisSize: MainAxisSize.min,
+    //               crossAxisAlignment: CrossAxisAlignment.start,
+    //               children: [
+    //                 Text(
+    //                   "Please provide an image",
+    //                   style: const TextStyle(
+    //                     fontSize: 14,
+    //                     color: Colors.white,
+    //                   ),
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //         ],
+    //       ),
+    //       duration: const Duration(seconds: 4),
+    //     ),
+    //   );
+    //   return false;
+    // }
     if (_timeEntry.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -364,6 +383,7 @@ class CompletedServiceProvider extends ChangeNotifier {
         return false;
       }
       final payload = {
+        "DocEntry": docEntry,
         "U_CK_Status": "Entry",
         "U_CK_AttachmentEntry": attachmentEntry,
         "CK_JOB_TIMECollection": [
@@ -387,12 +407,13 @@ class CompletedServiceProvider extends ChangeNotifier {
           }
         ],
         "CK_JOB_ISSUECollection": _openIssues,
+        "feedbackChecklistLine": _checkListLine
       };
 
       // print(payload);
       // return true;
       final completed = await dio.patch(
-        "/CK_JOBORDER($docEntry)",
+        "/script/test/CK_CompleteStatus($docEntry)",
         false,
         false,
         data: payload,

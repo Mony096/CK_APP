@@ -6,6 +6,7 @@ import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
 import 'package:bizd_tech_service/screens/equipment/equipmentImage.dart';
+import 'package:bizd_tech_service/screens/equipment/select/siteMasterPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -24,21 +25,20 @@ class General extends StatefulWidget {
 
 class _GeneralState extends State<General> {
   List<dynamic> eqtype = ["Active", "Retired", "Suspended", "Inactive"];
-
   @override
   Widget build(BuildContext context) {
+    // print(widget.controller?["customerCode"].text);
     return Padding(
-      
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Container(
-        margin: EdgeInsets.only(bottom: 40),
+        margin: const EdgeInsets.only(bottom: 40),
         padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(
             topRight: Radius.circular(12),
             topLeft: Radius.circular(12),
-                 bottomLeft: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
             bottomRight: Radius.circular(12),
           ),
           boxShadow: [
@@ -121,7 +121,18 @@ class _GeneralState extends State<General> {
               CustomTextField(
                   controller: widget.controller?['site'],
                   label: 'Site',
-                  star: false,
+                  star: true,
+                  readOnly: true,
+                  icon: widget.controller?['customerCode'].text != ""
+                      ? const Icon(
+                          Icons.keyboard_arrow_right,
+                          color: Colors.grey,
+                          size: 28,
+                        )
+                      : null,
+                  onclickIcon: () {
+                    _siteSelect();
+                  },
                   detail: widget.data.isNotEmpty),
               const SizedBox(height: 8),
               CustomTextField(
@@ -387,8 +398,26 @@ class _GeneralState extends State<General> {
                     getDataFromDynamic(value["CardCode"]);
                 widget.controller?["customerName"].text =
                     getDataFromDynamic(value["CardName"]);
+                widget.controller?["site"].text = "";
                 // customerCode.text = getDataFromDynamic(value["CardCode"]);
                 // customerName.text = getDataFromDynamic(value["CardName"]);
+              })
+            }
+        });
+  }
+
+  void _siteSelect() async {
+    goTo(
+        context,
+        SiteMasterPage(
+          customer: widget.controller?["customerCode"].text,
+        )).then((value) => {
+          if (value != null)
+            {
+              setState(() {
+                print(value);
+                widget.controller?["site"].text =
+                    getDataFromDynamic(value["Code"]);
               })
             }
         });

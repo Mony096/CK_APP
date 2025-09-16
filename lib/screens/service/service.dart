@@ -44,12 +44,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    _dateController.dispose(); // Always dispose controllers
-    super.dispose();
-  }
-
   Future<void> _init() async {
     if (!mounted) return;
     setState(() {
@@ -57,6 +51,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
     });
     await _loadUserName();
     final svProvider = Provider.of<ServiceListProvider>(context, listen: false);
+    
     if (svProvider.documents.isEmpty) {
       await svProvider.fetchDocuments(context: context);
     }
