@@ -26,7 +26,7 @@ class _DashboardState extends State<Dashboard>
   String? userName;
   List<Map<String, dynamic>> ticketGroups = [];
   final DioClient _dio = DioClient(); // Your custom Dio client
-
+  bool load = false;
   @override
   void initState() {
     super.initState();
@@ -66,6 +66,15 @@ class _DashboardState extends State<Dashboard>
 
   /// Fetch count of tickets for each date from SAP
   Future<void> _fetchTicketCounts() async {
+  setState(() {
+      load = true; // hide loading after all counts fetched
+    });
+   // optional small delay before hiding overall loading
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    setState(() {
+      load = false; // hide loading after all counts fetched
+    });
     for (var group in ticketGroups) {
       final dateValue = group["dateValue"];
       setState(() {
@@ -280,7 +289,6 @@ class _DashboardState extends State<Dashboard>
           ),
         ),
         actions: [
-          
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             onPressed: () {
@@ -390,213 +398,224 @@ class _DashboardState extends State<Dashboard>
 
   /// Ticket Tab
   Widget _ticketTab() {
-    return Column(
-      children: [
-        // 🔹 Filter bar
-
-        Container(
-          margin: const EdgeInsets.only(top: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-              top: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return load == true
+        ? Text("Loading")
+        : Column(
             children: [
-              const SizedBox(width: 7,),
-              Expanded(
-                child: Text(
-                  "Status: $_selectedStatus  |  Priority: $_selectedPriority",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.filter_alt, color: Colors.green),
-                onPressed: () {
-                  _showFilterDialog(); // call your bottom sheet
-                },
-              ),
-            ],
-          ),
-        ),
-
-        // 🔹 Ticket list
-        Expanded(
-          // <<< Fix: constrain ListView inside Column
-          child: ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: ticketGroups.length,
-            itemBuilder: (context, index) {
-              final group = ticketGroups[index];
-              final tickets = group["tickets"] as List;
-
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 5),
+              // 🔹 Filter bar
+              Container(
+                margin: const EdgeInsets.only(top: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                    width: 1,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+                    top: BorderSide(color: Colors.grey.shade300, width: 1),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(
+                      width: 7,
+                    ),
+                    Expanded(
+                      child: Text(
+                        "Status: $_selectedStatus  |  Priority: $_selectedPriority",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.filter_alt, color: Colors.green),
+                      onPressed: () {
+                        _showFilterDialog(); // call your bottom sheet
+                      },
                     ),
                   ],
                 ),
-                child: Theme(
-                  data: Theme.of(context)
-                      .copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.indigo[50],
-                      child: const Icon(Icons.event_note, color: Colors.indigo),
-                    ),
-                    title: Row(
-                      children: [
-                        Text(
-                          group["date"],
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
+              ),
+
+              // 🔹 Ticket list
+              Expanded(
+                // <<< Fix: constrain ListView inside Column
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: ticketGroups.length,
+                  itemBuilder: (context, index) {
+                    final group = ticketGroups[index];
+                    final tickets = group["tickets"] as List;
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1,
                         ),
-                        const SizedBox(width: 15),
-                        group["isLoadingCount"] == true
-                            ? const SizedBox(
-                                width: 15,
-                                height: 15,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.green,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.indigo[50],
+                            child: const Icon(Icons.event_note,
+                                color: Colors.indigo),
+                          ),
+                          title: Row(
+                            children: [
+                              Text(
+                                group["date"],
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              )
-                            : Container()
-                      ],
-                    ),
-                    subtitle: Text(
-                      "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    onExpansionChanged: (expanded) async {
-                      if (expanded && tickets.isEmpty) {
-                        setState(() {
-                          group["tickets"] = ["loading"];
-                        });
-                        final fetchedTickets =
-                            await _fetchTicketsFromApi(group["dateValue"]);
-                        setState(() {
-                          group["tickets"] = fetchedTickets;
-                        });
-                      }
-                    },
-                    childrenPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    children: tickets.isEmpty
-                        ? [
-                            const Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Text(
-                                "No tickets available!",
-                                style: TextStyle(color: Colors.grey),
                               ),
-                            )
-                          ]
-                        : tickets[0] == "loading"
-                            ? [
-                                Column(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Center(
-                                          child: SizedBox(
-                                              width: 23,
-                                              height: 23,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.green,
-                                              ))),
+                              const SizedBox(width: 15),
+                              group["isLoadingCount"] == true
+                                  ? const SizedBox(
+                                      width: 15,
+                                      height: 15,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.green,
+                                      ),
+                                    )
+                                  : Container()
+                            ],
+                          ),
+                          subtitle: Text(
+                            "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          onExpansionChanged: (expanded) async {
+                            if (expanded && tickets.isEmpty) {
+                              setState(() {
+                                group["tickets"] = ["loading"];
+                              });
+                              final fetchedTickets = await _fetchTicketsFromApi(
+                                  group["dateValue"]);
+                              setState(() {
+                                group["tickets"] = fetchedTickets;
+                              });
+                            }
+                          },
+                          childrenPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          children: tickets.isEmpty
+                              ? [
+                                  const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: Text(
+                                      "No tickets available!",
+                                      style: TextStyle(color: Colors.grey),
                                     ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      "Loading ${group["date"]}' Ticket...",
-                                      style: const TextStyle(
-                                          fontSize: 13, color: Colors.grey),
-                                    ),
-                                    const SizedBox(height: 10),
-                                  ],
-                                )
-                              ]
-                            : tickets.map<Widget>((ticket) {
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                          Icons.confirmation_number_outlined,
-                                          color: Colors.blue),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                  )
+                                ]
+                              : tickets[0] == "loading"
+                                  ? [
+                                      Column(
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.all(8),
+                                            child: Center(
+                                                child: SizedBox(
+                                                    width: 23,
+                                                    height: 23,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.green,
+                                                    ))),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            "Loading ${group["date"]}' Ticket...",
+                                            style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey),
+                                          ),
+                                          const SizedBox(height: 10),
+                                        ],
+                                      )
+                                    ]
+                                  : tickets.map<Widget>((ticket) {
+                                      return Container(
+                                        margin:
+                                            const EdgeInsets.only(bottom: 8),
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
                                           children: [
-                                            Text(
-                                              ticket["title"],
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
+                                            const Icon(
+                                                Icons
+                                                    .confirmation_number_outlined,
+                                                color: Colors.blue),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    ticket["title"],
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    "ID: ${ticket["id"]}",
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              "ID: ${ticket["id"]}",
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
+                                            Chip(
+                                              label: Text(
+                                                ticket["status"],
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
                                               ),
+                                              backgroundColor: _statusColor(
+                                                  ticket["status"]),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                      Chip(
-                                        label: Text(
-                                          ticket["status"],
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        backgroundColor:
-                                            _statusColor(ticket["status"]),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                  ),
+                                      );
+                                    }).toList(),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
+              ),
+            ],
+          );
   }
 
   /// KPI Tab
