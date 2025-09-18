@@ -598,7 +598,8 @@ class _ComponentState extends State<Component> {
                       _showDetail(item);
                     }
                   },
-                  child:Container(
+                  child:
+                  Container(
   margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),
   padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
   decoration: BoxDecoration(

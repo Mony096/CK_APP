@@ -27,6 +27,10 @@ class _DashboardState extends State<Dashboard>
   List<Map<String, dynamic>> ticketGroups = [];
   final DioClient _dio = DioClient(); // Your custom Dio client
   bool load = false;
+  String _selectedJob = "All"; // All, Open, Closed
+  String _selectedService = "All"; // All, Open, Closed
+  String _selectedPriority = "All"; // All, High, Medium, Low
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +45,8 @@ class _DashboardState extends State<Dashboard>
     _tabController.dispose();
     super.dispose();
   }
+
+  bool _isExpanded = false; // add this in your State
 
   Future<void> _loadUserName() async {
     final name = await LocalStorageManger.getString('FullName');
@@ -66,11 +72,11 @@ class _DashboardState extends State<Dashboard>
 
   /// Fetch count of tickets for each date from SAP
   Future<void> _fetchTicketCounts() async {
-  setState(() {
+    setState(() {
       load = true; // hide loading after all counts fetched
     });
-   // optional small delay before hiding overall loading
-    await Future.delayed(const Duration(milliseconds: 300));
+    // optional small delay before hiding overall loading
+    await Future.delayed(const Duration(milliseconds: 500));
 
     setState(() {
       load = false; // hide loading after all counts fetched
@@ -81,10 +87,22 @@ class _DashboardState extends State<Dashboard>
         group["isLoadingCount"] = true; // show loading
         group["tickets"] = []; // clear cached tickets
       });
+      String filter = "U_CK_Date eq '$dateValue'";
+
+      if (_selectedJob != "All") {
+        filter += " and U_CK_JobType eq '$_selectedJob'";
+      }
+
+      if (_selectedService != "All") {
+        filter += " and U_CK_ServiceType eq '$_selectedService'";
+      }
+      if (_selectedPriority != "All") {
+        filter += " and U_CK_Priority eq '$_selectedPriority'";
+      }
 
       try {
-        final response = await _dio
-            .get("/CK_JOBORDER/\$count?\$filter=U_CK_Date eq '$dateValue'");
+        final response =
+            await _dio.get("/CK_JOBORDER/\$count?\$filter=$filter");
         setState(() {
           group["count"] = response.data;
           group["isLoadingCount"] = false; // hide loading
@@ -120,8 +138,6 @@ class _DashboardState extends State<Dashboard>
   //     return [];
   //   }
   // }
-  String _selectedStatus = "All"; // All, Open, Closed
-  String _selectedPriority = "All"; // All, High, Medium, Low
 
   void _showFilterDialog() {
     showModalBottomSheet(
@@ -144,16 +160,43 @@ class _DashboardState extends State<Dashboard>
 
                   // Status filter
                   const Align(
-                      alignment: Alignment.centerLeft, child: Text("Status")),
+                      alignment: Alignment.centerLeft, child: Text("Job Type")),
                   Wrap(
                     spacing: 10,
-                    children: ["All", "Open", "Closed"].map((status) {
+                    children: ["All", "Corrective", "Preventve"].map((jType) {
                       return ChoiceChip(
-                        label: Text(status),
-                        selected: _selectedStatus == status,
+                        label: Text(jType),
+                        selected: _selectedJob == jType,
                         onSelected: (_) {
                           setModalState(() {
-                            _selectedStatus = status;
+                            _selectedJob = jType;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Priority filter
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Service Type")),
+                  Wrap(
+                    spacing: 10,
+                    children: [
+                      "All",
+                      "Breakdown",
+                      "Emergency",
+                      "Installation",
+                      "Overhaul",
+                      "Maintenance"
+                    ].map((serice) {
+                      return ChoiceChip(
+                        label: Text(serice),
+                        selected: _selectedService == serice,
+                        onSelected: (_) {
+                          setModalState(() {
+                            _selectedService = serice;
                           });
                         },
                       );
@@ -186,7 +229,8 @@ class _DashboardState extends State<Dashboard>
                       TextButton(
                         onPressed: () {
                           setState(() {
-                            _selectedStatus = "All";
+                            _selectedJob = "All";
+                            _selectedService = "All";
                             _selectedPriority = "All";
                           });
                           Navigator.pop(context);
@@ -196,6 +240,7 @@ class _DashboardState extends State<Dashboard>
                       ElevatedButton(
                         onPressed: () {
                           setState(() {}); // refresh tickets with filter
+                          _fetchTicketCounts();
                           Navigator.pop(context);
                         },
                         child: const Text("Confirm"),
@@ -215,10 +260,13 @@ class _DashboardState extends State<Dashboard>
     try {
       String filter = "U_CK_Date eq '$date'";
 
-      if (_selectedStatus != "All") {
-        filter += " and U_CK_Status eq '$_selectedStatus'";
+      if (_selectedJob != "All") {
+        filter += " and U_CK_JobType eq '$_selectedJob'";
       }
 
+      if (_selectedService != "All") {
+        filter += " and U_CK_ServiceType eq '$_selectedService'";
+      }
       if (_selectedPriority != "All") {
         filter += " and U_CK_Priority eq '$_selectedPriority'";
       }
@@ -293,7 +341,8 @@ class _DashboardState extends State<Dashboard>
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             onPressed: () {
               setState(() {
-                _selectedStatus = "All"; // All, Open, Closed
+                _selectedJob = "All"; // All, Open, Closed
+                _selectedService = "All"; // All, Open, Closed
                 _selectedPriority = "All"; // All, High, Medium, Low
               });
 
@@ -305,30 +354,49 @@ class _DashboardState extends State<Dashboard>
           preferredSize: const Size.fromHeight(55.0),
           child: Container(
             color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              indicator: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
+            child: Stack(
+              children: [
+                // ✅ TabBar
+                TabBar(
+                  controller: _tabController,
+                  indicator: const CustomTabIndicator(
+                    indicatorWidth: 70,
+                    indicatorHeight: 3,
                     color: Colors.green,
-                    width: 3.0,
                   ),
+                  indicatorSize: TabBarIndicatorSize.label,
+                  tabs: const [
+                    Tab(
+                      child: Text(
+                        "Tickets",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 62, 62, 67),
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        "KPI",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 62, 62, 67),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              indicatorSize: TabBarIndicatorSize.label,
-              tabs: const [
-                Tab(
-                  child: Text(
-                    "Ticket",
-                    style: TextStyle(
-                        fontSize: 16, color: Color.fromARGB(255, 62, 62, 67)),
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    "KPI",
-                    style: TextStyle(
-                        fontSize: 16, color: Color.fromARGB(255, 62, 62, 67)),
+
+                // ✅ Divider line in center
+                Container(
+                  margin: const EdgeInsets.only(top: 7),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 1,
+                      height: 30,
+                      color: Colors.grey.shade400,
+                    ),
                   ),
                 ),
               ],
@@ -398,50 +466,76 @@ class _DashboardState extends State<Dashboard>
 
   /// Ticket Tab
   Widget _ticketTab() {
-    return load == true
-        ? Text("Loading")
-        : Column(
+    return Column(
+      children: [
+        // 🔹 Filter bar
+        Container(
+          margin: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+              top: BorderSide(color: Colors.grey.shade300, width: 1),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 🔹 Filter bar
-              Container(
-                margin: const EdgeInsets.only(top: 10),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                    top: BorderSide(color: Colors.grey.shade300, width: 1),
+              const SizedBox(
+                width: 7,
+              ),
+              Expanded(
+                child: Text(
+                  "Job: $_selectedJob | Service: $_selectedService | Priority: $_selectedPriority",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
                   ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(
-                      width: 7,
-                    ),
-                    Expanded(
-                      child: Text(
-                        "Status: $_selectedStatus  |  Priority: $_selectedPriority",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.filter_alt, color: Colors.green),
-                      onPressed: () {
-                        _showFilterDialog(); // call your bottom sheet
-                      },
-                    ),
-                  ],
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 4),
+                height: 30,
+                child: IconButton(
+                  icon: const Icon(Icons.filter_alt, color: Colors.green),
+                  onPressed: () {
+                    _showFilterDialog(); // call your bottom sheet
+                  },
+                ),
+              )
+            ],
+          ),
+        ),
 
-              // 🔹 Ticket list
-              Expanded(
+        // 🔹 Ticket list
+        load == true
+            ? const SizedBox(
+                height: 550,
+                child: Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: Colors.green,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Loading...",
+                      style: TextStyle(fontSize: 17),
+                    ),
+                  ],
+                )),
+              )
+            : Expanded(
                 // <<< Fix: constrain ListView inside Column
                 child: ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -451,17 +545,17 @@ class _DashboardState extends State<Dashboard>
                     final tickets = group["tickets"] as List;
 
                     return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: const Color.fromARGB(255, 255, 255, 255),
+                        borderRadius: BorderRadius.circular(7),
                         border: Border.all(
                           color: Colors.grey.shade200,
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
+                            color: Colors.black.withOpacity(0.08),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -473,8 +567,8 @@ class _DashboardState extends State<Dashboard>
                         child: ExpansionTile(
                           leading: CircleAvatar(
                             backgroundColor: Colors.indigo[50],
-                            child: const Icon(Icons.event_note,
-                                color: Colors.indigo),
+                            child: const Icon(Icons.date_range,
+                                color: Color.fromARGB(255, 76, 99, 122)),
                           ),
                           title: Row(
                             children: [
@@ -502,10 +596,28 @@ class _DashboardState extends State<Dashboard>
                             "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
                             style: const TextStyle(color: Colors.grey),
                           ),
+                          // ✅ custom right icon
+                          // ✅ custom rotating arrow
+                          trailing: AnimatedRotation(
+                            turns: _isExpanded
+                                ? 0.5
+                                : 0.0, // 0.5 = 180°, 0.25 = 90°
+                            duration: const Duration(milliseconds: 200),
+                            child: const Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Colors.grey,
+                            ),
+                          ),
+
                           onExpansionChanged: (expanded) async {
+                            setState(() {
+                              _isExpanded = expanded;
+                            });
                             if (expanded && tickets.isEmpty) {
                               setState(() {
                                 group["tickets"] = ["loading"];
+                                _isExpanded = expanded;
+                                print(expanded);
                               });
                               final fetchedTickets = await _fetchTicketsFromApi(
                                   group["dateValue"]);
@@ -534,8 +646,8 @@ class _DashboardState extends State<Dashboard>
                                             padding: EdgeInsets.all(8),
                                             child: Center(
                                                 child: SizedBox(
-                                                    width: 23,
-                                                    height: 23,
+                                                    width: 21,
+                                                    height: 21,
                                                     child:
                                                         CircularProgressIndicator(
                                                       strokeWidth: 2,
@@ -555,56 +667,210 @@ class _DashboardState extends State<Dashboard>
                                     ]
                                   : tickets.map<Widget>((ticket) {
                                       return Container(
-                                        margin:
-                                            const EdgeInsets.only(bottom: 8),
-                                        padding: const EdgeInsets.all(12),
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 0, 0, 5),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 6.5, 10, 10),
                                         decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            const Icon(
-                                                Icons
-                                                    .confirmation_number_outlined,
-                                                color: Colors.blue),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    ticket["title"],
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    "ID: ${ticket["id"]}",
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                          border: const Border(
+                                            left: BorderSide(
+                                              color: Color.fromARGB(
+                                                  255, 66, 83, 100),
+                                              width: 8,
                                             ),
-                                            Chip(
-                                              label: Text(
-                                                ticket["status"],
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color.fromARGB(
+                                                      255, 133, 136, 138)
+                                                  .withOpacity(0.2),
+                                              spreadRadius: 2,
+                                              blurRadius: 2,
+                                              offset: const Offset(1, 1),
+                                            )
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Colors.white,
+                                        ),
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: Row(
+                                            children: [
+                                              const SizedBox(width: 5),
+                                              Expanded(
+                                                flex: 6,
+                                                child: Column(
+                                                  children: [
+                                                    // ✅ Header row
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            const Icon(
+                                                                Icons.settings,
+                                                                size: 19,
+                                                                color: Color
+                                                                    .fromARGB(
+                                                                        255,
+                                                                        188,
+                                                                        189,
+                                                                        190)),
+                                                            const SizedBox(
+                                                                width: 3),
+                                                            Text(
+                                                              "Ticket - No. ${index + 1}",
+                                                              style: const TextStyle(
+                                                                  fontSize: 13,
+                                                                  color: Colors
+                                                                      .grey),
+                                                              textScaleFactor:
+                                                                  1.0,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            // Corrective Tag
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          12,
+                                                                      vertical:
+                                                                          6),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: const Color(
+                                                                    0xFFD4AF37), // Gold yellow
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            5),
+                                                              ),
+                                                              child: const Text(
+                                                                "Corrective",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+
+                                                            const SizedBox(
+                                                                width: 8),
+
+                                                            // Entry Tag
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          12,
+                                                                      vertical:
+                                                                          6),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: const Color(
+                                                                    0xFF4CAF50), // Green
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            5),
+                                                              ),
+                                                              child: const Text(
+                                                                "Entry",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 6),
+
+                                                    // ✅ Item code & model row
+                                                    const Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 10),
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons.person,
+                                                              size: 21,
+                                                              color: Colors
+                                                                  .blue, // you can change the color
+                                                            ),
+                                                            SizedBox(
+                                                                width:
+                                                                    5), // spacing between icon and text
+                                                            Text(
+                                                              "1000098 - John Sey",
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              textScaleFactor:
+                                                                  1.0,
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 13,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )),
+                                                    const SizedBox(height: 7.5),
+
+                                                    // ✅ Brand & part row
+                                                    Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(left: 20),
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .width,
+                                                          child: const Text(
+                                                            "Brand :1asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssasasaa",
+                                                            // maxLines: 1,
+                                                            // overflow:
+                                                            //     TextOverflow
+                                                            //         .ellipsis,
+                                                            softWrap: true,
+                                                            textScaleFactor:
+                                                                1.0,
+                                                            style: TextStyle(
+                                                                fontSize: 13),
+                                                          ),
+                                                        )),
+                                                  ],
                                                 ),
                                               ),
-                                              backgroundColor: _statusColor(
-                                                  ticket["status"]),
-                                            ),
-                                          ],
+                                              const SizedBox(width: 5),
+                                            ],
+                                          ),
                                         ),
                                       );
                                     }).toList(),
@@ -614,8 +880,8 @@ class _DashboardState extends State<Dashboard>
                   },
                 ),
               ),
-            ],
-          );
+      ],
+    );
   }
 
   /// KPI Tab
@@ -695,6 +961,52 @@ class _DashboardState extends State<Dashboard>
           ],
         ),
       ),
+    );
+  }
+}
+
+class CustomTabIndicator extends Decoration {
+  final double indicatorWidth;
+  final double indicatorHeight;
+  final Color color;
+
+  const CustomTabIndicator({
+    this.indicatorWidth = 40,
+    this.indicatorHeight = 3,
+    this.color = Colors.green,
+  });
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return _CustomPainter(this, onChanged);
+  }
+}
+
+class _CustomPainter extends BoxPainter {
+  final CustomTabIndicator decoration;
+
+  _CustomPainter(this.decoration, VoidCallback? onChanged) : super(onChanged);
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration config) {
+    final paint = Paint()
+      ..color = decoration.color
+      ..style = PaintingStyle.fill;
+
+    final double xCenter =
+        offset.dx + (config.size!.width / 2) - (decoration.indicatorWidth / 2);
+    final double yBottom = offset.dy + config.size!.height;
+
+    final Rect rect = Rect.fromLTWH(
+      xCenter,
+      yBottom - decoration.indicatorHeight,
+      decoration.indicatorWidth,
+      decoration.indicatorHeight,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+      paint,
     );
   }
 }
