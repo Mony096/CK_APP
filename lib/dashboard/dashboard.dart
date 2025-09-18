@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
 import 'package:bizd_tech_service/screens/service/service.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -153,7 +157,7 @@ class _DashboardState extends State<Dashboard>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Filter",
+                  const Text("Matches Your Filter",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 20),
@@ -161,19 +165,22 @@ class _DashboardState extends State<Dashboard>
                   // Status filter
                   const Align(
                       alignment: Alignment.centerLeft, child: Text("Job Type")),
-                  Wrap(
-                    spacing: 10,
-                    children: ["All", "Corrective", "Preventve"].map((jType) {
-                      return ChoiceChip(
-                        label: Text(jType),
-                        selected: _selectedJob == jType,
-                        onSelected: (_) {
-                          setModalState(() {
-                            _selectedJob = jType;
-                          });
-                        },
-                      );
-                    }).toList(),
+                  Container(
+                    margin: const EdgeInsets.only(right: 45),
+                    child: Wrap(
+                      spacing: 5,
+                      children: ["All", "Corrective", "Preventve"].map((jType) {
+                        return ChoiceChip(
+                          label: Text(jType),
+                          selected: _selectedJob == jType,
+                          onSelected: (_) {
+                            setModalState(() {
+                              _selectedJob = jType;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -181,45 +188,52 @@ class _DashboardState extends State<Dashboard>
                   const Align(
                       alignment: Alignment.centerLeft,
                       child: Text("Service Type")),
-                  Wrap(
-                    spacing: 10,
-                    children: [
-                      "All",
-                      "Breakdown",
-                      "Emergency",
-                      "Installation",
-                      "Overhaul",
-                      "Maintenance"
-                    ].map((serice) {
-                      return ChoiceChip(
-                        label: Text(serice),
-                        selected: _selectedService == serice,
-                        onSelected: (_) {
-                          setModalState(() {
-                            _selectedService = serice;
-                          });
-                        },
-                      );
-                    }).toList(),
+                  Container(
+                    margin: const EdgeInsets.only(left: 0),
+                    child: Wrap(
+                      spacing: 5,
+                      children: [
+                        "All",
+                        "Breakdown",
+                        "Emergency",
+                        "Installation",
+                        "Overhaul",
+                        "Maintenance"
+                      ].map((serice) {
+                        return ChoiceChip(
+                          label: Text(serice),
+                          selected: _selectedService == serice,
+                          onSelected: (_) {
+                            setModalState(() {
+                              _selectedService = serice;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
                   // Priority filter
                   const Align(
                       alignment: Alignment.centerLeft, child: Text("Priority")),
-                  Wrap(
-                    spacing: 10,
-                    children: ["All", "High", "Medium", "Low"].map((priority) {
-                      return ChoiceChip(
-                        label: Text(priority),
-                        selected: _selectedPriority == priority,
-                        onSelected: (_) {
-                          setModalState(() {
-                            _selectedPriority = priority;
-                          });
-                        },
-                      );
-                    }).toList(),
+                  Container(
+                    margin: const EdgeInsets.only(right: 30),
+                    child: Wrap(
+                      spacing: 5,
+                      children:
+                          ["All", "High", "Medium", "Low"].map((priority) {
+                        return ChoiceChip(
+                          label: Text(priority),
+                          selected: _selectedPriority == priority,
+                          onSelected: (_) {
+                            setModalState(() {
+                              _selectedPriority = priority;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -233,9 +247,17 @@ class _DashboardState extends State<Dashboard>
                             _selectedService = "All";
                             _selectedPriority = "All";
                           });
+                          _fetchTicketCounts();
+
                           Navigator.pop(context);
                         },
-                        child: const Text("Reset"),
+                        child: const Text(
+                          "Reset",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.red,
+                              fontWeight: FontWeight.normal),
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -243,9 +265,25 @@ class _DashboardState extends State<Dashboard>
                           _fetchTicketCounts();
                           Navigator.pop(context);
                         },
-                        child: const Text("Confirm"),
-                      ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                              255, 66, 83, 100), // button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(7), // rounded corners
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 5), // optional
+                        ),
+                        child: const Text(
+                          "Confirm",
+                          style: TextStyle(color: Colors.white), // text color
+                        ),
+                      )
                     ],
+                  ),
+                  const SizedBox(
+                    height: 30,
                   )
                 ],
               ),
@@ -319,6 +357,122 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
+  Future<void> downloadAllDocuments(BuildContext context) async {
+    final onlineProvider =
+        Provider.of<ServiceListProvider>(context, listen: false);
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        String statusMessage = "Starting download...";
+
+        bool isDownloadStarted = false;
+
+        return StatefulBuilder(
+          builder: (statefulContext, setState) {
+            if (!isDownloadStarted) {
+              isDownloadStarted = true;
+              Future.microtask(() async {
+                try {
+                  // --- Download Services ---
+                  setState(() {
+                    statusMessage = "Downloading Services...";
+                  });
+                  await onlineProvider.fetchDocuments(
+                    loadMore: false,
+                    isSetFilter: false,
+                    context: statefulContext,
+                  );
+                  setState(() {
+                    statusMessage = "Saving Services to offline storage...";
+                  });
+                  await offlineProvider.saveDocuments(onlineProvider.documents);
+
+                  await Future.delayed(
+                      const Duration(milliseconds: 500)); // Brief pause
+
+                  // --- Download Service Tickets ---
+                  // setState(() {
+                  //   statusMessage = "Downloading Service Tickets...";
+                  // });
+                  // await onlineProvider.fetchDocumentTicket(
+                  //   loadMore: false,
+                  //   isSetFilter: false,
+                  //   context: statefulContext,
+                  // );
+                  // setState(() {
+                  //   statusMessage =
+                  //       "Saving Service Tickets to offline storage...";
+                  // });
+                  // await offlineProvider
+                  //     .saveDocuments(onlineProvider.documentsTicket);
+
+                  await Future.delayed(
+                      const Duration(milliseconds: 500)); // Brief pause
+
+                  // Download complete
+                  ScaffoldMessenger.of(statefulContext).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text("All documents downloaded successfully!")),
+                  );
+                  print(offlineProvider.documents);
+                } catch (e) {
+                  // Download failed
+                  ScaffoldMessenger.of(statefulContext).showSnackBar(
+                    SnackBar(content: Text("Failed to download: $e")),
+                  );
+                } finally {
+                  // Ensure the dialog is popped only once
+                  if (Navigator.of(dialogContext).canPop()) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
+              });
+            }
+
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(statusMessage),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> clearOfflineData(BuildContext context) async {
+    final offlineProviderService =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceTicket =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    try {
+      // Clear service data
+      await offlineProviderService.clearDocuments();
+
+      // Clear service ticket data
+      await offlineProviderServiceTicket.clearDocuments();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Offline data cleared successfully!")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to clear data: $e")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -329,11 +483,26 @@ class _DashboardState extends State<Dashboard>
           icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        title: const Center(
-          child: Text(
-            'Bizd Service Mobile',
-            style: TextStyle(fontSize: 17, color: Colors.white),
-            textScaleFactor: 1.0,
+        title: Center(
+          child: GestureDetector(
+            onTap: () async {
+              final offlineProvider = Provider.of<ServiceListProviderOffline>(
+                  context,
+                  listen: false);
+
+              // Load documents from Hive first
+              await offlineProvider.loadDocuments();
+
+              print("Offline documents:");
+              for (var doc in offlineProvider.documents) {
+                print(doc);
+              }
+            },
+            child: const Text(
+              'Bizd Service Mobile',
+              style: TextStyle(fontSize: 17, color: Colors.white),
+              textScaleFactor: 1.0,
+            ),
           ),
         ),
         actions: [
@@ -370,7 +539,7 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         "Tickets",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                           color: Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
@@ -379,7 +548,7 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         "KPI",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                           color: Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
@@ -436,6 +605,20 @@ class _DashboardState extends State<Dashboard>
                 ],
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.download, color: Colors.black54),
+              title: const Text("Download"),
+              onTap: () async {
+                downloadAllDocuments(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.clear, color: Colors.black54),
+              title: const Text("Clear"),
+              onTap: () async {
+                clearOfflineData(context);
+              },
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.black54),
@@ -471,7 +654,7 @@ class _DashboardState extends State<Dashboard>
         // 🔹 Filter bar
         Container(
           margin: const EdgeInsets.only(top: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
@@ -489,20 +672,18 @@ class _DashboardState extends State<Dashboard>
                 child: Text(
                   "Job: $_selectedJob | Service: $_selectedService | Priority: $_selectedPriority",
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Colors.black87,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(bottom: 4),
-                height: 30,
-                child: IconButton(
-                  icon: const Icon(Icons.filter_alt, color: Colors.green),
-                  onPressed: () {
-                    _showFilterDialog(); // call your bottom sheet
-                  },
+              GestureDetector(
+                onTap: _showFilterDialog,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 0),
+                  height: 30,
+                  child: const Icon(Icons.filter_alt, color: Colors.green),
                 ),
               )
             ],
@@ -575,7 +756,7 @@ class _DashboardState extends State<Dashboard>
                               Text(
                                 group["date"],
                                 style: const TextStyle(
-                                  fontSize: 15,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -594,7 +775,8 @@ class _DashboardState extends State<Dashboard>
                           ),
                           subtitle: Text(
                             "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
-                            style: const TextStyle(color: Colors.grey),
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 13),
                           ),
                           // ✅ custom right icon
                           // ✅ custom rotating arrow
@@ -634,7 +816,8 @@ class _DashboardState extends State<Dashboard>
                                     padding: EdgeInsets.all(12.0),
                                     child: Text(
                                       "No tickets available!",
-                                      style: TextStyle(color: Colors.grey),
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 13),
                                     ),
                                   )
                                 ]
@@ -666,213 +849,7 @@ class _DashboardState extends State<Dashboard>
                                       )
                                     ]
                                   : tickets.map<Widget>((ticket) {
-                                      return Container(
-                                        margin: const EdgeInsets.fromLTRB(
-                                            0, 0, 0, 5),
-                                        padding: const EdgeInsets.fromLTRB(
-                                            0, 6.5, 10, 10),
-                                        decoration: BoxDecoration(
-                                          border: const Border(
-                                            left: BorderSide(
-                                              color: Color.fromARGB(
-                                                  255, 66, 83, 100),
-                                              width: 8,
-                                            ),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color.fromARGB(
-                                                      255, 133, 136, 138)
-                                                  .withOpacity(0.2),
-                                              spreadRadius: 2,
-                                              blurRadius: 2,
-                                              offset: const Offset(1, 1),
-                                            )
-                                          ],
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          color: Colors.white,
-                                        ),
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 5),
-                                          child: Row(
-                                            children: [
-                                              const SizedBox(width: 5),
-                                              Expanded(
-                                                flex: 6,
-                                                child: Column(
-                                                  children: [
-                                                    // ✅ Header row
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            const Icon(
-                                                                Icons.settings,
-                                                                size: 19,
-                                                                color: Color
-                                                                    .fromARGB(
-                                                                        255,
-                                                                        188,
-                                                                        189,
-                                                                        190)),
-                                                            const SizedBox(
-                                                                width: 3),
-                                                            Text(
-                                                              "Ticket - No. ${index + 1}",
-                                                              style: const TextStyle(
-                                                                  fontSize: 13,
-                                                                  color: Colors
-                                                                      .grey),
-                                                              textScaleFactor:
-                                                                  1.0,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          children: [
-                                                            // Corrective Tag
-                                                            Container(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          12,
-                                                                      vertical:
-                                                                          6),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: const Color(
-                                                                    0xFFD4AF37), // Gold yellow
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            5),
-                                                              ),
-                                                              child: const Text(
-                                                                "Corrective",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
-                                                              ),
-                                                            ),
-
-                                                            const SizedBox(
-                                                                width: 8),
-
-                                                            // Entry Tag
-                                                            Container(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          12,
-                                                                      vertical:
-                                                                          6),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: const Color(
-                                                                    0xFF4CAF50), // Green
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            5),
-                                                              ),
-                                                              child: const Text(
-                                                                "Entry",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 6),
-
-                                                    // ✅ Item code & model row
-                                                    const Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 10),
-                                                        child: Row(
-                                                          children: [
-                                                            Icon(
-                                                              Icons.person,
-                                                              size: 21,
-                                                              color: Colors
-                                                                  .blue, // you can change the color
-                                                            ),
-                                                            SizedBox(
-                                                                width:
-                                                                    5), // spacing between icon and text
-                                                            Text(
-                                                              "1000098 - John Sey",
-                                                              maxLines: 1,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              textScaleFactor:
-                                                                  1.0,
-                                                              style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 13,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        )),
-                                                    const SizedBox(height: 7.5),
-
-                                                    // ✅ Brand & part row
-                                                    Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(left: 20),
-                                                        child: SizedBox(
-                                                          width: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .width,
-                                                          child: const Text(
-                                                            "Brand :1asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssasasaa",
-                                                            // maxLines: 1,
-                                                            // overflow:
-                                                            //     TextOverflow
-                                                            //         .ellipsis,
-                                                            softWrap: true,
-                                                            textScaleFactor:
-                                                                1.0,
-                                                            style: TextStyle(
-                                                                fontSize: 13),
-                                                          ),
-                                                        )),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 5),
-                                            ],
-                                          ),
-                                        ),
-                                      );
+                                      return _cardTicket(ticket, Colors.red);
                                     }).toList(),
                         ),
                       ),
@@ -908,58 +885,343 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
+  Widget _cardTicket(dynamic data, Color color) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
+      decoration: BoxDecoration(
+        border: const Border(
+          left: BorderSide(
+            color: Color.fromARGB(255, 66, 83, 100),
+            width: 8,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 133, 136, 138).withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 2,
+            offset: const Offset(1, 1),
+          )
+        ],
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 5),
+        child: Row(
+          children: [
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 6,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ✅ Header row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.settings,
+                              size: 19,
+                              color: Color.fromARGB(255, 188, 189, 190)),
+                          SizedBox(width: 3),
+                          Text(
+                            "Ticket - No. 1",
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                            textScaleFactor: 1.0,
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          // Corrective Tag
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37), // Gold yellow
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: const Text(
+                              "Corrective",
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 8),
+
+                          // Entry Tag
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4CAF50), // Green
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: const Text(
+                              "Entry",
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // ✅ Item code & model row
+                  const Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.person,
+                            size: 21,
+                            color: Colors.blue, // you can change the color
+                          ),
+                          SizedBox(width: 5), // spacing between icon and text
+                          Text(
+                            "1000098 - John Sey",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textScaleFactor: 1.0,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      )),
+                  const SizedBox(height: 7.5),
+
+                  // ✅ Brand & part row
+                  Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: const Text(
+                          "# / 23, Street 872 - Khan Sen Sok phnom Penh",
+                          // maxLines: 1,
+                          // overflow:
+                          //     TextOverflow
+                          //         .ellipsis,
+                          softWrap: true,
+                          textScaleFactor: 1.0,
+                          style: TextStyle(fontSize: 12.5),
+                        ),
+                      )),
+
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(0, 9, 10, 0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        top: BorderSide(color: Colors.grey.shade300, width: 1),
+                      ),
+                    ),
+                    margin: const EdgeInsets.fromLTRB(20, 10, 0, 0),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 85,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Service Type",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 133, 134, 137),
+                                        fontSize: 13),
+                                  ),
+                                  Text(
+                                    ":",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 133, 134, 137),
+                                        fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              " Breakdown",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textScaleFactor: 1.0,
+                              style: TextStyle(
+                                  color: Colors.black87, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5),
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 85,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Priority",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 133, 134, 137),
+                                        fontSize: 13),
+                                  ),
+                                  Text(
+                                    ":",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textScaleFactor: 1.0,
+                                    style: TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 133, 134, 137),
+                                        fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              " High",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textScaleFactor: 1.0,
+                              style: TextStyle(color: Colors.red, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 5),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _kpiCard(String title, String value, Color color) {
     return Expanded(
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: TextStyle(
-                    fontSize: 28, fontWeight: FontWeight.bold, color: color),
+      child: Container(
+        height: 150,
+        decoration: BoxDecoration(
+          color: Colors.white, // same as Card background
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1), // soft shadow
+              blurRadius: 4,
+              offset: const Offset(0, 2), // subtle elevation
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(13),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12.5,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 25),
+            Row(
+              children: [
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: color,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _listCard(String title, List<String> items) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            if (items.isEmpty)
-              const Text("No data available",
-                  style: TextStyle(color: Colors.grey))
-            else
-              Column(
-                children: items
-                    .map((item) => ListTile(
-                          title: Text(item),
-                          leading: const Icon(Icons.check_circle_outline),
-                        ))
-                    .toList(),
-              )
-          ],
-        ),
+    return Container(
+      height: 150,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          if (items.isEmpty)
+            const Text(
+              "No data available",
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            )
+          else
+            Column(
+              children: items
+                  .map(
+                    (item) => ListTile(
+                      title: Text(item),
+                      leading: const Icon(Icons.check_circle_outline),
+                    ),
+                  )
+                  .toList(),
+            ),
+        ],
       ),
     );
   }

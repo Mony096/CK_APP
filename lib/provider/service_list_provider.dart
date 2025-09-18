@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 
 class ServiceListProvider extends ChangeNotifier {
   List<dynamic> _documents = [];
+  List<dynamic> _documentTicket = [];
+
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isLoadingSetFilter = false;
@@ -18,6 +20,8 @@ class ServiceListProvider extends ChangeNotifier {
   final DioClient dio = DioClient();
 
   List<dynamic> get documents => _documents;
+  List<dynamic> get documentsTicket => _documentTicket;
+
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
   bool get isLoadingSetFilter => _isLoadingSetFilter;
@@ -94,18 +98,64 @@ class ServiceListProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchDocumentTicket({
+    bool loadMore = false,
+    bool isSetFilter = false,
+    required BuildContext context,
+  }) async {
+    if (_isLoading) return;
+    if (isSetFilter) {
+      if (_isLoadingSetFilter) return;
+      _isLoadingSetFilter = true;
+    }
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final query = await _buildQueryTicket();
+      final response = await dio.get(query);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        if (loadMore) {
+          _documentTicket.addAll(data);
+        } else {
+          _documentTicket = data;
+        }
+
+        _hasMore = data.length == _limit;
+        _skip += _limit;
+      } else {
+        throw Exception("Failed to load documents Ticket");
+      }
+    } catch (e) {
+      await MaterialDialog.warning(
+        context,
+        title: "Error",
+        body: e.toString(),
+      );
+      print("Error fetching documents Ticket: $e");
+    } finally {
+      if (isSetFilter) _isLoadingSetFilter = false;
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Build query dynamically
   Future<String> _buildQuery() async {
     final userId = await LocalStorageManger.getString('UserId');
+    final String dateNow = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
     String filter =
-        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
+        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' and U_CK_Date ge '$dateNow'";
 
     // Add text filter
     if (_currentFilter.isNotEmpty) {
       filter += " and contains(Code,'$_currentFilter')";
     }
 
-    // Add date filter
+    // Add date filter (if selected)
     if (_currentDate != null) {
       final dateStr = DateFormat("yyyy-MM-dd").format(_currentDate!);
       filter += " and U_CK_Date eq '$dateStr'";
@@ -119,6 +169,28 @@ class ServiceListProvider extends ChangeNotifier {
     _skip = 0;
     _hasMore = true;
     _documents.clear();
+  }
+
+  /// Build query dynamically Ticket
+  Future<String> _buildQueryTicket() async {
+    final userId = await LocalStorageManger.getString('UserId');
+    final String dateNow = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
+    String filter = "U_CK_TechnicianId eq $userId and U_CK_Date ge '$dateNow'";
+
+    // Add text filter
+    if (_currentFilter.isNotEmpty) {
+      filter += " and contains(Code,'$_currentFilter')";
+    }
+
+    // Add date filter (if selected)
+    if (_currentDate != null) {
+      final dateStr = DateFormat("yyyy-MM-dd").format(_currentDate!);
+      filter += " and U_CK_Date eq '$dateStr'";
+    }
+
+    print("Final Filter: $filter");
+    return "/script/test/GetCkServiceLists?\$filter=$filter&\$top=$_limit&\$skip=$_skip";
   }
 
   void setFilter(String filter, BuildContext context) {

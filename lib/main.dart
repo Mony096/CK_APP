@@ -9,11 +9,15 @@ import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/provider/service_list_ticket_provider_offline.dart';
+import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/site_list_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/wrapper_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
 import 'package:provider/provider.dart';
 
@@ -47,7 +51,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = DisableSSL();
-
+  await Hive.initFlutter();
+  await Hive.openBox('service_lists'); // open a box for your documents
   // await Firebase.initializeApp();
   // await LocationProvider.initializeService();
   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -95,8 +100,11 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ServiceListProvider()),
       ChangeNotifierProvider(create: (_) => CompletedServiceProvider()),
       ChangeNotifierProvider(create: (_) => HelperProvider()), // <-- Added
-      ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- Added
+      ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- AddedServiceListProviderOffline
       ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
+            ChangeNotifierProvider(create: (_) => ServiceListProviderOffline()), // <-- Added
+            ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
+
       // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],
     child: const MyApp(),
