@@ -40,6 +40,7 @@ class _DashboardState extends State<Dashboard>
     super.initState();
     _loadUserName();
     _tabController = TabController(length: 2, vsync: this);
+    // _initOffline();
     _initTicketDates();
     _fetchTicketCounts();
   }
@@ -75,73 +76,100 @@ class _DashboardState extends State<Dashboard>
   }
 
   /// Fetch count of tickets for each date from SAP
+  // Future<void> _fetchTicketCounts() async {
+  //   setState(() {
+  //     load = true; // hide loading after all counts fetched
+  //   });
+  //   // optional small delay before hiding overall loading
+  //   await Future.delayed(const Duration(milliseconds: 500));
+
+  //   setState(() {
+  //     load = false; // hide loading after all counts fetched
+  //   });
+  //   for (var group in ticketGroups) {
+  //     final dateValue = group["dateValue"];
+  //     setState(() {
+  //       group["isLoadingCount"] = true; // show loading
+  //       group["tickets"] = []; // clear cached tickets
+  //     });
+  //     String filter = "U_CK_Date eq '$dateValue'";
+
+  //     if (_selectedJob != "All") {
+  //       filter += " and U_CK_JobType eq '$_selectedJob'";
+  //     }
+
+  //     if (_selectedService != "All") {
+  //       filter += " and U_CK_ServiceType eq '$_selectedService'";
+  //     }
+  //     if (_selectedPriority != "All") {
+  //       filter += " and U_CK_Priority eq '$_selectedPriority'";
+  //     }
+
+  //     try {
+  //       final response =
+  //           await _dio.get("/CK_JOBORDER/\$count?\$filter=$filter");
+  //       setState(() {
+  //         group["count"] = response.data;
+  //         group["isLoadingCount"] = false; // hide loading
+  //       });
+  //     } catch (e) {
+  //       setState(() {
+  //         group["count"] = 0;
+  //         group["isLoadingCount"] = false; // hide loading
+  //         group["tickets"] = []; // also clear on error
+  //       });
+  //       debugPrint("Error fetching count for $dateValue: $e");
+  //     }
+  //   }
+  // }
+  /// Fetch count of tickets for each date using offline documents
+  /// Fetch count of tickets for each date using offline documents
   Future<void> _fetchTicketCounts() async {
     setState(() {
-      load = true; // hide loading after all counts fetched
+      load = true; // show overall loading
     });
-    // optional small delay before hiding overall loading
-    await Future.delayed(const Duration(milliseconds: 500));
 
-    setState(() {
-      load = false; // hide loading after all counts fetched
-    });
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    await offlineProvider.loadDocuments();
+    print(offlineProvider.documents);
     for (var group in ticketGroups) {
       final dateValue = group["dateValue"];
       setState(() {
-        group["isLoadingCount"] = true; // show loading
+        group["isLoadingCount"] = true; // show loading for this group
         group["tickets"] = []; // clear cached tickets
       });
-      String filter = "U_CK_Date eq '$dateValue'";
 
-      if (_selectedJob != "All") {
-        filter += " and U_CK_JobType eq '$_selectedJob'";
-      }
+      // Filter offline documents
+      var filteredDocs = offlineProvider.documents.where((doc) {
+        bool match = doc["U_CK_Date"] == '${dateValue}T00:00:00Z';
 
-      if (_selectedService != "All") {
-        filter += " and U_CK_ServiceType eq '$_selectedService'";
-      }
-      if (_selectedPriority != "All") {
-        filter += " and U_CK_Priority eq '$_selectedPriority'";
-      }
+        if (_selectedJob != "All") {
+          match = match && doc["U_CK_JobType"] == _selectedJob;
+        }
+        if (_selectedService != "All") {
+          match = match && doc["U_CK_ServiceType"] == _selectedService;
+        }
+        if (_selectedPriority != "All") {
+          match = match && doc["U_CK_Priority"] == _selectedPriority;
+        }
 
-      try {
-        final response =
-            await _dio.get("/CK_JOBORDER/\$count?\$filter=$filter");
-        setState(() {
-          group["count"] = response.data;
-          group["isLoadingCount"] = false; // hide loading
-        });
-      } catch (e) {
-        setState(() {
-          group["count"] = 0;
-          group["isLoadingCount"] = false; // hide loading
-          group["tickets"] = []; // also clear on error
-        });
-        debugPrint("Error fetching count for $dateValue: $e");
-      }
+        return match;
+      }).toList();
+
+      setState(() {
+        group["count"] = filteredDocs.length; // count of filtered docs
+        group["tickets"] = filteredDocs; // optionally store actual tickets
+        group["isLoadingCount"] = false; // hide loading
+      });
     }
+
+    // optional small delay for smooth UI
+    await Future.delayed(const Duration(milliseconds: 500));
+    setState(() {
+      load = false; // hide overall loading
+    });
   }
-
-  /// Fetch ticket details per date from SAP
-  // Future<List<Map<String, String>>> _fetchTicketsFromApi(String date) async {
-  //   try {
-  //     final response = await _dio.get(
-  //       "/CK_JOBORDER?\$filter=U_CK_Date eq '$date'",
-  //     );
-
-  //     final List data = response.data["value"] ?? [];
-  //     return data.map<Map<String, String>>((item) {
-  //       return {
-  //         "id": item["DocEntry"].toString(),
-  //         "title": item["U_CK_JobName"] ?? "No Title",
-  //         "status": item["U_CK_Status"] ?? "Open",
-  //       };
-  //     }).toList();
-  //   } catch (e) {
-  //     debugPrint("Error fetching tickets for $date: $e");
-  //     return [];
-  //   }
-  // }
 
   void _showFilterDialog() {
     showModalBottomSheet(
@@ -294,39 +322,78 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
-  Future<List<Map<String, String>>> _fetchTicketsFromApi(String date) async {
-    try {
-      String filter = "U_CK_Date eq '$date'";
+  // Future<List<Map<String, String>>> _fetchTicketsFromApi(String date) async {
+  //   try {
+  //     String filter = "U_CK_Date eq '$date'";
+
+  //     if (_selectedJob != "All") {
+  //       filter += " and U_CK_JobType eq '$_selectedJob'";
+  //     }
+
+  //     if (_selectedService != "All") {
+  //       filter += " and U_CK_ServiceType eq '$_selectedService'";
+  //     }
+  //     if (_selectedPriority != "All") {
+  //       filter += " and U_CK_Priority eq '$_selectedPriority'";
+  //     }
+
+  //     final response = await _dio.get(
+  //       "/CK_JOBORDER?\$filter=$filter",
+  //     );
+
+  //     final List data = response.data["value"] ?? [];
+  //     return data.map<Map<String, String>>((item) {
+  //       return {
+  //         "id": item["DocEntry"].toString(),
+  //         "title": item["U_CK_JobName"] ?? "No Title",
+  //         "status": item["U_CK_Status"] ?? "Open",
+  //         "priority": item["U_CK_Priority"] ?? "Low",
+  //       };
+  //     }).toList();
+  //   } catch (e) {
+  //     debugPrint("Error fetching tickets for $date: $e");
+  //     return [];
+  //   }
+  // }
+Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
+  try {
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    // Make sure documents are loaded
+    await offlineProvider.loadDocuments();
+
+    // Filter offline documents
+    final filteredDocs = offlineProvider.documents.where((doc) {
+      bool match = doc["U_CK_Date"] == '${date}T00:00:00Z';
 
       if (_selectedJob != "All") {
-        filter += " and U_CK_JobType eq '$_selectedJob'";
+        match = match && doc["U_CK_JobType"] == _selectedJob;
       }
-
       if (_selectedService != "All") {
-        filter += " and U_CK_ServiceType eq '$_selectedService'";
+        match = match && doc["U_CK_ServiceType"] == _selectedService;
       }
       if (_selectedPriority != "All") {
-        filter += " and U_CK_Priority eq '$_selectedPriority'";
+        match = match && doc["U_CK_Priority"] == _selectedPriority;
       }
 
-      final response = await _dio.get(
-        "/CK_JOBORDER?\$filter=$filter",
-      );
+      return match;
+    }).toList();
 
-      final List data = response.data["value"] ?? [];
-      return data.map<Map<String, String>>((item) {
-        return {
-          "id": item["DocEntry"].toString(),
-          "title": item["U_CK_JobName"] ?? "No Title",
-          "status": item["U_CK_Status"] ?? "Open",
-          "priority": item["U_CK_Priority"] ?? "Low",
-        };
-      }).toList();
-    } catch (e) {
-      debugPrint("Error fetching tickets for $date: $e");
-      return [];
-    }
+    // Map to the same format as your API
+    return filteredDocs.map<Map<String, String>>((item) {
+      return {
+        "id": item["DocEntry"].toString(),
+        "title": item["U_CK_JobName"] ?? "No Title",
+        "status": item["U_CK_Status"] ?? "Open",
+        "priority": item["U_CK_Priority"] ?? "Low",
+      };
+    }).toList();
+  } catch (e) {
+    debugPrint("Error fetching tickets from offline for $date: $e");
+    return [];
   }
+}
 
   Color _statusColor(String status) {
     switch (status) {
@@ -368,7 +435,6 @@ class _DashboardState extends State<Dashboard>
       barrierDismissible: false,
       builder: (dialogContext) {
         String statusMessage = "Starting download...";
-
         bool isDownloadStarted = false;
 
         return StatefulBuilder(
@@ -377,59 +443,66 @@ class _DashboardState extends State<Dashboard>
               isDownloadStarted = true;
               Future.microtask(() async {
                 try {
-                  // --- Download Services ---
+                  // --- Step 1: Clear existing offline data ---
+                  // setState(() {
+                  //   statusMessage = "Clearing old offline data...";
+                  // });
+                  // Await the clear operation to ensure it completes before saving new data.
+                  // await offlineProvider.clearDocuments();
+
+                  // You had two separate provider instances for the same class, which is redundant.
+                  // You only need one instance to clear both "documents" and "documentTickets."
+                  // Since the provider's `clearDocuments` method clears based on the key,
+                  // you would need separate clear methods if they used different keys.
+                  // Assuming they both use the same key 'documents', one call is enough.
+                  // If they use different keys, you would need two calls but still one provider instance.
+                  // For example:
+                  // await offlineProvider.clearServices();
+                  // await offlineProvider.clearTickets();
+                  // But in your original code, they were pointing to the same provider instance.
+                  // I have simplified this to one clear call.
+
+                  // --- Step 2: Download Service Tickets ---
                   setState(() {
-                    statusMessage = "Downloading Services...";
+                    statusMessage = "Downloading Service Tickets...";
                   });
-                  await onlineProvider.fetchDocuments(
+                  await onlineProvider.fetchDocumentTicket(
                     loadMore: false,
                     isSetFilter: false,
                     context: statefulContext,
                   );
+                  // print(onlineProvider.documentsTicket);
+                  // --- Step 3: Save Service Tickets to offline storage ---
                   setState(() {
-                    statusMessage = "Saving Services to offline storage...";
+                    statusMessage =
+                        "Saving Service Tickets to offline storage...";
                   });
-                  await offlineProvider.saveDocuments(onlineProvider.documents);
-
-                  await Future.delayed(
-                      const Duration(milliseconds: 500)); // Brief pause
-
-                  // --- Download Service Tickets ---
-                  // setState(() {
-                  //   statusMessage = "Downloading Service Tickets...";
-                  // });
-                  // await onlineProvider.fetchDocumentTicket(
-                  //   loadMore: false,
-                  //   isSetFilter: false,
-                  //   context: statefulContext,
-                  // );
-                  // setState(() {
-                  //   statusMessage =
-                  //       "Saving Service Tickets to offline storage...";
-                  // });
-                  // await offlineProvider
-                  //     .saveDocuments(onlineProvider.documentsTicket);
-
-                  await Future.delayed(
-                      const Duration(milliseconds: 500)); // Brief pause
+                  // Await the save operation. It will now run after the clear is finished.
+                  await offlineProvider
+                      .saveDocuments(onlineProvider.documentsTicket);
 
                   // Download complete
-                  ScaffoldMessenger.of(statefulContext).showSnackBar(
-                    const SnackBar(
-                        content:
-                            Text("All documents downloaded successfully!")),
-                  );
-                  print(offlineProvider.documents);
-                } catch (e) {
-                  // Download failed
-                  ScaffoldMessenger.of(statefulContext).showSnackBar(
-                    SnackBar(content: Text("Failed to download: $e")),
-                  );
-                } finally {
-                  // Ensure the dialog is popped only once
                   if (Navigator.of(dialogContext).canPop()) {
                     Navigator.of(dialogContext).pop();
                   }
+
+                  ScaffoldMessenger.of(statefulContext).showSnackBar(
+                    const SnackBar(
+                      content: Text("All documents downloaded successfully!"),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } catch (e) {
+                  // Download failed
+                  if (Navigator.of(dialogContext).canPop()) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                  ScaffoldMessenger.of(statefulContext).showSnackBar(
+                    SnackBar(
+                      content: Text("Failed to download: $e"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               });
             }
@@ -460,8 +533,8 @@ class _DashboardState extends State<Dashboard>
       // Clear service data
       await offlineProviderService.clearDocuments();
 
-      // Clear service ticket data
-      await offlineProviderServiceTicket.clearDocuments();
+      // // Clear service ticket data
+      // await offlineProviderServiceTicket.clearDocuments();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Offline data cleared successfully!")),
@@ -801,7 +874,7 @@ class _DashboardState extends State<Dashboard>
                                 _isExpanded = expanded;
                                 print(expanded);
                               });
-                              final fetchedTickets = await _fetchTicketsFromApi(
+                              final fetchedTickets = await _fetchTicketsFromOffline(
                                   group["dateValue"]);
                               setState(() {
                                 group["tickets"] = fetchedTickets;

@@ -6,6 +6,7 @@ import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/component/block_service.dart';
@@ -39,26 +40,47 @@ class _ServiceScreenState extends State<ServiceScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _init(); // this safely runs after first build
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _initOffline(); // this safely runs after first build
+    // });
   }
 
-  Future<void> _init() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoading = true;
-    });
-    await _loadUserName();
-    final svProvider = Provider.of<ServiceListProvider>(context, listen: false);
-    
-    if (svProvider.documents.isEmpty) {
-      await svProvider.fetchDocuments(context: context);
-    }
-    setState(() {
-      _isLoading = false;
-    });
-  }
+  // Future<void> _init() async {
+  //   if (!mounted) return;
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //   await _loadUserName();
+  //   final svProvider = Provider.of<ServiceListProvider>(context, listen: false);
+
+  //   if (svProvider.documents.isEmpty) {
+  //     await svProvider.fetchDocuments(context: context);
+  //   }
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
+  // }
+  // Future<void> _initOffline() async {
+  //   if (!mounted) return;
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //   final _userId = await LocalStorageManger.getString('UserId');
+
+  //   await _loadUserName();
+  //   final offlineProvider =
+  //       Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+  //   await offlineProvider.loadDocuments();
+
+
+  //   // Use filteredDocs in UI
+  //   print("Offline filtered docs: ${offlineProvider");
+
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
+  // }
 
   Future<void> _loadUserName() async {
     final name = await getName();
@@ -150,7 +172,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ServiceListProvider>(
+    return Consumer<ServiceListProviderOffline>(
       builder: (context, serviceProvider, _) {
         final documents = serviceProvider.documents;
         final isLoading = serviceProvider.isLoading;
@@ -288,27 +310,43 @@ class _ServiceScreenState extends State<ServiceScreen> {
                               const SizedBox(
                                 height: 5,
                               ),
-                              ...documents.map((travel) => BlockService(
-                                    data: travel,
-                                    onTap: () async {
-                                      if (travel["U_CK_Status"] == "Service") {
-                                        goTo(
-                                                context,
-                                                ServiceEntryScreen(
-                                                    data: travel))
-                                            .then((e) {
-                                          if (e == true) {
-                                            _refreshData();
-                                          }
+                              ...documents
+                                  .where((doc) {
+                                    final status =
+                                        doc['U_CK_Status']?.toString() ?? '';
+                                    final date =
+                                        doc['U_CK_Date']?.toString() ?? '';
+                                    final dateNow = DateFormat('yyyy-MM-dd')
+                                        .format(DateTime.now());
 
-                                          // Handle any actions after returning from ServiceEntryScreen
-                                        });
-                                        return;
-                                      }
-                                      onUpdateStatus(travel["DocEntry"],
-                                          travel["U_CK_Status"]);
-                                    },
-                                  )),
+                                    return status != 'Open' &&
+                                        status != 'Entry' &&
+                                        date.compareTo(dateNow) >= 0;
+                                    // works if date is in yyyy-MM-dd or ISO format
+                                  })
+                                  .toList()
+                                  .map((travel) => BlockService(
+                                        data: travel as dynamic,
+                                        onTap: () async {
+                                          if (travel["U_CK_Status"] ==
+                                              "Service") {
+                                            goTo(
+                                                    context,
+                                                    ServiceEntryScreen(
+                                                        data: travel))
+                                                .then((e) {
+                                              if (e == true) {
+                                                _refreshData();
+                                              }
+
+                                              // Handle any actions after returning from ServiceEntryScreen
+                                            });
+                                            return;
+                                          }
+                                          onUpdateStatus(travel["DocEntry"],
+                                              travel["U_CK_Status"]);
+                                        },
+                                      )),
                             ]),
                 ),
               ),

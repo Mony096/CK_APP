@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ServiceListProvider extends ChangeNotifier {
-  List<dynamic> _documents = [];
+  List<dynamic>_documents = [];
   List<dynamic> _documentTicket = [];
 
   bool _isLoading = false;
@@ -123,8 +123,8 @@ class ServiceListProvider extends ChangeNotifier {
           _documentTicket = data;
         }
 
-        _hasMore = data.length == _limit;
-        _skip += _limit;
+        // _hasMore = data.length == _limit;
+        // _skip += _limit;
       } else {
         throw Exception("Failed to load documents Ticket");
       }
@@ -148,8 +148,8 @@ class ServiceListProvider extends ChangeNotifier {
     final String dateNow = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
     String filter =
-        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' and U_CK_Date ge '$dateNow'";
-
+        // "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' and U_CK_Date ge '$dateNow'";
+ "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
     // Add text filter
     if (_currentFilter.isNotEmpty) {
       filter += " and contains(Code,'$_currentFilter')";
@@ -176,7 +176,8 @@ class ServiceListProvider extends ChangeNotifier {
     final userId = await LocalStorageManger.getString('UserId');
     final String dateNow = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
-    String filter = "U_CK_TechnicianId eq $userId and U_CK_Date ge '$dateNow'";
+    // String filter = "U_CK_TechnicianId eq $userId and U_CK_Date ge '$dateNow'";
+    String filter = "U_CK_TechnicianId eq $userId";
 
     // Add text filter
     if (_currentFilter.isNotEmpty) {
