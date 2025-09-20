@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
@@ -38,11 +39,18 @@ class _DashboardState extends State<Dashboard>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+      await offlineProvider.loadDocuments(); // make sure docs loaded
+      await _fetchTicketCounts(); // now counts will work
+    });
     _loadUserName();
     _tabController = TabController(length: 2, vsync: this);
     // _initOffline();
     _initTicketDates();
-    _fetchTicketCounts();
+    // _fetchTicketCounts();
   }
 
   @override
@@ -131,8 +139,8 @@ class _DashboardState extends State<Dashboard>
 
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
-    await offlineProvider.loadDocuments();
-    print(offlineProvider.documents);
+    await offlineProvider.loadDocuments(); // make sure docs loaded
+
     for (var group in ticketGroups) {
       final dateValue = group["dateValue"];
       setState(() {
@@ -165,7 +173,7 @@ class _DashboardState extends State<Dashboard>
     }
 
     // optional small delay for smooth UI
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 1000));
     setState(() {
       load = false; // hide overall loading
     });
@@ -355,45 +363,46 @@ class _DashboardState extends State<Dashboard>
   //     return [];
   //   }
   // }
-Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
-  try {
-    final offlineProvider =
-        Provider.of<ServiceListProviderOffline>(context, listen: false);
+  Future<List<Map<String, String>>> _fetchTicketsFromOffline(
+      String date) async {
+    try {
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
 
-    // Make sure documents are loaded
-    await offlineProvider.loadDocuments();
+      // Make sure documents are loaded
+      await offlineProvider.loadDocuments();
 
-    // Filter offline documents
-    final filteredDocs = offlineProvider.documents.where((doc) {
-      bool match = doc["U_CK_Date"] == '${date}T00:00:00Z';
+      // Filter offline documents
+      final filteredDocs = offlineProvider.documents.where((doc) {
+        bool match = doc["U_CK_Date"] == '${date}T00:00:00Z';
 
-      if (_selectedJob != "All") {
-        match = match && doc["U_CK_JobType"] == _selectedJob;
-      }
-      if (_selectedService != "All") {
-        match = match && doc["U_CK_ServiceType"] == _selectedService;
-      }
-      if (_selectedPriority != "All") {
-        match = match && doc["U_CK_Priority"] == _selectedPriority;
-      }
+        if (_selectedJob != "All") {
+          match = match && doc["U_CK_JobType"] == _selectedJob;
+        }
+        if (_selectedService != "All") {
+          match = match && doc["U_CK_ServiceType"] == _selectedService;
+        }
+        if (_selectedPriority != "All") {
+          match = match && doc["U_CK_Priority"] == _selectedPriority;
+        }
 
-      return match;
-    }).toList();
+        return match;
+      }).toList();
 
-    // Map to the same format as your API
-    return filteredDocs.map<Map<String, String>>((item) {
-      return {
-        "id": item["DocEntry"].toString(),
-        "title": item["U_CK_JobName"] ?? "No Title",
-        "status": item["U_CK_Status"] ?? "Open",
-        "priority": item["U_CK_Priority"] ?? "Low",
-      };
-    }).toList();
-  } catch (e) {
-    debugPrint("Error fetching tickets from offline for $date: $e");
-    return [];
+      // Map to the same format as your API
+      return filteredDocs.map<Map<String, String>>((item) {
+        return {
+          "id": item["DocEntry"].toString(),
+          "title": item["U_CK_JobName"] ?? "No Title",
+          "status": item["U_CK_Status"] ?? "Open",
+          "priority": item["U_CK_Priority"] ?? "Low",
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint("Error fetching tickets from offline for $date: $e");
+      return [];
+    }
   }
-}
 
   Color _statusColor(String status) {
     switch (status) {
@@ -480,6 +489,7 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                   // Await the save operation. It will now run after the clear is finished.
                   await offlineProvider
                       .saveDocuments(onlineProvider.documentsTicket);
+                  await _fetchTicketCounts();
 
                   // Download complete
                   if (Navigator.of(dialogContext).canPop()) {
@@ -511,7 +521,14 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CircularProgressIndicator(),
+                  SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Colors.green,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Text(statusMessage),
                 ],
@@ -526,20 +543,38 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
   Future<void> clearOfflineData(BuildContext context) async {
     final offlineProviderService =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
-    final offlineProviderServiceTicket =
-        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    // Show loading popup
+    showDialog(
+      context: context,
+      barrierDismissible: false, // prevent closing by tapping outside
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(
+          color: Colors.green,
+        ),
+      ),
+    );
 
     try {
       // Clear service data
       await offlineProviderService.clearDocuments();
 
-      // // Clear service ticket data
-      // await offlineProviderServiceTicket.clearDocuments();
+      await _fetchTicketCounts();
 
+      // Hide loading popup
+      Navigator.of(context).pop();
+
+      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Offline data cleared successfully!")),
       );
+
+      // ✅ Close drawer
+      Navigator.of(context).pop();
     } catch (e) {
+      // Hide loading popup
+      Navigator.of(context).pop();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to clear data: $e")),
       );
@@ -587,7 +622,6 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                 _selectedService = "All"; // All, Open, Closed
                 _selectedPriority = "All"; // All, High, Medium, Low
               });
-
               _fetchTicketCounts();
             },
           ),
@@ -677,6 +711,15 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                       Icons.build, "Equipment", 1, const EquipmentListScreen()),
                 ],
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.download, color: Colors.black54),
+              title: const Text("Sync to SAP"),
+              onTap: () async {
+                await Provider.of<CompletedServiceProvider>(context,
+                        listen: false)
+                    .syncAllOfflineServicesToSAP(context);
+              },
             ),
             ListTile(
               leading: const Icon(Icons.download, color: Colors.black54),
@@ -853,16 +896,16 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                           ),
                           // ✅ custom right icon
                           // ✅ custom rotating arrow
-                          trailing: AnimatedRotation(
-                            turns: _isExpanded
-                                ? 0.5
-                                : 0.0, // 0.5 = 180°, 0.25 = 90°
-                            duration: const Duration(milliseconds: 200),
-                            child: const Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Colors.grey,
-                            ),
-                          ),
+                          // trailing: AnimatedRotation(
+                          //   turns: _isExpanded
+                          //       ? 0.5
+                          //       : 0.0, // 0.5 = 180°, 0.25 = 90°
+                          //   duration: const Duration(milliseconds: 200),
+                          //   child: const Icon(
+                          //     Icons.keyboard_arrow_down,
+                          //     color: Colors.grey,
+                          //   ),
+                          // ),
 
                           onExpansionChanged: (expanded) async {
                             setState(() {
@@ -874,8 +917,9 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                                 _isExpanded = expanded;
                                 print(expanded);
                               });
-                              final fetchedTickets = await _fetchTicketsFromOffline(
-                                  group["dateValue"]);
+                              final fetchedTickets =
+                                  await _fetchTicketsFromOffline(
+                                      group["dateValue"]);
                               setState(() {
                                 group["tickets"] = fetchedTickets;
                               });
@@ -921,8 +965,11 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                                         ],
                                       )
                                     ]
-                                  : tickets.map<Widget>((ticket) {
-                                      return _cardTicket(ticket, Colors.red);
+                                  : tickets.asMap().entries.map((entry) {
+                                      final index = entry.key;
+                                      final ticket = entry.value;
+
+                                      return _cardTicket(ticket, index);
                                     }).toList(),
                         ),
                       ),
@@ -958,7 +1005,7 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
     );
   }
 
-  Widget _cardTicket(dynamic data, Color color) {
+  Widget _cardTicket(dynamic data, int index) {
     return Container(
       margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
@@ -994,14 +1041,14 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Row(
+                      Row(
                         children: [
                           Icon(Icons.settings,
                               size: 19,
                               color: Color.fromARGB(255, 188, 189, 190)),
                           SizedBox(width: 3),
                           Text(
-                            "Ticket - No. 1",
+                            "Ticket - No. ${index + 1}",
                             style: TextStyle(fontSize: 13, color: Colors.grey),
                             textScaleFactor: 1.0,
                           ),
@@ -1017,8 +1064,8 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                               color: const Color(0xFFD4AF37), // Gold yellow
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: const Text(
-                              "Corrective",
+                            child: Text(
+                              "${data["U_CK_JobType"] ?? "N/A"}",
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -1037,8 +1084,8 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                               color: const Color(0xFF4CAF50), // Green
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: const Text(
-                              "Entry",
+                            child: Text(
+                              "${data["U_CK_Status"] ?? "N/A"}",
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -1053,7 +1100,7 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                   const SizedBox(height: 6),
 
                   // ✅ Item code & model row
-                  const Padding(
+                  Padding(
                       padding: EdgeInsets.only(left: 10),
                       child: Row(
                         children: [
@@ -1064,7 +1111,7 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                           ),
                           SizedBox(width: 5), // spacing between icon and text
                           Text(
-                            "1000098 - John Sey",
+                            "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textScaleFactor: 1.0,
@@ -1082,8 +1129,11 @@ Future<List<Map<String, String>>> _fetchTicketsFromOffline(String date) async {
                       padding: const EdgeInsets.only(left: 20),
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        child: const Text(
-                          "# / 23, Street 872 - Khan Sen Sok phnom Penh",
+                        child: Text(
+                          ((data["CustomerAddress"] as List?)?.isNotEmpty ==
+                                  true)
+                              ? "# / ${(data["CustomerAddress"].first["StreetNo"] ?? "N/A")}"
+                              : "No Address",
                           // maxLines: 1,
                           // overflow:
                           //     TextOverflow

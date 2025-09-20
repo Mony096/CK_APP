@@ -40,6 +40,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   _initOffline(); // this safely runs after first build
     // });
@@ -72,7 +73,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
   //       Provider.of<ServiceListProviderOffline>(context, listen: false);
 
   //   await offlineProvider.loadDocuments();
-
 
   //   // Use filteredDocs in UI
   //   print("Offline filtered docs: ${offlineProvider");
@@ -174,7 +174,16 @@ class _ServiceScreenState extends State<ServiceScreen> {
   Widget build(BuildContext context) {
     return Consumer<ServiceListProviderOffline>(
       builder: (context, serviceProvider, _) {
-        final documents = serviceProvider.documents;
+        final documents = serviceProvider.documents.where((doc) {
+          final status = doc['U_CK_Status']?.toString() ?? '';
+          final date = doc['U_CK_Date']?.toString() ?? '';
+          final dateNow = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+          return status != 'Open' &&
+              status != 'Entry' &&
+              date.compareTo(dateNow) >= 0;
+          // works if date is in yyyy-MM-dd or ISO format
+        }).toList();
         final isLoading = serviceProvider.isLoading;
         return Scaffold(
           appBar: AppBar(
@@ -310,43 +319,27 @@ class _ServiceScreenState extends State<ServiceScreen> {
                               const SizedBox(
                                 height: 5,
                               ),
-                              ...documents
-                                  .where((doc) {
-                                    final status =
-                                        doc['U_CK_Status']?.toString() ?? '';
-                                    final date =
-                                        doc['U_CK_Date']?.toString() ?? '';
-                                    final dateNow = DateFormat('yyyy-MM-dd')
-                                        .format(DateTime.now());
-
-                                    return status != 'Open' &&
-                                        status != 'Entry' &&
-                                        date.compareTo(dateNow) >= 0;
-                                    // works if date is in yyyy-MM-dd or ISO format
-                                  })
-                                  .toList()
-                                  .map((travel) => BlockService(
-                                        data: travel as dynamic,
-                                        onTap: () async {
-                                          if (travel["U_CK_Status"] ==
-                                              "Service") {
-                                            goTo(
-                                                    context,
-                                                    ServiceEntryScreen(
-                                                        data: travel))
-                                                .then((e) {
-                                              if (e == true) {
-                                                _refreshData();
-                                              }
-
-                                              // Handle any actions after returning from ServiceEntryScreen
-                                            });
-                                            return;
+                              ...documents.map((travel) => BlockService(
+                                    data: travel as dynamic,
+                                    onTap: () async {
+                                      if (travel["U_CK_Status"] == "Service") {
+                                        goTo(
+                                                context,
+                                                ServiceEntryScreen(
+                                                    data: travel))
+                                            .then((e) {
+                                          if (e == true) {
+                                            _refreshData();
                                           }
-                                          onUpdateStatus(travel["DocEntry"],
-                                              travel["U_CK_Status"]);
-                                        },
-                                      )),
+
+                                          // Handle any actions after returning from ServiceEntryScreen
+                                        });
+                                        return;
+                                      }
+                                      onUpdateStatus(travel["DocEntry"],
+                                          travel["U_CK_Status"]);
+                                    },
+                                  )),
                             ]),
                 ),
               ),

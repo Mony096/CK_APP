@@ -22,9 +22,18 @@ class ServiceEntryScreen extends StatefulWidget {
 
 class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   void onCompletedService() async {
+    // final res =
+    //     await Provider.of<CompletedServiceProvider>(context, listen: false)
+    //         .onCompletedService(
+    //             context: context,
+    //             attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+    //             docEntry: widget.data["DocEntry"]);
+    // setState(() {
+    //   print("asasa");
+    // });
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
-            .onCompletedService(
+            .onCompletedServiceOffline(
                 context: context,
                 attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
                 docEntry: widget.data["DocEntry"]);
@@ -436,7 +445,6 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                   const SizedBox(
                                                     height: 10,
                                                   ),
-                                                  
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
@@ -490,15 +498,13 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                                 style: const TextStyle(color: Colors.white, fontSize: 12.5),
                                                                                 textScaleFactor: 1.0,
                                                                               ),
-                                                                            ))
-                                                                        .toList(),
-                                                                    Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .only(
+                                                                            )),
+                                                                    const Padding(
+                                                                      padding: EdgeInsets.only(
                                                                           bottom:
                                                                               7),
                                                                       child:
-                                                                          const Text(
+                                                                          Text(
                                                                         "more...",
                                                                         style: TextStyle(
                                                                             color:
@@ -547,7 +553,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               ))
                                         ],
                                       ),
-                                  ///////////////////////////
+                                      ///////////////////////////
                                       Row(
                                         children: [
                                           const Expanded(
@@ -662,12 +668,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                   as List)
                                                               .length >
                                                           2
-                                                      ? Padding(
+                                                      ? const Padding(
                                                           padding:
-                                                              const EdgeInsets
-                                                                  .only(
+                                                              EdgeInsets.only(
                                                                   bottom: 7),
-                                                          child: const Text(
+                                                          child: Text(
                                                             "more...",
                                                             style: TextStyle(
                                                                 color: Colors
@@ -833,7 +838,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           bottomNavigationBar: Container(
             color: const Color.fromARGB(255, 255, 255, 255),
             height: 105,
-            padding: const EdgeInsets.fromLTRB(12,0,12,30),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 30),
             child: Row(
               children: [
                 Expanded(flex: 2, child: Container()),
@@ -841,6 +846,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                 Expanded(
                   child: TextButton(
                     onPressed: () {
+                      print("asas");
                       onCompletedService();
                       // Define your button's action here
                     },
