@@ -439,201 +439,217 @@ class CompletedServiceProvider extends ChangeNotifier {
   //   }
   // }
 
-// Helper function to decode Base64 strings back to temporary files
-  Future<List<File>> decodeBase64Files(List<String> base64List) async {
-    List<File> files = [];
-    try {
-      final tempDir = await getTemporaryDirectory();
-      for (String base64String in base64List) {
-        final bytes = base64Decode(base64String);
-        // Use a unique filename to avoid conflicts
-        final fileName =
-            'temp_file_${DateTime.now().millisecondsSinceEpoch}.png';
-        final file = File('${tempDir.path}/$fileName');
-        await file.writeAsBytes(bytes);
-        files.add(file);
-      }
-    } catch (e) {
-      debugPrint("Error decoding Base64 file: $e");
+// // Helper function to decode Base64 strings back to temporary files
+//   Future<List<File>> decodeBase64Files(List<String> base64List) async {
+//     List<File> files = [];
+//     try {
+//       final tempDir = await getTemporaryDirectory();
+//       for (String base64String in base64List) {
+//         final bytes = base64Decode(base64String);
+//         // Use a unique filename to avoid conflicts
+//         final fileName =
+//             'temp_file_${DateTime.now().millisecondsSinceEpoch}.png';
+//         final file = File('${tempDir.path}/$fileName');
+//         await file.writeAsBytes(bytes);
+//         files.add(file);
+//       }
+//     } catch (e) {
+//       debugPrint("Error decoding Base64 file: $e");
+//     }
+//     return files;
+//   }
+
+
+
+void deleteTempFiles(List<File> files) {
+  for (File file in files) {
+    if (file.existsSync()) {
+      file.deleteSync();
     }
-    return files;
+  }
+}
+
+
+Future<void> syncAllOfflineServicesToSAP(BuildContext context) async {
+  MaterialDialog.loading(context);
+
+  final offlineProvider =
+      Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+  try {
+    List<Map<dynamic, dynamic>> completedServices =
+        await offlineProvider.getCompletedServicesToSync();
+
+    if (completedServices.isEmpty) {
+      MaterialDialog.close(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No offline services to sync.")),
+      );
+      return;
+    }
+
+    for (var servicePayload in completedServices) {
+      final docEntry = servicePayload['DocEntry'];
+      final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
+      final List<dynamic> fileDataList = servicePayload['files'] ?? [];
+
+      List<File> filesToUpload = [];
+
+      try {
+        // 🔑 Decode {ext, data} into temp files
+        final tempDir = await getTemporaryDirectory();
+        for (var f in fileDataList) {
+          if (f is Map && f.containsKey('data')) {
+            final bytes = base64Decode(f['data']);
+            final ext = f['ext'] ?? "bin";
+            final fileName =
+                "temp_${DateTime.now().millisecondsSinceEpoch}.$ext";
+            final file = File("${tempDir.path}/$fileName");
+            await file.writeAsBytes(bytes);
+            filesToUpload.add(file);
+          }
+        }
+
+        // 1. Upload attachments to SAP
+        final int? attachmentEntry = await uploadAttachmentsToSAP(
+          filesToUpload,
+          attachmentEntryExisting,
+        );
+
+        if (attachmentEntry == null) {
+          debugPrint("Failed to sync attachments for DocEntry: $docEntry");
+          continue; // skip to next service
+        }
+
+        // 2. Prepare SAP payload (remove offline-only keys)
+        final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+        sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
+        sapPayload.remove('files');
+        sapPayload.remove('sync_status');
+
+        // 3. Send payload to SAP
+        final response = await dio.patch(
+          "/script/test/CK_CompleteStatus($docEntry)",false,false,
+          data: sapPayload,
+        );
+
+        if (response.statusCode == 200) {
+          await offlineProvider.markServiceSynced(docEntry);
+          debugPrint("✅ Synced DocEntry: $docEntry");
+        } else {
+          debugPrint(
+              "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
+        }
+      } catch (e) {
+        debugPrint("⚠️ Error syncing DocEntry: $docEntry. Error: $e");
+      } finally {
+        // Always clean up temp files
+        deleteTempFiles(filesToUpload);
+      }
+    }
+
+    MaterialDialog.close(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Offline sync process completed.")),
+    );
+  } catch (e) {
+    MaterialDialog.close(context);
+    await MaterialDialog.warning(context,
+        title: "Batch Sync Error", body: e.toString());
+  }
+}
+  // Helper function: convert File → { ext, data }
+  Future<Map<String, String>> fileToBase64WithExt(File file) async {
+    final bytes = await file.readAsBytes();
+    final base64Data = base64Encode(bytes);
+
+    // Detect extension safely
+    final path = file.path.toLowerCase();
+    String ext = "bin"; // fallback
+    if (path.endsWith(".png")) ext = "png";
+    else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) ext = "jpg";
+    else if (path.endsWith(".pdf")) ext = "pdf";
+    else if (path.endsWith(".gif")) ext = "gif";
+
+    return {"ext": ext, "data": base64Data};
+  }
+  Future<bool> onCompletedServiceOffline({
+  required BuildContext context,
+  required int? attachmentEntryExisting,
+  required dynamic docEntry,
+  bool offline = false,
+}) async {
+
+
+  // 1. Convert all files into List<Map<String, String>>
+  List<Map<String, String>> fileDataList = [];
+
+  for (File imageFile in imagesList) {
+    fileDataList.add(await fileToBase64WithExt(imageFile));
   }
 
-// Helper function to delete temporary files after use
-  void deleteTempFiles(List<File> files) {
-    for (File file in files) {
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-    }
+  for (File signatureFile in signatureList) {
+    fileDataList.add(await fileToBase64WithExt(signatureFile));
   }
 
-// Main function to sync all offline services to SAP in a batch
-  Future<void> syncAllOfflineServicesToSAP(BuildContext context) async {
-    MaterialDialog.loading(context);
+  // 2. Build the payload
+  final payload = {
+    "DocEntry": docEntry,
+    "U_CK_Status": "Entry",
+    "U_CK_AttachmentEntry": attachmentEntryExisting ?? 0,
+    "CK_JOB_TIMECollection": [
+      {
+        "U_CK_Description": "Travel Time",
+        "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
+        "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
+        "U_CK_Effort": _timeEntry[0]["total_travel_time"],
+      },
+      {
+        "U_CK_Description": "Service Time",
+        "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
+        "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
+        "U_CK_Effort": _timeEntry[0]["total_service_time"],
+      },
+      {
+        "U_CK_Description": "Break Time",
+        "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
+        "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
+        "U_CK_Effort": _timeEntry[0]["total_break_time"],
+      }
+    ],
+    "CK_JOB_ISSUECollection": _openIssues,
+    "feedbackChecklistLine": _checkListLine,
+    "files": fileDataList, // ✅ Each file has {ext, data}
+  };
 
+  print(payload);
+
+  // 3. Offline saving
+  _submit = true;
+  notifyListeners();
+  MaterialDialog.loading(context);
+
+  try {
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
 
-    try {
-      List<Map<dynamic, dynamic>> completedServices =
-          await offlineProvider.getCompletedServicesToSync();
+    await offlineProvider.addCompletedService(payload);
+    await offlineProvider.markServiceCompleted(docEntry);
 
-      if (completedServices.isEmpty) {
-        MaterialDialog.close(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No offline services to sync.")),
-        );
-        return;
-      }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Service saved offline!")),
+    );
 
-      for (var servicePayload in completedServices) {
-        final docEntry = servicePayload['DocEntry'];
-        final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
-        final List<dynamic> fileDataList = servicePayload['file'] ?? [];
-
-        List<File> filesToUpload = [];
-
-        try {
-          // Decode Base64 strings back to temporary files
-          filesToUpload = await decodeBase64Files(fileDataList.cast<String>());
-
-          // 1. Upload attachments to SAP
-          final int? attachmentEntry = await uploadAttachmentsToSAP(
-            filesToUpload,
-            attachmentEntryExisting,
-          );
-
-          // Handle failure to upload attachments
-          if (attachmentEntry == null) {
-            debugPrint("Failed to sync attachments for DocEntry: $docEntry");
-            // Mark as failed and continue to the next service
-            continue;
-          }
-
-          // 2. Prepare the payload for SAP, removing local-only keys
-          final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
-          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
-          sapPayload.remove('file');
-          sapPayload.remove('sync_status');
-
-          // 3. Send the completed service payload to SAP
-          final response = await dio.patch(
-            "/script/test/CK_CompleteStatus($docEntry)",
-                    false,
-                  false,
-            data: sapPayload,
-          );
-
-          if (response.statusCode == 200) {
-            await offlineProvider.markServiceSynced(docEntry);
-            debugPrint("Successfully synced DocEntry: $docEntry");
-          } else {
-            debugPrint(
-                "Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
-          }
-        } catch (e) {
-          debugPrint("Error syncing DocEntry: $docEntry. Error: $e");
-        } finally {
-          // Ensure temporary files are deleted after each sync attempt
-          deleteTempFiles(filesToUpload);
-        }
-      }
-
-      // Final notification after the loop
-      MaterialDialog.close(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Offline sync process completed.")),
-      );
-    } catch (e) {
-      MaterialDialog.close(context);
-      await MaterialDialog.warning(context,
-          title: "Batch Sync Error", body: e.toString());
-    }
+    clearData();
+    return true;
+  } catch (e) {
+    await MaterialDialog.warning(context, title: "Error", body: e.toString());
+    return false;
+  } finally {
+    _submit = false;
+    _openIssues = [];
+    MaterialDialog.close(context);
   }
+}
 
-  Future<bool> onCompletedServiceOffline({
-    required BuildContext context,
-    required int? attachmentEntryExisting,
-    required dynamic docEntry,
-    bool offline = false,
-  }) async {
-    // Helper function to convert a File to a Base64 string
-    Future<String> fileToBase64(File file) async {
-      List<int> bytes = await file.readAsBytes();
-      return base64Encode(bytes);
-    }
-
-    // 1. Convert all files to Base64 strings
-    List<String> fileDataList = [];
-
-    // Convert images
-    for (File imageFile in imagesList) {
-      String base64String = await fileToBase64(imageFile);
-      fileDataList.add(base64String);
-    }
-
-    // Convert signatures
-    for (File signatureFile in signatureList) {
-      String base64String = await fileToBase64(signatureFile);
-      fileDataList.add(base64String);
-    }
-
-    // 2. Create the payload with the Base64 strings
-    final payload = {
-      "DocEntry": docEntry,
-      "U_CK_Status": "Entry",
-      "U_CK_AttachmentEntry": attachmentEntryExisting ?? 0,
-      "CK_JOB_TIMECollection": [
-        {
-          "U_CK_Description": "Travel Time",
-          "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
-          "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
-          "U_CK_Effort": _timeEntry[0]["total_travel_time"],
-        },
-        {
-          "U_CK_Description": "Service Time",
-          "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
-          "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
-          "U_CK_Effort": _timeEntry[0]["total_service_time"],
-        },
-        {
-          "U_CK_Description": "Break Time",
-          "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
-          "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
-          "U_CK_Effort": _timeEntry[0]["total_break_time"],
-        }
-      ],
-      "CK_JOB_ISSUECollection": _openIssues,
-      "feedbackChecklistLine": _checkListLine,
-      "file": fileDataList, // ✅ The list of Base64 strings is stored here
-    };
-    print(payload);
-    // 3. Begin offline saving logic
-    _submit = true;
-    notifyListeners();
-    MaterialDialog.loading(context);
-
-    try {
-      final offlineProvider =
-          Provider.of<ServiceListProviderOffline>(context, listen: false);
-
-      await offlineProvider.addCompletedService(payload);
-      await offlineProvider.markServiceCompleted(docEntry);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Service saved offline!")),
-      );
-
-      clearData();
-      return true;
-    } catch (e) {
-      await MaterialDialog.warning(context, title: "Error", body: e.toString());
-      return false;
-    } finally {
-      _submit = false;
-      _openIssues = [];
-      MaterialDialog.close(context);
-    }
-  }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bizd_tech_service/core/disble_ssl.dart';
+import 'package:bizd_tech_service/dashboard/download.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
@@ -200,7 +201,8 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Demo',
-      home: const WrapperScreen(),
+      // home: const WrapperScreen(),
+      home: DownloadScreen(),
     );
   }
 }

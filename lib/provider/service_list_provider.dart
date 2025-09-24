@@ -191,7 +191,7 @@ class ServiceListProvider extends ChangeNotifier {
     }
 
     print("Final Filter: $filter");
-    return "/script/test/GetCkServiceLists?\$filter=$filter&\$top=$_limit&\$skip=$_skip";
+    return "/script/test/GetCkServiceLists?\$filter=$filter";
   }
 
   void setFilter(String filter, BuildContext context) {

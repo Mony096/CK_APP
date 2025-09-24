@@ -452,26 +452,9 @@ class _DashboardState extends State<Dashboard>
               isDownloadStarted = true;
               Future.microtask(() async {
                 try {
-                  // --- Step 1: Clear existing offline data ---
-                  // setState(() {
-                  //   statusMessage = "Clearing old offline data...";
-                  // });
-                  // Await the clear operation to ensure it completes before saving new data.
-                  // await offlineProvider.clearDocuments();
+               
 
-                  // You had two separate provider instances for the same class, which is redundant.
-                  // You only need one instance to clear both "documents" and "documentTickets."
-                  // Since the provider's `clearDocuments` method clears based on the key,
-                  // you would need separate clear methods if they used different keys.
-                  // Assuming they both use the same key 'documents', one call is enough.
-                  // If they use different keys, you would need two calls but still one provider instance.
-                  // For example:
-                  // await offlineProvider.clearServices();
-                  // await offlineProvider.clearTickets();
-                  // But in your original code, they were pointing to the same provider instance.
-                  // I have simplified this to one clear call.
-
-                  // --- Step 2: Download Service Tickets ---
+                  // --- Step 1: Download Service Tickets ---
                   setState(() {
                     statusMessage = "Downloading Service Tickets...";
                   });
@@ -481,7 +464,7 @@ class _DashboardState extends State<Dashboard>
                     context: statefulContext,
                   );
                   // print(onlineProvider.documentsTicket);
-                  // --- Step 3: Save Service Tickets to offline storage ---
+                  // --- Step 2: Save Service Tickets to offline storage ---
                   setState(() {
                     statusMessage =
                         "Saving Service Tickets to offline storage...";

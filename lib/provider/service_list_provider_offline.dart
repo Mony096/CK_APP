@@ -199,7 +199,7 @@ class ServiceListProviderOffline extends ChangeNotifier {
   /// Add new completed payload and store it in Hive
   Future<void> addCompletedService(Map<dynamic, dynamic> payload) async {
     // Add a status to the payload for sync tracking
-    final payloadWithStatus = Map<dynamic, dynamic>.from(payload);
+    final payloadWithStatus = payload as dynamic;
     payloadWithStatus['sync_status'] = 'pending';
 
     _completedServices.add(payloadWithStatus);
