@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:hive/hive.dart';
 
@@ -110,6 +109,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 class ServiceListProviderOffline extends ChangeNotifier {
   List<dynamic> _documents = [];
@@ -119,7 +119,8 @@ class ServiceListProviderOffline extends ChangeNotifier {
   List<dynamic> get documents => _documents;
   List<dynamic> get completedServices => _completedServices;
   bool get isLoading => _isLoading;
-
+  DateTime? _currentDate;
+  DateTime? get currentDate => _currentDate;
   late final Box _box;
   late final Box _completedBox;
 
@@ -134,16 +135,49 @@ class ServiceListProviderOffline extends ChangeNotifier {
     await loadCompletedServices(); // ✅ Ensure this is called
   }
 
+  void setDate(DateTime date) {
+    _currentDate = date;
+    notifyListeners();
+  }
+
+  void clearCurrentDate() {
+    _currentDate = null;
+    notifyListeners();
+  }
+Future<void> refreshDocuments() async {
+    clearCurrentDate();
+    await loadDocuments();
+  }
+
   /// Load offline documents
+
   Future<void> loadDocuments() async {
     _isLoading = true;
     notifyListeners();
     try {
       final rawDocs = _box.get('documents', defaultValue: []) as List<dynamic>;
-      _documents = rawDocs
+      var docs = rawDocs
           .whereType<Map>()
           .map((doc) => Map<String, dynamic>.from(doc))
           .toList();
+
+      // ✅ Apply date filter if set
+      if (_currentDate != null) {
+        docs = docs.where((doc) {
+          if (doc["U_CK_Date"] == null) return false;
+          try {
+            final docDate =
+                DateFormat("yyyy-MM-ddTHH:mm:ss").parse(doc["U_CK_Date"]);
+            return docDate.year == _currentDate!.year &&
+                docDate.month == _currentDate!.month &&
+                docDate.day == _currentDate!.day;
+          } catch (e) {
+            return false;
+          }
+        }).toList();
+      }
+
+      _documents = docs;
     } catch (e) {
       debugPrint("Error loading offline docs: $e");
       _documents = [];
@@ -211,11 +245,16 @@ class ServiceListProviderOffline extends ChangeNotifier {
   Future<void> markServiceCompleted(int docEntry) async {
     List<dynamic> docs =
         List<dynamic>.from(_box.get('documents', defaultValue: []));
+
+    final now = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
+
     for (var doc in docs) {
       if (doc['DocEntry'] == docEntry) {
         doc['U_CK_Status'] = 'Entry';
+        doc['U_CK_EndTime'] = now; // ✅ add completed time
       }
     }
+
     await _box.put('documents', docs);
     _documents = docs; // keep in sync with memory
     notifyListeners();
@@ -231,15 +270,84 @@ class ServiceListProviderOffline extends ChangeNotifier {
     return pendingServices.cast<Map<dynamic, dynamic>>();
   }
 
+  Future<void> updateDocumentAndStatusOffline(
+      {required int docEntry,
+      required String status,
+      required BuildContext context}) async {
+    List<dynamic> docs =
+        List<dynamic>.from(_box.get('documents', defaultValue: []));
+
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now); // 24-hour format
+    // final now = DateTime.now();
+    // final timeStamp =
+    //     DateFormat("hh:mm:ss a").format(now); // 12-hour format with AM/PM
+
+    for (var doc in docs) {
+      if (doc['DocEntry'] == docEntry) {
+        doc['U_CK_Status'] = status;
+
+        if (status == "Accept") {
+          doc["U_CK_Time"] = timeStamp; // ✅ start time
+        } else {
+          doc["U_CK_EndTime"] = timeStamp; // ✅ end time
+        }
+      }
+    }
+
+    await _box.put('documents', docs);
+    _documents = docs; // sync with memory
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+      behavior: SnackBarBehavior.floating,
+      elevation: 10,
+      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(9),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      content: Row(
+        children: [
+          const Icon(Icons.remove_circle, color: Colors.white, size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Status updated successfully!",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 4),
+    ));
+  }
+
   /// Mark a service as successfully synced
   Future<void> markServiceSynced(dynamic docEntry) async {
     final List<dynamic> services =
         _completedBox.get('completed', defaultValue: []);
+    // print(services);
+    // return;
     final index =
         services.indexWhere((service) => service['DocEntry'] == docEntry);
+
     if (index != -1) {
-      services[index]['sync_status'] = 'synced';
+      // ✅ Remove the service instead of updating status
+      services.removeAt(index);
+
+      // ✅ Save back to Hive
       await _completedBox.put('completed', services);
+
+      // ✅ Update listeners
       notifyListeners();
     }
   }

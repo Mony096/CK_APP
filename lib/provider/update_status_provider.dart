@@ -17,10 +17,10 @@ class UpdateStatusProvider extends ChangeNotifier {
     notifyListeners();
     print(status);
     try {
-      // final now = DateTime.now();
-      // final timeStamp = DateFormat("HH:mm:ss").format(now); // 24-hour format
+      final now = DateTime.now();
+      final timeStamp = DateFormat("HH:mm:ss").format(now); // 24-hour format
 
-      final now = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
+      // final now = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
 
       final data = {
         "DocEntry": docEntry,
@@ -28,9 +28,9 @@ class UpdateStatusProvider extends ChangeNotifier {
       };
 
       if (status == "Accept") {
-        data["U_CK_Time"] = now;
+        data["U_CK_Time"] = timeStamp;
       } else {
-        data["U_CK_EndTime"] = now;
+        data["U_CK_EndTime"] = timeStamp;
       }
 
       final documentStatus = await dio.patch(
@@ -93,4 +93,5 @@ class UpdateStatusProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  
 }

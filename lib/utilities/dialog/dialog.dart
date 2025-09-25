@@ -556,6 +556,99 @@ class MaterialDialog {
     );
   }
 
+  static Future<void> warningClearDataDialog(
+    BuildContext context, {
+    String? title,
+    String? body,
+    Function()? onCancel,
+    String cancelLabel = 'Close',
+    IconData icon = Icons.info_outline,
+    Color iconColor = Colors.green,
+  }) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          backgroundColor: Colors.white,
+          titlePadding: const EdgeInsets.fromLTRB(15, 15, 0, 0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          actionsPadding: const EdgeInsets.only(right: 12, bottom: 8),
+          title: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(3),
+                child: Icon(icon, color: Colors.red, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title ?? 'Detail View',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Text(
+              body ?? "Are you sure you want to clear all the data?",
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color.fromARGB(221, 110, 110, 115),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red, // text/icon color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                "No",
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onCancel != null) onCancel();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: iconColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(cancelLabel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static Future<void> requiredFielDialog(
     BuildContext context, {
     String? title,

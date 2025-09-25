@@ -459,105 +459,170 @@ class CompletedServiceProvider extends ChangeNotifier {
 //     return files;
 //   }
 
-
-
-void deleteTempFiles(List<File> files) {
-  for (File file in files) {
-    if (file.existsSync()) {
-      file.deleteSync();
-    }
-  }
-}
-
-
-Future<void> syncAllOfflineServicesToSAP(BuildContext context) async {
-  MaterialDialog.loading(context);
-
-  final offlineProvider =
-      Provider.of<ServiceListProviderOffline>(context, listen: false);
-
-  try {
-    List<Map<dynamic, dynamic>> completedServices =
-        await offlineProvider.getCompletedServicesToSync();
-
-    if (completedServices.isEmpty) {
-      MaterialDialog.close(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No offline services to sync.")),
-      );
-      return;
-    }
-
-    for (var servicePayload in completedServices) {
-      final docEntry = servicePayload['DocEntry'];
-      final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
-      final List<dynamic> fileDataList = servicePayload['files'] ?? [];
-
-      List<File> filesToUpload = [];
-
-      try {
-        // 🔑 Decode {ext, data} into temp files
-        final tempDir = await getTemporaryDirectory();
-        for (var f in fileDataList) {
-          if (f is Map && f.containsKey('data')) {
-            final bytes = base64Decode(f['data']);
-            final ext = f['ext'] ?? "bin";
-            final fileName =
-                "temp_${DateTime.now().millisecondsSinceEpoch}.$ext";
-            final file = File("${tempDir.path}/$fileName");
-            await file.writeAsBytes(bytes);
-            filesToUpload.add(file);
-          }
-        }
-
-        // 1. Upload attachments to SAP
-        final int? attachmentEntry = await uploadAttachmentsToSAP(
-          filesToUpload,
-          attachmentEntryExisting,
-        );
-
-        if (attachmentEntry == null) {
-          debugPrint("Failed to sync attachments for DocEntry: $docEntry");
-          continue; // skip to next service
-        }
-
-        // 2. Prepare SAP payload (remove offline-only keys)
-        final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
-        sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
-        sapPayload.remove('files');
-        sapPayload.remove('sync_status');
-
-        // 3. Send payload to SAP
-        final response = await dio.patch(
-          "/script/test/CK_CompleteStatus($docEntry)",false,false,
-          data: sapPayload,
-        );
-
-        if (response.statusCode == 200) {
-          await offlineProvider.markServiceSynced(docEntry);
-          debugPrint("✅ Synced DocEntry: $docEntry");
-        } else {
-          debugPrint(
-              "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
-        }
-      } catch (e) {
-        debugPrint("⚠️ Error syncing DocEntry: $docEntry. Error: $e");
-      } finally {
-        // Always clean up temp files
-        deleteTempFiles(filesToUpload);
+  void deleteTempFiles(List<File> files) {
+    for (File file in files) {
+      if (file.existsSync()) {
+        file.deleteSync();
       }
     }
-
-    MaterialDialog.close(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Offline sync process completed.")),
-    );
-  } catch (e) {
-    MaterialDialog.close(context);
-    await MaterialDialog.warning(context,
-        title: "Batch Sync Error", body: e.toString());
   }
-}
+
+  Future<dynamic> syncAllOfflineServicesToSAP(BuildContext context) async {
+    MaterialDialog.loading(context);
+
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    try {
+      List<Map<dynamic, dynamic>> completedServices =
+          await offlineProvider.getCompletedServicesToSync();
+      if (completedServices.isEmpty) {
+        MaterialDialog.close(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: const Row(
+              children: [
+                Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "No offline services to sync.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return false;
+      }
+
+      for (var servicePayload in completedServices) {
+        final docEntry = servicePayload['DocEntry'];
+        final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
+        final List<dynamic> fileDataList = servicePayload['files'] ?? [];
+
+        List<File> filesToUpload = [];
+
+        try {
+          // 🔑 Decode {ext, data} into temp files
+          final tempDir = await getTemporaryDirectory();
+          for (var f in fileDataList) {
+            if (f is Map && f.containsKey('data')) {
+              final bytes = base64Decode(f['data']);
+              final ext = f['ext'] ?? "bin";
+              final fileName =
+                  "temp_${DateTime.now().millisecondsSinceEpoch}.$ext";
+              final file = File("${tempDir.path}/$fileName");
+              await file.writeAsBytes(bytes);
+              filesToUpload.add(file);
+            }
+          }
+
+          // 1. Upload attachments to SAP
+          final int? attachmentEntry = await uploadAttachmentsToSAP(
+            filesToUpload,
+            attachmentEntryExisting,
+          );
+
+          if (attachmentEntry == null) {
+            debugPrint("Failed to sync attachments for DocEntry: $docEntry");
+            continue; // skip to next service
+          }
+
+          // 2. Prepare SAP payload (remove offline-only keys)
+          final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
+          sapPayload.remove('files');
+          sapPayload.remove('sync_status');
+
+          // 3. Send payload to SAP
+          final response = await dio.patch(
+            "/script/test/CK_CompleteStatus($docEntry)",
+            false,
+            false,
+            data: sapPayload,
+          );
+
+          if (response.statusCode == 200) {
+            await offlineProvider.markServiceSynced(docEntry);
+            debugPrint("✅ Synced DocEntry: $docEntry");
+          } else {
+            debugPrint(
+                "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
+          }
+        } catch (e) {
+          debugPrint("⚠️ Error syncing DocEntry: $docEntry. Error: $e");
+        } finally {
+          // Always clean up temp files
+          deleteTempFiles(filesToUpload);
+        }
+      }
+
+      // MaterialDialog.close(context);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Offline sync process completed.")),
+      // );
+      MaterialDialog.close(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+        behavior: SnackBarBehavior.floating,
+        elevation: 10,
+        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        content: const Row(
+          children: [
+            Icon(Icons.remove_circle, color: Colors.white, size: 28),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Offline sync process completed.!.",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 4),
+      ));
+      return true;
+    } catch (e) {
+      MaterialDialog.close(context);
+      await MaterialDialog.warning(context,
+          title: "Batch Sync Error", body: e.toString());
+    }
+  }
+
   // Helper function: convert File → { ext, data }
   Future<Map<String, String>> fileToBase64WithExt(File file) async {
     final bytes = await file.readAsBytes();
@@ -566,90 +631,166 @@ Future<void> syncAllOfflineServicesToSAP(BuildContext context) async {
     // Detect extension safely
     final path = file.path.toLowerCase();
     String ext = "bin"; // fallback
-    if (path.endsWith(".png")) ext = "png";
-    else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) ext = "jpg";
-    else if (path.endsWith(".pdf")) ext = "pdf";
+    if (path.endsWith(".png"))
+      ext = "png";
+    else if (path.endsWith(".jpg") || path.endsWith(".jpeg"))
+      ext = "jpg";
+    else if (path.endsWith(".pdf"))
+      ext = "pdf";
     else if (path.endsWith(".gif")) ext = "gif";
 
     return {"ext": ext, "data": base64Data};
   }
+
   Future<bool> onCompletedServiceOffline({
-  required BuildContext context,
-  required int? attachmentEntryExisting,
-  required dynamic docEntry,
-  bool offline = false,
-}) async {
+    required BuildContext context,
+    required int? attachmentEntryExisting,
+    required dynamic docEntry,
+    bool offline = false,
+  }) async {
+    if (_timeEntry.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: const Row(
+            children: [
+              Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Please provide a Time Entry",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
+    if (_signatureList.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: const Row(
+            children: [
+              Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Please provide a signature",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
 
+    // 1. Convert all files into List<Map<String, String>>
+    List<Map<String, String>> fileDataList = [];
 
-  // 1. Convert all files into List<Map<String, String>>
-  List<Map<String, String>> fileDataList = [];
+    for (File imageFile in imagesList) {
+      fileDataList.add(await fileToBase64WithExt(imageFile));
+    }
 
-  for (File imageFile in imagesList) {
-    fileDataList.add(await fileToBase64WithExt(imageFile));
+    for (File signatureFile in signatureList) {
+      fileDataList.add(await fileToBase64WithExt(signatureFile));
+    }
+
+    // 2. Build the payload
+    final payload = {
+      "DocEntry": docEntry,
+      "U_CK_Status": "Entry",
+      "U_CK_AttachmentEntry": attachmentEntryExisting ?? 0,
+      "CK_JOB_TIMECollection": [
+        {
+          "U_CK_Description": "Travel Time",
+          "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
+          "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
+          "U_CK_Effort": _timeEntry[0]["total_travel_time"],
+        },
+        {
+          "U_CK_Description": "Service Time",
+          "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
+          "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
+          "U_CK_Effort": _timeEntry[0]["total_service_time"],
+        },
+        {
+          "U_CK_Description": "Break Time",
+          "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
+          "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
+          "U_CK_Effort": _timeEntry[0]["total_break_time"],
+        }
+      ],
+      "CK_JOB_ISSUECollection": _openIssues,
+      "feedbackChecklistLine": _checkListLine,
+      "files": fileDataList, // ✅ Each file has {ext, data}
+    };
+
+    print(payload);
+
+    // 3. Offline saving
+    _submit = true;
+    notifyListeners();
+    MaterialDialog.loading(context);
+
+    try {
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+      await offlineProvider.addCompletedService(payload);
+      await offlineProvider.markServiceCompleted(docEntry);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Service saved offline!")),
+      );
+
+      clearData();
+      return true;
+    } catch (e) {
+      await MaterialDialog.warning(context, title: "Error", body: e.toString());
+      return false;
+    } finally {
+      _submit = false;
+      _openIssues = [];
+      MaterialDialog.close(context);
+    }
   }
-
-  for (File signatureFile in signatureList) {
-    fileDataList.add(await fileToBase64WithExt(signatureFile));
-  }
-
-  // 2. Build the payload
-  final payload = {
-    "DocEntry": docEntry,
-    "U_CK_Status": "Entry",
-    "U_CK_AttachmentEntry": attachmentEntryExisting ?? 0,
-    "CK_JOB_TIMECollection": [
-      {
-        "U_CK_Description": "Travel Time",
-        "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
-        "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
-        "U_CK_Effort": _timeEntry[0]["total_travel_time"],
-      },
-      {
-        "U_CK_Description": "Service Time",
-        "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
-        "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
-        "U_CK_Effort": _timeEntry[0]["total_service_time"],
-      },
-      {
-        "U_CK_Description": "Break Time",
-        "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
-        "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
-        "U_CK_Effort": _timeEntry[0]["total_break_time"],
-      }
-    ],
-    "CK_JOB_ISSUECollection": _openIssues,
-    "feedbackChecklistLine": _checkListLine,
-    "files": fileDataList, // ✅ Each file has {ext, data}
-  };
-
-  print(payload);
-
-  // 3. Offline saving
-  _submit = true;
-  notifyListeners();
-  MaterialDialog.loading(context);
-
-  try {
-    final offlineProvider =
-        Provider.of<ServiceListProviderOffline>(context, listen: false);
-
-    await offlineProvider.addCompletedService(payload);
-    await offlineProvider.markServiceCompleted(docEntry);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Service saved offline!")),
-    );
-
-    clearData();
-    return true;
-  } catch (e) {
-    await MaterialDialog.warning(context, title: "Error", body: e.toString());
-    return false;
-  } finally {
-    _submit = false;
-    _openIssues = [];
-    MaterialDialog.close(context);
-  }
-}
-
 }

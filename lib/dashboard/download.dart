@@ -18,7 +18,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
   @override
   void initState() {
     super.initState();
-    _startDownload();
+    
   }
 
   Future<void> _startDownload() async {
@@ -55,17 +55,17 @@ class _DownloadScreenState extends State<DownloadScreen> {
       await _fetchTicketCounts();
 
       // --- Step 3: Download Equipment (example, adjust to your API) ---
-      // setState(() {
-      //   statusMessage = "Downloading Equipment...";
-      //   progress = 0.75;
-      // });
+      setState(() {
+        statusMessage = "Downloading Equipment...";
+        progress = 0.75;
+      });
       // await onlineProvider.fetchEquipment(context);
 
       // --- Step 4: Save Equipment ---
-      // setState(() {
-      //   statusMessage = "Saving Equipment...";
-      //   progress = 1.0;
-      // });
+      setState(() {
+        statusMessage = "Saving Equipment...";
+        progress = 1.0;
+      });
       // await offlineProvider.saveEquipment(onlineProvider.equipmentList);
 
       setState(() {

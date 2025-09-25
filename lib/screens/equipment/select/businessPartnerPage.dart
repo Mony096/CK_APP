@@ -1,4 +1,5 @@
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -102,29 +103,14 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
           const SizedBox(width: 12),
         ],
       ),
-      body: Consumer<CustomerListProvider>(
+      body: Consumer<CustomerListProviderOffline>(
         builder: (context, deliveryProvider, _) {
           final documents = deliveryProvider.documents;
-          final provider = Provider.of<CustomerListProvider>(context);
-          final isLoadingMore = provider.isLoading && provider.hasMore;
+          final provider = Provider.of<CustomerListProviderOffline>(context);
+          // final isLoadingMore = provider.isLoading && provider.hasMore;
+          final loading = provider.isLoading;
 
-          // if (isLoading && documents.isEmpty) {
-          //   return const Center(
-          //     child: SpinKitFadingCircle(
-          //       color: Colors.blue,
-          //       size: 50.0,
-          //     ),
-          //   );
-          // }
-
-          // if (documents.isEmpty) {
-          //   return const Center(
-          //     child: Text(
-          //       "No Delivered Recently",
-          //       style: TextStyle(fontSize: 16, color: Colors.grey),
-          //     ),
-          //   );
-          // }
+        
           return Column(
             children: [
               // const SizedBox(
@@ -253,7 +239,8 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
               // ),
               // 📦 List View with Pagination and States
               Expanded(
-                child: _initialLoading || provider.isLoadingSetFilter
+                // child: _initialLoading || provider.isLoadingSetFilter
+                   child: loading
                     ? const Padding(
                         padding: EdgeInsets.only(bottom: 100),
                         child: Center(
@@ -288,25 +275,25 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(top: 6),
-                              itemCount:
-                                  documents.length + (isLoadingMore ? 1 : 0),
+                              itemCount:documents.length,
+                                  // documents.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
-                                if (index == documents.length &&
-                                    isLoadingMore) {
-                                  return const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: SizedBox(
-                                      height: 40,
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: SpinKitFadingCircle(
-                                          color: Colors.green,
-                                          size: 50.0,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
+                                // if (index == documents.length &&
+                                //     isLoadingMore) {
+                                //   return const Padding(
+                                //     padding: EdgeInsets.all(4),
+                                //     child: SizedBox(
+                                //       height: 40,
+                                //       child: Align(
+                                //         alignment: Alignment.center,
+                                //         child: SpinKitFadingCircle(
+                                //           color: Colors.green,
+                                //           size: 50.0,
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   );
+                                // }
                                 final doc = documents[index];
                                 return GestureDetector(
                                   onTap: () => onPressed(doc),

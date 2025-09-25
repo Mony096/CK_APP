@@ -31,7 +31,7 @@ class ServiceScreen extends StatefulWidget {
 class _ServiceScreenState extends State<ServiceScreen> {
   final DioClient dio = DioClient(); // Your custom Dio client
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   List<dynamic> documents = [];
   List<dynamic> warehouses = [];
   String? userName;
@@ -94,19 +94,14 @@ class _ServiceScreenState extends State<ServiceScreen> {
   }
 
   Future<void> onUpdateStatus(entry, currentStatus) async {
-    // if (_pdf.isEmpty) {
-    // print(currentStatus);
-    // return;
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('Please provide a signature')),
-    //   );
-    //   return;
-    // }
     MaterialDialog.loading(context);
 
     try {
-      await Provider.of<UpdateStatusProvider>(context, listen: false)
-          .updateDocumentAndStatus(
+      // ⏳ Wait 1 seconds before updating
+      await Future.delayed(const Duration(seconds: 1));
+
+      await Provider.of<ServiceListProviderOffline>(context, listen: false)
+          .updateDocumentAndStatusOffline(
         docEntry: entry,
         status: currentStatus == "Pending"
             ? "Accept"
@@ -115,45 +110,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
                 : currentStatus == "Travel"
                     ? "Service"
                     : "Entry",
-        context: context, // ✅ Corrected here
+        context: context,
       );
-      Navigator.of(context).pop(); // Go back
-
-      await _refreshData();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-          behavior: SnackBarBehavior.floating,
-          elevation: 10,
-          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          content: const Row(
-            children: [
-              Icon(Icons.remove_circle, color: Colors.white, size: 28),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Status updated successfully!",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 4),
-        ),
-      );
+      final provider = context.read<ServiceListProviderOffline>();
+      provider.refreshDocuments(); // clear filter + reload all
+      MaterialDialog.close(context);
+      //✅ Close loading after update
     } catch (e) {
       Navigator.of(context).pop(); // Close loading
       ScaffoldMessenger.of(context).showSnackBar(
@@ -164,10 +126,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   Future<void> _refreshData() async {
     _dateController.clear(); // Clear the date controller
-    final provider = context.read<ServiceListProvider>();
-    provider.resetPagination();
-    provider.clearCurrentDate();
-    await provider.resfreshFetchDocuments(context);
+    // final provider = context.read<ServiceListProvider>();
+    // provider.resetPagination();
+    // provider.clearCurrentDate();
+    // await provider.resfreshFetchDocuments(context);
+    final provider = context.read<ServiceListProviderOffline>();
+    provider.refreshDocuments(); // clear filter + reload all
   }
 
   @override
@@ -259,34 +223,47 @@ class _ServiceScreenState extends State<ServiceScreen> {
                         borderRadius: BorderRadius.circular(5.0),
                       ),
                       child: TextButton(
+                        // onPressed: () {
+                        //   final provider = context.read<ServiceListProvider>();
+
+                        //   if (_dateController.text.isNotEmpty) {
+                        //     print(_dateController.text);
+
+                        //     // Parse using the correct format
+                        //     final parsedDate = DateFormat("dd MMMM yyyy")
+                        //         .parse(_dateController.text);
+
+                        //     provider.setDate(parsedDate, context);
+                        //   }
+                        // },
                         onPressed: () {
-                          final provider = context.read<ServiceListProvider>();
+                          final provider =
+                              context.read<ServiceListProviderOffline>();
 
                           if (_dateController.text.isNotEmpty) {
-                            print(_dateController.text);
-
-                            // Parse using the correct format
                             final parsedDate = DateFormat("dd MMMM yyyy")
                                 .parse(_dateController.text);
 
-                            provider.setDate(parsedDate, context);
+                            provider.setDate(parsedDate);
+                            provider.loadDocuments(); // ✅ apply filter
                           }
                         },
+
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5.0),
                           ),
                         ),
-                        child: Text("GO",
+                        child: const Text("GO",
                             style: TextStyle(
-                                color: const Color.fromARGB(255, 255, 255, 255),
+                                color: Color.fromARGB(255, 255, 255, 255),
                                 fontSize: 15),
                             textScaleFactor: 1.0),
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 5,
                   )
                 ],

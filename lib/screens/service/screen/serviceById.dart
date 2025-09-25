@@ -7,6 +7,7 @@ import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/service/component/detail_row.dart';
 import 'package:bizd_tech_service/screens/service/component/row_item.dart';
@@ -44,25 +45,36 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
     //   );
     //   return;
     // }
-    MaterialDialog.loading(context);
-
     try {
-      await Provider.of<UpdateStatusProvider>(context, listen: false)
-          .updateDocumentAndStatus(
+      // await Provider.of<UpdateStatusProvider>(context, listen: false)
+      //     .updateDocumentAndStatus(
+      //   docEntry: widget.data["DocEntry"],
+      //   status: "Open",
+      //   context: context, // ✅ Corrected here
+      // );
+      // if (!mounted) return; // <--- Add this check
+
+      // Navigator.of(context).pop(); // Go back
+      // Navigator.of(context).pop(); // Go back
+
+      // await _refreshData();
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Update Status Successfully')),
+      // );
+      MaterialDialog.loading(context);
+      await Future.delayed(const Duration(seconds: 1));
+
+      await Provider.of<ServiceListProviderOffline>(context, listen: false)
+          .updateDocumentAndStatusOffline(
         docEntry: widget.data["DocEntry"],
         status: "Open",
-        context: context, // ✅ Corrected here
+        context: context,
       );
-      if (!mounted) return; // <--- Add this check
-
-      Navigator.of(context).pop(); // Go back
-      Navigator.of(context).pop(); // Go back
-
-      await _refreshData();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Update Status Successfully')),
-      );
+      final provider = context.read<ServiceListProviderOffline>();
+      provider.refreshDocuments(); // clear filter + reload all
+      MaterialDialog.close(context);
+      MaterialDialog.close(context);
     } catch (e) {
       Navigator.of(context).pop(); // Close loading
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,11 +86,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   Future<void> _refreshData() async {
     // setState(() => _initialLoading = true);
 
-    final provider = Provider.of<ServiceListProvider>(context, listen: false);
-    // ✅ Only fetch if not already loaded
-    provider.resetPagination();
-    await provider.resfreshFetchDocuments(context);
+    // final provider = Provider.of<ServiceListProvider>(context, listen: false);
+    // // ✅ Only fetch if not already loaded
+    // provider.resetPagination();
+    // await provider.resfreshFetchDocuments(context);
     // setState(() => _initialLoading = false);
+    final provider = context.read<ServiceListProviderOffline>();
+    provider.refreshDocuments(); // clear filter + reload all
   }
 
   Future<void> onUpdateStatus() async {
@@ -86,11 +100,35 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
       goTo(context, ServiceEntryScreen(data: widget.data));
       return;
     }
-    MaterialDialog.loading(context);
 
     try {
-      await Provider.of<UpdateStatusProvider>(context, listen: false)
-          .updateDocumentAndStatus(
+      // await Provider.of<UpdateStatusProvider>(context, listen: false)
+      //     .updateDocumentAndStatus(
+      //   docEntry: widget.data["DocEntry"],
+      //   status: widget.data["U_CK_Status"] == "Pending"
+      //       ? "Accept"
+      //       : widget.data["U_CK_Status"] == "Accept"
+      //           ? "Travel"
+      //           : widget.data["U_CK_Status"] == "Travel"
+      //               ? "Service"
+      //               : "Entry",
+      //   context: context, // ✅ Corrected here
+      // );
+      // if (!mounted) return; // <--- Add this check
+
+      // Navigator.of(context).pop(); // Go back
+      // Navigator.of(context).pop(); // Go back
+      // await _refreshData();
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Update Status Successfully')),
+      // );
+      // ⏳ Wait 1 seconds before updating
+      MaterialDialog.loading(context);
+      await Future.delayed(const Duration(seconds: 1));
+
+      await Provider.of<ServiceListProviderOffline>(context, listen: false)
+          .updateDocumentAndStatusOffline(
         docEntry: widget.data["DocEntry"],
         status: widget.data["U_CK_Status"] == "Pending"
             ? "Accept"
@@ -99,17 +137,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                 : widget.data["U_CK_Status"] == "Travel"
                     ? "Service"
                     : "Entry",
-        context: context, // ✅ Corrected here
+        context: context,
       );
-      if (!mounted) return; // <--- Add this check
-
-      Navigator.of(context).pop(); // Go back
-      Navigator.of(context).pop(); // Go back
-      await _refreshData();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Update Status Successfully')),
-      );
+      final provider = context.read<ServiceListProviderOffline>();
+      provider.refreshDocuments(); // clear filter + reload all
+      MaterialDialog.close(context);
+      MaterialDialog.close(context);
     } catch (e) {
       Navigator.of(context).pop(); // Close loading
       ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +190,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
             children: [
               IconButton(
                 onPressed: () {
-                  // refresh();
+                  _refreshData();
                 },
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
               ),
@@ -544,7 +577,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                   ),
                                                   child: Text(
                                                       "${widget.data["U_CK_JobType"] ?? "N/A"}",
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                           color: Colors.black,
                                                           fontSize: 12),
                                                       textScaleFactor: 1.0),
@@ -734,8 +767,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           : (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
                               .expand<RowItem>((e) => [
                                     RowItem(
-                                      left: e["U_CK_EquipName"]??
-                                          "N/A",
+                                      left: e["U_CK_EquipName"] ?? "N/A",
                                       right:
                                           'SN: ${e["U_CK_SerialNum"] ?? "N/A"}',
                                     ),

@@ -1,8 +1,13 @@
 import 'dart:convert';
 
+import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/item_list_provider.dart';
+import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
@@ -30,27 +35,37 @@ class _DashboardState extends State<Dashboard>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? userName;
   List<Map<String, dynamic>> ticketGroups = [];
-  final DioClient _dio = DioClient(); // Your custom Dio client
+  // final DioClient _dio = DioClient(); // Your custom Dio client
   bool load = false;
   String _selectedJob = "All"; // All, Open, Closed
   String _selectedService = "All"; // All, Open, Closed
   String _selectedPriority = "All"; // All, High, Medium, Low
-
+  List<dynamic> documentOffline = [];
+  List<dynamic> completedService = [];
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);
+      // ✅ Make sure documents are loaded
+      await offlineProvider.loadDocuments();
 
-      await offlineProvider.loadDocuments(); // make sure docs loaded
-      await _fetchTicketCounts(); // now counts will work
+      // ✅ Replace the list instead of addAll
+      setState(() {
+        documentOffline = List.from(offlineProvider.documents);
+        completedService = List.from(offlineProvider.completedServices);
+      });
+
+      // ✅ Fetch ticket counts after docs are loaded
+      await _fetchTicketCounts();
     });
+
+    // Other initializations
     _loadUserName();
     _tabController = TabController(length: 2, vsync: this);
-    // _initOffline();
     _initTicketDates();
-    // _fetchTicketCounts();
   }
 
   @override
@@ -140,6 +155,9 @@ class _DashboardState extends State<Dashboard>
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
     await offlineProvider.loadDocuments(); // make sure docs loaded
+
+    documentOffline = List.from(offlineProvider.documents);
+    completedService = List.from(offlineProvider.completedServices);
 
     for (var group in ticketGroups) {
       final dateValue = group["dateValue"];
@@ -420,15 +438,16 @@ class _DashboardState extends State<Dashboard>
   }
 
   Widget _buildDrawerItem(
-      IconData icon, String title, int index, Widget screen) {
+      IconData icon, String title, int index, Widget screen, bool disabled) {
     return ListTile(
       leading: Icon(icon, color: Colors.black87),
       title: Text(title, style: const TextStyle(color: Colors.black87)),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => screen),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => screen),
+        // );
+        goTo(context, screen).then((e) => {_fetchTicketCounts()});
       },
     );
   }
@@ -438,7 +457,58 @@ class _DashboardState extends State<Dashboard>
         Provider.of<ServiceListProvider>(context, listen: false);
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final onlineProviderCustomer =
+        Provider.of<CustomerListProvider>(context, listen: false);
+    final offlineProviderCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final onlineProviderItem =
+        Provider.of<ItemListProvider>(context, listen: false);
+    final offlineProviderItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    //   final offlineProvider =
+    //       Provider.of<ServiceListProviderOffline>(context, listen: false);
 
+    final offlineDocument = offlineProvider.documents;
+    if (offlineDocument.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: const Row(
+            children: [
+              Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Services have already been downloaded.",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      MaterialDialog.close(context);
+
+      return;
+    }
+    ;
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -452,8 +522,6 @@ class _DashboardState extends State<Dashboard>
               isDownloadStarted = true;
               Future.microtask(() async {
                 try {
-               
-
                   // --- Step 1: Download Service Tickets ---
                   setState(() {
                     statusMessage = "Downloading Service Tickets...";
@@ -463,8 +531,6 @@ class _DashboardState extends State<Dashboard>
                     isSetFilter: false,
                     context: statefulContext,
                   );
-                  // print(onlineProvider.documentsTicket);
-                  // --- Step 2: Save Service Tickets to offline storage ---
                   setState(() {
                     statusMessage =
                         "Saving Service Tickets to offline storage...";
@@ -472,6 +538,37 @@ class _DashboardState extends State<Dashboard>
                   // Await the save operation. It will now run after the clear is finished.
                   await offlineProvider
                       .saveDocuments(onlineProvider.documentsTicket);
+
+                  // --- Step 2: Download Customer ---
+                  setState(() {
+                    statusMessage = "Downloading Customer...";
+                  });
+                  await onlineProviderCustomer.fetchDocumentOffline(
+                    loadMore: false,
+                    isSetFilter: false,
+                    context: statefulContext,
+                  );
+                  setState(() {
+                    statusMessage = "Saving Customer to offline storage...";
+                  });
+                  // Await the save operation. It will now run after the clear is finished.
+                  await offlineProviderCustomer
+                      .saveDocuments(onlineProviderCustomer.documentOffline);
+                  // --- Step 3: Download Item ---
+                  setState(() {
+                    statusMessage = "Downloading Items...";
+                  });
+                  await onlineProviderItem.fetchDocumentOffline(
+                    loadMore: false,
+                    isSetFilter: false,
+                    context: statefulContext,
+                  );
+                  setState(() {
+                    statusMessage = "Saving Item to offline storage...";
+                  });
+                  // Await the save operation. It will now run after the clear is finished.
+                  await offlineProviderItem
+                      .saveDocuments(onlineProviderItem.documentOffline);
                   await _fetchTicketCounts();
 
                   // Download complete
@@ -479,14 +576,53 @@ class _DashboardState extends State<Dashboard>
                     Navigator.of(dialogContext).pop();
                   }
 
-                  ScaffoldMessenger.of(statefulContext).showSnackBar(
-                    const SnackBar(
-                      content: Text("All documents downloaded successfully!"),
-                      backgroundColor: Colors.green,
+                  // ScaffoldMessenger.of(statefulContext).showSnackBar(
+                  //   const SnackBar(
+                  //     content: Text("All documents downloaded successfully!"),
+                  //     backgroundColor: Colors.green,
+                  //   ),
+                  // );
+                  MaterialDialog.close(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+                      behavior: SnackBarBehavior.floating,
+                      elevation: 10,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 14),
+                      content: const Row(
+                        children: [
+                          Icon(Icons.remove_circle,
+                              color: Colors.white, size: 28),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "All documents downloaded successfully!.",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      duration: const Duration(seconds: 4),
                     ),
                   );
                 } catch (e) {
                   // Download failed
+                  await offlineProvider.saveDocuments([]);
                   if (Navigator.of(dialogContext).canPop()) {
                     Navigator.of(dialogContext).pop();
                   }
@@ -504,10 +640,10 @@ class _DashboardState extends State<Dashboard>
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 30,
                     height: 30,
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 3,
                       color: Colors.green,
                     ),
@@ -526,42 +662,88 @@ class _DashboardState extends State<Dashboard>
   Future<void> clearOfflineData(BuildContext context) async {
     final offlineProviderService =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final offlineProviderServiceItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineDocument = offlineProviderService.documents;
+    if (offlineDocument.isEmpty) return;
+    MaterialDialog.warningClearDataDialog(
+      context,
+      title: 'Clear Data',
+      cancelLabel: "Yes",
+      onCancel: () async {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // prevent closing by tapping outside
+          builder: (_) => const Center(
+            child: CircularProgressIndicator(
+              color: Colors.green,
+            ),
+          ),
+        );
+        try {
+          // Clear service data
+          await offlineProviderService.clearDocuments();
+          await offlineProviderServiceCustomer.clearDocuments();
+          await offlineProviderServiceItem.clearDocuments();
+          await _fetchTicketCounts();
 
-    // Show loading popup
-    showDialog(
-      context: context,
-      barrierDismissible: false, // prevent closing by tapping outside
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(
-          color: Colors.green,
-        ),
-      ),
+          // Hide loading popup
+          // Navigator.of(context).pop();
+
+          // // Show success message
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(content: Text("Offline data cleared successfully!")),
+          // );
+          MaterialDialog.close(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+              behavior: SnackBarBehavior.floating,
+              elevation: 10,
+              margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(9),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              content: const Row(
+                children: [
+                  Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Offline data cleared successfully!.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+          // ✅ Close drawer
+          Navigator.of(context).pop();
+        } catch (e) {
+          // Hide loading popup
+          Navigator.of(context).pop();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to clear data: $e")),
+          );
+        }
+      },
     );
-
-    try {
-      // Clear service data
-      await offlineProviderService.clearDocuments();
-
-      await _fetchTicketCounts();
-
-      // Hide loading popup
-      Navigator.of(context).pop();
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Offline data cleared successfully!")),
-      );
-
-      // ✅ Close drawer
-      Navigator.of(context).pop();
-    } catch (e) {
-      // Hide loading popup
-      Navigator.of(context).pop();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to clear data: $e")),
-      );
-    }
+    // Show loading popup
   }
 
   @override
@@ -688,32 +870,55 @@ class _DashboardState extends State<Dashboard>
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _buildDrawerItem(
-                      Icons.settings, "Service", 0, const ServiceScreen()),
-                  _buildDrawerItem(
-                      Icons.build, "Equipment", 1, const EquipmentListScreen()),
+                  _buildDrawerItem(Icons.settings, "Service", 0,
+                      const ServiceScreen(), false),
+                  _buildDrawerItem(Icons.build, "Equipment", 1,
+                      const EquipmentListScreen(), false),
                 ],
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.download, color: Colors.black54),
-              title: const Text("Sync to SAP"),
+              leading: Icon(Icons.cloud_upload, size: 23, color: Colors.green),
+              title: Text("Sync to SAP", style: TextStyle(color: Colors.black)),
               onTap: () async {
-                await Provider.of<CompletedServiceProvider>(context,
+                // if (completedService.isEmpty) return;
+
+                final res = await Provider.of<CompletedServiceProvider>(context,
                         listen: false)
                     .syncAllOfflineServicesToSAP(context);
+                if (res) {
+                  _fetchTicketCounts();
+                }
+
+                Navigator.of(context).pop();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.download, color: Colors.black54),
-              title: const Text("Download"),
+              leading: Icon(Icons.download,
+                  color: documentOffline.isNotEmpty
+                      ? const Color.fromARGB(255, 159, 162, 163)
+                      : Colors.blue),
+              title: Text(
+                "Download",
+                style: TextStyle(
+                    color: documentOffline.isNotEmpty
+                        ? const Color.fromARGB(255, 159, 162, 163)
+                        : Colors.black),
+              ),
               onTap: () async {
                 downloadAllDocuments(context);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.clear, color: Colors.black54),
-              title: const Text("Clear"),
+              leading: Icon(Icons.clear,
+                  color: documentOffline.isEmpty
+                      ? const Color.fromARGB(255, 159, 162, 163)
+                      : Colors.red),
+              title: Text("Clear",
+                  style: TextStyle(
+                      color: documentOffline.isEmpty
+                          ? const Color.fromARGB(255, 159, 162, 163)
+                          : Colors.black)),
               onTap: () async {
                 clearOfflineData(context);
               },
@@ -1026,13 +1231,14 @@ class _DashboardState extends State<Dashboard>
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.settings,
+                          const Icon(Icons.settings,
                               size: 19,
                               color: Color.fromARGB(255, 188, 189, 190)),
-                          SizedBox(width: 3),
+                          const SizedBox(width: 3),
                           Text(
                             "Ticket - No. ${index + 1}",
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.grey),
                             textScaleFactor: 1.0,
                           ),
                         ],
@@ -1049,7 +1255,7 @@ class _DashboardState extends State<Dashboard>
                             ),
                             child: Text(
                               "${data["U_CK_JobType"] ?? "N/A"}",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
@@ -1069,7 +1275,7 @@ class _DashboardState extends State<Dashboard>
                             ),
                             child: Text(
                               "${data["U_CK_Status"] ?? "N/A"}",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
@@ -1084,21 +1290,22 @@ class _DashboardState extends State<Dashboard>
 
                   // ✅ Item code & model row
                   Padding(
-                      padding: EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 10),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.person,
                             size: 21,
                             color: Colors.blue, // you can change the color
                           ),
-                          SizedBox(width: 5), // spacing between icon and text
+                          const SizedBox(
+                              width: 5), // spacing between icon and text
                           Text(
                             "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textScaleFactor: 1.0,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -1123,7 +1330,7 @@ class _DashboardState extends State<Dashboard>
                           //         .ellipsis,
                           softWrap: true,
                           textScaleFactor: 1.0,
-                          style: TextStyle(fontSize: 12.5),
+                          style: const TextStyle(fontSize: 12.5),
                         ),
                       )),
 
