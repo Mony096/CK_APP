@@ -1,6 +1,7 @@
 import 'package:bizd_tech_service/component/text_field_dialog.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/select/itemMasterPage.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -253,7 +254,7 @@ class _PartState extends State<Part> {
         "U_ck_model": model.text,
       };
 
-      Provider.of<EquipmentCreateProvider>(context, listen: false)
+      Provider.of<EquipmentOfflineProvider>(context, listen: false)
           .addOrEditPart(item, editIndex: isEditPart);
       setState(() {
         isEditPart = -1;
@@ -300,7 +301,7 @@ class _PartState extends State<Part> {
 
       onCancel: () {
         // Remove using Provider
-        Provider.of<EquipmentCreateProvider>(context, listen: false)
+        Provider.of<EquipmentOfflineProvider>(context, listen: false)
             .removePart(index);
 
         // Reset edit state
@@ -581,7 +582,7 @@ class _PartState extends State<Part> {
               ),
               const SizedBox(height: 4),
               ////list----------------------------------------------------------------
-              context.watch<EquipmentCreateProvider>().parts.isEmpty
+              context.watch<EquipmentOfflineProvider>().parts.isEmpty
                   ? SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: 100,
@@ -607,7 +608,7 @@ class _PartState extends State<Part> {
                     )
                   : Container(),
               ...context
-                  .watch<EquipmentCreateProvider>()
+                  .watch<EquipmentOfflineProvider>()
                   .parts
                   .asMap()
                   .entries

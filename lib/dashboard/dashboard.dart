@@ -6,6 +6,7 @@ import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
@@ -566,6 +567,8 @@ class _DashboardState extends State<Dashboard>
                   setState(() {
                     statusMessage = "Saving Item to offline storage...";
                   });
+                  // print(onlineProviderItem.documentOffline);
+
                   // Await the save operation. It will now run after the clear is finished.
                   await offlineProviderItem
                       .saveDocuments(onlineProviderItem.documentOffline);
@@ -666,6 +669,8 @@ class _DashboardState extends State<Dashboard>
         Provider.of<CustomerListProviderOffline>(context, listen: false);
     final offlineProviderServiceItem =
         Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
     final offlineDocument = offlineProviderService.documents;
     if (offlineDocument.isEmpty) return;
     MaterialDialog.warningClearDataDialog(
@@ -687,6 +692,7 @@ class _DashboardState extends State<Dashboard>
           await offlineProviderService.clearDocuments();
           await offlineProviderServiceCustomer.clearDocuments();
           await offlineProviderServiceItem.clearDocuments();
+          await offlineProviderEquipment.clearEquipments();
           await _fetchTicketCounts();
 
           // Hide loading popup

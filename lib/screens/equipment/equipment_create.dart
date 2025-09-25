@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/component/general.dart';
 import 'package:bizd_tech_service/screens/equipment/component/component.dart';
@@ -62,7 +63,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     _pageController = PageController(); // Initialize the PageController
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _init(); // this safely runs after first build
+      _initOffline(); // this safely runs after first build
     });
   }
 
@@ -94,128 +95,222 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     });
   }
 
-  Future<void> _init() async {
+  // Future<void> _init() async {
+  //   //when create
+  //   if (widget.data.isEmpty) {
+  //     installedDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  //     nextDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  //     warrantyDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  //     uploadImg.text = "";
+  //     equipType.text = "Active";
+  //   }
+
+  //   if (widget.data.isEmpty) return;
+  //   //when edit
+  //   if (!mounted) return;
+
+  //   MaterialDialog.loading(context); // Show loading dialog
+
+  //   try {
+  //     // --- Fetch equipment ---
+  //     final response = await dio.get("/CK_CUSEQUI('${widget.data["Code"]}')");
+
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> data = response.data;
+
+  //       // --- Fetch attachments as Files ---
+  //       List<File> sapFiles = [];
+  //       final attachmentEntry = data["U_ck_AttachmentEntry"];
+
+  //       if (attachmentEntry != null) {
+  //         final attachmentRes =
+  //             await dio.getAttachment("/Attachments2($attachmentEntry)");
+
+  //         if (attachmentRes.statusCode == 200) {
+  //           final attData = attachmentRes.data;
+  //           final lines = attData["Attachments2_Lines"] as List<dynamic>;
+  //           final token = await LocalStorageManger.getString('SessionId');
+
+  //           for (var line in lines) {
+  //             final url =
+  //                 "/Attachments2(${line["AbsoluteEntry"]})/\$value?filename='${line["FileName"]}.${line["FileExtension"]}'";
+
+  //             try {
+  //               // download bytes
+  //               final imgRes = await http.get(
+  //                 Uri.parse(
+  //                     "https://svr10.biz-dimension.com:9093/api/sapIntegration/Attachments2"),
+  //                 headers: {
+  //                   'Content-Type': "application/json",
+  //                   "Authorization": 'Bearer $token',
+  //                   'sapUrl': url
+  //                 },
+  //               );
+  //               if (imgRes.statusCode == 200) {
+  //                 // Ensure bytes are valid
+
+  //                 // Save file to temp directory
+  //                 final tempDir = await getTemporaryDirectory();
+  //                 final fileName =
+  //                     "${line["FileName"]}.${line["FileExtension"]}";
+  //                 final filePath = "${tempDir.path}/$fileName";
+  //                 final file = File(filePath);
+
+  //                 await file.writeAsBytes(imgRes.bodyBytes);
+  //                 sapFiles.add(file);
+  //               } else {
+  //                 String errorMessage = "Unknown error";
+  //                 try {
+  //                   final decoded = jsonDecode(imgRes.body);
+  //                   if (decoded is Map && decoded.containsKey("error")) {
+  //                     errorMessage =
+  //                         decoded["error"]["message"]["value"].toString();
+  //                   }
+  //                 } catch (_) {
+  //                   // body was not valid JSON
+  //                   errorMessage = imgRes.body;
+  //                 }
+
+  //                 await MaterialDialog.warning(
+  //                   context,
+  //                   title: "Error",
+  //                   body: "Failed to fetch image: $errorMessage",
+  //                 );
+  //               }
+  //             } catch (e) {
+  //               print("Failed to fetch image ${line["FileName"]}: $e");
+  //             }
+  //           }
+  //         }
+  //       }
+
+  //       if (!mounted) return;
+
+  //       setState(() {
+  //         equipType.text = getDataFromDynamic(data["U_ck_eqStatus"]);
+  //         equipName.text = getDataFromDynamic(data['Name']);
+  //         equipCode.text = getDataFromDynamic(data['Code']);
+  //         customerCode.text = getDataFromDynamic(data['U_ck_CusCode']);
+  //         customerName.text = getDataFromDynamic(data['U_ck_CusName']);
+  //         serialNumber.text = getDataFromDynamic(data["U_ck_eqSerNum"]);
+  //         site.text = getDataFromDynamic(data["U_ck_siteCode"]);
+  //         remark.text = getDataFromDynamic(data['U_ck_Remark']);
+  //         brand.text = getDataFromDynamic(data["U_ck_eqBrand"]);
+  //         model.text = getDataFromDynamic(data["U_ck_eqModel"]);
+
+  //         installedDate.text = getDataFromDynamic(
+  //             data['U_ck_InstalDate']?.toString().split("T").first);
+  //         nextDate.text = getDataFromDynamic(
+  //             data["U_ck_NsvDate"]?.toString().split("T").first);
+  //         warrantyDate.text = getDataFromDynamic(
+  //             data["U_ck_WarExpDate"]?.toString().split("T").first);
+  //       });
+
+  //       // --- Update provider ---
+  //       final provider =
+  //           Provider.of<EquipmentCreateProvider>(context, listen: false);
+  //       provider.setComponents(data["CK_CUSEQUI01Collection"] ?? []);
+  //       provider.setParts(data["CK_CUSEQUI02Collection"] ?? []);
+  //       provider.setImages(sapFiles); // store list of Files
+
+  //       print("Fetched SAP images: ${sapFiles.length}");
+  //     } else {
+  //       throw Exception("Failed to load documents");
+  //     }
+  //   } catch (e) {
+  //     print("Error fetching documents: $e");
+  //   } finally {
+  //     if (mounted) MaterialDialog.close(context);
+  //   }
+  // }
+  Future<void> _initOffline() async {
+    // 1️⃣ When creating new equipment
     if (widget.data.isEmpty) {
       installedDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       nextDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       warrantyDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       uploadImg.text = "";
       equipType.text = "Active";
+      return; // no need to continue
     }
 
-    if (widget.data.isEmpty) return;
+    // 2️⃣ When editing existing equipment
     if (!mounted) return;
-
-    MaterialDialog.loading(context); // Show loading dialog
+    MaterialDialog.loading(context);
 
     try {
-      // --- Fetch equipment ---
-      final response = await dio.get("/CK_CUSEQUI('${widget.data["Code"]}')");
+      // --- Get offline provider ---
+      final provider =
+          Provider.of<EquipmentOfflineProvider>(context, listen: false);
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = response.data;
+      // --- Load offline equipments ---
+      await provider.loadEquipments();
 
-        // --- Fetch attachments as Files ---
-        List<File> sapFiles = [];
-        final attachmentEntry = data["U_ck_AttachmentEntry"];
+      // --- Find the equipment by code or unique identifier ---
+      final offlineData = provider.equipments.firstWhere(
+        (e) => e['Code'] == widget.data['Code'],
+        orElse: () => {},
+      );
 
-        if (attachmentEntry != null) {
-          final attachmentRes =
-              await dio.getAttachment("/Attachments2($attachmentEntry)");
-
-          if (attachmentRes.statusCode == 200) {
-            final attData = attachmentRes.data;
-            final lines = attData["Attachments2_Lines"] as List<dynamic>;
-            final token = await LocalStorageManger.getString('SessionId');
-
-            for (var line in lines) {
-              final url =
-                  "/Attachments2(${line["AbsoluteEntry"]})/\$value?filename='${line["FileName"]}.${line["FileExtension"]}'";
-
-              try {
-                // download bytes
-                final imgRes = await http.get(
-                  Uri.parse(
-                      "https://svr10.biz-dimension.com:9093/api/sapIntegration/Attachments2"),
-                  headers: {
-                    'Content-Type': "application/json",
-                    "Authorization": 'Bearer $token',
-                    'sapUrl': url
-                  },
-                );
-                if (imgRes.statusCode == 200) {
-                  // Ensure bytes are valid
-
-                  // Save file to temp directory
-                  final tempDir = await getTemporaryDirectory();
-                  final fileName =
-                      "${line["FileName"]}.${line["FileExtension"]}";
-                  final filePath = "${tempDir.path}/$fileName";
-                  final file = File(filePath);
-
-                  await file.writeAsBytes(imgRes.bodyBytes);
-                  sapFiles.add(file);
-                } else {
-                  String errorMessage = "Unknown error";
-                  try {
-                    final decoded = jsonDecode(imgRes.body);
-                    if (decoded is Map && decoded.containsKey("error")) {
-                      errorMessage =
-                          decoded["error"]["message"]["value"].toString();
-                    }
-                  } catch (_) {
-                    // body was not valid JSON
-                    errorMessage = imgRes.body;
-                  }
-
-                  await MaterialDialog.warning(
-                    context,
-                    title: "Error",
-                    body: "Failed to fetch image: $errorMessage",
-                  );
-                }
-              } catch (e) {
-                print("Failed to fetch image ${line["FileName"]}: $e");
-              }
-            }
-          }
-        }
-
-        if (!mounted) return;
-
-        setState(() {
-          equipType.text = getDataFromDynamic(data["U_ck_eqStatus"]);
-          equipName.text = getDataFromDynamic(data['Name']);
-          equipCode.text = getDataFromDynamic(data['Code']);
-          customerCode.text = getDataFromDynamic(data['U_ck_CusCode']);
-          customerName.text = getDataFromDynamic(data['U_ck_CusName']);
-          serialNumber.text = getDataFromDynamic(data["U_ck_eqSerNum"]);
-          site.text = getDataFromDynamic(data["U_ck_siteCode"]);
-          remark.text = getDataFromDynamic(data['U_ck_Remark']);
-          brand.text = getDataFromDynamic(data["U_ck_eqBrand"]);
-          model.text = getDataFromDynamic(data["U_ck_eqModel"]);
-
-          installedDate.text = getDataFromDynamic(
-              data['U_ck_InstalDate']?.toString().split("T").first);
-          nextDate.text = getDataFromDynamic(
-              data["U_ck_NsvDate"]?.toString().split("T").first);
-          warrantyDate.text = getDataFromDynamic(
-              data["U_ck_WarExpDate"]?.toString().split("T").first);
-        });
-
-        // --- Update provider ---
-        final provider =
-            Provider.of<EquipmentCreateProvider>(context, listen: false);
-        provider.setComponents(data["CK_CUSEQUI01Collection"] ?? []);
-        provider.setParts(data["CK_CUSEQUI02Collection"] ?? []);
-        provider.setImages(sapFiles); // store list of Files
-
-        print("Fetched SAP images: ${sapFiles.length}");
-      } else {
-        throw Exception("Failed to load documents");
+      if (offlineData.isEmpty) {
+        // Not found offline, fallback to default or show warning
+        await MaterialDialog.warning(
+          context,
+          title: "Warning",
+          body: "Equipment not found offline.",
+        );
+        return;
       }
+
+      // --- Populate controllers ---
+      setState(() {
+        equipType.text = offlineData['U_ck_eqStatus'] ?? "Active";
+        equipName.text = offlineData['Name'] ?? "";
+        equipCode.text = offlineData['Code'] ?? "";
+        customerCode.text = offlineData['U_ck_CusCode'] ?? "";
+        customerName.text = offlineData['U_ck_CusName'] ?? "";
+        serialNumber.text = offlineData["U_ck_eqSerNum"] ?? "";
+        site.text = offlineData["U_ck_siteCode"] ?? "";
+        remark.text = offlineData['U_ck_Remark'] ?? "";
+        brand.text = offlineData["U_ck_eqBrand"] ?? "";
+        model.text = offlineData["U_ck_eqModel"] ?? "";
+
+        installedDate.text =
+            offlineData['U_ck_InstalDate']?.toString().split("T").first ?? "";
+        nextDate.text =
+            offlineData["U_ck_NsvDate"]?.toString().split("T").first ?? "";
+        warrantyDate.text =
+            offlineData["U_ck_WarExpDate"]?.toString().split("T").first ?? "";
+      });
+
+      // --- Populate provider with components, parts, and images ---
+      provider.setComponents(
+          List<dynamic>.from(offlineData["CK_CUSEQUI01Collection"] ?? []));
+      provider.setParts(
+          List<dynamic>.from(offlineData["CK_CUSEQUI02Collection"] ?? []));
+
+      // Convert stored base64 files back to temporary File objects
+      final List<File> offlineFiles = [];
+      if (offlineData["files"] != null) {
+        for (var fileMap in offlineData["files"]) {
+          final bytes = base64Decode(fileMap["data"]);
+          final tempDir = await getTemporaryDirectory();
+          final filePath = "${tempDir.path}/${fileMap['name']}";
+          final file = File(filePath);
+          await file.writeAsBytes(bytes);
+          offlineFiles.add(file);
+        }
+      }
+      provider.setImages(offlineFiles);
+
+      print("Loaded offline images: ${offlineFiles.length}");
     } catch (e) {
-      print("Error fetching documents: $e");
+      debugPrint("Error loading offline equipment: $e");
+      await MaterialDialog.warning(
+        context,
+        title: "Error",
+        body: e.toString(),
+      );
     } finally {
       if (mounted) MaterialDialog.close(context);
     }
@@ -294,24 +389,25 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       );
       return;
     }
-    await Provider.of<EquipmentCreateProvider>(context, listen: false)
-        .postToSAP(data: {
-      "U_ck_eqStatus": equipType.text,
-      "U_ck_CusCode": customerCode.text,
-      "U_ck_CusName": customerName.text,
-      "U_ck_siteCode": site.text,
-      "Code": equipCode.text,
-      "Name": equipName.text,
-      "U_ck_eqSerNum": serialNumber.text,
-      "U_ck_eqBrand": brand.text,
-      "U_ck_eqModel": model.text,
-      "U_ck_Remark": remark.text,
-      // "CK_CUSEQUI01Collection": componentList,
-      // "CK_CUSEQUI02Collection": partList,
-      "U_ck_InstalDate": installedDate.text,
-      "U_ck_NsvDate": nextDate.text,
-      "U_ck_WarExpDate": warrantyDate.text
-    }, context: context);
+    await Provider.of<EquipmentOfflineProvider>(context, listen: false)
+        .saveEquipmentOffline(
+      data: {
+        "U_ck_eqStatus": equipType.text,
+        "U_ck_CusCode": customerCode.text,
+        "U_ck_CusName": customerName.text,
+        "U_ck_siteCode": site.text,
+        "Code": equipCode.text,
+        "Name": equipName.text,
+        "U_ck_eqSerNum": serialNumber.text,
+        "U_ck_eqBrand": brand.text,
+        "U_ck_eqModel": model.text,
+        "U_ck_Remark": remark.text,
+        "U_ck_InstalDate": installedDate.text,
+        "U_ck_NsvDate": nextDate.text,
+        "U_ck_WarExpDate": warrantyDate.text,
+        // Components, parts, and images are automatically included from provider
+      },
+    );
   }
 
   void clearAllFields() {
@@ -398,7 +494,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                               IconButton(
                                 onPressed: () async {
                                   if (widget.data.isNotEmpty) {
-                                    _init();
+                                    _initOffline();
                                   } else {
                                     clearAllFields();
                                   }

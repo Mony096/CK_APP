@@ -6,6 +6,7 @@ import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
@@ -103,12 +104,18 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ServiceListProvider()),
       ChangeNotifierProvider(create: (_) => CompletedServiceProvider()),
       ChangeNotifierProvider(create: (_) => HelperProvider()), // <-- Added
-      ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- AddedServiceListProviderOffline
-      ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added 
-      ChangeNotifierProvider(create: (_) => ServiceListProviderOffline()), // <-- Added
-      ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
+      ChangeNotifierProvider(
+          create: (_) =>
+              ItemListProvider()), // <-- AddedServiceListProviderOffline
+      ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
+      ChangeNotifierProvider(
+          create: (_) => ServiceListProviderOffline()), // <-- Added
+      ChangeNotifierProvider(
+          create: (_) => ServiceTicketListProviderOffline()), // <-- Added
       ChangeNotifierProvider(create: (_) => CustomerListProviderOffline()),
       ChangeNotifierProvider(create: (_) => ItemListProviderOffline()),
+      ChangeNotifierProvider(create: (_) => EquipmentOfflineProvider()),
+
       // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],
     child: const MyApp(),

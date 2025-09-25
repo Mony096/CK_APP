@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
@@ -36,41 +37,41 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+    // WidgetsBinding.instance.addPostFrameCallback((_) => _init());
 
-    _scrollController.addListener(() {
-      final provider =
-          Provider.of<EquipmentListProvider>(context, listen: false);
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 200 &&
-          provider.hasMore &&
-          !provider.isLoading) {
-        provider.fetchDocuments(loadMore: true);
-      }
-    });
+    // _scrollController.addListener(() {
+    //   final provider =
+    //       Provider.of<EquipmentListProvider>(context, listen: false);
+    //   if (_scrollController.position.pixels >=
+    //           _scrollController.position.maxScrollExtent - 200 &&
+    //       provider.hasMore &&
+    //       !provider.isLoading) {
+    //     provider.fetchDocuments(loadMore: true);
+    //   }
+    // });
   }
 
-  Future<void> _init() async {
-    setState(() => _initialLoading = true);
+  // Future<void> _init() async {
+  //   setState(() => _initialLoading = true);
 
-    final provider = Provider.of<EquipmentListProvider>(context, listen: false);
+  //   final provider = Provider.of<EquipmentListProvider>(context, listen: false);
 
-    if (provider.documents.isEmpty) {
-      await provider.fetchDocuments();
-    }
+  //   if (provider.documents.isEmpty) {
+  //     await provider.fetchDocuments();
+  //   }
 
-    setState(() {
-      _initialLoading = false;
-    });
-  }
+  //   setState(() {
+  //     _initialLoading = false;
+  //   });
+  // }
 
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<EquipmentListProvider>(context, listen: false);
+    final provider =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
     // ✅ Only fetch if not already loaded
-    provider.resetPagination();
-    await provider.resfreshFetchDocuments();
+    await provider.refreshDocuments();
     setState(() => _initialLoading = false);
   }
 
@@ -101,12 +102,15 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<EquipmentListProvider>(
+    return Consumer<EquipmentOfflineProvider>(
       builder: (context, deliveryProvider, _) {
-        final documents = deliveryProvider.documents;
+        // final documents = deliveryProvider.documents;
+        final documents = deliveryProvider.equipments;
+
         // final isLoading = deliveryProvider.isLoading;
-        final provider = Provider.of<EquipmentListProvider>(context);
-        final isLoadingMore = provider.isLoading && provider.hasMore;
+        final provider = Provider.of<EquipmentOfflineProvider>(context);
+        // final isLoadingMore = provider.isLoading && provider.hasMore;
+        final loading = false;
         return Scaffold(
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +206,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   width: 15,
                                 ),
                                 const Text(
-                                   textScaleFactor: 1.0,
+                                  textScaleFactor: 1.0,
                                   "Equipment Overview",
                                   style: TextStyle(
                                       fontSize: 19,
@@ -250,7 +254,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                           color: Color.fromARGB(
                                               255, 104, 104, 110)),
                                       Text(
-                                         textScaleFactor: 1.0,
+                                        textScaleFactor: 1.0,
                                         "New",
                                         style: TextStyle(
                                             fontSize: 15,
@@ -289,7 +293,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   width: 10,
                                 ),
                                 const Text(
-                                   textScaleFactor: 1.0,
+                                  textScaleFactor: 1.0,
                                   "Matches Your Filter",
                                   style: TextStyle(
                                     fontSize: 15,
@@ -353,7 +357,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               ),
                               onPressed: () {
                                 provider.setFilter(filter.text);
-
+                                provider.loadEquipments();
                                 // example: print search text
                                 // print("Search for: ${controller.text}");
                               },
@@ -373,7 +377,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               ),
               // CONTENT
               Expanded(
-                child: _initialLoading || provider.isLoadingSetFilter
+                child: loading
                     ? const Padding(
                         padding: EdgeInsets.only(bottom: 100),
                         child: Center(
@@ -408,25 +412,25 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(top: 5),
-                              itemCount:
-                                  documents.length + (isLoadingMore ? 1 : 0),
+                              itemCount: documents.length,
+                              // documents.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
-                                if (index == documents.length &&
-                                    isLoadingMore) {
-                                  return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: SizedBox(
-                                      height: 40,
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: SpinKitFadingCircle(
-                                          color: Colors.green,
-                                          size: 50.0,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
+                                // if (index == documents.length &&
+                                //     isLoadingMore) {
+                                //   return const Padding(
+                                //     padding: EdgeInsets.symmetric(vertical: 16),
+                                //     child: SizedBox(
+                                //       height: 40,
+                                //       child: Align(
+                                //         alignment: Alignment.center,
+                                //         child: SpinKitFadingCircle(
+                                //           color: Colors.green,
+                                //           size: 50.0,
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   );
+                                // }
 
                                 final item = documents[index];
 
@@ -487,7 +491,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
-                                                     textScaleFactor: 1.0,
+                                                    textScaleFactor: 1.0,
                                                     "${item["Code"] ?? "N/A"} - ${item["Name"] ?? "N/A"}",
                                                     style: const TextStyle(
                                                       fontWeight:
@@ -515,7 +519,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                             fontSize: 13)),
                                                   ),
                                                   Text(
-                                                     textScaleFactor: 1.0,
+                                                      textScaleFactor: 1.0,
                                                       ": ${item["U_ck_eqSerNum"] ?? "N/A"}",
                                                       style: const TextStyle(
                                                           fontSize: 13)),
@@ -532,14 +536,14 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                       const SizedBox(
                                                         width: 104,
                                                         child: Text(
-                                                           textScaleFactor:
+                                                            textScaleFactor:
                                                                 1.0,
                                                             "Customer Name",
                                                             style: TextStyle(
                                                                 fontSize: 13)),
                                                       ),
                                                       Text(
-                                                         textScaleFactor: 1.0,
+                                                          textScaleFactor: 1.0,
                                                           ": ${item["U_ck_CusName"] ?? "N/A"}",
                                                           style:
                                                               const TextStyle(

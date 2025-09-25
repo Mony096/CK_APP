@@ -23,41 +23,40 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+    // WidgetsBinding.instance.addPostFrameCallback((_) => _init());
 
-    _scrollController.addListener(() {
-      final provider =
-          Provider.of<CustomerListProvider>(context, listen: false);
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 200 &&
-          provider.hasMore &&
-          !provider.isLoading) {
-        provider.fetchDocuments(loadMore: true);
-      }
-    });
+    // _scrollController.addListener(() {
+    //   final provider =
+    //       Provider.of<CustomerListProvider>(context, listen: false);
+    //   if (_scrollController.position.pixels >=
+    //           _scrollController.position.maxScrollExtent - 200 &&
+    //       provider.hasMore &&
+    //       !provider.isLoading) {
+    //     provider.fetchDocuments(loadMore: true);
+    //   }
+    // });
   }
 
-  Future<void> _init() async {
-    setState(() => _initialLoading = true);
+  // Future<void> _init() async {
+  //   setState(() => _initialLoading = true);
 
-    final provider = Provider.of<CustomerListProvider>(context, listen: false);
+  //   final provider = Provider.of<CustomerListProvider>(context, listen: false);
 
-    if (provider.documents.isEmpty) {
-      await provider.fetchDocuments();
-    }
+  //   if (provider.documents.isEmpty) {
+  //     await provider.fetchDocuments();
+  //   }
 
-    setState(() {
-      _initialLoading = false;
-    });
-  }
+  //   setState(() {
+  //     _initialLoading = false;
+  //   });
+  // }
 
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<CustomerListProvider>(context, listen: false);
+    final provider = Provider.of<CustomerListProviderOffline>(context, listen: false);
     // ✅ Only fetch if not already loaded
-    provider.resetPagination();
-    await provider.resfreshFetchDocuments();
+    await provider.refreshDocuments();
     setState(() => _initialLoading = false);
   }
 
@@ -110,7 +109,6 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
           // final isLoadingMore = provider.isLoading && provider.hasMore;
           final loading = provider.isLoading;
 
-        
           return Column(
             children: [
               // const SizedBox(
@@ -221,6 +219,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                             ),
                             onPressed: () {
                               provider.setFilter(filter.text);
+                              provider.loadDocuments(); // ✅ apply filter
 
                               // example: print search text
                               // print("Search for: ${controller.text}");
@@ -240,7 +239,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
               // 📦 List View with Pagination and States
               Expanded(
                 // child: _initialLoading || provider.isLoadingSetFilter
-                   child: loading
+                child: loading
                     ? const Padding(
                         padding: EdgeInsets.only(bottom: 100),
                         child: Center(
@@ -275,8 +274,8 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(top: 6),
-                              itemCount:documents.length,
-                                  // documents.length + (isLoadingMore ? 1 : 0),
+                              itemCount: documents.length,
+                              // documents.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
                                 // if (index == documents.length &&
                                 //     isLoadingMore) {

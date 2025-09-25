@@ -11,7 +11,7 @@ class ItemListProviderOffline extends ChangeNotifier {
   String? get filter => _filter;
   late final Box _box;
 
-  CustomerListProviderOffline() {
+  ItemListProviderOffline() {
     _initBox();
   }
 
@@ -48,18 +48,17 @@ class ItemListProviderOffline extends ChangeNotifier {
           .toList();
 
       // ✅ Apply date filter if set
-      if (_filter != null) {
-        docs = docs.where((doc) {
-          if (doc["ItemCode"] == null) return false;
-          try {
+       if (_filter != null && _filter!.isNotEmpty) {
+          docs = docs.where((doc) {
             final code = doc["ItemCode"];
-
-            return code == _filter;
-          } catch (e) {
-            return false;
-          }
-        }).toList();
-      }
+            if (code == null) return false;
+            try {
+              return code.toString().toLowerCase().contains(_filter!.toLowerCase());
+            } catch (e) {
+              return false;
+            }
+          }).toList();
+        }
 
       _documents = docs;
     } catch (e) {

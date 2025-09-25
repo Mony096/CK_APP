@@ -1,5 +1,6 @@
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider.dart';
+import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -23,41 +24,45 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+    // WidgetsBinding.instance.addPostFrameCallback((_) => _init());
 
-    _scrollController.addListener(() {
-      final provider = Provider.of<ItemListProvider>(context, listen: false);
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 200 &&
-          provider.hasMore &&
-          !provider.isLoading) {
-        provider.fetchDocuments(loadMore: true);
-      }
-    });
+    // _scrollController.addListener(() {
+    //   final provider = Provider.of<ItemListProvider>(context, listen: false);
+    //   if (_scrollController.position.pixels >=
+    //           _scrollController.position.maxScrollExtent - 200 &&
+    //       provider.hasMore &&
+    //       !provider.isLoading) {
+    //     provider.fetchDocuments(loadMore: true);
+    //   }
+    // });
   }
 
-  Future<void> _init() async {
-    setState(() => _initialLoading = true);
+  // Future<void> _init() async {
+  //   setState(() => _initialLoading = true);
 
-    final provider = Provider.of<ItemListProvider>(context, listen: false);
+  //   final provider = Provider.of<ItemListProvider>(context, listen: false);
 
-    if (provider.documents.isEmpty) {
-      await provider.fetchDocuments();
-    }
+  //   if (provider.documents.isEmpty) {
+  //     await provider.fetchDocuments();
+  //   }
 
-    setState(() {
-      _initialLoading = false;
-    });
-  }
+  //   setState(() {
+  //     _initialLoading = false;
+  //   });
+  // }
 
 // Items?$select=ItemCode,ItemName,InventoryItem,InventoryUoMEntry,InventoryUOM,U_tl_dim1,U_tl_dim2 & $filter=InventoryItem eq 'tYES' ${props.filter ?? ""} &$orderby = ItemCode asc
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<ItemListProvider>(context, listen: false);
+    // final provider = Provider.of<ItemListProvider>(context, listen: false);
+    final provider =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+
     // ✅ Only fetch if not already loaded
-    provider.resetPagination();
-    await provider.resfreshFetchDocuments();
+    // provider.resetPagination();
+    // await provider.resfreshFetchDocuments();
+    await provider.refreshDocuments();
     setState(() => _initialLoading = false);
   }
 
@@ -103,12 +108,13 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
           const SizedBox(width: 12),
         ],
       ),
-      body: Consumer<ItemListProvider>(
+      body: Consumer<ItemListProviderOffline>(
         builder: (context, deliveryProvider, _) {
           final documents = deliveryProvider.documents;
-          final provider = Provider.of<ItemListProvider>(context);
-          final isLoadingMore = provider.isLoading && provider.hasMore;
-
+          final provider = Provider.of<ItemListProviderOffline>(context);
+          // final isLoadingMore = provider.isLoading && provider.hasMore;
+          final loading = provider.isLoading;
+          print(documents);
           // if (isLoading && documents.isEmpty) {
           //   return const Center(
           //     child: SpinKitFadingCircle(
@@ -236,7 +242,7 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                             ),
                             onPressed: () {
                               provider.setFilter(filter.text);
-
+                              provider.loadDocuments();
                               // example: print search text
                               // print("Search for: ${controller.text}");
                             },
@@ -254,7 +260,8 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
               // ),
               // 📦 List View with Pagination and States
               Expanded(
-                child: _initialLoading || provider.isLoadingSetFilter
+                // child: _initialLoading || provider.isLoadingSetFilter
+                child: loading
                     ? const Padding(
                         padding: EdgeInsets.only(bottom: 100),
                         child: Center(
@@ -289,25 +296,25 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(top: 6),
-                              itemCount:
-                                  documents.length + (isLoadingMore ? 1 : 0),
+                              itemCount: documents.length,
+                              // documents.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
-                                if (index == documents.length &&
-                                    isLoadingMore) {
-                                  return const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: SizedBox(
-                                      height: 40,
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: SpinKitFadingCircle(
-                                          color: Colors.green,
-                                          size: 50.0,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
+                                // if (index == documents.length &&
+                                //     isLoadingMore) {
+                                //   return const Padding(
+                                //     padding: EdgeInsets.all(4),
+                                //     child: SizedBox(
+                                //       height: 40,
+                                //       child: Align(
+                                //         alignment: Alignment.center,
+                                //         child: SpinKitFadingCircle(
+                                //           color: Colors.green,
+                                //           size: 50.0,
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   );
+                                // }
                                 final doc = documents[index];
                                 return GestureDetector(
                                   onTap: () => onPressed(doc),
