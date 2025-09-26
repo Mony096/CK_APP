@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class EquipmentCreateProvider with ChangeNotifier {
@@ -152,10 +156,10 @@ class EquipmentCreateProvider with ChangeNotifier {
               borderRadius: BorderRadius.circular(9),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            content: Row(
+            content: const Row(
               children: [
-                const Icon(Icons.remove_circle, color: Colors.white, size: 28),
-                const SizedBox(width: 16),
+                Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -163,7 +167,7 @@ class EquipmentCreateProvider with ChangeNotifier {
                     children: [
                       Text(
                         "Failed to upload attachments",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           color: Colors.white,
                         ),
@@ -221,5 +225,186 @@ class EquipmentCreateProvider with ChangeNotifier {
       MaterialDialog.close(context); // Show loading dialog
       notifyListeners();
     }
+  }
+
+  void deleteTempFiles(List<File> files) {
+    for (File file in files) {
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    }
+  }
+
+  ///sync to SAP
+  // Future<dynamic> syncAllOfflineEquipmentToSAP(BuildContext context) async {
+  //   final offlineProvider =
+  //       Provider.of<EquipmentOfflineProvider>(context, listen: false);
+
+  //   List<dynamic> completedEquipment = offlineProvider.equipments;
+  //   if (completedEquipment.isEmpty) return false;
+
+  //   for (var equipmentPayload in completedEquipment) {
+  //     final code = equipmentPayload['Code'];
+  //     final List<dynamic> fileDataList = equipmentPayload['files'] ?? [];
+
+  //     List<File> filesToUpload = [];
+
+  //     try {
+  //       // 🔑 Decode {ext, data} into temp files (only if files exist)
+  //       if (fileDataList.isNotEmpty) {
+  //         final tempDir = await getTemporaryDirectory();
+  //         for (var f in fileDataList) {
+  //           if (f is Map && f.containsKey('data')) {
+  //             final bytes = base64Decode(f['data']);
+  //             final ext = f['ext'] ?? "bin";
+  //             final fileName =
+  //                 "temp_${DateTime.now().millisecondsSinceEpoch}.$ext";
+  //             final file = File("${tempDir.path}/$fileName");
+  //             await file.writeAsBytes(bytes);
+  //             filesToUpload.add(file);
+  //           }
+  //         }
+  //       }
+
+  //       int? attachmentEntry;
+
+  //       // 1. Upload attachments only if files exist
+  //       if (filesToUpload.isNotEmpty) {
+  //         attachmentEntry = await uploadAttachmentsToSAP(filesToUpload);
+  //         if (attachmentEntry == null) {
+  //           debugPrint(
+  //               "⚠️ Failed to sync attachments for Equipment Code: $code");
+  //           continue; // skip this equipment but move on
+  //         }
+  //       }
+
+  //       // 2. Prepare SAP payload (remove offline-only keys)
+  //       final sapPayload = Map<dynamic, dynamic>.from(equipmentPayload);
+  //       if (attachmentEntry != null) {
+  //         sapPayload['U_ck_AttachmentEntry'] = attachmentEntry;
+  //       }
+  //       sapPayload.remove('files');
+  //       sapPayload.remove('sync_status');
+  //       sapPayload.remove('savedAt');
+
+  //       // 3. Send payload to SAP
+  //       final response = await dio.post(
+  //         "/CK_CUSEQUI",
+  //         false,
+  //         false,
+  //         data: sapPayload,
+  //       );
+
+  //       if (response.statusCode == 201) {
+  //         debugPrint("✅ Synced Equipment Code: $code");
+  //       } else {
+  //         throw Exception(
+  //             "Failed to sync Equipment Code: $code. Status: ${response.statusCode}");
+  //       }
+
+  //       return true;
+  //     } catch (e) {
+  //       throw Exception("Your Equipment Failed: ${e.toString()}");
+  //     } finally {
+  //       // Always clean up temp files
+  //       deleteTempFiles(filesToUpload);
+  //     }
+  //   }
+  // }
+  Future<bool> syncAllOfflineEquipmentToSAP(BuildContext context) async {
+    final offlineProvider =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
+
+    // Filter only pending equipments
+    final pendingEquipment = offlineProvider.equipments
+        .where((e) => e['sync_status'] == 'pending')
+        .toList();
+    // print(pendingEquipment);
+    // return false;
+    if (pendingEquipment.isEmpty) {
+      debugPrint("No pending offline equipment to sync.");
+      return false;
+    }
+
+    for (var equipmentPayload in pendingEquipment) {
+      final code = equipmentPayload['Code'];
+      final List<dynamic> fileDataList = equipmentPayload['files'] ?? [];
+      List<File> filesToUpload = [];
+
+      try {
+        // Decode files if exist
+        if (fileDataList.isNotEmpty) {
+          final tempDir = await getTemporaryDirectory();
+          for (var f in fileDataList) {
+            if (f is Map && f.containsKey('data')) {
+              final bytes = base64Decode(f['data']);
+              final ext = f['ext'] ?? "bin";
+              final fileName =
+                  "temp_${DateTime.now().millisecondsSinceEpoch}.$ext";
+              final file = File("${tempDir.path}/$fileName");
+              await file.writeAsBytes(bytes);
+              filesToUpload.add(file);
+            }
+          }
+        }
+
+        int? attachmentEntry;
+
+        if (filesToUpload.isNotEmpty) {
+          attachmentEntry = await uploadAttachmentsToSAP(filesToUpload);
+          if (attachmentEntry == null) {
+            debugPrint(
+                "⚠️ Failed to sync attachments for Equipment Code: $code");
+            continue;
+          }
+        }
+
+        // Prepare SAP payload
+        final sapPayload = Map<String, dynamic>.from(equipmentPayload);
+        if (attachmentEntry != null) {
+          sapPayload['U_ck_AttachmentEntry'] = attachmentEntry;
+        }
+        sapPayload.remove('files');
+        sapPayload.remove('sync_status');
+        sapPayload.remove('savedAt');
+        final index = offlineProvider.equipments
+            .indexWhere((e) => e['Code'] == equipmentPayload['Code']);
+        if (index != -1) {
+          equipmentPayload['sync_status'] = 'synced';
+          await offlineProvider.updateEquipment(equipmentPayload);
+        }
+        // Send to SAP
+        final response = await dio.post(
+          "/CK_CUSEQUI",
+          false,
+          false,
+          data: sapPayload,
+        );
+
+        if (response.statusCode == 201) {
+          debugPrint("✅ Synced Equipment Code: $code");
+
+          // Update local status to 'synced' using provider method
+          final index = offlineProvider.equipments
+              .indexWhere((e) => e['Code'] == equipmentPayload['Code']);
+          if (index != -1) {
+            equipmentPayload['sync_status'] = 'synced';
+            await offlineProvider.updateEquipment(equipmentPayload);
+          }
+        } else {
+          throw Exception(
+              "Failed to sync Equipment Code: $code. Status: ${response.statusCode}");
+        }
+        await offlineProvider.loadEquipments();
+      } catch (e) {
+        await offlineProvider.loadEquipments();
+
+        throw Exception("Equipment Failed: ${e.toString()}");
+      } finally {
+        deleteTempFiles(filesToUpload);
+      }
+    }
+
+    return true;
   }
 }

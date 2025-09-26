@@ -3,6 +3,7 @@ import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +80,7 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
       final newHash = sha256.convert(newBytes).toString();
 
       bool isDuplicate = false;
-      final provider = context.read<EquipmentCreateProvider>();
+      final provider = context.read<EquipmentOfflineProvider>();
 
       for (final file in provider.imagesList) {
         final existingBytes = await file.readAsBytes();
@@ -109,8 +110,8 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
         );
         return;
       }
-      Provider.of<EquipmentCreateProvider>(context, listen: false)
-          .setImages([newFile]); // Pass as list
+      Provider.of<EquipmentOfflineProvider>(context, listen: false)
+          .addImages([newFile]); // Pass as list
 
       // setState(() {
       //   _images.add(newFile);
@@ -201,8 +202,9 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                     ),
                     ImageShow(
                         data: widget.data,
-                        image:
-                            context.watch<EquipmentCreateProvider>().imagesList)
+                        image: context
+                            .watch<EquipmentOfflineProvider>()
+                            .imagesList)
                     /////do somthing
                   ]),
                 )),
@@ -324,15 +326,15 @@ class _ImageShowState extends State<ImageShow> {
       padding: const EdgeInsets.all(5),
       child: widget.image.isEmpty
           ? SizedBox(
-            height: 300,
-            child: const Center(
+              height: 300,
+              child: const Center(
                 child: Icon(
                   Icons.image,
                   size: 100,
                   color: Color.fromARGB(115, 63, 65, 67),
                 ),
               ),
-          )
+            )
           : GridView.count(
               crossAxisCount: 2,
               mainAxisSpacing: 8,

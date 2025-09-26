@@ -115,7 +115,7 @@ class ItemListProvider extends ChangeNotifier {
         // _hasMore = data.length == _limit;
         // _skip += _limit;
       } else {
-        throw Exception("Failed to load documents Item offline");
+        throw Exception("Failed to Download Item");
       }
     } catch (e) {
       await MaterialDialog.warning(

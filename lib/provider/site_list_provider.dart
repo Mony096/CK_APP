@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 class SiteListProvider extends ChangeNotifier {
   List<dynamic> _documents = [];
+    List<dynamic> _documentOffline = [];
+
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isLoadingSetFilter = false;
@@ -14,6 +16,8 @@ class SiteListProvider extends ChangeNotifier {
   final DioClient dio = DioClient();
 
   List<dynamic> get documents => _documents;
+    List<dynamic> get documentOffline => _documentOffline;
+
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
   bool get isLoadingSetFilter => _isLoadingSetFilter;
@@ -81,6 +85,39 @@ class SiteListProvider extends ChangeNotifier {
       }
     } catch (e) {
       print("Error fetching documents: $e");
+    } finally {
+      if (isSetFilter) {
+        _isLoadingSetFilter = false;
+      }
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  Future<void> fetchOfflineDocuments(
+      {bool loadMore = false,
+      bool isSetFilter = false,
+      String customer = ''}) async {
+    if (_isLoading) return;
+    _isLoading = true;
+    notifyListeners();
+
+   
+    try {
+      final response = await dio.get(
+          "/CK_CUSTSITE?&\$filter = U_ck_type eq 'Customer Site' &\$select=Code,Name,U_ck_type,U_ck_custcode");
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data["value"];
+        if (loadMore) {
+          _documentOffline.addAll(data);
+        } else {
+          _documentOffline = data;
+        }
+      } else {
+        throw Exception("Failed to Download Site");
+      }
+    } catch (e) {
+       throw Exception(e.toString());
     } finally {
       if (isSetFilter) {
         _isLoadingSetFilter = false;

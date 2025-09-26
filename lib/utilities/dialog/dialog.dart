@@ -339,15 +339,6 @@ class MaterialDialog {
 
   static Future<void> createdSuccess(
     BuildContext context,
-    //    {
-    //   String? title,
-    //   String? body,
-    //   Function()? onConfirm,
-    //   Function()? onCancel,
-    //   String confirmLabel = 'Ok',
-    //   String cancelLabel = 'Cancel',
-    //   required IconData icon, // Add a required icon parameter
-    // }
   ) async {
     return showDialog<void>(
       context: context,
@@ -480,7 +471,139 @@ class MaterialDialog {
       },
     );
   }
-
+  static Future<void> allSyncSuccess(
+    BuildContext context,
+  ) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13.0), // Rounded corners
+          ),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          titlePadding:
+              const EdgeInsets.fromLTRB(0, 10, 0, 10), // Custom padding
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 24.0), // Custom padding
+          actionsPadding: const EdgeInsets.fromLTRB(
+              20.0, 0.0, 10.0, 10.0), // Custom padding
+          title: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // White background
+                      borderRadius: BorderRadius.circular(
+                          25), // Fully rounded (half of width/height)
+                      border: Border.all(
+                        color: Colors.green, // Solid blue border
+                        width: 2, // Border width of 5 pixels
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.done_all, // The icon you pass in
+                      size: 18,
+                      color: Colors
+                          .green, // Or a color that matches your app's theme
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const SizedBox(
+                    width: 210,
+                    child: Text(
+                      'Success',
+                      // textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 64, 64, 70),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1, // Restrict to a single line
+                      overflow:
+                          TextOverflow.ellipsis, // Add "..." if text overflows
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                child: Divider(height: 1, thickness: 1),
+              ),
+              const SizedBox(height: 5),
+            ],
+          ),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  "Successfully synced to SAP",
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color.fromARGB(221, 77, 78, 82),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            // A horizontal line to separate the content from the buttons
+            const SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 35,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+                      foregroundColor: Colors.white,
+                      elevation: 3,
+                      // Adjust the padding to make the button smaller
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.fromLTRB(7, 0, 5, 0),
+                      child: Text(
+                        "OK",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
   static Future<void> viewDetailDialog(
     BuildContext context, {
     String? title,

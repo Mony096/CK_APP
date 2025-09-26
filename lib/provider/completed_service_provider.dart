@@ -68,7 +68,6 @@ class CompletedServiceProvider extends ChangeNotifier {
       item['U_CK_BreakTime'].split(" ")[0],
       item['U_CK_BreakEndTime'].split(" ")[0],
     );
-    print(timeEntry);
     if (editIndex == -1) {
       _timeEntry = [item];
     } else {
@@ -468,158 +467,85 @@ class CompletedServiceProvider extends ChangeNotifier {
   }
 
   Future<dynamic> syncAllOfflineServicesToSAP(BuildContext context) async {
-    MaterialDialog.loading(context);
-
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
 
-    try {
-      List<Map<dynamic, dynamic>> completedServices =
-          await offlineProvider.getCompletedServicesToSync();
-      if (completedServices.isEmpty) {
-        MaterialDialog.close(context);
+    List<Map<dynamic, dynamic>> completedServices =
+        await offlineProvider.getCompletedServicesToSync();
+    if (completedServices.isEmpty) return false;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-            behavior: SnackBarBehavior.floating,
-            elevation: 10,
-            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            content: const Row(
-              children: [
-                Icon(Icons.remove_circle, color: Colors.white, size: 28),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "No offline services to sync.",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            duration: const Duration(seconds: 4),
-          ),
-        );
-        return false;
-      }
+    for (var servicePayload in completedServices) {
+      final docEntry = servicePayload['DocEntry'];
+      final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
+      final List<dynamic> fileDataList = servicePayload['files'] ?? [];
 
-      for (var servicePayload in completedServices) {
-        final docEntry = servicePayload['DocEntry'];
-        final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
-        final List<dynamic> fileDataList = servicePayload['files'] ?? [];
+      List<File> filesToUpload = [];
 
-        List<File> filesToUpload = [];
-
-        try {
-          // 🔑 Decode {ext, data} into temp files
+      try {
+        // 🔑 Decode {ext, data} into temp files only if files exist
+        if (fileDataList.isNotEmpty) {
           final tempDir = await getTemporaryDirectory();
+          int i = 0;
           for (var f in fileDataList) {
             if (f is Map && f.containsKey('data')) {
               final bytes = base64Decode(f['data']);
               final ext = f['ext'] ?? "bin";
               final fileName =
-                  "temp_${DateTime.now().millisecondsSinceEpoch}.$ext";
+                  "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
               final file = File("${tempDir.path}/$fileName");
               await file.writeAsBytes(bytes);
               filesToUpload.add(file);
+              i++;
             }
           }
+        }
 
-          // 1. Upload attachments to SAP
-          final int? attachmentEntry = await uploadAttachmentsToSAP(
+        int? attachmentEntry;
+
+        // 1. Upload attachments only if there are files
+        if (filesToUpload.isNotEmpty) {
+          attachmentEntry = await uploadAttachmentsToSAP(
             filesToUpload,
             attachmentEntryExisting,
           );
 
           if (attachmentEntry == null) {
-            debugPrint("Failed to sync attachments for DocEntry: $docEntry");
-            continue; // skip to next service
+            debugPrint("⚠️ Failed to sync attachments for DocEntry: $docEntry");
+            continue; // skip this service but move on
           }
-
-          // 2. Prepare SAP payload (remove offline-only keys)
-          final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
-          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
-          sapPayload.remove('files');
-          sapPayload.remove('sync_status');
-
-          // 3. Send payload to SAP
-          final response = await dio.patch(
-            "/script/test/CK_CompleteStatus($docEntry)",
-            false,
-            false,
-            data: sapPayload,
-          );
-
-          if (response.statusCode == 200) {
-            await offlineProvider.markServiceSynced(docEntry);
-            debugPrint("✅ Synced DocEntry: $docEntry");
-          } else {
-            debugPrint(
-                "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
-          }
-        } catch (e) {
-          debugPrint("⚠️ Error syncing DocEntry: $docEntry. Error: $e");
-        } finally {
-          // Always clean up temp files
-          deleteTempFiles(filesToUpload);
         }
-      }
 
-      // MaterialDialog.close(context);
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(content: Text("Offline sync process completed.")),
-      // );
-      MaterialDialog.close(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        behavior: SnackBarBehavior.floating,
-        elevation: 10,
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(9),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        content: const Row(
-          children: [
-            Icon(Icons.remove_circle, color: Colors.white, size: 28),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Offline sync process completed.!.",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        duration: const Duration(seconds: 4),
-      ));
-      return true;
-    } catch (e) {
-      MaterialDialog.close(context);
-      await MaterialDialog.warning(context,
-          title: "Batch Sync Error", body: e.toString());
+        // 2. Prepare SAP payload (remove offline-only keys)
+        final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+        if (attachmentEntry != null) {
+          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
+        }
+        sapPayload.remove('files');
+        sapPayload.remove('sync_status');
+
+        // 3. Send payload to SAP
+        final response = await dio.patch(
+          "/script/test/CK_CompleteStatus($docEntry)",
+          false,
+          false,
+          data: sapPayload,
+        );
+
+        if (response.statusCode == 200) {
+          await offlineProvider.markServiceSynced(docEntry);
+          debugPrint("✅ Synced DocEntry: $docEntry");
+        } else {
+          throw Exception(
+              "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
+        }
+
+        return true;
+      } catch (e) {
+        throw Exception("Your Service Failed: ${e.toString()}");
+      } finally {
+        // Always clean up temp files
+        deleteTempFiles(filesToUpload);
+      }
     }
   }
 

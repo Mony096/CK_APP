@@ -4,6 +4,7 @@ import 'package:bizd_tech_service/component/text_remark.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/select/businessPartnerPage.dart';
 import 'package:bizd_tech_service/screens/equipment/equipmentImage.dart';
 import 'package:bizd_tech_service/screens/equipment/select/siteMasterPage.dart';
@@ -200,7 +201,7 @@ class _GeneralState extends State<General> {
                   ),
                   child: Text(
                     widget.data.isNotEmpty
-                        ? "View ( ${context.read<EquipmentCreateProvider>().imagesList.length} / Image )"
+                        ? "View ( ${context.watch<EquipmentOfflineProvider>().imagesList.length} / Image )"
                         : "Add Image",
                     style: const TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),

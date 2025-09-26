@@ -126,15 +126,10 @@ class ServiceListProvider extends ChangeNotifier {
         // _hasMore = data.length == _limit;
         // _skip += _limit;
       } else {
-        throw Exception("Failed to load documents Ticket");
+        throw Exception("Failed to Download Service");
       }
     } catch (e) {
-      await MaterialDialog.warning(
-        context,
-        title: "Error",
-        body: e.toString(),
-      );
-      print("Error fetching documents Ticket: $e");
+      throw Exception(e.toString());
     } finally {
       if (isSetFilter) _isLoadingSetFilter = false;
       _isLoading = false;

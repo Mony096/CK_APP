@@ -1,5 +1,6 @@
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/site_list_provider.dart';
+import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -19,45 +20,71 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
   final filter = TextEditingController();
 
   final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+    Future.microtask(() async {
+      final siteProvider =
+          Provider.of<SiteListProviderOffline>(context, listen: false);
 
-    _scrollController.addListener(() {
-      final provider = Provider.of<SiteListProvider>(context, listen: false);
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 200 &&
-          provider.hasMore &&
-          !provider.isLoading) {
-        provider.fetchDocuments(loadMore: true, customer: widget.customer);
-      }
+      // ✅ Required filter
+      siteProvider.setCustCode(widget.customer);
+
+      // ✅ Optional filter (only if you want to search by ItemCode)
+      // siteProvider.setFilter("ITM100");
+
+      // ✅ Load documents with filters applied
+      await siteProvider.loadDocuments();
     });
   }
 
-  Future<void> _init() async {
-    setState(() => _initialLoading = true);
-    // print(widget.customer);
-    final provider = Provider.of<SiteListProvider>(context, listen: false);
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // WidgetsBinding.instance.addPostFrameCallback((_) => _init());
 
-    // if (provider.documents.isEmpty) {
-     provider.resetPagination();
-    await provider.fetchDocuments(customer: widget.customer);
-    // }
+  //   // _scrollController.addListener(() {
+  //   //   final provider = Provider.of<SiteListProvider>(context, listen: false);
+  //   //   if (_scrollController.position.pixels >=
+  //   //           _scrollController.position.maxScrollExtent - 200 &&
+  //   //       provider.hasMore &&
+  //   //       !provider.isLoading) {
+  //   //     provider.fetchDocuments(loadMore: true, customer: widget.customer);
+  //   //   }
+  //   // });
+  // }
 
-    setState(() {
-      _initialLoading = false;
-    });
-  }
+  // Future<void> _init() async {
+  //   setState(() => _initialLoading = true);
+  //   // print(widget.customer);
+  //   final provider = Provider.of<SiteListProvider>(context, listen: false);
 
+  //   // if (provider.documents.isEmpty) {
+  //    provider.resetPagination();
+  //   await provider.fetchDocuments(customer: widget.customer);
+  //   // }
+
+  //   setState(() {
+  //     _initialLoading = false;
+  //   });
+  // }
+
+  // Future<void> _refreshData() async {
+  //   setState(() => _initialLoading = true);
+
+  //   final provider = Provider.of<SiteListProvider>(context, listen: false);
+  //   // ✅ Only fetch if not already loaded
+  //   provider.resetPagination();
+  //   await provider.resfreshFetchDocuments(customer: widget.customer);
+  //   setState(() => _initialLoading = false);
+  // }
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<SiteListProvider>(context, listen: false);
+    final provider =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
     // ✅ Only fetch if not already loaded
-    provider.resetPagination();
-    await provider.resfreshFetchDocuments(customer: widget.customer);
+    await provider.refreshDocuments();
     setState(() => _initialLoading = false);
   }
 
@@ -70,6 +97,7 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
 // }
   void onPressed(dynamic bp) {
     Navigator.pop(context, bp);
+    _refreshData();
   }
 
   @override
@@ -103,11 +131,12 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
           const SizedBox(width: 12),
         ],
       ),
-      body: Consumer<SiteListProvider>(
+      body: Consumer<SiteListProviderOffline>(
         builder: (context, deliveryProvider, _) {
           final documents = deliveryProvider.documents;
-          final provider = Provider.of<SiteListProvider>(context);
-          final isLoadingMore = provider.isLoading && provider.hasMore;
+          final provider = Provider.of<SiteListProviderOffline>(context);
+          // final isLoadingMore = provider.isLoading && provider.hasMore;
+          final loading = provider.isLoading;
 
           // if (isLoading && documents.isEmpty) {
           //   return const Center(
@@ -236,7 +265,7 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                             ),
                             onPressed: () {
                               provider.setFilter(filter.text, widget.customer);
-
+                              provider.loadDocuments();
                               // example: print search text
                               // print("Search for: ${controller.text}");
                             },
@@ -254,7 +283,8 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
               // ),
               // 📦 List View with Pagination and States
               Expanded(
-                child: _initialLoading || provider.isLoadingSetFilter
+                // child: _initialLoading || loading
+                child: false
                     ? const Padding(
                         padding: EdgeInsets.only(bottom: 100),
                         child: Center(
@@ -289,25 +319,25 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(top: 6),
-                              itemCount:
-                                  documents.length + (isLoadingMore ? 1 : 0),
+                              itemCount: documents.length,
+                              // documents.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
-                                if (index == documents.length &&
-                                    isLoadingMore) {
-                                  return const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: SizedBox(
-                                      height: 40,
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: SpinKitFadingCircle(
-                                          color: Colors.green,
-                                          size: 50.0,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
+                                // if (index == documents.length &&
+                                //     isLoadingMore) {
+                                //   return const Padding(
+                                //     padding: EdgeInsets.all(4),
+                                //     child: SizedBox(
+                                //       height: 40,
+                                //       child: Align(
+                                //         alignment: Alignment.center,
+                                //         child: SpinKitFadingCircle(
+                                //           color: Colors.green,
+                                //           size: 50.0,
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   );
+                                // }
                                 final doc = documents[index];
                                 return GestureDetector(
                                   onTap: () => onPressed(doc),

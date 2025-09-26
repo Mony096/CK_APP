@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 class EquipmentListProvider extends ChangeNotifier {
   List<dynamic> _documents = [];
+  List<dynamic> _documentOffline = [];
+
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isLoadingSetFilter = false;
@@ -15,6 +17,8 @@ class EquipmentListProvider extends ChangeNotifier {
   final DioClient dio = DioClient();
 
   List<dynamic> get documents => _documents;
+  List<dynamic> get documentOffline => _documentOffline;
+
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
   bool get isLoadingSetFilter => _isLoadingSetFilter;
@@ -75,6 +79,37 @@ class EquipmentListProvider extends ChangeNotifier {
       }
     } catch (e) {
       print("Error fetching documents: $e");
+    } finally {
+      if (isSetFilter) {
+        _isLoadingSetFilter = false;
+      }
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchOfflineDocuments(
+      {bool loadMore = false, bool isSetFilter = false}) async {
+    if (_isLoading) return;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await dio.get(
+          "/CK_CUSEQUI?\$select=U_ck_AttachmentEntry,U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry,U_ck_siteCode,U_ck_eqStatus,U_ck_eqBrand,U_ck_Remark,U_ck_InstalDate,U_ck_NsvDate,U_ck_WarExpDate,CK_CUSEQUI01Collection,CK_CUSEQUI02Collection &\$orderby=DocEntry desc");
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data["value"] ;
+        if (loadMore) {
+          _documentOffline.addAll(data);
+        } else {
+          _documentOffline = data;
+        }
+      } else {
+        throw Exception("Failed to Download Equipment");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
     } finally {
       if (isSetFilter) {
         _isLoadingSetFilter = false;

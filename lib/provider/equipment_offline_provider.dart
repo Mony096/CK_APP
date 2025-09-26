@@ -1,19 +1,29 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Helper function to convert file to base64 with extension
 Future<Map<String, String>> fileToBase64WithExt(File file) async {
   final bytes = await file.readAsBytes();
-  final ext = file.path.split('.').last;
-  return {
-    "ext": ext,
-    "data": base64Encode(bytes),
-    "name": file.path.split('/').last,
-  };
+  final base64Data = base64Encode(bytes);
+
+  // Detect extension safely
+  final path = file.path.toLowerCase();
+  String ext = "bin"; // fallback
+  if (path.endsWith(".png"))
+    ext = "png";
+  else if (path.endsWith(".jpg") || path.endsWith(".jpeg"))
+    ext = "jpg";
+  else if (path.endsWith(".pdf"))
+    ext = "pdf";
+  else if (path.endsWith(".gif")) ext = "gif";
+
+  return {"ext": ext, "data": base64Data};
 }
 
 class EquipmentOfflineProvider with ChangeNotifier {
@@ -23,8 +33,8 @@ class EquipmentOfflineProvider with ChangeNotifier {
   bool _submit = false;
   bool get submit => _submit;
 
-  List<Map<String, dynamic>> _equipments = [];
-  List<Map<String, dynamic>> get equipments => _equipments;
+  List<dynamic> _equipments = [];
+  List<dynamic> get equipments => _equipments;
 
   List<dynamic> _components = [];
   List<dynamic> _parts = [];
@@ -48,6 +58,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
     await Hive.openBox(_boxName);
     await loadEquipments();
   }
+
   void setFilter(String filter) {
     _filter = filter;
     notifyListeners();
@@ -59,35 +70,101 @@ class EquipmentOfflineProvider with ChangeNotifier {
   }
 
   /// Load all equipments from Hive
- Future<void> loadEquipments() async {
-  final box = Hive.box(_boxName);
-  try {
-    final raw = box.get(_keyEquipments, defaultValue: []);
-    var equipments = (raw as List)
-        .whereType<Map>()
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
+  // Future<void> loadEquipments() async {
+  //   final box = Hive.box(_boxName);
+  //   try {
+  //     final raw = box.get(_keyEquipments, defaultValue: []);
+  //     var equipments = (raw as List)
+  //         .whereType<Map>()
+  //         .map((e) => Map<String, dynamic>.from(e))
+  //         .toList();
 
-    // ✅ Apply filter if provided
-    if (_filter != null && _filter!.isNotEmpty) {
-      equipments = equipments.where((equip) {
-        final code = equip["Code"] ?? ""; // or "CardCode" if you store it like docs
-        try {
-          return code.toString().toLowerCase().contains(_filter!.toLowerCase());
-        } catch (e) {
-          return false;
+  //     // ✅ Apply filter if provided
+  //     if (_filter != null && _filter!.isNotEmpty) {
+  //       equipments = equipments.where((equip) {
+  //         final code =
+  //             equip["Code"] ?? ""; // or "CardCode" if you store it like docs
+  //         try {
+  //           return code
+  //               .toString()
+  //               .toLowerCase()
+  //               .contains(_filter!.toLowerCase());
+  //         } catch (e) {
+  //           return false;
+  //         }
+  //       }).toList();
+  //     }
+
+  //     _equipments = equipments;
+  //   } catch (e) {
+  //     debugPrint("Error loading offline equipments: $e");
+  //     _equipments = [];
+  //   } finally {
+  //     notifyListeners();
+  //   }
+  // }
+  Future<void> loadEquipments() async {
+    final box = Hive.box(_boxName);
+    try {
+      final raw = box.get(_keyEquipments, defaultValue: []);
+      var equipments = (raw as List)
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+
+      // Apply filter if provided
+      if (_filter != null && _filter!.isNotEmpty) {
+        equipments = equipments.where((equip) {
+          final code = equip["Code"] ?? "";
+          try {
+            return code
+                .toString()
+                .toLowerCase()
+                .contains(_filter!.toLowerCase());
+          } catch (e) {
+            return false;
+          }
+        }).toList();
+      }
+
+      // Sort by savedAt descending; if missing, order by DocEntry descending
+      equipments.sort((a, b) {
+        final aSavedAt = a['savedAt']?.toString();
+        final bSavedAt = b['savedAt']?.toString();
+
+        if (aSavedAt != null && bSavedAt != null) {
+          return bSavedAt.compareTo(aSavedAt);
+        } else if (aSavedAt != null) {
+          return -1; // a comes first
+        } else if (bSavedAt != null) {
+          return 1; // b comes first
+        } else {
+          // both savedAt missing, fallback to DocEntry descending
+          final aDoc = a['DocEntry'] ?? 0;
+          final bDoc = b['DocEntry'] ?? 0;
+          return (bDoc as int).compareTo(aDoc as int);
         }
-      }).toList();
-    }
+      });
 
-    _equipments = equipments;
-  } catch (e) {
-    debugPrint("Error loading offline equipments: $e");
-    _equipments = [];
-  } finally {
-    notifyListeners();
+      _equipments = equipments;
+    } catch (e) {
+      debugPrint("Error loading offline equipments: $e");
+      _equipments = [];
+    } finally {
+      notifyListeners();
+    }
   }
-}
+
+  Future<void> saveDocuments(List<dynamic> docs) async {
+    try {
+      final box = await Hive.openBox(_boxName); // make sure the box is open
+      await box.put(_keyEquipments, docs); // save the list
+      _equipments = docs; // update local state
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error saving offline equipments: $e");
+    }
+  }
 
   /// Save a new equipment offline
   Future<void> addEquipment(Map<String, dynamic> payload) async {
@@ -99,13 +176,37 @@ class EquipmentOfflineProvider with ChangeNotifier {
   }
 
   /// Update an existing equipment by index
-  Future<void> updateEquipment(int index, Map<String, dynamic> payload) async {
+/// Update an existing equipment by looking for its 'id'
+  Future<void> updateEquipment(Map<String, dynamic> payload) async {
+    // 1. Get the box and the existing list
     final box = Hive.box(_boxName);
     final List<dynamic> existing = box.get(_keyEquipments, defaultValue: []);
-    if (index >= 0 && index < existing.length) {
-      existing[index] = payload;
+
+    // 2. Get the ID of the equipment we want to update
+    final idToUpdate = payload['Code'];
+
+    // Check if we have an ID to work with
+    if (idToUpdate == null) {
+      debugPrint("Error: Payload is missing a unique 'id' for update.");
+      return;
+    }
+
+    // 3. Find the index of the equipment with the matching ID
+    // We cast to Map<String, dynamic> to safely access the 'id' key.
+    final indexToUpdate = existing.indexWhere(
+      (item) => (item as dynamic)['Code'] == idToUpdate,
+    );
+
+    // 4. Update the list if the item was found
+    if (indexToUpdate != -1) {
+      existing[indexToUpdate] = payload; // Update the item at the found index
+
+      // 5. Save the updated list and refresh local state
       await box.put(_keyEquipments, existing);
-      await loadEquipments();
+      await loadEquipments(); // refresh
+    } else {
+      debugPrint(
+          "Warning: Equipment with ID $idToUpdate not found for update.");
     }
   }
   //refresh
@@ -216,10 +317,12 @@ class EquipmentOfflineProvider with ChangeNotifier {
   }
 
   /// Save equipment offline with components, parts, and images as base64
-  Future<bool> saveEquipmentOffline({
-    required Map<String, dynamic> data,
-  }) async {
+  Future<bool> saveEquipmentOffline(
+      {required Map<String, dynamic> data,
+      required BuildContext context}) async {
     _submit = true;
+    MaterialDialog.loading(context); // Show loading dialog
+
     notifyListeners();
 
     try {
@@ -234,6 +337,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
         "files": fileDataList,
         "CK_CUSEQUI01Collection": _components,
         "CK_CUSEQUI02Collection": _parts,
+        "sync_status": "pending", // or use isPending: true
         "savedAt": DateTime.now().toIso8601String(),
       };
 
@@ -241,15 +345,29 @@ class EquipmentOfflineProvider with ChangeNotifier {
       print(_equipments);
       // Clear temp collections
       clearCollection();
+      MaterialDialog.close(context); // Show loading dialog
+
       _submit = false;
+      await MaterialDialog.createdSuccess(
+        context,
+      );
       notifyListeners();
 
       return true;
     } catch (e) {
-      debugPrint("Error saving equipment offline: $e");
-      _submit = false;
+      await MaterialDialog.warning(
+        context,
+        title: "Error",
+        body: e.toString(),
+      );
       notifyListeners();
       return false;
+    } finally {
+      _submit = false;
+      _components = [];
+      _parts = [];
+      _imagesList = [];
+      MaterialDialog.close(context); // Show loading dialog
     }
   }
 }

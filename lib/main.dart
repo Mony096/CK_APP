@@ -17,6 +17,7 @@ import 'package:bizd_tech_service/provider/service_list_ticket_provider_offline.
 import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/site_list_provider.dart';
+import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/wrapper_screen.dart';
 import 'package:flutter/material.dart';
@@ -104,17 +105,14 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ServiceListProvider()),
       ChangeNotifierProvider(create: (_) => CompletedServiceProvider()),
       ChangeNotifierProvider(create: (_) => HelperProvider()), // <-- Added
-      ChangeNotifierProvider(
-          create: (_) =>
-              ItemListProvider()), // <-- AddedServiceListProviderOffline
+      ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- AddedServiceListProviderOffline
       ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
-      ChangeNotifierProvider(
-          create: (_) => ServiceListProviderOffline()), // <-- Added
-      ChangeNotifierProvider(
-          create: (_) => ServiceTicketListProviderOffline()), // <-- Added
+      ChangeNotifierProvider(create: (_) => ServiceListProviderOffline()), // <-- Added
+      ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
       ChangeNotifierProvider(create: (_) => CustomerListProviderOffline()),
       ChangeNotifierProvider(create: (_) => ItemListProviderOffline()),
       ChangeNotifierProvider(create: (_) => EquipmentOfflineProvider()),
+      ChangeNotifierProvider(create: (_) => SiteListProviderOffline()),
 
       // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],

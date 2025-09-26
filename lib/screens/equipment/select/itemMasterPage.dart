@@ -75,6 +75,8 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
 // }
   void onPressed(dynamic bp) {
     Navigator.pop(context, bp);
+        _refreshData();
+
   }
 
   @override

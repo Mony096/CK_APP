@@ -249,9 +249,8 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       // --- Find the equipment by code or unique identifier ---
       final offlineData = provider.equipments.firstWhere(
         (e) => e['Code'] == widget.data['Code'],
-        orElse: () => {},
+        orElse: () => <String, dynamic>{},
       );
-
       if (offlineData.isEmpty) {
         // Not found offline, fallback to default or show warning
         await MaterialDialog.warning(
@@ -283,24 +282,31 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             offlineData["U_ck_WarExpDate"]?.toString().split("T").first ?? "";
       });
 
-      // --- Populate provider with components, parts, and images ---
+      // --- Populate provider with components, parts ---
       provider.setComponents(
           List<dynamic>.from(offlineData["CK_CUSEQUI01Collection"] ?? []));
       provider.setParts(
           List<dynamic>.from(offlineData["CK_CUSEQUI02Collection"] ?? []));
 
-      // Convert stored base64 files back to temporary File objects
+      // --- Convert stored base64 files back to temporary File objects ---
       final List<File> offlineFiles = [];
       if (offlineData["files"] != null) {
+        int i = 0;
         for (var fileMap in offlineData["files"]) {
           final bytes = base64Decode(fileMap["data"]);
           final tempDir = await getTemporaryDirectory();
-          final filePath = "${tempDir.path}/${fileMap['name']}";
+
+          // ✅ ensure unique filename (avoids overwriting)
+          final filePath =
+              "${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_${i}_${fileMap['name']}";
           final file = File(filePath);
           await file.writeAsBytes(bytes);
           offlineFiles.add(file);
+          i++;
         }
       }
+
+      // ✅ Replace images list (not append duplicates)
       provider.setImages(offlineFiles);
 
       print("Loaded offline images: ${offlineFiles.length}");
@@ -390,24 +396,22 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       return;
     }
     await Provider.of<EquipmentOfflineProvider>(context, listen: false)
-        .saveEquipmentOffline(
-      data: {
-        "U_ck_eqStatus": equipType.text,
-        "U_ck_CusCode": customerCode.text,
-        "U_ck_CusName": customerName.text,
-        "U_ck_siteCode": site.text,
-        "Code": equipCode.text,
-        "Name": equipName.text,
-        "U_ck_eqSerNum": serialNumber.text,
-        "U_ck_eqBrand": brand.text,
-        "U_ck_eqModel": model.text,
-        "U_ck_Remark": remark.text,
-        "U_ck_InstalDate": installedDate.text,
-        "U_ck_NsvDate": nextDate.text,
-        "U_ck_WarExpDate": warrantyDate.text,
-        // Components, parts, and images are automatically included from provider
-      },
-    );
+        .saveEquipmentOffline(data: {
+      "U_ck_eqStatus": equipType.text,
+      "U_ck_CusCode": customerCode.text,
+      "U_ck_CusName": customerName.text,
+      "U_ck_siteCode": site.text,
+      "Code": equipCode.text,
+      "Name": equipName.text,
+      "U_ck_eqSerNum": serialNumber.text,
+      "U_ck_eqBrand": brand.text,
+      "U_ck_eqModel": model.text,
+      "U_ck_Remark": remark.text,
+      "U_ck_InstalDate": installedDate.text,
+      "U_ck_NsvDate": nextDate.text,
+      "U_ck_WarExpDate": warrantyDate.text,
+      // Components, parts, and images are automatically included from provider
+    }, context: context);
   }
 
   void clearAllFields() {
@@ -428,7 +432,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     nextDate.clear();
     warrantyDate.clear();
     final provider =
-        Provider.of<EquipmentCreateProvider>(context, listen: false);
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
     provider.setComponents([]);
     provider.setParts([]);
   }
@@ -438,7 +442,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     return WillPopScope(
       onWillPop: () async {
         final provider =
-            Provider.of<EquipmentCreateProvider>(context, listen: false);
+            Provider.of<EquipmentOfflineProvider>(context, listen: false);
         provider.clearCollection();
 
         return true; // Allow navigation to pop
@@ -469,7 +473,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                         children: [
                           GestureDetector(
                               onTap: () => {
-                                    Provider.of<EquipmentCreateProvider>(
+                                    Provider.of<EquipmentOfflineProvider>(
                                             context,
                                             listen: false)
                                         .clearCollection(),

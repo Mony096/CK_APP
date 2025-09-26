@@ -6,11 +6,15 @@ import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/site_list_provider.dart';
+import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
 import 'package:bizd_tech_service/screens/service/service.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -466,126 +470,121 @@ class _DashboardState extends State<Dashboard>
         Provider.of<ItemListProvider>(context, listen: false);
     final offlineProviderItem =
         Provider.of<ItemListProviderOffline>(context, listen: false);
-    //   final offlineProvider =
-    //       Provider.of<ServiceListProviderOffline>(context, listen: false);
-
+    final onlineProviderSite =
+        Provider.of<SiteListProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
+    final onlineProviderEquipment =
+        Provider.of<EquipmentListProvider>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
     final offlineDocument = offlineProvider.documents;
-    if (offlineDocument.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-          behavior: SnackBarBehavior.floating,
-          elevation: 10,
-          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          content: const Row(
-            children: [
-              Icon(Icons.remove_circle, color: Colors.white, size: 28),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Services have already been downloaded.",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 4),
-        ),
-      );
-      MaterialDialog.close(context);
+    if (offlineDocument.isNotEmpty) return;
 
-      return;
-    }
-    ;
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
         String statusMessage = "Starting download...";
+        double progress = 0.0;
         bool isDownloadStarted = false;
+
+        final steps = [
+          "Downloading Service Tickets...",
+          "Saving Service Tickets...",
+          "Downloading Customers...",
+          "Saving Customers...",
+          "Downloading Items...",
+          "Saving Items...",
+          "Downloading Sites...",
+          "Saving Sites...",
+          "Downloading Equipment...",
+          "Saving Equipment...",
+        ];
 
         return StatefulBuilder(
           builder: (statefulContext, setState) {
+            Future<void> updateStep(int index, String message) async {
+              setState(() {
+                statusMessage = message;
+                progress = (index + 1) / steps.length;
+              });
+            }
+
             if (!isDownloadStarted) {
               isDownloadStarted = true;
               Future.microtask(() async {
                 try {
-                  // --- Step 1: Download Service Tickets ---
-                  setState(() {
-                    statusMessage = "Downloading Service Tickets...";
-                  });
+                  // --- Step 1: Service Tickets ---
+                  await updateStep(0, steps[0]);
                   await onlineProvider.fetchDocumentTicket(
                     loadMore: false,
                     isSetFilter: false,
                     context: statefulContext,
                   );
-                  setState(() {
-                    statusMessage =
-                        "Saving Service Tickets to offline storage...";
-                  });
-                  // Await the save operation. It will now run after the clear is finished.
+
+                  await updateStep(1, steps[1]);
                   await offlineProvider
                       .saveDocuments(onlineProvider.documentsTicket);
 
-                  // --- Step 2: Download Customer ---
-                  setState(() {
-                    statusMessage = "Downloading Customer...";
-                  });
+                  // --- Step 2: Customers ---
+                  await updateStep(2, steps[2]);
                   await onlineProviderCustomer.fetchDocumentOffline(
                     loadMore: false,
                     isSetFilter: false,
                     context: statefulContext,
                   );
-                  setState(() {
-                    statusMessage = "Saving Customer to offline storage...";
-                  });
-                  // Await the save operation. It will now run after the clear is finished.
+
+                  await updateStep(3, steps[3]);
                   await offlineProviderCustomer
                       .saveDocuments(onlineProviderCustomer.documentOffline);
-                  // --- Step 3: Download Item ---
-                  setState(() {
-                    statusMessage = "Downloading Items...";
-                  });
+
+                  // --- Step 3: Items ---
+                  await updateStep(4, steps[4]);
                   await onlineProviderItem.fetchDocumentOffline(
                     loadMore: false,
                     isSetFilter: false,
                     context: statefulContext,
                   );
-                  setState(() {
-                    statusMessage = "Saving Item to offline storage...";
-                  });
-                  // print(onlineProviderItem.documentOffline);
 
-                  // Await the save operation. It will now run after the clear is finished.
+                  await updateStep(5, steps[5]);
                   await offlineProviderItem
                       .saveDocuments(onlineProviderItem.documentOffline);
+
+                  // --- Step 4: Sites ---
+                  await updateStep(6, steps[6]);
+                  await onlineProviderSite.fetchOfflineDocuments(
+                    loadMore: false,
+                    isSetFilter: false,
+                  );
+
+                  await updateStep(7, steps[7]);
+                  await offlineProviderSite
+                      .saveDocuments(onlineProviderSite.documentOffline);
+
+                  // --- Step 5: Equipment ---
+                  await updateStep(8, steps[8]);
+                  await onlineProviderEquipment.fetchOfflineDocuments(
+                    loadMore: false,
+                    isSetFilter: false,
+                  );
+
+                  await updateStep(9, steps[9]);
+                  await offlineProviderEquipment
+                      .saveDocuments(onlineProviderEquipment.documentOffline);
+
+                  //All download Done
                   await _fetchTicketCounts();
+                  setState(() {
+                    progress = 1.0;
+                    statusMessage = "All documents downloaded successfully!";
+                  });
+                  await Future.delayed(const Duration(seconds: 1));
 
-                  // Download complete
-                  if (Navigator.of(dialogContext).canPop()) {
-                    Navigator.of(dialogContext).pop();
-                  }
-
-                  // ScaffoldMessenger.of(statefulContext).showSnackBar(
-                  //   const SnackBar(
-                  //     content: Text("All documents downloaded successfully!"),
-                  //     backgroundColor: Colors.green,
-                  //   ),
-                  // );
+                  // ✅ Done
                   MaterialDialog.close(context);
+                  MaterialDialog.close(context);
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       backgroundColor: const Color.fromARGB(255, 66, 83, 100),
@@ -600,16 +599,16 @@ class _DashboardState extends State<Dashboard>
                           horizontal: 14, vertical: 14),
                       content: const Row(
                         children: [
-                          Icon(Icons.remove_circle,
-                              color: Colors.white, size: 28),
-                          SizedBox(width: 16),
+                          // Icon(Icons.remove_circle,
+                          //     color: Colors.white, size: 28),
+                          // SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "All documents downloaded successfully!.",
+                                  "✅ All documents downloaded successfully!",
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
@@ -624,35 +623,43 @@ class _DashboardState extends State<Dashboard>
                     ),
                   );
                 } catch (e) {
-                  // Download failed
-                  await offlineProvider.saveDocuments([]);
-                  if (Navigator.of(dialogContext).canPop()) {
-                    Navigator.of(dialogContext).pop();
-                  }
-                  ScaffoldMessenger.of(statefulContext).showSnackBar(
-                    SnackBar(
-                      content: Text("Failed to download: $e"),
-                      backgroundColor: Colors.red,
-                    ),
+                  await offlineProvider.clearDocuments();
+                  await offlineProviderCustomer.clearDocuments();
+                  await offlineProviderItem.clearDocuments();
+                  // await offlineProviderEquipment.clearEquipments();
+                  await offlineProviderSite.clearDocuments();
+                  await _fetchTicketCounts();
+                  MaterialDialog.close(context);
+                  await MaterialDialog.warning(
+                    context,
+                    title: "Error",
+                    body: e.toString(),
                   );
                 }
               });
             }
 
             return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Colors.green,
-                    ),
-                  ),
+                  const Icon(Icons.cloud_download,
+                      size: 40, color: Colors.blue),
                   const SizedBox(height: 16),
-                  Text(statusMessage),
+                  LinearProgressIndicator(value: progress),
+                  const SizedBox(height: 12),
+                  Text(
+                    statusMessage,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "${(progress * 100).toStringAsFixed(0)}%",
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                 ],
               ),
             );
@@ -671,6 +678,9 @@ class _DashboardState extends State<Dashboard>
         Provider.of<ItemListProviderOffline>(context, listen: false);
     final offlineProviderEquipment =
         Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
+        
     final offlineDocument = offlineProviderService.documents;
     if (offlineDocument.isEmpty) return;
     MaterialDialog.warningClearDataDialog(
@@ -693,6 +703,7 @@ class _DashboardState extends State<Dashboard>
           await offlineProviderServiceCustomer.clearDocuments();
           await offlineProviderServiceItem.clearDocuments();
           await offlineProviderEquipment.clearEquipments();
+          await offlineProviderSite.clearDocuments();
           await _fetchTicketCounts();
 
           // Hide loading popup
@@ -749,6 +760,74 @@ class _DashboardState extends State<Dashboard>
         }
       },
     );
+    // Show loading popup
+  }
+
+  Future<dynamic> syncAllProcessToSAP() async {
+    MaterialDialog.loading(context);
+
+    try {
+      final res1 =
+          await Provider.of<CompletedServiceProvider>(context, listen: false)
+              .syncAllOfflineServicesToSAP(context);
+      // Sync Equipment Data
+      final res2 =
+          await Provider.of<EquipmentCreateProvider>(context, listen: false)
+              .syncAllOfflineEquipmentToSAP(context);
+      if (res1 == false && res2 == false) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: const Row(
+              children: [
+                Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "No offline data to synchronize.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        MaterialDialog.close(context);
+        MaterialDialog.close(context);
+
+        return;
+      }
+      MaterialDialog.close(context);
+      await MaterialDialog.allSyncSuccess(context);
+      return true;
+    } catch (e) {
+      // Hide loading popup
+      Navigator.of(context).pop();
+      await MaterialDialog.warning(
+        context,
+        title: "Error",
+        body: e.toString(),
+      );
+      return false;
+    }
+
     // Show loading popup
   }
 
@@ -884,14 +963,14 @@ class _DashboardState extends State<Dashboard>
               ),
             ),
             ListTile(
-              leading: Icon(Icons.cloud_upload, size: 23, color: Colors.green),
-              title: Text("Sync to SAP", style: TextStyle(color: Colors.black)),
+              leading:
+                  const Icon(Icons.cloud_upload, size: 23, color: Colors.green),
+              title: const Text("Sync to SAP",
+                  style: TextStyle(color: Colors.black)),
               onTap: () async {
                 // if (completedService.isEmpty) return;
 
-                final res = await Provider.of<CompletedServiceProvider>(context,
-                        listen: false)
-                    .syncAllOfflineServicesToSAP(context);
+                final res = await syncAllProcessToSAP();
                 if (res) {
                   _fetchTicketCounts();
                 }
@@ -899,6 +978,22 @@ class _DashboardState extends State<Dashboard>
                 Navigator.of(context).pop();
               },
             ),
+            // ListTile(
+            //   leading:
+            //       const Icon(Icons.done_rounded, size: 23, color: Colors.green),
+            //   title: const Text("Completed",
+            //       style: TextStyle(color: Colors.black)),
+            //   onTap: () async {
+            //     // if (completedService.isEmpty) return;
+
+            //     final res = await syncAllProcessToSAP();
+            //     if (res) {
+            //       _fetchTicketCounts();
+            //     }
+
+            //     Navigator.of(context).pop();
+            //   },
+            // ),
             ListTile(
               leading: Icon(Icons.download,
                   color: documentOffline.isNotEmpty
@@ -944,6 +1039,9 @@ class _DashboardState extends State<Dashboard>
                 );
               },
             ),
+            SizedBox(
+              height: 45,
+            )
           ],
         ),
       ),

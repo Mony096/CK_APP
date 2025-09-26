@@ -54,7 +54,8 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
   Future<void> _refreshData() async {
     setState(() => _initialLoading = true);
 
-    final provider = Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final provider =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
     // ✅ Only fetch if not already loaded
     await provider.refreshDocuments();
     setState(() => _initialLoading = false);
@@ -69,6 +70,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
 // }
   void onPressed(dynamic bp) {
     Navigator.pop(context, bp);
+    _refreshData();
   }
 
   @override

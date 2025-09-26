@@ -115,15 +115,10 @@ class CustomerListProvider extends ChangeNotifier {
         // _hasMore = data.length == _limit;
         // _skip += _limit;
       } else {
-        throw Exception("Failed to load documents Customer offline");
+        throw Exception("Failed to Download Customer");
       }
     } catch (e) {
-      await MaterialDialog.warning(
-        context,
-        title: "Error",
-        body: e.toString(),
-      );
-      print("Error fetching documents Customer offline: $e");
+      throw Exception(e.toString());
     } finally {
       if (isSetFilter) _isLoadingSetFilter = false;
       _isLoading = false;
