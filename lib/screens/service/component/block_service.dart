@@ -90,7 +90,10 @@ class BlockService extends StatelessWidget {
                             children: [
                               Text(
                                 data["CustomerName"] ?? "N/A",
-                                style: const TextStyle(fontSize: 12.5),
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.033),
                                 textScaleFactor: 1.0,
                               ),
                               const SizedBox(height: 6),
@@ -102,8 +105,9 @@ class BlockService extends StatelessWidget {
                                             .first["StreetNo"] ??
                                         "N/A")
                                     : "N/A",
-                                style: const TextStyle(
-                                  fontSize: 12.5,
+                                style: TextStyle(
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.032,
                                   fontWeight: FontWeight.bold,
                                   height: 2,
                                 ),
@@ -125,16 +129,21 @@ class BlockService extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                const Text(
+                                Text(
                                   "No: ",
-                                  style: TextStyle(fontSize: 13),
+                                  style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.033),
                                   textScaleFactor: 1.0,
                                 ),
                                 Text(
                                   "${data["DocNum"]}",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13),
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.033),
                                   textScaleFactor: 1.0,
                                 ),
                               ],
@@ -288,7 +297,7 @@ class BlockService extends StatelessWidget {
                   Expanded(
                       flex: 2,
                       child: Container(
-                        margin: EdgeInsets.only(bottom: 20),
+                        margin: const EdgeInsets.only(bottom: 20),
                         child: Row(
                           children: [
                             const Icon(
@@ -301,8 +310,11 @@ class BlockService extends StatelessWidget {
                             ),
                             Text(
                                 "${data["U_CK_Time"] ?? "No Time"} - ${data["U_CK_EndTime"] ?? "No Time"}",
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.032),
                                 textScaleFactor: 1.0),
                           ],
                         ),
@@ -314,7 +326,7 @@ class BlockService extends StatelessWidget {
                       child: Container(
                         width: 100,
                         height: 35,
-                        margin: EdgeInsets.only(left: 3),
+                        margin: const EdgeInsets.only(left: 3),
                         decoration: BoxDecoration(
                           color: Colors.yellow,
                           borderRadius: BorderRadius.circular(5.0),
@@ -330,8 +342,10 @@ class BlockService extends StatelessWidget {
                             ),
                           ),
                           child: Text("${data["U_CK_JobType"] ?? "N/A"}",
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 12),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: MediaQuery.of(context).size.width *
+                                      0.030),
                               textScaleFactor: 1.0),
                         ),
                       ),
@@ -358,16 +372,15 @@ class BlockService extends StatelessWidget {
                         onTap: () {
                           goTo(context, ServiceByIdScreen(data: data));
                         },
-                        child:  Center(
-                            child: SizedBox(
-                              height: 50,
-                              child: Icon(
-                                Icons.keyboard_arrow_up,
-                                color: Colors.green,
-                                size: 35,
-                              ),
+                        child: const Center(
+                          child: SizedBox(
+                            height: 50,
+                            child: Icon(
+                              Icons.keyboard_arrow_up,
+                              color: Colors.green,
+                              size: 35,
                             ),
-                          
+                          ),
                         ),
                       )),
                   const SizedBox(
@@ -413,15 +426,21 @@ class BlockService extends StatelessWidget {
                                       Text(
                                           "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
                                           style:
-                                              const TextStyle(fontSize: 12.5),
+                                               TextStyle(fontSize:  MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.031),
                                           textScaleFactor: 1.0),
                                       const SizedBox(
                                         height: 6,
                                       ),
                                       Text(
                                         "SN: ${(data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
-                                        style: const TextStyle(
-                                          fontSize: 12.5,
+                                        style:  TextStyle(
+                                          fontSize:  MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.031,
                                           fontWeight: FontWeight.bold,
                                           height: 2,
                                         ),
@@ -472,7 +491,10 @@ class BlockService extends StatelessWidget {
                                                       255, 8, 8, 8)
                                                   : const Color.fromARGB(
                                                       255, 255, 255, 255),
-                                              fontSize: 13),
+                                              fontSize:  MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.031),
                                           textScaleFactor: 1.0),
                                     ),
                                   ),

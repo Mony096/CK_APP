@@ -287,10 +287,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
                             borderRadius: BorderRadius.circular(5.0),
                           ),
                         ),
-                        child: const Text("GO",
+                        child: Text("GO",
                             style: TextStyle(
-                                color: Color.fromARGB(255, 255, 255, 255),
-                                fontSize: 15),
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.035),
                             textScaleFactor: 1.0),
                       ),
                     ),
@@ -356,84 +357,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-class DateSelector extends StatefulWidget {
-  final void Function(DateTime)? onDateChanged;
-
-  const DateSelector({super.key, this.onDateChanged});
-
-  @override
-  _DateSelectorState createState() => _DateSelectorState();
-}
-
-class _DateSelectorState extends State<DateSelector> {
-  DateTime? _selectedDate; // 👈 start as null
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime initialDate = _selectedDate ?? DateTime.now();
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() => _selectedDate = picked);
-      widget.onDateChanged?.call(_selectedDate!);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final formattedDate = _selectedDate != null
-        ? DateFormat('dd MMMM yyyy').format(_selectedDate!)
-        : "No Date Selection"; // 👈 show placeholder when empty
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.green, width: 1.0),
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      width: double.infinity,
-      height: 50,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const Expanded(flex: 1, child: Icon(Icons.date_range)),
-          Expanded(
-            flex: 4,
-            child: Text(
-              formattedDate,
-              style: const TextStyle(fontSize: 13),
-              textScaleFactor: 1.0,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.keyboard_arrow_left,
-                      size: 30, color: Color.fromARGB(255, 88, 89, 90)),
-                  onPressed: () => _selectDate(context),
-                ),
-                const SizedBox(width: 3),
-                IconButton(
-                  icon: const Icon(Icons.keyboard_arrow_right,
-                      size: 30, color: Color.fromARGB(255, 88, 89, 90)),
-                  onPressed: () => _selectDate(context),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

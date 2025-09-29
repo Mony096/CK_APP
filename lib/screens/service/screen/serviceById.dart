@@ -442,8 +442,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             Text(
                                                 widget.data["CustomerName"] ??
                                                     "N/A", //////aaaaaaaaaaaaa
-                                                style: const TextStyle(
-                                                    fontSize: 12.5),
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0),
                                             const SizedBox(
                                               height: 6,
@@ -459,8 +463,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                             .first["StreetNo"] ??
                                                         "N/A")
                                                     : "N/A",
-                                                style: const TextStyle(
-                                                  fontSize: 12.5,
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.032,
                                                   fontWeight: FontWeight.bold,
                                                   height: 2,
                                                 ),
@@ -485,16 +493,25 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 "No: ",
-                                                style: TextStyle(fontSize: 13),
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                               Text(
                                                 "${widget.data["DocNum"]}",
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 13),
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                             ],
@@ -539,9 +556,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                   ),
                                                   Text(
                                                       "${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")} ",
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                           color: Colors.white,
-                                                          fontSize: 12.5),
+                                                          fontSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.031),
                                                       textScaleFactor: 1.0),
                                                 ],
                                               ),
@@ -562,9 +583,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                   ),
                                                   Text(
                                                       "${widget.data["U_CK_Time"] ?? "No Time"} - ${widget.data["U_CK_EndTime"] ?? "No Time"}",
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                           color: Colors.white,
-                                                          fontSize: 12.5),
+                                                          fontSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.031),
                                                       textScaleFactor: 1.0),
                                                 ],
                                               ),
@@ -598,9 +623,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                                   ),
                                                   child: Text(
                                                       "${widget.data["U_CK_JobType"] ?? "N/A"}",
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                           color: Colors.black,
-                                                          fontSize: 12),
+                                                          fontSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.030),
                                                       textScaleFactor: 1.0),
                                                 ),
                                               ),
@@ -629,16 +658,26 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             size: 20,
                                             color: Colors.white,
                                           ),
-                                          const SizedBox(
-                                            width: 5,
+                                          const SizedBox(width: 5),
+                                          Flexible(
+                                            child: Text(
+                                              userName ?? "...",
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.031,
+                                                color: Colors.white,
+                                              ),
+                                              textScaleFactor: 1.0,
+                                              overflow: TextOverflow
+                                                  .ellipsis, // ⬅️ important
+                                              maxLines:
+                                                  1, // ⬅️ keep it one line
+                                            ),
                                           ),
-                                          Text(userName ?? "...",
-                                              style: const TextStyle(
-                                                  fontSize: 12.5,
-                                                  color: Colors.white),
-                                              textScaleFactor: 1.0),
                                         ],
-                                      ),
+                                      )
                                     ],
                                   ),
                                 ),
@@ -681,10 +720,11 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
                               "${widget.data["CustomerName"] ?? "N/A"}s' Information",
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.034,
                                 // fontWeight: FontWeight.w500,
-                                color: Color.fromARGB(221, 85, 81, 81),
+                                color: const Color.fromARGB(221, 85, 81, 81),
                               ),
                             ),
                           ),
@@ -942,10 +982,12 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                         )
                       ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(30, 10, 5, 10),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(30, 10, 5, 10),
                       child: Text("Service task remark for technician",
-                          style: TextStyle(fontSize: 12.5),
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.033),
                           textScaleFactor: 1.0),
                     ),
                     Container(
@@ -968,11 +1010,14 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                             BorderRadius.circular(5.0),
                                       ),
                                     ),
-                                    child: const Text("Reject",
+                                    child: Text("Reject",
                                         style: TextStyle(
-                                            color: Color.fromARGB(
+                                            color: const Color.fromARGB(
                                                 255, 255, 255, 255),
-                                            fontSize: 12),
+                                            fontSize: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.031),
                                         textScaleFactor: 1.0),
                                   )
                                 : Container(),
@@ -1007,7 +1052,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                           ? const Color.fromARGB(255, 8, 8, 8)
                                           : const Color.fromARGB(
                                               255, 255, 255, 255),
-                                      fontSize: 12),
+                                      fontSize:  MediaQuery.of(context).size.width *
+                                              0.031),
                                   textScaleFactor: 1.0),
                             ),
                           ),
@@ -1093,7 +1139,7 @@ Future<void> _showConfirmationDialog({
         ),
         title: Text(
           title,
-          style: const TextStyle(fontSize: 19,fontWeight: FontWeight.w400),
+          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w400),
         ),
         content: Text(
           content,

@@ -461,7 +461,10 @@ class _DashboardState extends State<Dashboard>
       IconData icon, String title, int index, Widget screen, bool disabled) {
     return ListTile(
       leading: Icon(icon, color: Colors.black87),
-      title: Text(title, style: const TextStyle(color: Colors.black87)),
+      title: Text(title,
+          style: TextStyle(
+              color: Colors.black87,
+              fontSize: MediaQuery.of(context).size.width * 0.039)),
       onTap: () {
         // Navigator.push(
         //   context,
@@ -886,25 +889,12 @@ class _DashboardState extends State<Dashboard>
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Center(
-          child: GestureDetector(
-            onTap: () async {
-              final offlineProvider = Provider.of<ServiceListProviderOffline>(
-                  context,
-                  listen: false);
-
-              // Load documents from Hive first
-              await offlineProvider.loadDocuments();
-
-              print("Offline documents:");
-              for (var doc in offlineProvider.documents) {
-                print(doc);
-              }
-            },
-            child: const Text(
-              'Bizd Service Mobile',
-              style: TextStyle(fontSize: 17, color: Colors.white),
-              textScaleFactor: 1.0,
-            ),
+          child: Text(
+            'Bizd Service Mobile',
+            style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.04,
+                color: Colors.white),
+            textScaleFactor: 1.0,
           ),
         ),
         actions: [
@@ -935,13 +925,13 @@ class _DashboardState extends State<Dashboard>
                     color: Colors.green,
                   ),
                   indicatorSize: TabBarIndicatorSize.label,
-                  tabs: const [
+                  tabs: [
                     Tab(
                       child: Text(
                         "Tickets",
                         style: TextStyle(
-                          fontSize: 15,
-                          color: Color.fromARGB(255, 62, 62, 67),
+                          fontSize: MediaQuery.of(context).size.width * 0.036,
+                          color: const Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
                     ),
@@ -949,8 +939,8 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         "KPI",
                         style: TextStyle(
-                          fontSize: 15,
-                          color: Color.fromARGB(255, 62, 62, 67),
+                          fontSize: MediaQuery.of(context).size.width * 0.036,
+                          color: const Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
                     ),
@@ -987,12 +977,16 @@ class _DashboardState extends State<Dashboard>
               ),
               accountName: Text(
                 userName ?? '...',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: MediaQuery.of(context).size.width * 0.038),
               ),
-              accountEmail: const Text(
+              accountEmail: Text(
                 'George_Keeng88@gmail.com',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: MediaQuery.of(context).size.width * 0.035),
               ),
             ),
             Expanded(
@@ -1009,8 +1003,10 @@ class _DashboardState extends State<Dashboard>
             ListTile(
               leading:
                   const Icon(Icons.cloud_upload, size: 23, color: Colors.green),
-              title: const Text("Sync to SAP",
-                  style: TextStyle(color: Colors.black)),
+              title: Text("Sync to SAP",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: MediaQuery.of(context).size.width * 0.039)),
               onTap: () async {
                 // if (completedService.isEmpty) return;
 
@@ -1046,6 +1042,7 @@ class _DashboardState extends State<Dashboard>
               title: Text(
                 "Download",
                 style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.039,
                     color: documentOffline.isNotEmpty
                         ? const Color.fromARGB(255, 159, 162, 163)
                         : Colors.black),
@@ -1061,6 +1058,7 @@ class _DashboardState extends State<Dashboard>
                       : Colors.red),
               title: Text("Clear",
                   style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.039,
                       color: documentOffline.isEmpty
                           ? const Color.fromARGB(255, 159, 162, 163)
                           : Colors.black)),
@@ -1071,7 +1069,11 @@ class _DashboardState extends State<Dashboard>
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.black54),
-              title: const Text("Log out"),
+              title: Text(
+                "Log out",
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.039),
+              ),
               onTap: () async {
                 MaterialDialog.loading(context);
                 await clearOfflineDataWithLogout(context);
@@ -1084,7 +1086,7 @@ class _DashboardState extends State<Dashboard>
                 );
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 45,
             )
           ],
@@ -1208,8 +1210,9 @@ class _DashboardState extends State<Dashboard>
                             children: [
                               Text(
                                 group["date"],
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style: TextStyle(
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.035,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1228,8 +1231,8 @@ class _DashboardState extends State<Dashboard>
                           ),
                           subtitle: Text(
                             "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 13),
+                            style: TextStyle(
+                                color: Colors.grey, fontSize: MediaQuery.of(context).size.width * 0.031),
                           ),
                           // ✅ custom right icon
                           // ✅ custom rotating arrow
@@ -1386,8 +1389,10 @@ class _DashboardState extends State<Dashboard>
                           const SizedBox(width: 3),
                           Text(
                             "Ticket - No. ${index + 1}",
-                            style: const TextStyle(
-                                fontSize: 13, color: Colors.grey),
+                            style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.030,
+                                color: Colors.grey),
                             textScaleFactor: 1.0,
                           ),
                         ],
@@ -1404,8 +1409,9 @@ class _DashboardState extends State<Dashboard>
                             ),
                             child: Text(
                               "${data["U_CK_JobType"] ?? "N/A"}",
-                              style: const TextStyle(
-                                fontSize: 11,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.025,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
@@ -1424,8 +1430,9 @@ class _DashboardState extends State<Dashboard>
                             ),
                             child: Text(
                               "${data["U_CK_Status"] ?? "N/A"}",
-                              style: const TextStyle(
-                                fontSize: 11,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.025,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
@@ -1454,9 +1461,10 @@ class _DashboardState extends State<Dashboard>
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textScaleFactor: 1.0,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.032,
                             ),
                           ),
                         ],
@@ -1479,7 +1487,9 @@ class _DashboardState extends State<Dashboard>
                           //         .ellipsis,
                           softWrap: true,
                           textScaleFactor: 1.0,
-                          style: const TextStyle(fontSize: 12.5),
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.030),
                         ),
                       )),
 
@@ -1497,7 +1507,7 @@ class _DashboardState extends State<Dashboard>
                       children: [
                         Row(
                           children: [
-                            SizedBox(
+                             SizedBox(
                               width: 85,
                               child: Row(
                                 mainAxisAlignment:
@@ -1511,7 +1521,8 @@ class _DashboardState extends State<Dashboard>
                                     style: TextStyle(
                                         color:
                                             Color.fromARGB(255, 133, 134, 137),
-                                        fontSize: 13),
+                                        fontSize: MediaQuery.of(context).size.width *
+                                                0.030),
                                   ),
                                   Text(
                                     ":",
@@ -1521,25 +1532,27 @@ class _DashboardState extends State<Dashboard>
                                     style: TextStyle(
                                         color:
                                             Color.fromARGB(255, 133, 134, 137),
-                                        fontSize: 13),
+                                        fontSize: MediaQuery.of(context).size.width *
+                                                0.030),
                                   ),
                                 ],
                               ),
                             ),
                             Text(
-                              " ${data["U_CK_ServiceType"]}",
+                              " ${data["U_CK_ServiceType"] ?? "N/A"}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
                               style: TextStyle(
-                                  color: Colors.black87, fontSize: 13),
+                                  color: Colors.black87, fontSize: MediaQuery.of(context).size.width *
+                                      0.030),
                             ),
                           ],
                         ),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Row(
                           children: [
-                            SizedBox(
+                             SizedBox(
                               width: 85,
                               child: Row(
                                 mainAxisAlignment:
@@ -1553,7 +1566,8 @@ class _DashboardState extends State<Dashboard>
                                     style: TextStyle(
                                         color:
                                             Color.fromARGB(255, 133, 134, 137),
-                                        fontSize: 13),
+                                        fontSize: MediaQuery.of(context).size.width *
+                                                0.030),
                                   ),
                                   Text(
                                     ":",
@@ -1569,11 +1583,13 @@ class _DashboardState extends State<Dashboard>
                               ),
                             ),
                             Text(
-                              " ${data["U_CK_Priority"]}",
+                              " ${data["U_CK_Priority"] ?? "N/A"}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
-                              style: TextStyle(color: Colors.red, fontSize: 13),
+                              style: TextStyle(
+                                  color: Colors.red, fontSize: MediaQuery.of(context).size.width *
+                                      0.030),
                             ),
                           ],
                         ),

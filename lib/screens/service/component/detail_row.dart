@@ -276,9 +276,9 @@ class DetailRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13.5,
+                      fontSize:  MediaQuery.of(context).size.width * 0.032,
                     ),
                     textScaleFactor: 1.0,
                   ),
@@ -295,8 +295,8 @@ class DetailRow extends StatelessWidget {
                               child: Text(
                                 row.left,
                                 textScaleFactor: 1.0,
-                                style: const TextStyle(
-                                  fontSize: 12.5,
+                                style: TextStyle(
+                                  fontSize:  MediaQuery.of(context).size.width * 0.031,
                                   height: 1.5,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -313,8 +313,11 @@ class DetailRow extends StatelessWidget {
                                         row.right.toString(),
                                         textAlign: TextAlign.right,
                                         textScaleFactor: 1.0,
-                                        style: const TextStyle(
-                                          fontSize: 12.5,
+                                        style: TextStyle(
+                                          fontSize:  MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.031,
                                           height: 1.5,
                                         ),
                                         overflow: TextOverflow.ellipsis,
