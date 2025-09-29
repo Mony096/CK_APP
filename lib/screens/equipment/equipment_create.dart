@@ -436,6 +436,23 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     provider.setParts([]);
   }
 
+  void onBackScreen() {
+    MaterialDialog.warningBackScreen(
+      context,
+      title: '',
+      confirmLabel: "Yes",
+      cancelLabel: "No",
+      onConfirm: () {
+        Provider.of<EquipmentOfflineProvider>(context, listen: false)
+            .clearCollection();
+        Navigator.of(context).pop();
+      },
+
+      onCancel: () {},
+      icon: Icons.question_mark, // 👈 Pass the icon here
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -471,13 +488,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           GestureDetector(
-                              onTap: () => {
-                                    Provider.of<EquipmentOfflineProvider>(
-                                            context,
-                                            listen: false)
-                                        .clearCollection(),
-                                    Navigator.of(context).pop()
-                                  },
+                              onTap: () => {onBackScreen()},
                               child: Container(
                                   width: 28,
                                   height: 28,
@@ -554,10 +565,12 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                 const SizedBox(
                                   width: 15,
                                 ),
-                                 Text(
+                                Text(
                                   "Equipment Setup",
                                   style: TextStyle(
-                                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.05,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -629,10 +642,13 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                       : null,
                                   borderRadius: BorderRadius.circular(5),
                                 ),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
                                     "General",
-                                    style: TextStyle(fontSize: 15),
+                                    style: TextStyle(
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.035),
                                   ),
                                 ),
                               ),
@@ -660,10 +676,13 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                       : null,
                                   borderRadius: BorderRadius.circular(5),
                                 ),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
                                     "Component",
-                                    style: TextStyle(fontSize: 15),
+                                    style: TextStyle(
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.035),
                                   ),
                                 ),
                               ),
@@ -691,10 +710,13 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                       : null,
                                   borderRadius: BorderRadius.circular(5),
                                 ),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
                                     "Part",
-                                    style: TextStyle(fontSize: 15),
+                                    style: TextStyle(
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.035),
                                   ),
                                 ),
                               ),

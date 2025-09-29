@@ -106,7 +106,7 @@ class _DateForServiceListState extends State<DateForServiceList> {
                 _selectedDate != null
                     ? DateFormat("dd MMMM yyyy").format(_selectedDate!)
                     : "Document Date",
-                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.034, color: textColor),
+                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.035, color: textColor),
               ),
             ),
           ),

@@ -160,8 +160,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             children: [
               Text(
                 widget.label,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.034,
                   fontWeight: FontWeight.w500,
                   color: Color.fromARGB(221, 58, 58, 59),
                 ),
@@ -193,7 +193,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               focusNode: widget.focusNode,
               controller: widget.controller,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: MediaQuery.of(context).size.width * 0.037,
                 color: (widget.detail || widget.disabled)
                     ? Colors.black54
                     : Colors.black,

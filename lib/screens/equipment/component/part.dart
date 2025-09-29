@@ -568,10 +568,11 @@ class _PartState extends State<Part> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           // 'Add Component',
                           "Add Part",
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white,fontSize: MediaQuery.of(context).size.width *
+                                                0.034),
                         ),
                       ),
                     )
@@ -595,10 +596,11 @@ class _PartState extends State<Part> {
                             'images/svg/kjav3.svg',
                             width: 25,
                           ),
-                          const Text(
+                           Text(
                             "No Part",
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: MediaQuery.of(context).size.width *
+                                                0.034,
                               // fontWeight: FontWeight.w500,
                               color: Color.fromARGB(221, 168, 168, 171),
                             ),

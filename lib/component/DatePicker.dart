@@ -215,8 +215,9 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
             children: [
               Text(
                 widget.label,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width *
+                                                0.034,
                   fontWeight: FontWeight.w500,
                   color: Color.fromARGB(221, 58, 58, 59),
                 ),
@@ -245,7 +246,8 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
               controller: widget.controller,
               readOnly: true,
               onTap: () => _selectDate(context),
-              style: TextStyle(fontSize: 16, color: textColor),
+              style: TextStyle(fontSize: MediaQuery.of(context).size.width *
+                                                0.037, color: textColor),
               decoration: InputDecoration(
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 4, horizontal: 12),

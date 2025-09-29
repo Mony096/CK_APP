@@ -93,7 +93,7 @@ class BlockService extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize:
                                         MediaQuery.of(context).size.width *
-                                            0.033),
+                                            0.034),
                                 textScaleFactor: 1.0,
                               ),
                               const SizedBox(height: 6),
@@ -107,7 +107,7 @@ class BlockService extends StatelessWidget {
                                     : "N/A",
                                 style: TextStyle(
                                   fontSize:
-                                      MediaQuery.of(context).size.width * 0.032,
+                                      MediaQuery.of(context).size.width * 0.033,
                                   fontWeight: FontWeight.bold,
                                   height: 2,
                                 ),
@@ -134,7 +134,7 @@ class BlockService extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
-                                              0.033),
+                                              0.034),
                                   textScaleFactor: 1.0,
                                 ),
                                 Text(
@@ -143,7 +143,7 @@ class BlockService extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
-                                              0.033),
+                                              0.034),
                                   textScaleFactor: 1.0,
                                 ),
                               ],
@@ -314,7 +314,7 @@ class BlockService extends StatelessWidget {
                                     color: Colors.white,
                                     fontSize:
                                         MediaQuery.of(context).size.width *
-                                            0.032),
+                                            0.033),
                                 textScaleFactor: 1.0),
                           ],
                         ),
@@ -429,7 +429,7 @@ class BlockService extends StatelessWidget {
                                                TextStyle(fontSize:  MediaQuery.of(context)
                                                       .size
                                                       .width *
-                                                  0.031),
+                                                  0.033),
                                           textScaleFactor: 1.0),
                                       const SizedBox(
                                         height: 6,
@@ -440,7 +440,7 @@ class BlockService extends StatelessWidget {
                                           fontSize:  MediaQuery.of(context)
                                                   .size
                                                   .width *
-                                              0.031,
+                                              0.032,
                                           fontWeight: FontWeight.bold,
                                           height: 2,
                                         ),

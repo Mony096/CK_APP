@@ -22,8 +22,9 @@ class ComponentTitle extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 15,
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width *
+                                                0.037,
                 // fontWeight: FontWeight.w500,
                 color: Color.fromARGB(221, 85, 81, 81),
               ),
