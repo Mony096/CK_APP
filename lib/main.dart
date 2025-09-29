@@ -56,11 +56,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = DisableSSL();
   await Hive.initFlutter();
-  // await Hive.openBox('service_lists');
-  // await Hive.openBox('equipment_box');
-  //   await Hive.openBox('customer_lists');
-  // await Hive.openBox('item_lists');
-  //   await Hive.openBox('site_lists');
+  await Hive.openBox('service_lists');
+  await Hive.openBox('equipment_box');
+  await Hive.openBox('customer_lists');
+  await Hive.openBox('item_lists');
+  await Hive.openBox('site_lists');
 
   // await Firebase.initializeApp();
   // await LocationProvider.initializeService();
@@ -109,9 +109,12 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ServiceListProvider()),
       ChangeNotifierProvider(create: (_) => CompletedServiceProvider()),
       ChangeNotifierProvider(create: (_) => HelperProvider()), // <-- Added
-      ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- AddedServiceListProviderOffline
+      ChangeNotifierProvider(
+          create: (_) =>
+              ItemListProvider()), // <-- AddedServiceListProviderOffline
       ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
-      ChangeNotifierProvider(create: (_) => ServiceListProviderOffline()), // <-- Added
+      ChangeNotifierProvider(
+          create: (_) => ServiceListProviderOffline()), // <-- Added
       // ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
       ChangeNotifierProvider(create: (_) => CustomerListProviderOffline()),
       ChangeNotifierProvider(create: (_) => ItemListProviderOffline()),

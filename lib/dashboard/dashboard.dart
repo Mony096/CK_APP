@@ -1462,7 +1462,7 @@ class _DashboardState extends State<Dashboard>
                       ),
                     ),
                     margin: const EdgeInsets.fromLTRB(20, 10, 0, 0),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -1497,7 +1497,7 @@ class _DashboardState extends State<Dashboard>
                               ),
                             ),
                             Text(
-                              " Breakdown",
+                              " ${data["U_CK_ServiceType"]}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
@@ -1539,7 +1539,7 @@ class _DashboardState extends State<Dashboard>
                               ),
                             ),
                             Text(
-                              " High",
+                                " ${data["U_CK_Priority"]}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
