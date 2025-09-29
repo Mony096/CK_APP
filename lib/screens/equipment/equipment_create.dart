@@ -508,25 +508,25 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                   color: Colors.white,
                                 ),
                               ),
-                              IconButton(
-                                onPressed: () async {
-                                  MaterialDialog.loading(context);
-                                  await Provider.of<AuthProvider>(context,
-                                          listen: false)
-                                      .logout();
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (_) => const LoginScreen()),
-                                    (route) => false,
-                                  );
-                                },
-                                icon: const Icon(
-                                  Icons.logout,
-                                  size: 27,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              // IconButton(
+                              //   onPressed: () async {
+                              //     MaterialDialog.loading(context);
+                              //     await Provider.of<AuthProvider>(context,
+                              //             listen: false)
+                              //         .logout();
+                              //     Navigator.of(context).pop();
+                              //     Navigator.of(context).pushAndRemoveUntil(
+                              //       MaterialPageRoute(
+                              //           builder: (_) => const LoginScreen()),
+                              //       (route) => false,
+                              //     );
+                              //   },
+                              //   icon: const Icon(
+                              //     Icons.logout,
+                              //     size: 27,
+                              //     color: Colors.white,
+                              //   ),
+                              // ),
                             ],
                           )
                         ],

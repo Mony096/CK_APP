@@ -779,6 +779,35 @@ class _DashboardState extends State<Dashboard>
     // Show loading popup
   }
 
+  Future<void> clearOfflineDataWithLogout(BuildContext context) async {
+    final offlineProviderService =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final offlineProviderServiceItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
+
+    try {
+      // Clear service data
+      await offlineProviderService.clearDocuments();
+      await offlineProviderServiceCustomer.clearDocuments();
+      await offlineProviderServiceItem.clearDocuments();
+      await offlineProviderEquipment.clearEquipments();
+      await offlineProviderSite.clearDocuments();
+    } catch (e) {
+      // Hide loading popup
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to clear data: $e")),
+      );
+    }
+    // Show loading popup
+  }
+
   Future<dynamic> syncAllProcessToSAP() async {
     MaterialDialog.loading(context);
 
@@ -1045,6 +1074,7 @@ class _DashboardState extends State<Dashboard>
               title: const Text("Log out"),
               onTap: () async {
                 MaterialDialog.loading(context);
+                await clearOfflineDataWithLogout(context);
                 await Provider.of<AuthProvider>(context, listen: false)
                     .logout();
                 Navigator.of(context).pop();
@@ -1539,7 +1569,7 @@ class _DashboardState extends State<Dashboard>
                               ),
                             ),
                             Text(
-                                " ${data["U_CK_Priority"]}",
+                              " ${data["U_CK_Priority"]}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,

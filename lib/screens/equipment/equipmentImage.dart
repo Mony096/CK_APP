@@ -249,7 +249,7 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
         // Centered title
         title: const Center(
           child: Text(
-            'Image',
+            'Equipment Image',
             style: TextStyle(fontSize: 18, color: Colors.white),
           ),
         ),
@@ -264,19 +264,19 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
               ),
               // SizedBox(width: 3),
-              IconButton(
-                onPressed: () async {
-                  MaterialDialog.loading(context);
-                  await Provider.of<AuthProvider>(context, listen: false)
-                      .logout();
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                icon: const Icon(Icons.logout, color: Colors.white),
-              )
+              // IconButton(
+              //   onPressed: () async {
+              //     MaterialDialog.loading(context);
+              //     await Provider.of<AuthProvider>(context, listen: false)
+              //         .logout();
+              //     Navigator.of(context).pop();
+              //     Navigator.of(context).pushAndRemoveUntil(
+              //       MaterialPageRoute(builder: (_) => const LoginScreen()),
+              //       (route) => false,
+              //     );
+              //   },
+              //   icon: const Icon(Icons.logout, color: Colors.white),
+              // )
             ],
           ),
         ],

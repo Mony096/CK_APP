@@ -216,19 +216,19 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
               ),
               // SizedBox(width: 3),
-              IconButton(
-                onPressed: () async {
-                  MaterialDialog.loading(context);
-                  await Provider.of<AuthProvider>(context, listen: false)
-                      .logout();
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                icon: const Icon(Icons.logout, color: Colors.white),
-              )
+              // IconButton(
+              //   onPressed: () async {
+              //     MaterialDialog.loading(context);
+              //     await Provider.of<AuthProvider>(context, listen: false)
+              //         .logout();
+              //     Navigator.of(context).pop();
+              //     Navigator.of(context).pushAndRemoveUntil(
+              //       MaterialPageRoute(builder: (_) => const LoginScreen()),
+              //       (route) => false,
+              //     );
+              //   },
+              //   icon: const Icon(Icons.logout, color: Colors.white),
+              // )
             ],
           ),
         ],

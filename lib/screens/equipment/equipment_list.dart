@@ -2,9 +2,13 @@ import 'dart:async';
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
+import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
+import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_create.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -100,6 +104,33 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
     goTo(context, EquipmentCreateScreen(data: data));
   }
 
+  Future<void> clearOfflineDataWithLogout(BuildContext context) async {
+    final offlineProviderService =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final offlineProviderServiceItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
+
+    try {
+      // Clear service data
+      await offlineProviderService.clearDocuments();
+      await offlineProviderServiceCustomer.clearDocuments();
+      await offlineProviderServiceItem.clearDocuments();
+      await offlineProviderEquipment.clearEquipments();
+      await offlineProviderSite.clearDocuments();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to clear data: $e")),
+      );
+    }
+    // Show loading popup
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<EquipmentOfflineProvider>(
@@ -167,6 +198,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               IconButton(
                                 onPressed: () async {
                                   MaterialDialog.loading(context);
+                                  await clearOfflineDataWithLogout(context);
                                   await Provider.of<AuthProvider>(context,
                                           listen: false)
                                       .logout();

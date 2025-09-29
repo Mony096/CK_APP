@@ -1,12 +1,20 @@
 import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
+import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
+import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/screens/service/screen/image.dart';
 import 'package:bizd_tech_service/screens/service/screen/materialReserve.dart';
 import 'package:bizd_tech_service/screens/service/screen/openIssue.dart';
 import 'package:bizd_tech_service/screens/service/screen/serviceCheckList.dart';
 import 'package:bizd_tech_service/screens/service/screen/signature.dart';
 import 'package:bizd_tech_service/screens/service/screen/time.dart';
+import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +49,35 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       Navigator.of(context).pop(true); // Return true to previous screen
     }
   }
+
+ 
+  Future<void> clearOfflineDataWithLogout(BuildContext context) async {
+    final offlineProviderService =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final offlineProviderServiceItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
+
+    try {
+      // Clear service data
+      await offlineProviderService.clearDocuments();
+      await offlineProviderServiceCustomer.clearDocuments();
+      await offlineProviderServiceItem.clearDocuments();
+      await offlineProviderEquipment.clearEquipments();
+      await offlineProviderSite.clearDocuments();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to clear data: $e")),
+      );
+    }
+    // Show loading popup
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +120,17 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                   ),
                   // SizedBox(width: 3),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      MaterialDialog.loading(context);
+                      await clearOfflineDataWithLogout(context);
+                      await Provider.of<AuthProvider>(context, listen: false)
+                          .logout();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    },
                     icon: const Icon(Icons.logout, color: Colors.white),
                   )
                 ],
