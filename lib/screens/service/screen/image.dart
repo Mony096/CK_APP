@@ -5,6 +5,7 @@ import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +55,10 @@ class _ImageScreenState extends State<ImageScreen> {
                 color: Colors.blue,
                 size: 25,
               ),
-              title: const Text("Take Photo",style: TextStyle(fontSize: 16),),
+              title: const Text(
+                "Take Photo",
+                style: TextStyle(fontSize: 16),
+              ),
               onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
             ListTile(
@@ -146,11 +150,12 @@ class _ImageScreenState extends State<ImageScreen> {
         actions: [
           Row(
             children: [
-              IconButton(
+               IconButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   // refresh();
                 },
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                icon: const Icon(Icons.check, color: Colors.white),
               ),
               // SizedBox(width: 3),
               // IconButton(
@@ -423,7 +428,7 @@ class _ImageScreenState extends State<ImageScreen> {
                                         const SizedBox(
                                           height: 10,
                                         ),
-                                         Padding(
+                                        Padding(
                                           padding:
                                               const EdgeInsets.only(right: 10),
                                           child: Row(
@@ -508,7 +513,7 @@ class _ImageScreenState extends State<ImageScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                                    Row(
+                                              Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 crossAxisAlignment:
@@ -564,16 +569,13 @@ class _ImageScreenState extends State<ImageScreen> {
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
-                                                                        ))
-                                                                    .toList(),
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .only(
+                                                                        )),
+                                                                const Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
                                                                           bottom:
                                                                               7),
-                                                                  child:
-                                                                      const Text(
+                                                                  child: Text(
                                                                     "more...",
                                                                     style: TextStyle(
                                                                         color: Colors
@@ -737,11 +739,10 @@ class _ImageScreenState extends State<ImageScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 7),
-                                                      child: const Text(
+                                                  ? const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: 7),
+                                                      child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,
@@ -782,10 +783,38 @@ class _ImageScreenState extends State<ImageScreen> {
                     ImageShow(
                         image: context
                             .watch<CompletedServiceProvider>()
-                            .imagesList)
+                            .imagesList),
+                    //            const SizedBox(
+                    //   height: 7,
+                    // ),
+
                     /////do somthing
                   ]),
                 )),
+                // Align(
+                //   alignment: Alignment.topRight,
+                //   child: Container(
+                //     margin: const EdgeInsets.fromLTRB(0, 5, 5, 25),
+                //     width: 122,
+                //     padding: const EdgeInsets.all(5),
+                //     child: TextButton(
+                //       onPressed: () => Navigator.of(context).pop(),
+                //       style: TextButton.styleFrom(
+                //         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(5.0),
+                //         ),
+                //       ),
+                //       child: const Text(
+                //         "Done",
+                //         style: TextStyle(
+                //           color: Color.fromARGB(255, 255, 255, 255),
+                //           fontSize: 13,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // )
               ],
             )),
       ),

@@ -180,7 +180,8 @@ class CompletedServiceProvider extends ChangeNotifier {
           ),
         ));
       }
-
+      // print("Attachment Entryyyyy $existingAttachmentEntry");
+      // return null;
       late Response response;
       if (existingAttachmentEntry != null) {
         // PATCH request to update existing
@@ -201,7 +202,13 @@ class CompletedServiceProvider extends ChangeNotifier {
           options: Options(headers: {'Content-Type': 'multipart/form-data'}),
         );
       }
-
+      // response = await dio.post(
+      //   '/Attachments2',
+      //   false,
+      //   true,
+      //   data: formData,
+      //   options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      // );
       if ([200, 201].contains(response.statusCode)) {
         final absEntry =
             response.data['AbsEntry'] ?? response.data['AbsoluteEntry'];
@@ -483,44 +490,44 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       try {
         // 🔑 Decode {ext, data} into temp files only if files exist
-        // if (fileDataList.isNotEmpty) {
-        //   final tempDir = await getTemporaryDirectory();
-        //   int i = 0;
-        //   for (var f in fileDataList) {
-        //     if (f is Map && f.containsKey('data')) {
-        //       final bytes = base64Decode(f['data']);
-        //       final ext = f['ext'] ?? "bin";
-        //       final fileName =
-        //           "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-        //       final file = File("${tempDir.path}/$fileName");
-        //       await file.writeAsBytes(bytes);
-        //       filesToUpload.add(file);
-        //       i++;
-        //     }
-        //   }
-        // }
         if (fileDataList.isNotEmpty) {
           final tempDir = await getTemporaryDirectory();
           int i = 0;
           for (var f in fileDataList) {
-            if (f is Map<String, dynamic> && f['data'] is String) {
-              try {
-                final bytes = base64Decode(f['data'] as String);
-                final ext = (f['ext'] as String?) ?? "bin";
-                final fileName =
-                    "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-                final file = File("${tempDir.path}/$fileName");
-                await file.writeAsBytes(bytes);
-                filesToUpload.add(file);
-                i++;
-              } catch (err) {
-                debugPrint("❌ Error decoding base64 for file $i: $err");
-              }
-            } else {
-              debugPrint("⚠️ Skipped invalid entry in fileDataList: $f");
+            if (f is Map && f.containsKey('data')) {
+              final bytes = base64Decode(f['data']);
+              final ext = f['ext'] ?? "bin";
+              final fileName =
+                  "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+              final file = File("${tempDir.path}/$fileName");
+              await file.writeAsBytes(bytes);
+              filesToUpload.add(file);
+              i++;
             }
           }
         }
+        // if (fileDataList.isNotEmpty) {
+        //   final tempDir = await getTemporaryDirectory();
+        //   int i = 0;
+        //   for (var f in fileDataList) {
+        //     if (f is Map<String, dynamic> && f['data'] is String) {
+        //       try {
+        //         final bytes = base64Decode(f['data'] as String);
+        //         final ext = (f['ext'] as String?) ?? "bin";
+        //         final fileName =
+        //             "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+        //         final file = File("${tempDir.path}/$fileName");
+        //         await file.writeAsBytes(bytes);
+        //         filesToUpload.add(file);
+        //         i++;
+        //       } catch (err) {
+        //         debugPrint("❌ Error decoding base64 for file $i: $err");
+        //       }
+        //     } else {
+        //       debugPrint("⚠️ Skipped invalid entry in fileDataList: $f");
+        //     }
+        //   }
+        // }
 
         print(fileDataList);
 
@@ -541,6 +548,8 @@ class CompletedServiceProvider extends ChangeNotifier {
 
         // 2. Prepare SAP payload (remove offline-only keys)
         final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+        // print(sapPayload["U_CK_Time"]);
+        // return;
         if (attachmentEntry != null) {
           sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
         }
@@ -595,6 +604,8 @@ class CompletedServiceProvider extends ChangeNotifier {
     required BuildContext context,
     required int? attachmentEntryExisting,
     required dynamic docEntry,
+    required dynamic startTime,
+    required dynamic endTime,
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
@@ -687,7 +698,9 @@ class CompletedServiceProvider extends ChangeNotifier {
     final payload = {
       "DocEntry": docEntry,
       "U_CK_Status": "Entry",
-      "U_CK_AttachmentEntry": attachmentEntryExisting ?? 0,
+      "U_CK_AttachmentEntry": attachmentEntryExisting,
+      "U_CK_Time": startTime,
+      "U_CK_EndTime": endTime,
       "CK_JOB_TIMECollection": [
         {
           "U_CK_Description": "Travel Time",

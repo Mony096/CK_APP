@@ -186,7 +186,6 @@ class ServiceListProviderOffline extends ChangeNotifier {
         }
       }
     }
-
     await _box.put('documents', docs);
     _documents = docs; // sync with memory
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(

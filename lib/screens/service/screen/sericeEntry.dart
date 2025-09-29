@@ -44,7 +44,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             .onCompletedServiceOffline(
                 context: context,
                 attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-                docEntry: widget.data["DocEntry"]);
+                docEntry: widget.data["DocEntry"],
+                startTime: widget.data["U_CK_Time"],
+                endTime: widget.data["U_CK_EndTime"],
+                
+                );
     if (res) {
       Navigator.of(context).pop(true); // Return true to previous screen
     }

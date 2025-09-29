@@ -349,11 +349,12 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
         actions: [
           Row(
             children: [
-              IconButton(
+               IconButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   // refresh();
                 },
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                icon: const Icon(Icons.check, color: Colors.white),
               ),
               // SizedBox(width: 3),
               // IconButton(

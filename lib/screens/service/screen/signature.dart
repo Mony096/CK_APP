@@ -55,6 +55,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 236, 238, 240),
@@ -80,9 +81,10 @@ class _SignatureScreenState extends State<SignatureScreen> {
             children: [
               IconButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   // refresh();
                 },
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                icon: const Icon(Icons.check, color: Colors.white),
               ),
               // SizedBox(width: 3),
               // IconButton(
@@ -440,7 +442,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                                    Row(
+                                              Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 crossAxisAlignment:
@@ -496,16 +498,13 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
-                                                                        ))
-                                                                    .toList(),
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .only(
+                                                                        )),
+                                                                const Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
                                                                           bottom:
                                                                               7),
-                                                                  child:
-                                                                      const Text(
+                                                                  child: Text(
                                                                     "more...",
                                                                     style: TextStyle(
                                                                         color: Colors
@@ -669,11 +668,10 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 7),
-                                                      child: const Text(
+                                                  ? const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: 7),
+                                                      child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,
@@ -718,7 +716,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                       color: Colors.white,
                       child: Row(
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 10,
                           ),
                           Expanded(
@@ -813,7 +811,9 @@ class _MenuState extends State<Menu> {
       color: Colors.white,
       child: Row(
         children: [
-          SizedBox(width: 5,),
+          const SizedBox(
+            width: 5,
+          ),
           // icon (keeps natural size)
           if (widget.icon != null) widget.icon!,
 
