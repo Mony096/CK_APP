@@ -399,7 +399,7 @@ class EquipmentCreateProvider with ChangeNotifier {
       } catch (e) {
         await offlineProvider.loadEquipments();
 
-        throw Exception("Equipment Failed: ${e.toString()}");
+        throw Exception("Equipment Failed: $e");
       } finally {
         deleteTempFiles(filesToUpload);
       }

@@ -176,7 +176,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
   }
 
   /// Update an existing equipment by index
-/// Update an existing equipment by looking for its 'id'
+  /// Update an existing equipment by looking for its 'id'
   Future<void> updateEquipment(Map<String, dynamic> payload) async {
     // 1. Get the box and the existing list
     final box = Hive.box(_boxName);
@@ -209,6 +209,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
           "Warning: Equipment with ID $idToUpdate not found for update.");
     }
   }
+
   //refresh
   Future<void> refreshDocuments() async {
     clearFilter();
@@ -326,6 +327,17 @@ class EquipmentOfflineProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+    // --- Check for duplicate code ---
+      final existing = _equipments.firstWhere(
+        (e) => e['Code'] == data['Code'],
+        orElse: () => <String, dynamic>{},
+      );
+
+      if (existing.isNotEmpty) {
+        MaterialDialog.close(context); // Close loading before throwing
+        throw Exception("Equipment with code ${data['Code']} already exists!");
+      }
+
       // Convert images to base64
       List<Map<String, String>> fileDataList = [];
       for (File imageFile in _imagesList) {
@@ -355,7 +367,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
 
       return true;
     } catch (e) {
-      await MaterialDialog.warning(
+      await MaterialDialog.warningStayScreenWhenOk(
         context,
         title: "Error",
         body: e.toString(),
@@ -367,7 +379,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
       _components = [];
       _parts = [];
       _imagesList = [];
-      MaterialDialog.close(context); // Show loading dialog
+      // MaterialDialog.close(context); // Show loading dialog
     }
   }
 }

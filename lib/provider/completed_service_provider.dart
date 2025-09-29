@@ -483,22 +483,46 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       try {
         // 🔑 Decode {ext, data} into temp files only if files exist
+        // if (fileDataList.isNotEmpty) {
+        //   final tempDir = await getTemporaryDirectory();
+        //   int i = 0;
+        //   for (var f in fileDataList) {
+        //     if (f is Map && f.containsKey('data')) {
+        //       final bytes = base64Decode(f['data']);
+        //       final ext = f['ext'] ?? "bin";
+        //       final fileName =
+        //           "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+        //       final file = File("${tempDir.path}/$fileName");
+        //       await file.writeAsBytes(bytes);
+        //       filesToUpload.add(file);
+        //       i++;
+        //     }
+        //   }
+        // }
         if (fileDataList.isNotEmpty) {
           final tempDir = await getTemporaryDirectory();
           int i = 0;
           for (var f in fileDataList) {
-            if (f is Map && f.containsKey('data')) {
-              final bytes = base64Decode(f['data']);
-              final ext = f['ext'] ?? "bin";
-              final fileName =
-                  "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-              final file = File("${tempDir.path}/$fileName");
-              await file.writeAsBytes(bytes);
-              filesToUpload.add(file);
-              i++;
+            if (f is Map<String, dynamic> && f['data'] is String) {
+              try {
+                final bytes = base64Decode(f['data'] as String);
+                final ext = (f['ext'] as String?) ?? "bin";
+                final fileName =
+                    "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+                final file = File("${tempDir.path}/$fileName");
+                await file.writeAsBytes(bytes);
+                filesToUpload.add(file);
+                i++;
+              } catch (err) {
+                debugPrint("❌ Error decoding base64 for file $i: $err");
+              }
+            } else {
+              debugPrint("⚠️ Skipped invalid entry in fileDataList: $f");
             }
           }
         }
+
+        print(fileDataList);
 
         int? attachmentEntry;
 
@@ -530,7 +554,6 @@ class CompletedServiceProvider extends ChangeNotifier {
           false,
           data: sapPayload,
         );
-
         if (response.statusCode == 200) {
           await offlineProvider.markServiceSynced(docEntry);
           debugPrint("✅ Synced DocEntry: $docEntry");

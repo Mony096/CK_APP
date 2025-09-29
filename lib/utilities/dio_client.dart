@@ -286,6 +286,11 @@ class DioClient {
     } on DioException catch (e) {
       log(e.requestOptions.method);
       log(e.requestOptions.uri.toString());
+       if (e.requestOptions.data is FormData) {
+        log('[FormData] - skipped logging raw content.');
+      } else {
+        log(jsonEncode(e.requestOptions.data));
+      }
       log(jsonEncode(e.requestOptions.data));
       log('dio ${e.response?.statusCode}');
       log(jsonEncode(e.requestOptions.headers));
