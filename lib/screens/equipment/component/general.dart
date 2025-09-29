@@ -201,7 +201,8 @@ class _GeneralState extends State<General> {
                   ),
                   child: Text(
                     widget.data.isNotEmpty
-                        ? "View ( ${context.watch<EquipmentOfflineProvider>().imagesList.length} / Image )"
+                        // ? "View ( ${context.watch<EquipmentOfflineProvider>().imagesList.length} / Image )"
+                        ? "View Image"
                         : "Add Image",
                     style: const TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),

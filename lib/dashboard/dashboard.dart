@@ -197,9 +197,11 @@ class _DashboardState extends State<Dashboard>
 
     // optional small delay for smooth UI
     await Future.delayed(const Duration(milliseconds: 1000));
-    setState(() {
-      load = false; // hide overall loading
-    });
+    if (mounted) {
+      setState(() {
+        load = false; // hide overall loading
+      });
+    }
   }
 
   void _showFilterDialog() {
@@ -216,9 +218,10 @@ class _DashboardState extends State<Dashboard>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Matches Your Filter",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("Matches Your Filter",
+                      style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.043,
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 20),
 
                   // Status filter
@@ -230,7 +233,11 @@ class _DashboardState extends State<Dashboard>
                       spacing: 5,
                       children: ["All", "Corrective", "Preventve"].map((jType) {
                         return ChoiceChip(
-                          label: Text(jType),
+                          label: Text(jType,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.034,
+                              )),
                           selected: _selectedJob == jType,
                           onSelected: (_) {
                             setModalState(() {
@@ -260,7 +267,11 @@ class _DashboardState extends State<Dashboard>
                         "Maintenance"
                       ].map((serice) {
                         return ChoiceChip(
-                          label: Text(serice),
+                          label: Text(serice,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.034,
+                              )),
                           selected: _selectedService == serice,
                           onSelected: (_) {
                             setModalState(() {
@@ -283,7 +294,11 @@ class _DashboardState extends State<Dashboard>
                       children:
                           ["All", "High", "Medium", "Low"].map((priority) {
                         return ChoiceChip(
-                          label: Text(priority),
+                          label: Text(priority,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.034,
+                              )),
                           selected: _selectedPriority == priority,
                           onSelected: (_) {
                             setModalState(() {
@@ -652,8 +667,9 @@ class _DashboardState extends State<Dashboard>
                   const SizedBox(height: 12),
                   Text(
                     statusMessage,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.032,
+                        fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -680,7 +696,7 @@ class _DashboardState extends State<Dashboard>
         Provider.of<EquipmentOfflineProvider>(context, listen: false);
     final offlineProviderSite =
         Provider.of<SiteListProviderOffline>(context, listen: false);
-        
+
     final offlineDocument = offlineProviderService.documents;
     if (offlineDocument.isEmpty) return;
     MaterialDialog.warningClearDataDialog(
@@ -811,7 +827,6 @@ class _DashboardState extends State<Dashboard>
         );
         MaterialDialog.close(context);
         MaterialDialog.close(context);
-
         return;
       }
       MaterialDialog.close(context);

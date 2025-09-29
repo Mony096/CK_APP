@@ -13,7 +13,6 @@ import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider.dart';
 import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_list_provider.dart';
-import 'package:bizd_tech_service/provider/service_list_ticket_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/service_provider.dart';
 import 'package:bizd_tech_service/provider/site_list_provider.dart';
@@ -57,7 +56,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = DisableSSL();
   await Hive.initFlutter();
-  await Hive.openBox('service_lists'); // open a box for your documents
+  // await Hive.openBox('service_lists');
+  // await Hive.openBox('equipment_box');
+  //   await Hive.openBox('customer_lists');
+  // await Hive.openBox('item_lists');
+  //   await Hive.openBox('site_lists');
+
   // await Firebase.initializeApp();
   // await LocationProvider.initializeService();
   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -108,7 +112,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ItemListProvider()), // <-- AddedServiceListProviderOffline
       ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
       ChangeNotifierProvider(create: (_) => ServiceListProviderOffline()), // <-- Added
-      ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
+      // ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
       ChangeNotifierProvider(create: (_) => CustomerListProviderOffline()),
       ChangeNotifierProvider(create: (_) => ItemListProviderOffline()),
       ChangeNotifierProvider(create: (_) => EquipmentOfflineProvider()),

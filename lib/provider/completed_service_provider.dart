@@ -698,12 +698,10 @@ class CompletedServiceProvider extends ChangeNotifier {
     MaterialDialog.loading(context);
 
     try {
-      final offlineProvider =
-          Provider.of<ServiceListProviderOffline>(context, listen: false);
+      final offlineProvider = Provider.of<ServiceListProviderOffline>(context, listen: false);
 
       await offlineProvider.addCompletedService(payload);
       await offlineProvider.markServiceCompleted(docEntry);
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Service saved offline!")),
       );

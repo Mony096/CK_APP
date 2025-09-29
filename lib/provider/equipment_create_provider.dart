@@ -135,97 +135,97 @@ class EquipmentCreateProvider with ChangeNotifier {
     return null;
   }
 
-  Future<void> postToSAP({
-    required BuildContext context, // ✅ Add BuildContext for UI
-    required Map<String, dynamic> data,
-  }) async {
-    _submit = true;
-    notifyListeners();
-    MaterialDialog.loading(context); // Show loading dialog
+  // Future<void> postToSAP({
+  //   required BuildContext context, // ✅ Add BuildContext for UI
+  //   required Map<String, dynamic> data,
+  // }) async {
+  //   _submit = true;
+  //   notifyListeners();
+  //   MaterialDialog.loading(context); // Show loading dialog
 
-    try {
-      final int? attachmentEntry = await uploadAttachmentsToSAP(_imagesList);
-      if (attachmentEntry == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-            behavior: SnackBarBehavior.floating,
-            elevation: 10,
-            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            content: const Row(
-              children: [
-                Icon(Icons.remove_circle, color: Colors.white, size: 28),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Failed to upload attachments",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            duration: const Duration(seconds: 4),
-          ),
-        );
-        return;
-      }
-      final payload = {
-        ...data,
-        "U_ck_AttachmentEntry": attachmentEntry,
-        // "CK_CUSEQUI01Collection":
-        //     _components.map((e) => Map.from(e)..remove("BrandName")).toList(),
-        // "CK_CUSEQUI02Collection":
-        //     _parts.map((e) => Map.from(e)..remove("BrandName")).toList(),
-        "CK_CUSEQUI01Collection": _components,
-        "CK_CUSEQUI02Collection": _parts,
-      };
-      final create = await dio.post(
-        "/CK_CUSEQUI",
-        false,
-        false,
-        data: payload,
-      );
+  //   try {
+  //     final int? attachmentEntry = await uploadAttachmentsToSAP(_imagesList);
+  //     if (attachmentEntry == null) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+  //           behavior: SnackBarBehavior.floating,
+  //           elevation: 10,
+  //           margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(9),
+  //           ),
+  //           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+  //           content: const Row(
+  //             children: [
+  //               Icon(Icons.remove_circle, color: Colors.white, size: 28),
+  //               SizedBox(width: 16),
+  //               Expanded(
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     Text(
+  //                       "Failed to upload attachments",
+  //                       style: TextStyle(
+  //                         fontSize: 14,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           duration: const Duration(seconds: 4),
+  //         ),
+  //       );
+  //       return;
+  //     }
+  //     final payload = {
+  //       ...data,
+  //       "U_ck_AttachmentEntry": attachmentEntry,
+  //       // "CK_CUSEQUI01Collection":
+  //       //     _components.map((e) => Map.from(e)..remove("BrandName")).toList(),
+  //       // "CK_CUSEQUI02Collection":
+  //       //     _parts.map((e) => Map.from(e)..remove("BrandName")).toList(),
+  //       "CK_CUSEQUI01Collection": _components,
+  //       "CK_CUSEQUI02Collection": _parts,
+  //     };
+  //     final create = await dio.post(
+  //       "/CK_CUSEQUI",
+  //       false,
+  //       false,
+  //       data: payload,
+  //     );
 
-      if (create.statusCode == 201) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //     content: Text("Status updated successfully!"),
-        //     backgroundColor: Color.fromARGB(255, 53, 55, 53),
-        //     duration: Duration(seconds: 2),
-        //   ),
-        // );
-        await MaterialDialog.createdSuccess(
-          context,
-        );
-      }
-    } catch (e) {
-      await MaterialDialog.warning(
-        context,
-        title: "Error",
-        body: e.toString(),
-      );
-    } finally {
-      _submit = false;
-      _components = [];
-      _parts = [];
-      _imagesList = [];
-      MaterialDialog.close(context); // Show loading dialog
-      notifyListeners();
-    }
-  }
+  //     if (create.statusCode == 201) {
+  //       // ScaffoldMessenger.of(context).showSnackBar(
+  //       //   const SnackBar(
+  //       //     content: Text("Status updated successfully!"),
+  //       //     backgroundColor: Color.fromARGB(255, 53, 55, 53),
+  //       //     duration: Duration(seconds: 2),
+  //       //   ),
+  //       // );
+  //       await MaterialDialog.createdSuccess(
+  //         context,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     await MaterialDialog.warning(
+  //       context,
+  //       title: "Error",
+  //       body: e.toString(),
+  //     );
+  //   } finally {
+  //     _submit = false;
+  //     _components = [];
+  //     _parts = [];
+  //     _imagesList = [];
+  //     MaterialDialog.close(context); // Show loading dialog
+  //     notifyListeners();
+  //   }
+  // }
 
   void deleteTempFiles(List<File> files) {
     for (File file in files) {

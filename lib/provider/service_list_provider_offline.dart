@@ -1,112 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:hive/hive.dart';
-
-// class ServiceListProviderOffline extends ChangeNotifier {
-//   List<dynamic> _documents = [];
-//   List<dynamic> _completedServices = [];
-//   bool _isLoading = false;
-
-//   List<dynamic> get documents => _documents;
-//   List<dynamic> get completedServices => _completedServices;
-//   bool get isLoading => _isLoading;
-
-//   late final Box _box;
-//   late final Box _completedBox;
-
-//   ServiceListProviderOffline() {
-//     _initBox();
-//   }
-
-//   Future<void> _initBox() async {
-//     _box = await Hive.openBox('service_lists');
-//     _completedBox = await Hive.openBox('offlineCompleted');
-//     await loadDocuments();
-//     // await loadCompletedServices();
-//   }
-
-//   /// Load offline documents
-//   Future<void> loadDocuments() async {
-//     _isLoading = true;
-//     notifyListeners();
-//     try {
-//       final rawDocs = _box.get('documents', defaultValue: []) as List<dynamic>;
-//       _documents = rawDocs
-//           .whereType<Map>()
-//           .map((doc) => Map<String, dynamic>.from(doc))
-//           .toList();
-//     } catch (e) {
-//       debugPrint("Error loading offline docs: $e");
-//       _documents = [];
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   /// Save documents
-//   Future<void> saveDocuments(List<dynamic> docs) async {
-//     _isLoading = true;
-//     notifyListeners();
-//     try {
-//       await _box.put('documents', docs);
-//       _documents = docs;
-//     } catch (e) {
-//       debugPrint("Error saving offline docs: $e");
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   /// Clear documents
-//   Future<void> clearDocuments() async {
-//     _isLoading = true;
-//     notifyListeners();
-//     try {
-//       await _box.delete('documents');
-//       _documents = [];
-//       await _box.delete('completed');
-//       _completedServices = [];
-//     } catch (e) {
-//       debugPrint("Error clearing offline docs: $e");
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   /// Load completed services
-//   // Future<void> loadCompletedServices() async {
-//   //   final raw =
-//   //       _completedBox.get('completed', defaultValue: []) as List<dynamic>;
-//   //   _completedServices = raw
-//   //       .whereType<Map>()
-//   //       .map((doc) => Map<String, dynamic>.from(doc))
-//   //       .toList();
-//   //   notifyListeners();
-//   // }
-
-//   /// Add new completed payload
-//   Future<void> addCompletedService(Map<dynamic, dynamic> payload) async {
-//     _completedServices.add(payload);
-//     await _completedBox.put('completed', _completedServices);
-//     notifyListeners();
-//   }
-
-//   /// Mark a service as completed in offline docs
-//   Future<void> markServiceCompleted(int docEntry) async {
-//     List<dynamic> docs =
-//         List<dynamic>.from(_box.get('documents', defaultValue: []));
-//     for (var doc in docs) {
-//       if (doc['DocEntry'] == docEntry) {
-//         doc['U_CK_Status'] = 'Entry';
-//       }
-//     }
-//     await _box.put('documents', docs);
-//     _documents = docs; // keep in sync with memory
-//     notifyListeners();
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -144,7 +35,8 @@ class ServiceListProviderOffline extends ChangeNotifier {
     _currentDate = null;
     notifyListeners();
   }
-Future<void> refreshDocuments() async {
+
+  Future<void> refreshDocuments() async {
     clearCurrentDate();
     await loadDocuments();
   }
@@ -179,7 +71,7 @@ Future<void> refreshDocuments() async {
 
       _documents = docs;
     } catch (e) {
-      debugPrint("Error loading offline docs: $e");
+      debugPrint("Error loading offline docsaaa: $e");
       _documents = [];
     } finally {
       _isLoading = false;
@@ -306,10 +198,10 @@ Future<void> refreshDocuments() async {
         borderRadius: BorderRadius.circular(9),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      content: Row(
+      content: const Row(
         children: [
-          const Icon(Icons.remove_circle, color: Colors.white, size: 28),
-          const SizedBox(width: 16),
+          Icon(Icons.remove_circle, color: Colors.white, size: 28),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -317,7 +209,7 @@ Future<void> refreshDocuments() async {
               children: [
                 Text(
                   "Status updated successfully!",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: Colors.white,
                   ),

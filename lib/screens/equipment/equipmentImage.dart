@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
@@ -5,11 +6,16 @@ import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
+import 'package:bizd_tech_service/utilities/dio_client.dart';
+import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class EquipmentImageScreen extends StatefulWidget {
   const EquipmentImageScreen({super.key, required this.data});
@@ -19,6 +25,113 @@ class EquipmentImageScreen extends StatefulWidget {
 }
 
 class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
+  final DioClient dio = DioClient(); // Your custom Dio client
+
+  Future<void> _downloadImage() async {
+    MaterialDialog.loading(context);
+
+    try {
+      List<File> sapFiles = [];
+      final attachmentEntry = widget.data["U_ck_AttachmentEntry"];
+      final offlineProvider =
+          Provider.of<EquipmentOfflineProvider>(context, listen: false);
+
+      if (attachmentEntry != null) {
+        final attachmentRes =
+            await dio.getAttachment("/Attachments2($attachmentEntry)");
+
+        if (attachmentRes.statusCode == 200) {
+          final attData = attachmentRes.data;
+          final lines = attData["Attachments2_Lines"] as List<dynamic>;
+          final token = await LocalStorageManger.getString('SessionId');
+
+          for (var line in lines) {
+            final url =
+                "/Attachments2(${line["AbsoluteEntry"]})/\$value?filename='${line["FileName"]}.${line["FileExtension"]}'";
+
+            try {
+              final imgRes = await http.get(
+                Uri.parse(
+                    "https://svr10.biz-dimension.com:9093/api/sapIntegration/Attachments2"),
+                headers: {
+                  'Content-Type': "application/json",
+                  "Authorization": 'Bearer $token',
+                  'sapUrl': url,
+                },
+              );
+
+              if (imgRes.statusCode == 200) {
+                final tempDir = await getTemporaryDirectory();
+                final fileName = "${line["FileName"]}.${line["FileExtension"]}";
+                final filePath = "${tempDir.path}/$fileName";
+                final file = File(filePath);
+
+                await file.writeAsBytes(imgRes.bodyBytes);
+                sapFiles.add(file);
+              } else {
+                String errorMessage = "Unknown error";
+                try {
+                  final decoded = jsonDecode(imgRes.body);
+                  if (decoded is Map && decoded.containsKey("error")) {
+                    errorMessage =
+                        decoded["error"]["message"]["value"].toString();
+                  }
+                } catch (_) {
+                  errorMessage = imgRes.body;
+                }
+
+                await MaterialDialog.warning(
+                  context,
+                  title: "Error",
+                  body: "Failed to fetch image: $errorMessage",
+                );
+              }
+            } catch (e) {
+              print("Failed to fetch image ${line["FileName"]}: $e");
+            }
+          }
+
+          if (sapFiles.isNotEmpty) {
+            // Convert files to base64
+            List<Map<String, String>> fileDataList = [];
+            for (File file in sapFiles) {
+              fileDataList.add(await fileToBase64WithExt(file));
+            }
+
+            // Update equipment offline provider
+            final updatedPayload = {
+              ...widget.data,
+              "files": fileDataList,
+            };
+
+            await offlineProvider.updateEquipment(updatedPayload);
+
+            // ✅ Update widget and provider immediately
+            setState(() {
+              widget.data["files"] = fileDataList;
+              offlineProvider.setImages(sapFiles);
+            });
+            await offlineProvider.loadEquipments();
+            print("Updated equipment with ${fileDataList.length} files");
+          }
+        }
+      } else {
+        throw Exception(
+            "No images available for this equipment (${widget.data["Code"]})");
+      }
+    } catch (e) {
+      if (mounted) MaterialDialog.close(context);
+
+      await MaterialDialog.warning(
+        context,
+        title: "Error",
+        body: e.toString(),
+      );
+    } finally {
+      if (mounted) MaterialDialog.close(context);
+    }
+  }
+
   Future<void> pickImage() async {
     final picker = ImagePicker();
 
@@ -185,7 +298,17 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                   child: ListView(children: [
                     Menu(
                       data: widget.data,
-                      onTap: widget.data.isEmpty ? pickImage : () {},
+                      onTap: () {
+                        if (widget.data.isEmpty) {
+                          // Handle add image
+                          pickImage();
+                        } else if (!widget.data.containsKey("sync_status")) {
+                          // ✅ Call your download function
+                          _downloadImage();
+                        } else {
+                          // Handle normal case (Equipment Photos)
+                        }
+                      },
                       title: 'Upload Image',
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 5),
@@ -275,7 +398,11 @@ class _MenuState extends State<Menu> {
                 ),
               ),
               child: Text(
-                widget.data.isEmpty ? "Add Image" : "Equipment Photos",
+                widget.data.isEmpty
+                    ? "Add Image"
+                    : (widget.data.containsKey("sync_status")
+                        ? "Equipment Image"
+                        : "Download Image"),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,

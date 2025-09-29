@@ -12,7 +12,6 @@ import 'package:bizd_tech_service/screens/equipment/component/component.dart';
 import 'package:bizd_tech_service/screens/equipment/component/part.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
-import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

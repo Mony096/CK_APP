@@ -48,17 +48,20 @@ class ItemListProviderOffline extends ChangeNotifier {
           .toList();
 
       // ✅ Apply date filter if set
-       if (_filter != null && _filter!.isNotEmpty) {
-          docs = docs.where((doc) {
-            final code = doc["ItemCode"];
-            if (code == null) return false;
-            try {
-              return code.toString().toLowerCase().contains(_filter!.toLowerCase());
-            } catch (e) {
-              return false;
-            }
-          }).toList();
-        }
+      if (_filter != null && _filter!.isNotEmpty) {
+        docs = docs.where((doc) {
+          final code = doc["ItemCode"];
+          if (code == null) return false;
+          try {
+            return code
+                .toString()
+                .toLowerCase()
+                .contains(_filter!.toLowerCase());
+          } catch (e) {
+            return false;
+          }
+        }).toList();
+      }
 
       _documents = docs;
     } catch (e) {
