@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ServiceByIdScreen extends StatefulWidget {
   const ServiceByIdScreen({super.key, required this.data});
@@ -81,6 +82,26 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
         SnackBar(content: Text('❌ Error: $e')),
       );
     }
+  }
+
+  void makePhoneCall(BuildContext context, String phoneNumber) {
+    _showConfirmationDialog(
+      context: context,
+      title: "Call $phoneNumber ?",
+      content: "Are you want to call this number ?",
+      onConfirm: () async {
+        final Uri phoneUri = Uri.parse("tel:$phoneNumber");
+
+        try {
+          await launchUrl(phoneUri, mode: LaunchMode.externalApplication);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Cannot make phone call on this device')),
+          );
+        }
+      },
+    );
   }
 
   Future<void> _refreshData() async {
@@ -704,13 +725,18 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                       right: "",
                                     ),
                                     RowItem(
-                                        left: e["MobilePhone"] ?? "N/A",
-                                        right: const Icon(
+                                      left: e["MobilePhone"] ?? "N/A",
+                                      right: GestureDetector(
+                                        onTap: () => makePhoneCall(
+                                            context, e["MobilePhone"]),
+                                        child: const Icon(
                                           Icons.phone,
                                           size: 20,
                                           color: Colors.green,
                                         ),
-                                        isRightIcon: true),
+                                      ),
+                                      isRightIcon: true,
+                                    ),
                                   ])
                               .toList(),
                     ),
@@ -1050,4 +1076,63 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
       // ),
     );
   }
+}
+
+Future<void> _showConfirmationDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required VoidCallback onConfirm,
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 19,fontWeight: FontWeight.w400),
+        ),
+        content: Text(
+          content,
+          style: const TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(7),
+              ),
+              minimumSize: const Size(
+                  70, 35), // width, height (height smaller than default)
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16), // optional: adjust padding
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text("Go"),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (result == true) {
+    onConfirm();
+  }
+  //   @override
+  // void dispose() {
+  //   stopLocationUpdates();
+  //   super.dispose();
+  // }
 }

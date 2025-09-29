@@ -36,7 +36,6 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
     super.initState();
 
     _loadUserName();
-    date.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
 
   final area = TextEditingController();
@@ -53,6 +52,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
       {"missing": false, "value": "Description required", "isAdded": 0});
 
   void _showCreateIssue() async {
+    date.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     await showDialog<String>(
       barrierDismissible: false,
       context: context,
@@ -125,6 +125,8 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                 setState(() {
                   isEditComp = -1;
                 });
+                clear();
+
                 Navigator.of(context).pop();
               },
               child: const Text(
@@ -242,7 +244,6 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
         // Remove using Provider
         Provider.of<CompletedServiceProvider>(context, listen: false)
             .removeOpenIssue(index);
-
         // Reset edit state
         isEditComp = -1;
 
@@ -711,7 +712,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                               const SizedBox(
                                                 height: 10,
                                               ),
-                                                  Row(
+                                              Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 crossAxisAlignment:
@@ -767,16 +768,13 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
-                                                                        ))
-                                                                    .toList(),
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .only(
+                                                                        )),
+                                                                const Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
                                                                           bottom:
                                                                               7),
-                                                                  child:
-                                                                      const Text(
+                                                                  child: Text(
                                                                     "more...",
                                                                     style: TextStyle(
                                                                         color: Colors
@@ -940,11 +938,10 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 7),
-                                                      child: const Text(
+                                                  ? const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: 7),
+                                                      child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,

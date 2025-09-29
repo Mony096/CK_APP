@@ -29,7 +29,7 @@ class CompletedServiceProvider extends ChangeNotifier {
   List<dynamic> get checkListLine => _checkListLine;
   final DioClient dio = DioClient(); // Custom Dio wrapper
 
-  void addOrEditOpenIssue(Map<String, dynamic> item, {int editIndex = -1}) {
+  void addOrEditOpenIssue(dynamic item, {int editIndex = -1}) {
     if (editIndex == -1) {
       _openIssues.add(item);
     } else {
@@ -38,7 +38,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addOrEditOpenCheckList(Map<String, dynamic> item, {int editIndex = -1}) {
+  void addOrEditOpenCheckList(dynamic item, {int editIndex = -1}) {
     if (editIndex >= 0) {
       // Edit existing checklist
       _checkListLine[editIndex] = item;
@@ -686,19 +686,34 @@ class CompletedServiceProvider extends ChangeNotifier {
         }
       ],
       "CK_JOB_ISSUECollection": _openIssues,
-      "feedbackChecklistLine": _checkListLine,
+      "feedbackChecklistLine": _checkListLine.map((item) {
+        final newItem = Map<String, dynamic>.from(item); // clone the map
+
+        if (newItem['U_CK_Checked'] == true) {
+          newItem['U_CK_TrueOutput'] = 'Yes';
+          newItem['U_CK_FalseOutput'] = 'No';
+        } else {
+          newItem['U_CK_TrueOutput'] = 'No';
+          newItem['U_CK_FalseOutput'] = 'Yes';
+        }
+
+        newItem.remove('U_CK_Checked'); // remove the original field
+        return newItem;
+      }).toList(),
+
       "files": fileDataList, // ✅ Each file has {ext, data}
     };
 
-    print(payload);
-
+    // print(payload["CK_JOB_ISSUECollection"]);
+    // return false;
     // 3. Offline saving
     _submit = true;
     notifyListeners();
     MaterialDialog.loading(context);
 
     try {
-      final offlineProvider = Provider.of<ServiceListProviderOffline>(context, listen: false);
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
 
       await offlineProvider.addCompletedService(payload);
       await offlineProvider.markServiceCompleted(docEntry);
