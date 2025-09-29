@@ -69,10 +69,10 @@ class _SignatureScreenState extends State<SignatureScreen> {
           },
         ),
         // Centered title
-        title: const Center(
+        title: Center(
           child: Text(
             'Signature',
-            style: TextStyle(fontSize: 18, color: Colors.white),
+            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
           ),
         ),
         // Right-aligned actions (scan barcode)
@@ -319,8 +319,12 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                           children: [
                                             Text(
                                               "${widget.data["CustomerName"] ?? "N/A"}",
-                                              style: const TextStyle(
-                                                  fontSize: 12.5),
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.033),
                                               textScaleFactor: 1.0,
                                             ),
                                             const SizedBox(
@@ -337,8 +341,11 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                           .first["StreetNo"] ??
                                                       "N/A")
                                                   : "N/A",
-                                              style: const TextStyle(
-                                                fontSize: 12.5,
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.032,
                                                 fontWeight: FontWeight.bold,
                                                 height: 2,
                                               ),
@@ -364,16 +371,25 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 "No: ",
-                                                style: TextStyle(fontSize: 13),
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                               Text(
                                                 "${widget.data["DocNum"]}",
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 13),
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                             ],
@@ -411,7 +427,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              const Row(
+                                              Row(
                                                 children: [
                                                   Expanded(
                                                       child: Text(
@@ -420,7 +436,11 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: Colors.white,
-                                                        fontSize: 13.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   Expanded(
@@ -430,7 +450,11 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontSize: 13.5,
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033,
                                                         color: Colors.white),
                                                     textScaleFactor: 1.0,
                                                   )),
@@ -466,13 +490,15 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                                       .only(
                                                                       bottom:
                                                                           8),
-                                                              child: const Text(
+                                                              child: Text(
                                                                 "No Services Available",
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.032),
                                                               ),
                                                             )
                                                           ]
@@ -494,12 +520,12 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                                               Text(
                                                                             "${e["U_CK_ServiceName"]}",
                                                                             style:
-                                                                                const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
                                                                         )),
-                                                                const Padding(
+                                                                Padding(
                                                                   padding: EdgeInsets
                                                                       .only(
                                                                           bottom:
@@ -510,7 +536,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                                         color: Colors
                                                                             .white,
                                                                         fontSize:
-                                                                            12.5),
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.031),
                                                                     textScaleFactor:
                                                                         1.0,
                                                                   ),
@@ -528,23 +555,27 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                                       child:
                                                                           Text(
                                                                         "${e["U_CK_ServiceName"]}",
-                                                                        style: const TextStyle(
+                                                                        style: TextStyle(
                                                                             color:
                                                                                 Colors.white,
-                                                                            fontSize: 12.5),
+                                                                            fontSize: MediaQuery.of(context).size.width * 0.032),
                                                                         textScaleFactor:
                                                                             1.0,
                                                                       ),
                                                                     ))
                                                                 .toList(),
                                                   )),
-                                                  const Expanded(
+                                                  Expanded(
                                                       child: Text(
                                                     "Open",
                                                     textAlign: TextAlign.end,
                                                     style: TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: 12.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   const SizedBox(
@@ -575,7 +606,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Row(
+                                              Row(
                                                 children: [
                                                   Expanded(
                                                       child: Text(
@@ -584,7 +615,11 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: Colors.white,
-                                                        fontSize: 13.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   Expanded(
@@ -612,11 +647,15 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                       margin:
                                                           const EdgeInsets.only(
                                                               bottom: 8),
-                                                      child: const Text(
+                                                      child: Text(
                                                         "No Equipment Available",
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031),
                                                       ),
                                                     )
                                                   : Container(),
@@ -634,12 +673,14 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                           Expanded(
                                                               child: Text(
                                                             "${item["U_CK_EquipName"]}",
-                                                            style:
-                                                                const TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -648,12 +689,14 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                             "SN: ${item["U_CK_SerialNum"]}",
                                                             textAlign:
                                                                 TextAlign.end,
-                                                            style:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        12.5,
-                                                                    color: Colors
-                                                                        .white),
+                                                            style: TextStyle(
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031,
+                                                                color: Colors
+                                                                    .white),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -668,14 +711,18 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? const Padding(
+                                                  ? Padding(
                                                       padding: EdgeInsets.only(
                                                           bottom: 7),
                                                       child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031),
                                                         textScaleFactor: 1.0,
                                                       ),
                                                     )
@@ -684,11 +731,12 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                           ))
                                     ],
                                   ),
+                                  ///////////////////////////////////////////
                                 ],
                               )),
                         ],
                       ),
-                    ), //
+                    ),
 /////endddddddddddddddddddddddddddddd
                     const SizedBox(
                       height: 10,
@@ -823,9 +871,9 @@ class _MenuState extends State<Menu> {
           Expanded(
             child: Text(
               widget.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: MediaQuery.of(context).size.width * 0.032,
               ),
               textScaleFactor: 1.0,
               overflow: TextOverflow.ellipsis,
@@ -846,9 +894,9 @@ class _MenuState extends State<Menu> {
             ),
             child: Text(
               widget.signature.isNotEmpty ? "Edit Signature" : "Add Signature",
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.white,
-                fontSize: 13,
+                fontSize: MediaQuery.of(context).size.width * 0.032,
               ),
             ),
           ),

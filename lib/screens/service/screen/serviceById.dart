@@ -200,9 +200,9 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
           },
         ),
         // Centered title
-        title: const Center(
+        title: Center(
           child: Text('Service Infomation',
-              style: TextStyle(fontSize: 17, color: Colors.white),
+              style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
               textScaleFactor: 1.0),
         ),
         // Right-aligned actions (scan barcode)

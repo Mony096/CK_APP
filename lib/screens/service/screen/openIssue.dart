@@ -338,10 +338,10 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
           },
         ),
         // Centered title
-        title: const Center(
+        title: Center(
           child: Text(
             'Open Issue',
-            style: TextStyle(fontSize: 17, color: Colors.white),
+            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
             textScaleFactor: 1.0,
           ),
         ),
@@ -349,7 +349,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
         actions: [
           Row(
             children: [
-               IconButton(
+              IconButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   // refresh();
@@ -590,8 +590,12 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                           children: [
                                             Text(
                                               "${widget.data["CustomerName"] ?? "N/A"}",
-                                              style: const TextStyle(
-                                                  fontSize: 12.5),
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.033),
                                               textScaleFactor: 1.0,
                                             ),
                                             const SizedBox(
@@ -608,8 +612,11 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                           .first["StreetNo"] ??
                                                       "N/A")
                                                   : "N/A",
-                                              style: const TextStyle(
-                                                fontSize: 12.5,
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.032,
                                                 fontWeight: FontWeight.bold,
                                                 height: 2,
                                               ),
@@ -635,16 +642,25 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 "No: ",
-                                                style: TextStyle(fontSize: 13),
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                               Text(
                                                 "${widget.data["DocNum"]}",
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 13),
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                             ],
@@ -682,7 +698,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              const Row(
+                                              Row(
                                                 children: [
                                                   Expanded(
                                                       child: Text(
@@ -691,7 +707,11 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: Colors.white,
-                                                        fontSize: 13.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   Expanded(
@@ -701,7 +721,11 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontSize: 13.5,
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033,
                                                         color: Colors.white),
                                                     textScaleFactor: 1.0,
                                                   )),
@@ -737,13 +761,15 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                                       .only(
                                                                       bottom:
                                                                           8),
-                                                              child: const Text(
+                                                              child: Text(
                                                                 "No Services Available",
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.032),
                                                               ),
                                                             )
                                                           ]
@@ -765,12 +791,12 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                                               Text(
                                                                             "${e["U_CK_ServiceName"]}",
                                                                             style:
-                                                                                const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
                                                                         )),
-                                                                const Padding(
+                                                                Padding(
                                                                   padding: EdgeInsets
                                                                       .only(
                                                                           bottom:
@@ -781,7 +807,8 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                                         color: Colors
                                                                             .white,
                                                                         fontSize:
-                                                                            12.5),
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.031),
                                                                     textScaleFactor:
                                                                         1.0,
                                                                   ),
@@ -799,23 +826,27 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                                       child:
                                                                           Text(
                                                                         "${e["U_CK_ServiceName"]}",
-                                                                        style: const TextStyle(
+                                                                        style: TextStyle(
                                                                             color:
                                                                                 Colors.white,
-                                                                            fontSize: 12.5),
+                                                                            fontSize: MediaQuery.of(context).size.width * 0.032),
                                                                         textScaleFactor:
                                                                             1.0,
                                                                       ),
                                                                     ))
                                                                 .toList(),
                                                   )),
-                                                  const Expanded(
+                                                  Expanded(
                                                       child: Text(
                                                     "Open",
                                                     textAlign: TextAlign.end,
                                                     style: TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: 12.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   const SizedBox(
@@ -846,7 +877,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Row(
+                                              Row(
                                                 children: [
                                                   Expanded(
                                                       child: Text(
@@ -855,7 +886,11 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: Colors.white,
-                                                        fontSize: 13.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   Expanded(
@@ -883,11 +918,15 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                       margin:
                                                           const EdgeInsets.only(
                                                               bottom: 8),
-                                                      child: const Text(
+                                                      child: Text(
                                                         "No Equipment Available",
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031),
                                                       ),
                                                     )
                                                   : Container(),
@@ -905,12 +944,14 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                           Expanded(
                                                               child: Text(
                                                             "${item["U_CK_EquipName"]}",
-                                                            style:
-                                                                const TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -919,12 +960,14 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                             "SN: ${item["U_CK_SerialNum"]}",
                                                             textAlign:
                                                                 TextAlign.end,
-                                                            style:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        12.5,
-                                                                    color: Colors
-                                                                        .white),
+                                                            style: TextStyle(
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031,
+                                                                color: Colors
+                                                                    .white),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -939,14 +982,18 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? const Padding(
+                                                  ? Padding(
                                                       padding: EdgeInsets.only(
                                                           bottom: 7),
                                                       child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031),
                                                         textScaleFactor: 1.0,
                                                       ),
                                                     )
@@ -955,11 +1002,13 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                           ))
                                     ],
                                   ),
+                                  ///////////////////////////////////////////
                                 ],
                               )),
                         ],
                       ),
-                    ), //
+                    ),
+
                     ///endddddddddddddddddddddd
                     const SizedBox(
                       height: 10,
@@ -1119,8 +1168,9 @@ class _MenuState extends State<Menu> {
                 width: 8,
               ),
               Text(widget.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: MediaQuery.of(context).size.width * 0.032),
                   textScaleFactor: 1.0)
             ],
           ),
@@ -1166,14 +1216,15 @@ class _DetailMenuState extends State<DetailMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: MediaQuery.of(context).size.width * 0.032),
                       textScaleFactor: 1.0),
                   const SizedBox(
                     height: 5,
                   ),
                   Text(widget.desc,
-                      style: const TextStyle(fontSize: 12.5),
+                      style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.031),
                       textScaleFactor: 1.0),
                 ],
               )),

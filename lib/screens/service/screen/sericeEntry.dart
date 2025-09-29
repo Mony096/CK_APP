@@ -42,19 +42,17 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onCompletedServiceOffline(
-                context: context,
-                attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-                docEntry: widget.data["DocEntry"],
-                startTime: widget.data["U_CK_Time"],
-                endTime: widget.data["U_CK_EndTime"],
-                
-                );
+      context: context,
+      attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+      docEntry: widget.data["DocEntry"],
+      startTime: widget.data["U_CK_Time"],
+      endTime: widget.data["U_CK_EndTime"],
+    );
     if (res) {
       Navigator.of(context).pop(true); // Return true to previous screen
     }
   }
 
- 
   Future<void> clearOfflineDataWithLogout(BuildContext context) async {
     final offlineProviderService =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
@@ -82,6 +80,21 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     // Show loading popup
   }
 
+  void onBackScreen() {
+    MaterialDialog.warningBackScreen(
+      context,
+      title: '',
+      confirmLabel: "Yes",
+      cancelLabel: "No",
+      onConfirm: () {
+        context.read<CompletedServiceProvider>().clearData();
+        Navigator.of(context).pop(); // Close warning dialog first
+      },
+
+      onCancel: () {},
+      icon: Icons.question_mark, // 👈 Pass the icon here
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +111,17 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
-                context.read<CompletedServiceProvider>().clearData();
-                Navigator.of(context).pop();
+                onBackScreen();
                 // Handle menu button press or keep it empty for default Drawer action
               },
             ),
             // Centered title
-            title: const Center(
+            title: Center(
               child: Text(
                 'Service Entry',
-                style: TextStyle(fontSize: 17, color: Colors.white),
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.042,
+                    color: Colors.white),
                 textScaleFactor: 1.0,
               ),
             ),
@@ -368,8 +382,12 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               children: [
                                                 Text(
                                                   "${widget.data["CustomerName"] ?? "N/A"}",
-                                                  style: const TextStyle(
-                                                      fontSize: 12.5),
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.033),
                                                   textScaleFactor: 1.0,
                                                 ),
                                                 const SizedBox(
@@ -386,8 +404,12 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                               .first["StreetNo"] ??
                                                           "N/A")
                                                       : "N/A",
-                                                  style: const TextStyle(
-                                                    fontSize: 12.5,
+                                                  style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.032,
                                                     fontWeight: FontWeight.bold,
                                                     height: 2,
                                                   ),
@@ -413,18 +435,26 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.end,
                                                 children: [
-                                                  const Text(
+                                                  Text(
                                                     "No: ",
-                                                    style:
-                                                        TextStyle(fontSize: 13),
+                                                    style: TextStyle(
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   ),
                                                   Text(
                                                     "${widget.data["DocNum"]}",
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontSize: 13),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   ),
                                                 ],
@@ -463,7 +493,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                               flex: 6,
                                               child: Column(
                                                 children: [
-                                                  const Row(
+                                                  Row(
                                                     children: [
                                                       Expanded(
                                                           child: Text(
@@ -472,7 +502,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             color: Colors.white,
-                                                            fontSize: 13.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033),
                                                         textScaleFactor: 1.0,
                                                       )),
                                                       Expanded(
@@ -483,7 +517,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            fontSize: 13.5,
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033,
                                                             color:
                                                                 Colors.white),
                                                         textScaleFactor: 1.0,
@@ -522,14 +560,14 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                           .only(
                                                                           bottom:
                                                                               8),
-                                                                  child:
-                                                                      const Text(
+                                                                  child: Text(
                                                                     "No Services Available",
                                                                     style: TextStyle(
                                                                         color: Colors
                                                                             .white,
                                                                         fontSize:
-                                                                            12.5),
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.032),
                                                                   ),
                                                                 )
                                                               ]
@@ -546,11 +584,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                               margin: const EdgeInsets.only(bottom: 8),
                                                                               child: Text(
                                                                                 "${e["U_CK_ServiceName"]}",
-                                                                                style: const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
                                                                                 textScaleFactor: 1.0,
                                                                               ),
                                                                             )),
-                                                                    const Padding(
+                                                                    Padding(
                                                                       padding: EdgeInsets.only(
                                                                           bottom:
                                                                               7),
@@ -560,7 +598,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                         style: TextStyle(
                                                                             color:
                                                                                 Colors.white,
-                                                                            fontSize: 12.5),
+                                                                            fontSize: MediaQuery.of(context).size.width * 0.031),
                                                                         textScaleFactor:
                                                                             1.0,
                                                                       ),
@@ -578,21 +616,25 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                               Text(
                                                                             "${e["U_CK_ServiceName"]}",
                                                                             style:
-                                                                                const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.032),
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
                                                                         ))
                                                                     .toList(),
                                                       )),
-                                                      const Expanded(
+                                                      Expanded(
                                                           child: Text(
                                                         "Open",
                                                         textAlign:
                                                             TextAlign.end,
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033),
                                                         textScaleFactor: 1.0,
                                                       )),
                                                       const SizedBox(
@@ -624,7 +666,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  const Row(
+                                                  Row(
                                                     children: [
                                                       Expanded(
                                                           child: Text(
@@ -633,7 +675,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             color: Colors.white,
-                                                            fontSize: 13.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033),
                                                         textScaleFactor: 1.0,
                                                       )),
                                                       Expanded(
@@ -662,12 +708,16 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                               const EdgeInsets
                                                                   .only(
                                                                   bottom: 8),
-                                                          child: const Text(
+                                                          child: Text(
                                                             "No Equipment Available",
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white,
-                                                                fontSize: 12.5),
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
                                                           ),
                                                         )
                                                       : Container(),
@@ -686,11 +736,13 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                               Expanded(
                                                                   child: Text(
                                                                 "${item["U_CK_EquipName"]}",
-                                                                style: const TextStyle(
+                                                                style: TextStyle(
                                                                     color: Colors
                                                                         .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.031),
                                                                 textScaleFactor:
                                                                     1.0,
                                                               )),
@@ -700,9 +752,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                 textAlign:
                                                                     TextAlign
                                                                         .end,
-                                                                style: const TextStyle(
-                                                                    fontSize:
-                                                                        12.5,
+                                                                style: TextStyle(
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.031,
                                                                     color: Colors
                                                                         .white),
                                                                 textScaleFactor:
@@ -719,7 +773,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                                   as List)
                                                               .length >
                                                           2
-                                                      ? const Padding(
+                                                      ? Padding(
                                                           padding:
                                                               EdgeInsets.only(
                                                                   bottom: 7),
@@ -728,7 +782,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white,
-                                                                fontSize: 12.5),
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
                                                             textScaleFactor:
                                                                 1.0,
                                                           ),
@@ -944,8 +1002,9 @@ class _MenuState extends State<Menu> {
               flex: 6,
               child: Text(
                 widget.title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: MediaQuery.of(context).size.width * 0.032),
                 textScaleFactor: 1.0,
               )),
           const Expanded(

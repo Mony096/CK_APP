@@ -892,7 +892,7 @@ class _DashboardState extends State<Dashboard>
           child: Text(
             'Bizd Service Mobile',
             style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.04,
+                fontSize: MediaQuery.of(context).size.width * 0.042,
                 color: Colors.white),
             textScaleFactor: 1.0,
           ),
@@ -1232,7 +1232,9 @@ class _DashboardState extends State<Dashboard>
                           subtitle: Text(
                             "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
                             style: TextStyle(
-                                color: Colors.grey, fontSize: MediaQuery.of(context).size.width * 0.031),
+                                color: Colors.grey,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.031),
                           ),
                           // ✅ custom right icon
                           // ✅ custom rotating arrow
@@ -1507,7 +1509,7 @@ class _DashboardState extends State<Dashboard>
                       children: [
                         Row(
                           children: [
-                             SizedBox(
+                            SizedBox(
                               width: 85,
                               child: Row(
                                 mainAxisAlignment:
@@ -1521,7 +1523,8 @@ class _DashboardState extends State<Dashboard>
                                     style: TextStyle(
                                         color:
                                             Color.fromARGB(255, 133, 134, 137),
-                                        fontSize: MediaQuery.of(context).size.width *
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
                                                 0.030),
                                   ),
                                   Text(
@@ -1532,7 +1535,8 @@ class _DashboardState extends State<Dashboard>
                                     style: TextStyle(
                                         color:
                                             Color.fromARGB(255, 133, 134, 137),
-                                        fontSize: MediaQuery.of(context).size.width *
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
                                                 0.030),
                                   ),
                                 ],
@@ -1544,7 +1548,8 @@ class _DashboardState extends State<Dashboard>
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
                               style: TextStyle(
-                                  color: Colors.black87, fontSize: MediaQuery.of(context).size.width *
+                                  color: Colors.black87,
+                                  fontSize: MediaQuery.of(context).size.width *
                                       0.030),
                             ),
                           ],
@@ -1552,7 +1557,7 @@ class _DashboardState extends State<Dashboard>
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                             SizedBox(
+                            SizedBox(
                               width: 85,
                               child: Row(
                                 mainAxisAlignment:
@@ -1566,7 +1571,8 @@ class _DashboardState extends State<Dashboard>
                                     style: TextStyle(
                                         color:
                                             Color.fromARGB(255, 133, 134, 137),
-                                        fontSize: MediaQuery.of(context).size.width *
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
                                                 0.030),
                                   ),
                                   Text(
@@ -1588,7 +1594,8 @@ class _DashboardState extends State<Dashboard>
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
                               style: TextStyle(
-                                  color: Colors.red, fontSize: MediaQuery.of(context).size.width *
+                                  color: Colors.red,
+                                  fontSize: MediaQuery.of(context).size.width *
                                       0.030),
                             ),
                           ],

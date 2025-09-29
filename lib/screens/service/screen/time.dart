@@ -81,7 +81,7 @@ class _TimeScreenState extends State<TimeScreen> {
               child: Container(
                   child: ListView(
                 children: [
-                  const Row(
+                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
@@ -96,7 +96,7 @@ class _TimeScreenState extends State<TimeScreen> {
                           ),
                           Text(
                             "Travel Time",
-                            style: TextStyle(fontSize: 15, color: Colors.black),
+                            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.036, color: Colors.black),
                           ),
                           SizedBox(
                             width: 5,
@@ -522,10 +522,10 @@ class _TimeScreenState extends State<TimeScreen> {
           //     "5:30",
           //   ));
           // },
-          child: const Center(
+          child: Center(
             child: Text(
               'Time Entry',
-              style: TextStyle(fontSize: 17, color: Colors.white),
+              style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
               textScaleFactor: 1.0,
             ),
           ),
@@ -706,240 +706,299 @@ class _TimeScreenState extends State<TimeScreen> {
                     borderRadius: BorderRadius.circular(5.0), // Rounded corners
                   ),
                   child: ListView(children: [
-                    Container(
-                      // margin: EdgeInsets.only(bottom: 1),
-                      padding: const EdgeInsets.only(bottom: 6),
-                      width: double.infinity,
-                      // height: 250,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        border: Border.all(
-                          color: Colors.green, // Border color
-                          width: 1.0, // Border width
-                        ),
-                        borderRadius:
-                            BorderRadius.circular(5.0), // Rounded corners
-                      ),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                    flex: 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            height: 45,
-                                            width:
-                                                45, // Ensure the width and height are equal for a perfect circle
-                                            decoration: BoxDecoration(
-                                              color: Colors.green,
-                                              shape: BoxShape
-                                                  .circle, // Makes the container circular
-                                              border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255,
-                                                    79,
-                                                    78,
-                                                    78), // Optional: Add a border if needed
-                                                width: 1.0, // Border width
+                   Container(
+                          // margin: EdgeInsets.only(bottom: 1),
+                          padding: const EdgeInsets.only(bottom: 6),
+                          width: double.infinity,
+                          // height: 250,
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                            border: Border.all(
+                              color: Colors.green, // Border color
+                              width: 1.0, // Border width
+                            ),
+                            borderRadius:
+                                BorderRadius.circular(5.0), // Rounded corners
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                        flex: 1,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                height: 45,
+                                                width:
+                                                    45, // Ensure the width and height are equal for a perfect circle
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green,
+                                                  shape: BoxShape
+                                                      .circle, // Makes the container circular
+                                                  border: Border.all(
+                                                    color: const Color.fromARGB(
+                                                        255,
+                                                        79,
+                                                        78,
+                                                        78), // Optional: Add a border if needed
+                                                    width: 1.0, // Border width
+                                                  ),
+                                                ),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: SvgPicture.asset(
+                                                    'images/svg/key.svg',
+                                                    width: 30,
+                                                    height: 30,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )),
+                                    Expanded(
+                                        flex: 4,
+                                        child: Container(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                4, 10, 4, 10),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "${widget.data["CustomerName"] ?? "N/A"}",
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.033),
+                                                  textScaleFactor: 1.0,
+                                                ),
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                Text(
+                                                  ((widget.data["CustomerAddress"]
+                                                                  as List?)
+                                                              ?.isNotEmpty ==
+                                                          true)
+                                                      ? (widget
+                                                              .data[
+                                                                  "CustomerAddress"]
+                                                              .first["StreetNo"] ??
+                                                          "N/A")
+                                                      : "N/A",
+                                                  style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.032,
+                                                    fontWeight: FontWeight.bold,
+                                                    height: 2,
+                                                  ),
+                                                  textScaleFactor: 1.0,
+                                                ),
+                                              ],
+                                            ))),
+                                    Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 10),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    "No: ",
+                                                    style: TextStyle(
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
+                                                    textScaleFactor: 1.0,
+                                                  ),
+                                                  Text(
+                                                    "${widget.data["DocNum"]}",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
+                                                    textScaleFactor: 1.0,
+                                                  ),
+                                                ],
                                               ),
                                             ),
+                                          ],
+                                        ))
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                  // height: 150,
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 15, 10, 8),
+                                  color: const Color.fromARGB(255, 66, 83, 100),
+                                  width: double.infinity,
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
                                             child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
+                                              padding: const EdgeInsets.only(
+                                                  right: 6),
                                               child: SvgPicture.asset(
-                                                'images/svg/key.svg',
+                                                color: const Color.fromARGB(
+                                                    255, 255, 255, 255),
+                                                'images/svg/dolla.svg',
                                                 width: 30,
                                                 height: 30,
                                               ),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    )),
-                                Expanded(
-                                    flex: 4,
-                                    child: Container(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            4, 10, 4, 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "${widget.data["CustomerName"] ?? "N/A"}",
-                                              style: const TextStyle(
-                                                  fontSize: 12.5),
-                                              textScaleFactor: 1.0,
-                                            ),
-                                            const SizedBox(
-                                              height: 6,
-                                            ),
-                                            Text(
-                                              ((widget.data["CustomerAddress"]
-                                                              as List?)
-                                                          ?.isNotEmpty ==
-                                                      true)
-                                                  ? (widget
-                                                          .data[
-                                                              "CustomerAddress"]
-                                                          .first["StreetNo"] ??
-                                                      "N/A")
-                                                  : "N/A",
-                                              style: const TextStyle(
-                                                fontSize: 12.5,
-                                                fontWeight: FontWeight.bold,
-                                                height: 2,
-                                              ),
-                                              textScaleFactor: 1.0,
-                                            ),
-                                          ],
-                                        ))),
-                                Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 10),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              const Text(
-                                                "No: ",
-                                                style: TextStyle(fontSize: 13),
-                                                textScaleFactor: 1.0,
-                                              ),
-                                              Text(
-                                                "${widget.data["DocNum"]}",
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13),
-                                                textScaleFactor: 1.0,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ))
-                              ],
-                            ),
-                          ),
-                          Container(
-                              // height: 150,
-                              padding: const EdgeInsets.fromLTRB(10, 15, 10, 8),
-                              color: const Color.fromARGB(255, 66, 83, 100),
-                              width: double.infinity,
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 6),
-                                          child: SvgPicture.asset(
-                                            color: const Color.fromARGB(
-                                                255, 255, 255, 255),
-                                            'images/svg/dolla.svg',
-                                            width: 30,
-                                            height: 30,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                          flex: 6,
-                                          child: Column(
-                                            children: [
-                                              const Row(
+                                          Expanded(
+                                              flex: 6,
+                                              child: Column(
                                                 children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Service:",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white,
-                                                        fontSize: 13.5),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Status:",
-                                                    textAlign: TextAlign.end,
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 13.5,
-                                                        color: Colors.white),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  SizedBox(
-                                                    width: 5,
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: Text(
+                                                        "Service:",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Colors.white,
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      Expanded(
+                                                          child: Text(
+                                                        "Status:",
+                                                        textAlign:
+                                                            TextAlign.end,
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033,
+                                                            color:
+                                                                Colors.white),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Expanded(
-                                                      child: Column(
+                                                  const SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
                                                             .start,
-                                                    children: (widget.data[
-                                                                    "CK_JOB_SERVICESCollection"]
-                                                                as List)
-                                                            .isEmpty
-                                                        ? [
-                                                            Container(
-                                                              margin:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      bottom:
-                                                                          8),
-                                                              child: const Text(
-                                                                "No Services Available",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        12.5),
-                                                              ),
-                                                            )
-                                                          ]
-                                                        : (widget.data["CK_JOB_SERVICESCollection"]
-                                                                        as List)
-                                                                    .length >
-                                                                2
+                                                    children: [
+                                                      Expanded(
+                                                          child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: (widget.data[
+                                                                        "CK_JOB_SERVICESCollection"]
+                                                                    as List)
+                                                                .isEmpty
                                                             ? [
-                                                                ...(widget.data[
+                                                                Container(
+                                                                  margin:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          bottom:
+                                                                              8),
+                                                                  child: Text(
+                                                                    "No Services Available",
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.032),
+                                                                  ),
+                                                                )
+                                                              ]
+                                                            : (widget.data["CK_JOB_SERVICESCollection"]
+                                                                            as List)
+                                                                        .length >
+                                                                    2
+                                                                ? [
+                                                                    ...(widget.data["CK_JOB_SERVICESCollection"]
+                                                                            as List)
+                                                                        .take(2)
+                                                                        .map((e) =>
+                                                                            Container(
+                                                                              margin: const EdgeInsets.only(bottom: 8),
+                                                                              child: Text(
+                                                                                "${e["U_CK_ServiceName"]}",
+                                                                                style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
+                                                                                textScaleFactor: 1.0,
+                                                                              ),
+                                                                            )),
+                                                                    Padding(
+                                                                      padding: EdgeInsets.only(
+                                                                          bottom:
+                                                                              7),
+                                                                      child:
+                                                                          Text(
+                                                                        "more...",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.white,
+                                                                            fontSize: MediaQuery.of(context).size.width * 0.031),
+                                                                        textScaleFactor:
+                                                                            1.0,
+                                                                      ),
+                                                                    ),
+                                                                  ]
+                                                                : (widget.data[
                                                                             "CK_JOB_SERVICESCollection"]
                                                                         as List)
-                                                                    .take(2)
                                                                     .map((e) =>
                                                                         Container(
                                                                           margin: const EdgeInsets
@@ -949,201 +1008,192 @@ class _TimeScreenState extends State<TimeScreen> {
                                                                               Text(
                                                                             "${e["U_CK_ServiceName"]}",
                                                                             style:
-                                                                                const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.032),
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
-                                                                        )),
-                                                                const Padding(
-                                                                  padding: EdgeInsets
-                                                                      .only(
-                                                                          bottom:
-                                                                              7),
-                                                                  child: Text(
-                                                                    "more...",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            12.5),
-                                                                    textScaleFactor:
-                                                                        1.0,
-                                                                  ),
-                                                                ),
-                                                              ]
-                                                            : (widget.data[
-                                                                        "CK_JOB_SERVICESCollection"]
-                                                                    as List)
-                                                                .map((e) =>
-                                                                    Container(
-                                                                      margin: const EdgeInsets
-                                                                          .only(
-                                                                          bottom:
-                                                                              8),
-                                                                      child:
-                                                                          Text(
-                                                                        "${e["U_CK_ServiceName"]}",
-                                                                        style: const TextStyle(
-                                                                            color:
-                                                                                Colors.white,
-                                                                            fontSize: 12.5),
-                                                                        textScaleFactor:
-                                                                            1.0,
-                                                                      ),
-                                                                    ))
-                                                                .toList(),
-                                                  )),
-                                                  const Expanded(
-                                                      child: Text(
-                                                    "Open",
-                                                    textAlign: TextAlign.end,
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 12.5),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          ))
-                                    ],
-                                  ),
-                                  ///////////////////////////
-                                  Row(
-                                    children: [
-                                      const Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                            padding: EdgeInsets.only(right: 6),
-                                            child: Icon(
-                                              Icons.build,
-                                              color: Colors.white,
-                                              size: 25,
-                                            )),
-                                      ),
-                                      Expanded(
-                                          flex: 6,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Equipment:",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white,
-                                                        fontSize: 13.5),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  Expanded(
-                                                      child: Text("",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: Colors
-                                                                  .white))),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
-                                                          as List)
-                                                      .isEmpty
-                                                  ? Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              bottom: 8),
-                                                      child: const Text(
-                                                        "No Equipment Available",
+                                                                        ))
+                                                                    .toList(),
+                                                      )),
+                                                      Expanded(
+                                                          child: Text(
+                                                        "Open",
+                                                        textAlign:
+                                                            TextAlign.end,
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      const SizedBox(
+                                                        width: 5,
                                                       ),
-                                                    )
-                                                  : Container(),
-                                              ...(widget.data[
-                                                          "CK_JOB_EQUIPMENTCollection"]
-                                                      as List)
-                                                  .take(2)
-                                                  .map(
-                                                    (item) => Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              bottom: 10),
-                                                      child: Row(
-                                                        children: [
-                                                          Expanded(
-                                                              child: Text(
-                                                            "${item["U_CK_EquipName"]}",
-                                                            style:
-                                                                const TextStyle(
+                                                    ],
+                                                  )
+                                                ],
+                                              ))
+                                        ],
+                                      ),
+                                      ///////////////////////////
+                                      Row(
+                                        children: [
+                                          const Expanded(
+                                            flex: 1,
+                                            child: Padding(
+                                                padding:
+                                                    EdgeInsets.only(right: 6),
+                                                child: Icon(
+                                                  Icons.build,
+                                                  color: Colors.white,
+                                                  size: 25,
+                                                )),
+                                          ),
+                                          Expanded(
+                                              flex: 6,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: Text(
+                                                        "Equipment:",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Colors.white,
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.033),
+                                                        textScaleFactor: 1.0,
+                                                      )),
+                                                      Expanded(
+                                                          child: Text("",
+                                                              textAlign:
+                                                                  TextAlign.end,
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white))),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                              as List)
+                                                          .isEmpty
+                                                      ? Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 8),
+                                                          child: Text(
+                                                            "No Equipment Available",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
+                                                          ),
+                                                        )
+                                                      : Container(),
+                                                  ...(widget.data[
+                                                              "CK_JOB_EQUIPMENTCollection"]
+                                                          as List)
+                                                      .take(2)
+                                                      .map(
+                                                        (item) => Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 10),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                  child: Text(
+                                                                "${item["U_CK_EquipName"]}",
+                                                                style: TextStyle(
                                                                     color: Colors
                                                                         .white,
-                                                                    fontSize:
-                                                                        12.5),
-                                                            textScaleFactor:
-                                                                1.0,
-                                                          )),
-                                                          Expanded(
-                                                              child: Text(
-                                                            "SN: ${item["U_CK_SerialNum"]}",
-                                                            textAlign:
-                                                                TextAlign.end,
-                                                            style:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        12.5,
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.031),
+                                                                textScaleFactor:
+                                                                    1.0,
+                                                              )),
+                                                              Expanded(
+                                                                  child: Text(
+                                                                "SN: ${item["U_CK_SerialNum"]}",
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .end,
+                                                                style: TextStyle(
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.031,
                                                                     color: Colors
                                                                         .white),
+                                                                textScaleFactor:
+                                                                    1.0,
+                                                              )),
+                                                              const SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  (widget.data["CK_JOB_EQUIPMENTCollection"]
+                                                                  as List)
+                                                              .length >
+                                                          2
+                                                      ? Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  bottom: 7),
+                                                          child: Text(
+                                                            "more...",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
                                                             textScaleFactor:
                                                                 1.0,
-                                                          )),
-                                                          const SizedBox(
-                                                            width: 5,
                                                           ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
-                                                              as List)
-                                                          .length >
-                                                      2
-                                                  ? const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          bottom: 7),
-                                                      child: Text(
-                                                        "more...",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 12.5),
-                                                        textScaleFactor: 1.0,
-                                                      ),
-                                                    )
-                                                  : Container(),
-                                            ],
-                                          ))
+                                                        )
+                                                      : Container(),
+                                                ],
+                                              ))
+                                        ],
+                                      ),
+                                      ///////////////////////////////////////////
                                     ],
-                                  ),
-                                ],
-                              )),
-                        ],
-                      ),
-                    ), //
+                                  )),
+                            ],
+                          ),
+                        ),
                     ////endddddddddddddddddddddddddd
                     const SizedBox(
                       height: 10,
@@ -1221,7 +1271,7 @@ class _MenuState extends State<Menu> {
                 textScaleFactor: 1.0,
                 widget.title,
                 style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                     TextStyle(fontWeight: FontWeight.bold, fontSize:  MediaQuery.of(context).size.width * 0.032),
               )),
           Expanded(
               flex: 3,
@@ -1231,8 +1281,8 @@ class _MenuState extends State<Menu> {
                   textAlign: TextAlign.right,
                   textScaleFactor: 1.0,
                   widget.date,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13),
+                  style:  TextStyle(
+                      fontWeight: FontWeight.bold, fontSize:  MediaQuery.of(context).size.width * 0.032),
                 ),
               )),
         ],
@@ -1274,7 +1324,7 @@ class _DetailTimeState extends State<DetailTime> {
                     children: [
                       Row(
                         children: [
-                          const Expanded(
+                           Expanded(
                               flex: 3,
                               child: Padding(
                                 padding: EdgeInsets.only(top: 20),
@@ -1283,7 +1333,7 @@ class _DetailTimeState extends State<DetailTime> {
                                   "Travel Time:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 12),
+                                      fontSize:  MediaQuery.of(context).size.width * 0.032),
                                 ),
                               )),
                           Expanded(
@@ -1291,11 +1341,11 @@ class _DetailTimeState extends State<DetailTime> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Start Time:",
+                                   Text("Start Time:",
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1321,7 +1371,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget
                                                 .timeEntry["U_CK_TraveledTime"],
                                             style:
-                                                const TextStyle(fontSize: 12),
+                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1345,11 +1395,11 @@ class _DetailTimeState extends State<DetailTime> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("End Time:",
+                                   Text("End Time:",
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1375,7 +1425,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget.timeEntry[
                                                 "U_CK_TraveledEndTime"],
                                             style:
-                                                const TextStyle(fontSize: 12),
+                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1398,12 +1448,12 @@ class _DetailTimeState extends State<DetailTime> {
                               flex: 3,
                               child: Column(
                                 children: [
-                                  const Text(
+                                   Text(
                                     textScaleFactor: 1.0,
                                     "Eff.T",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 12),
+                                        fontSize:  MediaQuery.of(context).size.width * 0.030),
                                   ),
                                   const SizedBox(
                                     height: 6,
@@ -1439,8 +1489,8 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget
                                                 .timeEntry["total_travel_time"],
                                             textScaleFactor: 1.0,
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                            style:  TextStyle(
+                                              fontSize:  MediaQuery.of(context).size.width * 0.032,
                                               color: Colors.green,
                                             )),
                                         const SizedBox(
@@ -1460,7 +1510,7 @@ class _DetailTimeState extends State<DetailTime> {
                       ),
                       Row(
                         children: [
-                          const Expanded(
+                           Expanded(
                               flex: 3,
                               child: Padding(
                                 padding: EdgeInsets.only(top: 20),
@@ -1469,7 +1519,7 @@ class _DetailTimeState extends State<DetailTime> {
                                   "Service Time:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 12),
+                                      fontSize:  MediaQuery.of(context).size.width * 0.032),
                                 ),
                               )),
                           Expanded(
@@ -1477,11 +1527,11 @@ class _DetailTimeState extends State<DetailTime> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Start Time:",
+                                   Text("Start Time:",
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1507,7 +1557,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget.timeEntry[
                                                 "U_CK_ServiceStartTime"],
                                             style:
-                                                const TextStyle(fontSize: 12),
+                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1531,11 +1581,11 @@ class _DetailTimeState extends State<DetailTime> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("End Time:",
+                                   Text("End Time:",
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1560,7 +1610,7 @@ class _DetailTimeState extends State<DetailTime> {
                                           child: Text(
                                             widget.timeEntry["U_CK_SerEndTime"],
                                             style:
-                                                const TextStyle(fontSize: 12),
+                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1607,8 +1657,8 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget.timeEntry[
                                                 "total_service_time"],
                                             textScaleFactor: 1.0,
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                            style: TextStyle(
+                                              fontSize:  MediaQuery.of(context).size.width * 0.032,
                                               color: Colors.green,
                                             )),
                                         const SizedBox(
@@ -1628,7 +1678,7 @@ class _DetailTimeState extends State<DetailTime> {
                       ),
                       Row(
                         children: [
-                          const Expanded(
+                           Expanded(
                               flex: 3,
                               child: Padding(
                                 padding: EdgeInsets.only(top: 20),
@@ -1637,7 +1687,7 @@ class _DetailTimeState extends State<DetailTime> {
                                   "Break Time:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 12),
+                                      fontSize:  MediaQuery.of(context).size.width * 0.032),
                                 ),
                               )),
                           Expanded(
@@ -1645,11 +1695,11 @@ class _DetailTimeState extends State<DetailTime> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Start Time:",
+                                   Text("Start Time:",
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1674,7 +1724,7 @@ class _DetailTimeState extends State<DetailTime> {
                                           child: Text(
                                             widget.timeEntry["U_CK_BreakTime"],
                                             style:
-                                                const TextStyle(fontSize: 12),
+                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1698,11 +1748,11 @@ class _DetailTimeState extends State<DetailTime> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("End Time:",
+                                   Text("End Time:",
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
                                   const SizedBox(
                                     height: 5,
                                   ),
@@ -1728,7 +1778,7 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget
                                                 .timeEntry["U_CK_BreakEndTime"],
                                             style:
-                                                const TextStyle(fontSize: 12),
+                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
                                             textScaleFactor: 1.0,
                                           ),
                                         ),
@@ -1770,8 +1820,8 @@ class _DetailTimeState extends State<DetailTime> {
                                             widget
                                                 .timeEntry["total_break_time"],
                                             textScaleFactor: 1.0,
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                            style: TextStyle(
+                                              fontSize:  MediaQuery.of(context).size.width * 0.032,
                                               color: Colors.green,
                                             )),
                                         const SizedBox(
@@ -1793,7 +1843,7 @@ class _DetailTimeState extends State<DetailTime> {
                   )
                 : Container(
                     padding: const EdgeInsets.fromLTRB(20, 15, 20, 30),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1808,7 +1858,7 @@ class _DetailTimeState extends State<DetailTime> {
                         Text(
                           "No Time Added",
                           style: TextStyle(
-                              fontSize: 14,
+                              fontSize:  MediaQuery.of(context).size.width * 0.033,
                               // fontWeight: FontWeight.w500,
                               color: Color.fromARGB(221, 168, 168, 171)),
                         ),
@@ -1834,9 +1884,9 @@ class _DetailTimeState extends State<DetailTime> {
                       ),
                       child: Text(
                         !widget.isValidTime ? "Add Time" : "Edit Time",
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: Color.fromARGB(255, 255, 255, 255),
-                            fontSize: 13),
+                            fontSize:  MediaQuery.of(context).size.width * 0.031),
                       ),
                     ),
                   ),

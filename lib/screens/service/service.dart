@@ -195,7 +195,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
             title: Center(
               child: Text(
                 "$userName' Service",
-                style: const TextStyle(fontSize: 17, color: Colors.white),
+                style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
                 textScaleFactor: 1.0,
               ),
             ),

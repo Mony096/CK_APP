@@ -375,9 +375,9 @@ class _MenuState extends State<Menu> {
                   ),
                   Text(
                     widget.title,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: MediaQuery.of(context).size.width * 0.032,
                     ),
                     overflow: TextOverflow.ellipsis, // avoid overflow
                     textScaleFactor: 1.0,
@@ -403,9 +403,9 @@ class _MenuState extends State<Menu> {
                     : (widget.data.containsKey("sync_status")
                         ? "Equipment Image"
                         : "Download Image"),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 13,
+                  fontSize: MediaQuery.of(context).size.width * 0.031,
                 ),
               ),
             ),

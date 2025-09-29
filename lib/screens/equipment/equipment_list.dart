@@ -237,11 +237,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 const SizedBox(
                                   width: 15,
                                 ),
-                                const Text(
+                                 Text(
                                   textScaleFactor: 1.0,
                                   "Equipment Overview",
                                   style: TextStyle(
-                                      fontSize: 19,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 )
@@ -276,7 +276,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                     ),
                                   ],
                                 ),
-                                child: const Padding(
+                                child: Padding(
                                   padding: EdgeInsets.only(right: 4),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -289,7 +289,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                         textScaleFactor: 1.0,
                                         "New",
                                         style: TextStyle(
-                                            fontSize: 15,
+                                            fontSize: MediaQuery.of(context).size.width * 0.034,
                                             color: Color.fromARGB(
                                                 255, 104, 104, 110)),
                                       ),
@@ -324,11 +324,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 const SizedBox(
                                   width: 10,
                                 ),
-                                const Text(
+                                 Text(
                                   textScaleFactor: 1.0,
                                   "Matches Your Filter",
                                   style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: MediaQuery.of(context).size.width * 0.035,
                                     color: Colors.white,
                                   ),
                                 )
@@ -355,8 +355,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   style: const TextStyle(fontSize: 14),
                                   decoration: InputDecoration(
                                     hintText: "Search",
-                                    hintStyle: const TextStyle(
-                                        color: Colors.grey, fontSize: 14),
+                                    hintStyle:  TextStyle(
+                                        color: Colors.grey, fontSize: MediaQuery.of(context).size.width * 0.034),
                                     // Decrease vertical and horizontal padding to shrink the field
                                     contentPadding: const EdgeInsets.symmetric(
                                         vertical: 4, // Reduced from 8
@@ -393,7 +393,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 // example: print search text
                                 // print("Search for: ${controller.text}");
                               },
-                              child: const Text("GO"),
+                              child:  Text("GO",style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.034),),
                             ),
                           ],
                         ),
@@ -525,10 +525,10 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                   Text(
                                                     textScaleFactor: 1.0,
                                                     "${item["Code"] ?? "N/A"} - ${item["Name"] ?? "N/A"}",
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      fontSize: 13,
+                                                      fontSize: MediaQuery.of(context).size.width * 0.032,
                                                     ),
                                                   ),
                                                   const Icon(
@@ -542,19 +542,19 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                               const SizedBox(height: 6),
                                               Row(
                                                 children: [
-                                                  const SizedBox(
+                                                   SizedBox(
                                                     width: 104,
                                                     child: Text(
                                                         textScaleFactor: 1.0,
                                                         "Serial Number",
                                                         style: TextStyle(
-                                                            fontSize: 13)),
+                                                            fontSize: MediaQuery.of(context).size.width * 0.031)),
                                                   ),
                                                   Text(
                                                       textScaleFactor: 1.0,
                                                       ": ${item["U_ck_eqSerNum"] ?? "N/A"}",
-                                                      style: const TextStyle(
-                                                          fontSize: 13)),
+                                                      style: TextStyle(
+                                                          fontSize: MediaQuery.of(context).size.width * 0.031)),
                                                 ],
                                               ),
                                               const SizedBox(height: 6),
@@ -565,29 +565,29 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                 children: [
                                                   Row(
                                                     children: [
-                                                      const SizedBox(
+                                                       SizedBox(
                                                         width: 104,
                                                         child: Text(
                                                             textScaleFactor:
                                                                 1.0,
                                                             "Customer Name",
                                                             style: TextStyle(
-                                                                fontSize: 13)),
+                                                                fontSize: MediaQuery.of(context).size.width * 0.031)),
                                                       ),
                                                       Text(
                                                           textScaleFactor: 1.0,
                                                           ": ${item["U_ck_CusName"] ?? "N/A"}",
                                                           style:
-                                                              const TextStyle(
+                                                               TextStyle(
                                                                   color: Colors
                                                                       .green,
                                                                   fontSize:
-                                                                      13)),
+                                                                      MediaQuery.of(context).size.width * 0.031)),
                                                     ],
                                                   ),
                                                   Text("No : ${index + 1}",
-                                                      style: const TextStyle(
-                                                          fontSize: 13)),
+                                                      style: TextStyle(
+                                                          fontSize: MediaQuery.of(context).size.width * 0.031)),
                                                 ],
                                               ),
                                             ],

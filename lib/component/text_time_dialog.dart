@@ -48,8 +48,8 @@ class CustomTimeFieldDialog extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize:  MediaQuery.of(context).size.width * 0.033,
                     fontWeight: FontWeight.w400,
                     color: Color.fromARGB(221, 58, 58, 59),
                   ),
@@ -77,7 +77,7 @@ class CustomTimeFieldDialog extends StatelessWidget {
                 controller: controller,
                 readOnly: true,
                 onTap: () => _selectTime(context),
-                style: const TextStyle(fontSize: 14),
+                style:  TextStyle(fontSize: MediaQuery.of(context).size.width * 0.035),
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 4,

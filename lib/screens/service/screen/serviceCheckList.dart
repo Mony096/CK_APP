@@ -26,18 +26,17 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
 
   String? userName;
 
-@override
+  @override
   void initState() {
     super.initState();
     // Defer the provider update until the current frame is finished rendering.
-      final provider =
-          Provider.of<CompletedServiceProvider>(context, listen: false);
+    final provider =
+        Provider.of<CompletedServiceProvider>(context, listen: false);
 
-      // Check if the list needs to be populated to avoid redundant updates.
-      if (provider.checkListLine.isEmpty) {
-        provider.setCheckList(widget.data["checklistLine"] ?? []);
-      }
-    
+    // Check if the list needs to be populated to avoid redundant updates.
+    if (provider.checkListLine.isEmpty) {
+      provider.setCheckList(widget.data["checklistLine"] ?? []);
+    }
   }
 
   final remark = TextEditingController();
@@ -318,10 +317,10 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
           },
         ),
         // Centered title
-        title: const Center(
+        title: Center(
           child: Text(
             'Service CheckList',
-            style: TextStyle(fontSize: 17, color: Colors.white),
+            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
             textScaleFactor: 1.0,
           ),
         ),
@@ -570,8 +569,12 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                           children: [
                                             Text(
                                               "${widget.data["CustomerName"] ?? "N/A"}",
-                                              style: const TextStyle(
-                                                  fontSize: 12.5),
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.033),
                                               textScaleFactor: 1.0,
                                             ),
                                             const SizedBox(
@@ -588,8 +591,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                           .first["StreetNo"] ??
                                                       "N/A")
                                                   : "N/A",
-                                              style: const TextStyle(
-                                                fontSize: 12.5,
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.032,
                                                 fontWeight: FontWeight.bold,
                                                 height: 2,
                                               ),
@@ -615,16 +621,25 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 "No: ",
-                                                style: TextStyle(fontSize: 13),
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                               Text(
                                                 "${widget.data["DocNum"]}",
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 13),
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                 textScaleFactor: 1.0,
                                               ),
                                             ],
@@ -662,7 +677,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                           flex: 6,
                                           child: Column(
                                             children: [
-                                              const Row(
+                                              Row(
                                                 children: [
                                                   Expanded(
                                                       child: Text(
@@ -671,7 +686,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: Colors.white,
-                                                        fontSize: 13.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   Expanded(
@@ -681,7 +700,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontSize: 13.5,
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033,
                                                         color: Colors.white),
                                                     textScaleFactor: 1.0,
                                                   )),
@@ -717,13 +740,15 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                                       .only(
                                                                       bottom:
                                                                           8),
-                                                              child: const Text(
+                                                              child: Text(
                                                                 "No Services Available",
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                                    fontSize: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.032),
                                                               ),
                                                             )
                                                           ]
@@ -745,12 +770,12 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                                               Text(
                                                                             "${e["U_CK_ServiceName"]}",
                                                                             style:
-                                                                                const TextStyle(color: Colors.white, fontSize: 12.5),
+                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
                                                                             textScaleFactor:
                                                                                 1.0,
                                                                           ),
                                                                         )),
-                                                                const Padding(
+                                                                Padding(
                                                                   padding: EdgeInsets
                                                                       .only(
                                                                           bottom:
@@ -761,7 +786,8 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                                         color: Colors
                                                                             .white,
                                                                         fontSize:
-                                                                            12.5),
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.031),
                                                                     textScaleFactor:
                                                                         1.0,
                                                                   ),
@@ -779,23 +805,27 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                                       child:
                                                                           Text(
                                                                         "${e["U_CK_ServiceName"]}",
-                                                                        style: const TextStyle(
+                                                                        style: TextStyle(
                                                                             color:
                                                                                 Colors.white,
-                                                                            fontSize: 12.5),
+                                                                            fontSize: MediaQuery.of(context).size.width * 0.032),
                                                                         textScaleFactor:
                                                                             1.0,
                                                                       ),
                                                                     ))
                                                                 .toList(),
                                                   )),
-                                                  const Expanded(
+                                                  Expanded(
                                                       child: Text(
                                                     "Open",
                                                     textAlign: TextAlign.end,
                                                     style: TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: 12.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   const SizedBox(
@@ -826,7 +856,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Row(
+                                              Row(
                                                 children: [
                                                   Expanded(
                                                       child: Text(
@@ -835,7 +865,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: Colors.white,
-                                                        fontSize: 13.5),
+                                                        fontSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
                                                     textScaleFactor: 1.0,
                                                   )),
                                                   Expanded(
@@ -863,11 +897,15 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                       margin:
                                                           const EdgeInsets.only(
                                                               bottom: 8),
-                                                      child: const Text(
+                                                      child: Text(
                                                         "No Equipment Available",
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031),
                                                       ),
                                                     )
                                                   : Container(),
@@ -885,12 +923,14 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                           Expanded(
                                                               child: Text(
                                                             "${item["U_CK_EquipName"]}",
-                                                            style:
-                                                                const TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        12.5),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -899,12 +939,14 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                             "SN: ${item["U_CK_SerialNum"]}",
                                                             textAlign:
                                                                 TextAlign.end,
-                                                            style:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        12.5,
-                                                                    color: Colors
-                                                                        .white),
+                                                            style: TextStyle(
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031,
+                                                                color: Colors
+                                                                    .white),
                                                             textScaleFactor:
                                                                 1.0,
                                                           )),
@@ -919,14 +961,18 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                                               as List)
                                                           .length >
                                                       2
-                                                  ? const Padding(
+                                                  ? Padding(
                                                       padding: EdgeInsets.only(
                                                           bottom: 7),
                                                       child: Text(
                                                         "more...",
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 12.5),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031),
                                                         textScaleFactor: 1.0,
                                                       ),
                                                     )
@@ -935,11 +981,12 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                                           ))
                                     ],
                                   ),
+                                  ///////////////////////////////////////////
                                 ],
                               )),
                         ],
                       ),
-                    ), //
+                    ),
                     //////Enddddddddddddddddddddddddddddddddddddddddddddd
                     const SizedBox(
                       height: 10,
@@ -1108,8 +1155,9 @@ class _MenuState extends State<Menu> {
                 width: 8,
               ),
               Text(widget.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: MediaQuery.of(context).size.width * 0.032),
                   textScaleFactor: 1.0)
             ],
           ),
@@ -1177,9 +1225,10 @@ class _DetailMenuState extends State<DetailMenu> {
                           constraints: const BoxConstraints(maxWidth: 210),
                           child: Text(
                             widget.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.032,
                             ),
                             softWrap: true,
                             overflow: TextOverflow.visible,
@@ -1203,9 +1252,11 @@ class _DetailMenuState extends State<DetailMenu> {
                               ),
                             ),
                             onPressed: widget.onEditFeedback,
-                            child: const Text(
+                            child: Text(
                               "Feedback",
-                              style: TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                  fontSize: MediaQuery.of(context).size.width *
+                                      0.031),
                             ),
                           ),
                         ),
@@ -1218,7 +1269,8 @@ class _DetailMenuState extends State<DetailMenu> {
                       constraints: const BoxConstraints(maxWidth: 210),
                       child: Text(
                         "${widget.desc} ",
-                        style: const TextStyle(fontSize: 12.5),
+                        style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.03),
                         softWrap: true,
                         overflow: TextOverflow.visible,
                         textScaleFactor: 1.0,

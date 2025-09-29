@@ -554,10 +554,10 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                 const SizedBox(
                                   width: 15,
                                 ),
-                                const Text(
+                                 Text(
                                   "Equipment Setup",
                                   style: TextStyle(
-                                      fontSize: 19,
+                                      fontSize: MediaQuery.of(context).size.width * 0.05,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
