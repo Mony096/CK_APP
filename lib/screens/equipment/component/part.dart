@@ -157,9 +157,10 @@ class _PartState extends State<Part> {
                           clear();
                           Navigator.of(context).pop();
                         },
-                        child: const Text(
+                        child: Text(
                           "Cancel",
                           style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.036,
                               color: Color.fromARGB(255, 66, 83, 100)),
                         ),
                       ),
@@ -224,8 +225,8 @@ class _PartState extends State<Part> {
                             padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                             child: Text(
                               isEditPart >= 0 ? "Edit" : "Add",
-                              style: const TextStyle(
-                                fontSize: 15,
+                              style: TextStyle(
+                                fontSize: MediaQuery.of(context).size.width * 0.036,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

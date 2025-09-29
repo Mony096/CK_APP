@@ -142,12 +142,12 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        title: const Row(
+        title: Row(
           children: [
             Text(
               'Select Image Source',
               style: TextStyle(
-                fontSize: 18,
+                fontSize:  MediaQuery.of(context).size.width * 0.042,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -162,9 +162,9 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                 color: Colors.blue,
                 size: 25,
               ),
-              title: const Text(
+              title: Text(
                 "Take Photo",
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.038),
               ),
               onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
@@ -174,8 +174,8 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                 color: Colors.green,
                 size: 25,
               ),
-              title: const Text("Choose from Gallery",
-                  style: TextStyle(fontSize: 16)),
+              title: Text("Choose from Gallery",
+                  style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.038)),
               onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
             ),
           ],

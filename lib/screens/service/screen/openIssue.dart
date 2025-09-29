@@ -129,9 +129,11 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
 
                 Navigator.of(context).pop();
               },
-              child: const Text(
+              child: Text(
                 "Cancel",
-                style: TextStyle(color: Color.fromARGB(255, 66, 83, 100)),
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.036,
+                    color: Color.fromARGB(255, 66, 83, 100)),
               ),
             ),
             ElevatedButton(
@@ -165,8 +167,9 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
               ),
               child: Text(
                 isEditComp >= 0 ? "Edit" : "Add",
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.036,
+                    fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -341,7 +344,9 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
         title: Center(
           child: Text(
             'Open Issue',
-            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
+            style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.042,
+                color: Colors.white),
             textScaleFactor: 1.0,
           ),
         ),
@@ -1119,11 +1124,13 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Add Issue",
                                 style: TextStyle(
                                     color: Color.fromARGB(255, 255, 255, 255),
-                                    fontSize: 13),
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.031),
                               ),
                             ),
                           ),
@@ -1224,7 +1231,8 @@ class _DetailMenuState extends State<DetailMenu> {
                     height: 5,
                   ),
                   Text(widget.desc,
-                      style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.031),
+                      style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.031),
                       textScaleFactor: 1.0),
                 ],
               )),

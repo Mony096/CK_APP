@@ -179,7 +179,7 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                   children: [
                     SizedBox(
                         width: MediaQuery.of(context).size.width - 40,
-                        child: const Row(
+                        child: Row(
                           children: [
                             Icon(
                               Icons.filter_alt,
@@ -192,7 +192,7 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                             Text(
                               "MATCHES YOUR FILTER",
                               style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize:  MediaQuery.of(context).size.width * 0.036,
                                   color: Color.fromARGB(255, 53, 53, 55)),
                             ),
                           ],
@@ -207,7 +207,7 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                               height: 40,
                               child: TextField(
                                 controller: filter,
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.035),
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
@@ -365,8 +365,8 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                                           children: [
                                             Text(
                                               '${doc["Code"]}',
-                                              style: const TextStyle(
-                                                  fontSize: 14,
+                                              style: TextStyle(
+                                                  fontSize:  MediaQuery.of(context).size.width * 0.034,
                                                   fontWeight: FontWeight.bold,
                                                   color: Color.fromARGB(
                                                       255, 69, 70, 72)),
@@ -383,8 +383,8 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                                         ),
                                         Text(
                                           '${(doc["Name"] == null || doc["Name"].toString().isEmpty) ? "N/A" : doc["Name"]}',
-                                          style: const TextStyle(
-                                              fontSize: 14,
+                                          style: TextStyle(
+                                              fontSize:  MediaQuery.of(context).size.width * 0.033,
                                               // fontWeight: FontWeight.bold,
                                               color: Color.fromARGB(
                                                   255, 69, 70, 72)),

@@ -488,7 +488,16 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           GestureDetector(
-                              onTap: () => {onBackScreen()},
+                              onTap: () {
+                                if (widget.data.isNotEmpty) {
+                                  Provider.of<EquipmentOfflineProvider>(context,
+                                          listen: false)
+                                      .clearCollection();
+                                  Navigator.of(context).pop();
+                                } else {
+                                  onBackScreen();
+                                }
+                              },
                               child: Container(
                                   width: 28,
                                   height: 28,
@@ -648,7 +657,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                     style: TextStyle(
                                         fontSize:
                                             MediaQuery.of(context).size.width *
-                                                0.035),
+                                                0.036),
                                   ),
                                 ),
                               ),
@@ -682,7 +691,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                     style: TextStyle(
                                         fontSize:
                                             MediaQuery.of(context).size.width *
-                                                0.035),
+                                                0.036),
                                   ),
                                 ),
                               ),
@@ -716,7 +725,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                                     style: TextStyle(
                                         fontSize:
                                             MediaQuery.of(context).size.width *
-                                                0.035),
+                                                0.036),
                                   ),
                                 ),
                               ),

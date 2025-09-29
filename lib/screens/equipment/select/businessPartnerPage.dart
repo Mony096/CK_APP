@@ -135,7 +135,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                   children: [
                     SizedBox(
                         width: MediaQuery.of(context).size.width - 40,
-                        child: const Row(
+                        child: Row(
                           children: [
                             Icon(
                               Icons.filter_alt,
@@ -148,7 +148,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                             Text(
                               "MATCHES YOUR FILTER",
                               style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: MediaQuery.of(context).size.width * 0.036,
                                   color: Color.fromARGB(255, 53, 53, 55)),
                             ),
                           ],
@@ -163,7 +163,7 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                               height: 40,
                               child: TextField(
                                 controller: filter,
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.035),
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
@@ -322,8 +322,8 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                           children: [
                                             Text(
                                               '${doc["CardCode"]} - ${(doc["CardName"] == null || doc["CardName"].toString().isEmpty) ? "N/A" : doc["CardName"]}',
-                                              style: const TextStyle(
-                                                  fontSize: 14,
+                                              style: TextStyle(
+                                                  fontSize: MediaQuery.of(context).size.width * 0.034,
                                                   fontWeight: FontWeight.bold,
                                                   color: Color.fromARGB(
                                                       255, 69, 70, 72)),
@@ -340,8 +340,8 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                         ),
                                         Text(
                                           '${doc["ShipToDefault"] ?? "N/A"}',
-                                          style: const TextStyle(
-                                              fontSize: 14,
+                                          style: TextStyle(
+                                              fontSize: MediaQuery.of(context).size.width * 0.033,
                                               // fontWeight: FontWeight.bold,
                                               color: Color.fromARGB(
                                                   255, 69, 70, 72)),

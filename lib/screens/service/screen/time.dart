@@ -282,9 +282,9 @@ class _TimeScreenState extends State<TimeScreen> {
                           // clear();
                           Navigator.of(context).pop();
                         },
-                        child: const Text(
+                        child: Text(
                           "Cancel",
-                          style: TextStyle(
+                          style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.036,
                               color: Color.fromARGB(255, 66, 83, 100)),
                         ),
                       ),
@@ -364,8 +364,8 @@ class _TimeScreenState extends State<TimeScreen> {
                                       .isEmpty
                                   ? "Add Time"
                                   : "Edit Time",
-                              style: const TextStyle(
-                                fontSize: 15,
+                              style: TextStyle(
+                                fontSize:  MediaQuery.of(context).size.width * 0.036,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

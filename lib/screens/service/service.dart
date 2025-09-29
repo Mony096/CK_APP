@@ -195,7 +195,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
             title: Center(
               child: Text(
                 "$userName' Service",
-                style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.042,
+                    color: Colors.white),
                 textScaleFactor: 1.0,
               ),
             ),
@@ -350,6 +352,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                           travel["U_CK_Status"]);
                                     },
                                   )),
+                              const SizedBox(
+                                height: 45,
+                              ),
                             ]),
                 ),
               ),

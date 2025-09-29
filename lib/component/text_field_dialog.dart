@@ -34,8 +34,8 @@ class CustomTextFieldDialog extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize:  MediaQuery.of(context).size.width * 0.034,
                   fontWeight: FontWeight.w500,
                   color: Color.fromARGB(221, 58, 58, 59),
                 ),
@@ -91,7 +91,7 @@ class CustomTextFieldDialog extends StatelessWidget {
             enabled: !isDisabled,
             readOnly: readOnly,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: MediaQuery.of(context).size.width * 0.037,
               color: isDisabled ? Colors.black54 : Colors.black,
             ),
             decoration: InputDecoration(

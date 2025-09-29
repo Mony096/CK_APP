@@ -75,8 +75,7 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
 // }
   void onPressed(dynamic bp) {
     Navigator.pop(context, bp);
-        _refreshData();
-
+    _refreshData();
   }
 
   @override
@@ -158,7 +157,7 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                   children: [
                     SizedBox(
                         width: MediaQuery.of(context).size.width - 40,
-                        child: const Row(
+                        child: Row(
                           children: [
                             Icon(
                               Icons.filter_alt,
@@ -171,7 +170,8 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                             Text(
                               "MATCHES YOUR FILTER",
                               style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.036,
                                   color: Color.fromARGB(255, 53, 53, 55)),
                             ),
                           ],
@@ -186,7 +186,10 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                               height: 40,
                               child: TextField(
                                 controller: filter,
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.035),
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
@@ -344,8 +347,12 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                                           children: [
                                             Text(
                                               '${(doc["ItemCode"] == null || doc["ItemCode"].toString().isEmpty) ? "N/A" : doc["ItemCode"]}',
-                                              style: const TextStyle(
-                                                  fontSize: 14,
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.034,
                                                   fontWeight: FontWeight.bold,
                                                   color: Color.fromARGB(
                                                       255, 69, 70, 72)),
@@ -362,8 +369,11 @@ class _ItemMasterPageBusinessState extends State<ItemMasterPageBusiness> {
                                         ),
                                         Text(
                                           '${doc["ItemName"] ?? "N/A"}',
-                                          style: const TextStyle(
-                                              fontSize: 14,
+                                          style: TextStyle(
+                                              fontSize: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.033,
                                               // fontWeight: FontWeight.bold,
                                               color: Color.fromARGB(
                                                   255, 69, 70, 72)),

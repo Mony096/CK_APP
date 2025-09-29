@@ -37,7 +37,7 @@ await showDialog(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Container(
             width: 280,
-            height: 420,
+            height: 460,
             padding: const EdgeInsets.all(10),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -137,7 +137,7 @@ await showDialog(
             controller: widget.controller,
             readOnly: true,
             onTap: () => _selectDate(context),
-            style: TextStyle(fontSize: 16, color: textColor),
+            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.037, color: textColor),
             decoration: InputDecoration(
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
