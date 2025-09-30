@@ -615,7 +615,7 @@ class _DashboardState extends State<Dashboard>
                       ),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 14),
-                      content: const Row(
+                      content: Row(
                         children: [
                           // Icon(Icons.remove_circle,
                           //     color: Colors.white, size: 28),
@@ -628,7 +628,8 @@ class _DashboardState extends State<Dashboard>
                                 Text(
                                   "✅ All documents downloaded successfully!",
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: MediaQuery.of(context).size.width *
+                                            0.033,
                                     color: Colors.white,
                                   ),
                                 ),
