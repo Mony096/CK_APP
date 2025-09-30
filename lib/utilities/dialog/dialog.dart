@@ -490,7 +490,7 @@ class MaterialDialog {
             child: ListBody(
               children: <Widget>[
                 Text(
-                  "Are you sure you want to go back without completing?",
+                  body ?? "Are you sure you want to go back without completing?",
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width * 0.036,

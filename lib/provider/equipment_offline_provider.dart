@@ -327,7 +327,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-    // --- Check for duplicate code ---
+      // --- Check for duplicate code ---
       final existing = _equipments.firstWhere(
         (e) => e['Code'] == data['Code'],
         orElse: () => <String, dynamic>{},
@@ -360,6 +360,9 @@ class EquipmentOfflineProvider with ChangeNotifier {
       MaterialDialog.close(context); // Show loading dialog
 
       _submit = false;
+      _components = [];
+      _parts = [];
+      _imagesList = [];
       await MaterialDialog.createdSuccess(
         context,
       );
@@ -374,12 +377,6 @@ class EquipmentOfflineProvider with ChangeNotifier {
       );
       notifyListeners();
       return false;
-    } finally {
-      _submit = false;
-      _components = [];
-      _parts = [];
-      _imagesList = [];
-      // MaterialDialog.close(context); // Show loading dialog
     }
   }
 }

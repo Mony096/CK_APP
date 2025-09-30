@@ -5,6 +5,7 @@ import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/middleware/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
@@ -320,7 +321,9 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
         title: Center(
           child: Text(
             'Service CheckList',
-            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
+            style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.042,
+                color: Colors.white),
             textScaleFactor: 1.0,
           ),
         ),

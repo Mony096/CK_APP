@@ -259,9 +259,9 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
             children: [
               IconButton(
                 onPressed: () {
-                  // refresh();
+                 Navigator.of(context).pop();
                 },
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                icon: const Icon(Icons.check, color: Colors.white),
               ),
               // SizedBox(width: 3),
               // IconButton(

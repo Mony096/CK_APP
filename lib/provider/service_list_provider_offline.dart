@@ -22,8 +22,8 @@ class ServiceListProviderOffline extends ChangeNotifier {
   Future<void> _initBox() async {
     _box = await Hive.openBox('service_lists');
     _completedBox = await Hive.openBox('offlineCompleted');
-    await loadDocuments();
     await loadCompletedServices(); // ✅ Ensure this is called
+    await loadDocuments();
   }
 
   void setDate(DateTime date) {

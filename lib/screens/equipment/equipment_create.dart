@@ -440,6 +440,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     MaterialDialog.warningBackScreen(
       context,
       title: '',
+      body: "Are you sure you want to go back without Saving?",
       confirmLabel: "Yes",
       cancelLabel: "No",
       onConfirm: () {

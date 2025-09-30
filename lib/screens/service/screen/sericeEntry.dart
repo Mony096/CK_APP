@@ -84,6 +84,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     MaterialDialog.warningBackScreen(
       context,
       title: '',
+      body: "Are you sure you want to go back without completing?",
       confirmLabel: "Yes",
       cancelLabel: "No",
       onConfirm: () {
