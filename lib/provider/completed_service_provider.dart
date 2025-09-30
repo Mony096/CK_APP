@@ -754,9 +754,40 @@ class CompletedServiceProvider extends ChangeNotifier {
       await offlineProvider.addCompletedService(payload);
       await offlineProvider.markServiceCompleted(docEntry);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Service saved offline!")),
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: Row(
+            children: [
+              // Icon(Icons.remove_circle,
+              //     color: Colors.white, size: 28),
+              // SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "✅ Service successfully completed in offline mode.",
+                      style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.033,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
       );
-
       clearData();
       return true;
     } catch (e) {
