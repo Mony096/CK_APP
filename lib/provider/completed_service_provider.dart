@@ -776,7 +776,7 @@ class CompletedServiceProvider extends ChangeNotifier {
                     Text(
                       "✅ Service successfully completed in offline mode.",
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.033,
+                        fontSize: MediaQuery.of(context).size.width * 0.031,
                         color: Colors.white,
                       ),
                     ),
