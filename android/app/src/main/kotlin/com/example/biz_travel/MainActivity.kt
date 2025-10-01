@@ -27,7 +27,7 @@ class MainActivity: FlutterActivity() {
                 .build()
 
             val channel = NotificationChannel(
-                "call_channel",
+                "call_channel_1",
                 "Incoming Call",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
