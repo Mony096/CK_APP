@@ -33,20 +33,20 @@ class AuthProvider with ChangeNotifier {
 
   /// Login function
   ///
-  // Future<void> updateDocumentStatus(String token) async {
-  //   try {
-  //     final userId = await LocalStorageManger.getString('UserId');
-  //     final response = await dio.patch(
-  //       "/EmployeesInfo($userId)",
-  //       false,
-  //       false,
-  //       data: {"U_lk_andriod_token": token},
-  //     );
-  //     print(response.data);
-  //   } catch (e) {
-  //     rethrow; // Let the caller handle the error
-  //   }
-  // }
+  Future<void> updateToken(String token) async {
+    try {
+      final userId = await LocalStorageManger.getString('UserId');
+      final response = await dio.patch(
+        "/EmployeesInfo($userId)",
+        false,
+        false,
+        data: {"U_ck_andriod_token": token},
+      );
+      print(response.data);
+    } catch (e) {
+      rethrow; // Let the caller handle the error
+    }
+  }
 
   // Future<List> getCurrUser(String code) async {
   //   try {
@@ -89,14 +89,15 @@ class AuthProvider with ChangeNotifier {
             'UserName', response.data["firstName"].toString());
         await LocalStorageManger.setString('FullName',
             '${response.data["firstName"].toString()} ${response.data["lastName"].toString()}');
-        // final FirebaseMessaging messaging = FirebaseMessaging.instance;
-        // await messaging.requestPermission(
-        //     alert: true, badge: true, sound: true);
-        // final token = await messaging.getToken();
-        // if (token != null) {
-        //   await updateDocumentStatus(token);
-        //   await LocalStorageManger.setString('frmToken', token);
-        // }
+
+        final FirebaseMessaging messaging = FirebaseMessaging.instance;
+        await messaging.requestPermission(
+            alert: true, badge: true, sound: true);
+        final token = await messaging.getToken();
+        if (token != null) {
+          await updateToken(token);
+          await LocalStorageManger.setString('frmToken', token);
+        }
         checkSession();
         _isLoggedIn = true;
         notifyListeners();
@@ -153,7 +154,7 @@ class AuthProvider with ChangeNotifier {
 
   /// Logout and clear session
   Future<void> logout() async {
-    // await updateDocumentStatus("");
+    await updateToken("");
     await LocalStorageManger.removeString('SessionId');
     // await FirebaseMessaging.instance.deleteToken();
     _isLoggedIn = false;

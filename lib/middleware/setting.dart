@@ -12,7 +12,7 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _hostConfig = TextEditingController(text: "192.168.1.10");
+  final _hostConfig = TextEditingController(text: "https://192.168.1.10");
   final _portConfig = TextEditingController(text: "9091");
   // final _companyDB = TextEditingController(text: "SBOLK");
 
@@ -102,7 +102,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
                         backgroundColor:
-                            const Color.fromARGB(255, 33, 107, 243),
+                            Color.fromARGB(255, 66, 83, 100),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

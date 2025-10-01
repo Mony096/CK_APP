@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:bizd_tech_service/helper/helper.dart';
+import 'package:bizd_tech_service/middleware/setting.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
@@ -40,6 +44,44 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  bool _showText = false;
+  double _holdProgress = 0.0; // 0.0 to 1.0
+  Timer? _timer;
+
+  void _startHold() {
+    setState(() {
+      _showText = true;
+      _holdProgress = 0.0;
+    });
+
+    const interval = Duration(milliseconds: 100); // update every 0.1s
+    int ticks = 0;
+    int maxTicks = 100; // 6 seconds / 0.1s = 60 ticks
+
+    _timer = Timer.periodic(interval, (timer) {
+      ticks++;
+      setState(() {
+        _holdProgress = ticks / maxTicks;
+      });
+
+      if (ticks >= maxTicks) {
+        timer.cancel();
+        print("✅ Held for 10 seconds!");
+        goTo(context, const SettingScreen());
+        // Trigger your action here
+        _endHold(); // optional, hide text after 10 sec
+      }
+    });
+  }
+
+  void _endHold() {
+    _timer?.cancel();
+    setState(() {
+      _showText = false;
+      _holdProgress = 0.0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,13 +100,24 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // if (_showText)
+                  // Column(
+                  //   children: [
+                  //     // Text(
+                  //     //   "Holding... ${(_holdProgress * 100).toStringAsFixed(0)}%",
+                  //     //   style: TextStyle(fontSize: 18, color: Colors.blue),
+                  //     // ),
+                  //     // SizedBox(height: 10),
+                  //     // LinearProgressIndicator(value: _holdProgress),
+                  //   ],
+                  // ),
                   // Title
                   // const SizedBox(
                   //   height: 20,
                   // ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width - 100,
-                    child: const Opacity(
+                    child: Opacity(
                       opacity:
                           0.8, // Set the opacity level (0.0 is fully transparent, 1.0 is fully opaque)
                       child: Column(
@@ -356,7 +409,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // const Expanded(
                   // flex: 1,
                   const SizedBox(height: 80),
-                  const SizedBox(
+                  SizedBox(
                     width: double.infinity,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -367,9 +420,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(fontSize: 14.5, color: Colors.grey),
                         ),
                         SizedBox(height: 10),
-                        Text(
-                          "All rights reserved",
-                          style: TextStyle(fontSize: 14.5, color: Colors.grey),
+                        GestureDetector(
+                          onLongPressStart: (_) => _startHold(),
+                          onLongPressEnd: (_) => _endHold(),
+                          child: Text(
+                            "All rights reserved",
+                            style:
+                                TextStyle(fontSize: 14.5, color: Colors.grey),
+                          ),
                         ),
                       ],
                     ),

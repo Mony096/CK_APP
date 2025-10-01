@@ -18,7 +18,6 @@ class MainActivity: FlutterActivity() {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
     }
-
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.ringtone)
