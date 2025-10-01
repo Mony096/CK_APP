@@ -65,7 +65,7 @@ void main() async {
     null,
     [
       NotificationChannel(
-        channelKey: 'call_channel_1',
+        channelKey: 'call_channel',
         channelName: 'Incoming Call',
         channelDescription: 'Call notifications',
         importance: NotificationImportance.Max,
