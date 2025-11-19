@@ -23,8 +23,8 @@ import 'package:flutter/material.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vibration/vibration.dart';
 
@@ -88,6 +88,8 @@ void main() async {
     _showIncomingCallNotification();
     _startVibrationLoop(); // Optional: long vibration when foreground
   });
+    var dir = await getApplicationDocumentsDirectory();
+  print(dir);
   await Hive.initFlutter();
   await Hive.openBox('service_lists');
   await Hive.openBox('equipment_box');
