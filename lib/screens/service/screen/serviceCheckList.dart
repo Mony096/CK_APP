@@ -170,13 +170,38 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                   children: [
                     const Icon(Icons.assignment, color: Colors.green, size: 25),
                     const SizedBox(width: 10),
-                    Text(
-                      "Checklist (${data["U_CK_ChecklistTitle"] ?? "N/A"})",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                    // Text(
+                    //   "Checklist (${data["U_CK_ChecklistTitle"] ?? "N/A"})",
+                    //   style: const TextStyle(
+                    //     fontSize: 16,
+                    //     fontWeight: FontWeight.bold,
+                    //     color: Colors.black87,
+                    //   ),
+                    // ),
+                       Row(
+                      children: [
+                        Text("Checklist",
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                               fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                            ),
+                            textScaleFactor: 1.0),
+
+                        const Text(" - "),
+
+                        // Name
+                        SizedBox(
+                          width: 170,
+                          child: Text(data["U_CK_ChecklistTitle"] ?? "N/A",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                              ),
+                              textScaleFactor: 1.0),
+                        ),
+                      ],
                     ),
                   ],
                 ),

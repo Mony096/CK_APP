@@ -12,8 +12,8 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _hostConfig = TextEditingController(text: "https://192.168.1.10");
-  final _portConfig = TextEditingController(text: "9091");
+  final _hostConfig = TextEditingController(text: "https://svr10.biz-dimension.com");
+  final _portConfig = TextEditingController(text: "9093");
   // final _companyDB = TextEditingController(text: "SBOLK");
 
   bool loading = false;

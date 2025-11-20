@@ -384,7 +384,7 @@ class BlockService extends StatelessWidget {
                         ),
                       )),
                   const SizedBox(
-                    height: 5,
+                    height: 2,
                   ),
                   Expanded(
                     flex: 5,
@@ -423,21 +423,52 @@ class BlockService extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                          "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
-                                          style:
-                                               TextStyle(fontSize:  MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.033),
-                                          textScaleFactor: 1.0),
+                                      // Text(
+                                      //     "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
+                                      //     style:
+                                      //          TextStyle(fontSize:  MediaQuery.of(context)
+                                      //                 .size
+                                      //                 .width *
+                                      //             0.033),
+                                      //     textScaleFactor: 1.0),
+                                      Row(
+                                        children: [
+                     
+                                          Text(data["U_CK_CardCode"] ?? "N/A",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.033),
+                                              textScaleFactor: 1.0),
+
+                                          const Text(" - "),
+
+                                          // Name
+                                          SizedBox(
+                                            width: 150,
+                                            child: Text(
+                                                data["CustomerName"] ?? "N/A",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.033),
+                                                textScaleFactor: 1.0),
+                                          ),
+                                        ],
+                                      ),
                                       const SizedBox(
                                         height: 6,
                                       ),
                                       Text(
-                                        "SN: ${(data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] ?? "N/A" : "N/A"}",
-                                        style:  TextStyle(
-                                          fontSize:  MediaQuery.of(context)
+                                        "SN: ${(data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] == "" ? "N/A" : data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] : "N/A"}",
+                                        style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
                                                   .size
                                                   .width *
                                               0.032,
@@ -491,7 +522,7 @@ class BlockService extends StatelessWidget {
                                                       255, 8, 8, 8)
                                                   : const Color.fromARGB(
                                                       255, 255, 255, 255),
-                                              fontSize:  MediaQuery.of(context)
+                                              fontSize: MediaQuery.of(context)
                                                       .size
                                                       .width *
                                                   0.031),
