@@ -141,7 +141,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
         // final isLoading = deliveryProvider.isLoading;
         final provider = Provider.of<EquipmentOfflineProvider>(context);
         // final isLoadingMore = provider.isLoading && provider.hasMore;
-        final loading = false;
+        const loading = false;
         return Scaffold(
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,11 +237,13 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 const SizedBox(
                                   width: 15,
                                 ),
-                                 Text(
+                                Text(
                                   textScaleFactor: 1.0,
                                   "Equipment Overview",
                                   style: TextStyle(
-                                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.05,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 )
@@ -277,11 +279,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   ],
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.only(right: 4),
+                                  padding: const EdgeInsets.only(right: 4),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.add,
+                                      const Icon(Icons.add,
                                           size: 16,
                                           color: Color.fromARGB(
                                               255, 104, 104, 110)),
@@ -289,8 +291,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                         textScaleFactor: 1.0,
                                         "New",
                                         style: TextStyle(
-                                            fontSize: MediaQuery.of(context).size.width * 0.034,
-                                            color: Color.fromARGB(
+                                            fontSize: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.034,
+                                            color: const Color.fromARGB(
                                                 255, 104, 104, 110)),
                                       ),
                                     ],
@@ -324,11 +329,13 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 const SizedBox(
                                   width: 10,
                                 ),
-                                 Text(
+                                Text(
                                   textScaleFactor: 1.0,
                                   "Matches Your Filter",
                                   style: TextStyle(
-                                    fontSize: MediaQuery.of(context).size.width * 0.035,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.035,
                                     color: Colors.white,
                                   ),
                                 )
@@ -355,8 +362,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   style: const TextStyle(fontSize: 14),
                                   decoration: InputDecoration(
                                     hintText: "Search",
-                                    hintStyle:  TextStyle(
-                                        color: Colors.grey, fontSize: MediaQuery.of(context).size.width * 0.034),
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.034),
                                     // Decrease vertical and horizontal padding to shrink the field
                                     contentPadding: const EdgeInsets.symmetric(
                                         vertical: 4, // Reduced from 8
@@ -393,7 +403,13 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                 // example: print search text
                                 // print("Search for: ${controller.text}");
                               },
-                              child:  Text("GO",style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.034),),
+                              child: Text(
+                                "GO",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.034),
+                              ),
                             ),
                           ],
                         ),
@@ -522,14 +538,52 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Text(
-                                                    textScaleFactor: 1.0,
-                                                    "${item["Code"] ?? "N/A"} - ${item["Name"] ?? "N/A"}",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: MediaQuery.of(context).size.width * 0.032,
-                                                    ),
+                                                  Row(
+                                                    children: [
+                                                      // Code
+                                                      // SizedBox(
+                                                      //   width: 90,
+                                                      //   child: Text(
+                                                      //     item["Code"] ?? "N/A",
+                                                      //     overflow: TextOverflow
+                                                      //         .ellipsis,
+                                                      //     style:
+                                                      //         const TextStyle(
+                                                      //       fontWeight:
+                                                      //           FontWeight.bold,
+                                                      //       fontSize: 11,
+                                                      //     ),
+                                                      //   ),
+                                                      // ),
+                                                      Text(
+                                                        item["Code"] ?? "N/A",
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 11,
+                                                        ),
+                                                      ),
+
+                                                      const Text(" - "),
+
+                                                      // Name
+                                                      SizedBox(
+                                                        width: 90,
+                                                        child: Text(
+                                                          item["Name"] ?? "N/A",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 11,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                   const Icon(
                                                     Icons.keyboard_arrow_right,
@@ -542,19 +596,27 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                               const SizedBox(height: 6),
                                               Row(
                                                 children: [
-                                                   SizedBox(
+                                                  SizedBox(
                                                     width: 104,
                                                     child: Text(
                                                         textScaleFactor: 1.0,
                                                         "Serial Number",
                                                         style: TextStyle(
-                                                            fontSize: MediaQuery.of(context).size.width * 0.031)),
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.031)),
                                                   ),
                                                   Text(
                                                       textScaleFactor: 1.0,
                                                       ": ${item["U_ck_eqSerNum"] ?? "N/A"}",
                                                       style: TextStyle(
-                                                          fontSize: MediaQuery.of(context).size.width * 0.031)),
+                                                          fontSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.031)),
                                                 ],
                                               ),
                                               const SizedBox(height: 6),
@@ -565,29 +627,53 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                                 children: [
                                                   Row(
                                                     children: [
-                                                       SizedBox(
+                                                      SizedBox(
                                                         width: 104,
                                                         child: Text(
                                                             textScaleFactor:
                                                                 1.0,
                                                             "Customer Name",
                                                             style: TextStyle(
-                                                                fontSize: MediaQuery.of(context).size.width * 0.031)),
+                                                                fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.031)),
                                                       ),
-                                                      Text(
-                                                          textScaleFactor: 1.0,
-                                                          ": ${item["U_ck_CusName"] ?? "N/A"}",
+                                                      // Text(
+                                                      //     textScaleFactor: 1.0,
+                                                      //     ": ${item["U_ck_CusName"] ?? "N/A"}",
+                                                      //     style: TextStyle(
+                                                      //         color:
+                                                      //             Colors.green,
+                                                      //         fontSize: MediaQuery.of(
+                                                      //                     context)
+                                                      //                 .size
+                                                      //                 .width *
+                                                      //             0.031)),
+                                                      SizedBox(
+                                                        width: 120,
+                                                        child: Text(
+                                                          item["U_ck_CusName"] ??
+                                                              "N/A",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           style:
-                                                               TextStyle(
-                                                                  color: Colors
-                                                                      .green,
-                                                                  fontSize:
-                                                                      MediaQuery.of(context).size.width * 0.031)),
+                                                              const TextStyle(
+                                                            color: Colors.green,
+                                                            fontSize: 11,
+                                                          ),
+                                                        ),
+                                                      ),
                                                     ],
                                                   ),
                                                   Text("No : ${index + 1}",
                                                       style: TextStyle(
-                                                          fontSize: MediaQuery.of(context).size.width * 0.031)),
+                                                          fontSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.031)),
                                                 ],
                                               ),
                                             ],

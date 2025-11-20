@@ -18,9 +18,7 @@ import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/screens/equipment/equipment_list.dart';
 import 'package:bizd_tech_service/screens/service/service.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
-import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -47,6 +45,7 @@ class _DashboardState extends State<Dashboard>
   String _selectedPriority = "All"; // All, High, Medium, Low
   List<dynamic> documentOffline = [];
   List<dynamic> completedService = [];
+  String isDownloaded = "false";
   @override
   void initState() {
     super.initState();
@@ -83,8 +82,10 @@ class _DashboardState extends State<Dashboard>
 
   Future<void> _loadUserName() async {
     final name = await LocalStorageManger.getString('FullName');
+    final isDownLoadDone = await LocalStorageManger.getString('isDownloaded');
     setState(() {
       userName = name;
+      isDownloaded = isDownLoadDone;
     });
   }
 
@@ -497,7 +498,7 @@ class _DashboardState extends State<Dashboard>
     final offlineProviderEquipment =
         Provider.of<EquipmentOfflineProvider>(context, listen: false);
     final offlineDocument = offlineProvider.documents;
-    if (offlineDocument.isNotEmpty) return;
+    if (isDownloaded == "true") return;
 
     await showDialog(
       context: context,
@@ -593,12 +594,13 @@ class _DashboardState extends State<Dashboard>
 
                   //All download Done
                   await _fetchTicketCounts();
+                  await LocalStorageManger.setString('isDownloaded', 'true');
                   setState(() {
                     progress = 1.0;
+                    isDownloaded = "true";
                     statusMessage = "All documents downloaded successfully!";
                   });
                   await Future.delayed(const Duration(seconds: 1));
-
                   // ✅ Done
                   MaterialDialog.close(context);
                   MaterialDialog.close(context);
@@ -628,7 +630,8 @@ class _DashboardState extends State<Dashboard>
                                 Text(
                                   "✅ All documents downloaded successfully!",
                                   style: TextStyle(
-                                    fontSize: MediaQuery.of(context).size.width *
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
                                             0.033,
                                     color: Colors.white,
                                   ),
@@ -647,6 +650,10 @@ class _DashboardState extends State<Dashboard>
                   await offlineProviderItem.clearDocuments();
                   // await offlineProviderEquipment.clearEquipments();
                   await offlineProviderSite.clearDocuments();
+                  await LocalStorageManger.setString('isDownloaded', 'false');
+                  setState(() {
+                    isDownloaded = "false";
+                  });
                   await _fetchTicketCounts();
                   MaterialDialog.close(context);
                   await MaterialDialog.warning(
@@ -687,6 +694,13 @@ class _DashboardState extends State<Dashboard>
         );
       },
     );
+    setState(() {
+      load = true;
+    });
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      load = false;
+    });
   }
 
   Future<void> clearOfflineData(BuildContext context) async {
@@ -700,9 +714,7 @@ class _DashboardState extends State<Dashboard>
         Provider.of<EquipmentOfflineProvider>(context, listen: false);
     final offlineProviderSite =
         Provider.of<SiteListProviderOffline>(context, listen: false);
-
-    final offlineDocument = offlineProviderService.documents;
-    if (offlineDocument.isEmpty) return;
+    if (isDownloaded == "false") return;
     MaterialDialog.warningClearDataDialog(
       context,
       title: 'Clear Data',
@@ -769,6 +781,10 @@ class _DashboardState extends State<Dashboard>
             ),
           );
           // ✅ Close drawer
+          await LocalStorageManger.setString('isDownloaded', 'false');
+          setState(() {
+            isDownloaded = "false";
+          });
           Navigator.of(context).pop();
         } catch (e) {
           // Hide loading popup
@@ -802,6 +818,10 @@ class _DashboardState extends State<Dashboard>
       await offlineProviderServiceItem.clearDocuments();
       await offlineProviderEquipment.clearEquipments();
       await offlineProviderSite.clearDocuments();
+      await LocalStorageManger.setString('isDownloaded', 'false');
+      setState(() {
+        isDownloaded = "false";
+      });
     } catch (e) {
       // Hide loading popup
 
@@ -1037,14 +1057,14 @@ class _DashboardState extends State<Dashboard>
             // ),
             ListTile(
               leading: Icon(Icons.download,
-                  color: documentOffline.isNotEmpty
+                  color: isDownloaded == "true"
                       ? const Color.fromARGB(255, 159, 162, 163)
                       : Colors.blue),
               title: Text(
                 "Download",
                 style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width * 0.039,
-                    color: documentOffline.isNotEmpty
+                    color: isDownloaded == "true"
                         ? const Color.fromARGB(255, 159, 162, 163)
                         : Colors.black),
               ),
@@ -1054,13 +1074,13 @@ class _DashboardState extends State<Dashboard>
             ),
             ListTile(
               leading: Icon(Icons.clear,
-                  color: documentOffline.isEmpty
+                  color: isDownloaded == "false"
                       ? const Color.fromARGB(255, 159, 162, 163)
                       : Colors.red),
               title: Text("Clear",
                   style: TextStyle(
                       fontSize: MediaQuery.of(context).size.width * 0.039,
-                      color: documentOffline.isEmpty
+                      color: isDownloaded == "false"
                           ? const Color.fromARGB(255, 159, 162, 163)
                           : Colors.black)),
               onTap: () async {
@@ -1149,7 +1169,7 @@ class _DashboardState extends State<Dashboard>
         // 🔹 Ticket list
         load == true
             ? const SizedBox(
-                height: 550,
+                height: 450,
                 child: Center(
                     child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1522,8 +1542,8 @@ class _DashboardState extends State<Dashboard>
                                     overflow: TextOverflow.ellipsis,
                                     textScaleFactor: 1.0,
                                     style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 133, 134, 137),
+                                        color: const Color.fromARGB(
+                                            255, 133, 134, 137),
                                         fontSize:
                                             MediaQuery.of(context).size.width *
                                                 0.030),
@@ -1534,8 +1554,8 @@ class _DashboardState extends State<Dashboard>
                                     overflow: TextOverflow.ellipsis,
                                     textScaleFactor: 1.0,
                                     style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 133, 134, 137),
+                                        color: const Color.fromARGB(
+                                            255, 133, 134, 137),
                                         fontSize:
                                             MediaQuery.of(context).size.width *
                                                 0.030),
@@ -1570,13 +1590,13 @@ class _DashboardState extends State<Dashboard>
                                     overflow: TextOverflow.ellipsis,
                                     textScaleFactor: 1.0,
                                     style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 133, 134, 137),
+                                        color: const Color.fromARGB(
+                                            255, 133, 134, 137),
                                         fontSize:
                                             MediaQuery.of(context).size.width *
                                                 0.030),
                                   ),
-                                  Text(
+                                  const Text(
                                     ":",
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,

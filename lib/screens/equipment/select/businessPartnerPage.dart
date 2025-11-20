@@ -137,19 +137,20 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                         width: MediaQuery.of(context).size.width - 40,
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.filter_alt,
                               size: 25,
                               color: Color.fromARGB(255, 84, 84, 85),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 10,
                             ),
                             Text(
                               "MATCHES YOUR FILTER",
                               style: TextStyle(
-                                  fontSize: MediaQuery.of(context).size.width * 0.036,
-                                  color: Color.fromARGB(255, 53, 53, 55)),
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.036,
+                                  color: const Color.fromARGB(255, 53, 53, 55)),
                             ),
                           ],
                         )),
@@ -163,7 +164,10 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                               height: 40,
                               child: TextField(
                                 controller: filter,
-                                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.035),
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.035),
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(7),
@@ -320,13 +324,48 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              '${doc["CardCode"]} - ${(doc["CardName"] == null || doc["CardName"].toString().isEmpty) ? "N/A" : doc["CardName"]}',
-                                              style: TextStyle(
-                                                  fontSize: MediaQuery.of(context).size.width * 0.034,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color.fromARGB(
-                                                      255, 69, 70, 72)),
+                                            // Text(
+                                            //   '${doc["CardCode"]} - ${(doc["CardName"] == null || doc["CardName"].toString().isEmpty) ? "N/A" : doc["CardName"]}',
+                                            //   style: TextStyle(
+                                            //       fontSize: MediaQuery.of(context).size.width * 0.034,
+                                            //       fontWeight: FontWeight.bold,
+                                            //       color: Color.fromARGB(
+                                            //           255, 69, 70, 72)),
+                                            // ),
+                                            Row(
+                                              children: [
+                                                // Code
+                                                SizedBox(
+                                                  width: 50,
+                                                  child: Text(
+                                                    doc["CardCode"] ?? "N/A",
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                const Text(" - "),
+
+                                                // Name
+                                                SizedBox(
+                                                  width: 220,
+                                                  child: Text(
+                                                    '${(doc["CardName"] == null || doc["CardName"].toString().isEmpty) ? "N/A" : doc["CardName"]}',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             const Icon(
                                               Icons.arrow_right,
@@ -341,9 +380,12 @@ class _BusinessPartnerPageState extends State<BusinessPartnerPage> {
                                         Text(
                                           '${doc["ShipToDefault"] ?? "N/A"}',
                                           style: TextStyle(
-                                              fontSize: MediaQuery.of(context).size.width * 0.033,
+                                              fontSize: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.033,
                                               // fontWeight: FontWeight.bold,
-                                              color: Color.fromARGB(
+                                              color: const Color.fromARGB(
                                                   255, 69, 70, 72)),
                                         )
                                       ],

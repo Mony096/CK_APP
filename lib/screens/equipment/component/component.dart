@@ -123,7 +123,7 @@ class _ComponentState extends State<Component> {
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: partFieldNotifier,
+                    // isMissingFieldNotifier: partFieldNotifier,
                     controller: part,
                     label: 'Part Number',
                     disabled: true,
@@ -139,7 +139,7 @@ class _ComponentState extends State<Component> {
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: modelFieldNotifier,
+                    // isMissingFieldNotifier: modelFieldNotifier,
                     controller: model,
                     label: 'Model',
                     disabled: true,
@@ -160,7 +160,8 @@ class _ComponentState extends State<Component> {
                         child: Text(
                           "Cancel",
                           style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.036,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.036,
                               color: Color.fromARGB(255, 66, 83, 100)),
                         ),
                       ),
@@ -173,10 +174,12 @@ class _ComponentState extends State<Component> {
                             //   onConfirm();
                             // }
                             if (code.text.isEmpty ||
-                                name.text.isEmpty ||
-                                part.text.isEmpty ||
-                                brand.text.isEmpty ||
-                                model.text.isEmpty) {
+                                    name.text.isEmpty ||
+                                    // part.text.isEmpty ||
+                                    brand.text.isEmpty
+                                //  ||
+                                // model.text.isEmpty
+                                ) {
                               codeFieldNotifier.value = {
                                 "missing": code.text.isEmpty,
                                 "value": "Code is required!",
@@ -187,22 +190,22 @@ class _ComponentState extends State<Component> {
                                 "value": "Name is required!",
                                 "isAdded": 1,
                               };
-                              partFieldNotifier.value = {
-                                "missing": part.text.isEmpty,
-                                "value": "Part is required!",
-                                "isAdded": 1,
-                              };
+                              // partFieldNotifier.value = {
+                              //   "missing": part.text.isEmpty,
+                              //   "value": "Part is required!",
+                              //   "isAdded": 1,
+                              // };
 
                               brandFieldNotifier.value = {
                                 "missing": brand.text.isEmpty,
                                 "value": "Brand is required!",
                                 "isAdded": 1,
                               };
-                              modelFieldNotifier.value = {
-                                "missing": model.text.isEmpty,
-                                "value": "Model is required!",
-                                "isAdded": 1,
-                              };
+                              // modelFieldNotifier.value = {
+                              //   "missing": model.text.isEmpty,
+                              //   "value": "Model is required!",
+                              //   "isAdded": 1,
+                              // };
                               return;
                             }
 
@@ -226,7 +229,8 @@ class _ComponentState extends State<Component> {
                             child: Text(
                               isEditComp >= 0 ? "Edit" : "Add",
                               style: TextStyle(
-                                fontSize: MediaQuery.of(context).size.width * 0.036,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.036,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -570,11 +574,11 @@ class _ComponentState extends State<Component> {
                             'images/svg/kjav3.svg',
                             width: 25,
                           ),
-                           Text(
+                          Text(
                             "No Component",
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width *
-                                                0.034,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.034,
                               // fontWeight: FontWeight.w500,
                               color: Color.fromARGB(221, 168, 168, 171),
                             ),
@@ -686,7 +690,7 @@ class _ComponentState extends State<Component> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        "Model : ${item["U_ck_model"]}",
+                                        "Model : ${((item["U_ck_model"] ?? "").toString().trim().isEmpty) ? "N/A" : item["U_ck_model"]}",
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
@@ -716,7 +720,7 @@ class _ComponentState extends State<Component> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        "Part : ${item["U_ck_partNum"]}",
+                                        "Part : ${((item["U_ck_partNum"] ?? "").toString().trim().isEmpty) ? "N/A" : item["U_ck_partNum"]}",
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,

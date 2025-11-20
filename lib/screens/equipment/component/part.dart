@@ -123,7 +123,7 @@ class _PartState extends State<Part> {
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: partFieldNotifier,
+                    // isMissingFieldNotifier: partFieldNotifier,
                     controller: part,
                     label: 'Part Number',
                     disabled: true,
@@ -139,7 +139,7 @@ class _PartState extends State<Part> {
                   ),
                   const SizedBox(height: 8),
                   CustomTextFieldDialog(
-                    isMissingFieldNotifier: modelFieldNotifier,
+                    // isMissingFieldNotifier: modelFieldNotifier,
                     controller: model,
                     label: 'Model',
                     disabled: true,
@@ -174,9 +174,10 @@ class _PartState extends State<Part> {
                             // }
                             if (code.text.isEmpty ||
                                 name.text.isEmpty ||
-                                part.text.isEmpty ||
-                                brand.text.isEmpty ||
-                                model.text.isEmpty) {
+                                // part.text.isEmpty ||
+                                brand.text.isEmpty
+                                //  ||  model.text.isEmpty
+                                ) {
                               codeFieldNotifier.value = {
                                 "missing": code.text.isEmpty,
                                 "value": "Code is required!",
@@ -187,22 +188,22 @@ class _PartState extends State<Part> {
                                 "value": "Name is required!",
                                 "isAdded": 1,
                               };
-                              partFieldNotifier.value = {
-                                "missing": part.text.isEmpty,
-                                "value": "Part is required!",
-                                "isAdded": 1,
-                              };
+                              // partFieldNotifier.value = {
+                              //   "missing": part.text.isEmpty,
+                              //   "value": "Part is required!",
+                              //   "isAdded": 1,
+                              // };
 
                               brandFieldNotifier.value = {
                                 "missing": brand.text.isEmpty,
                                 "value": "Brand is required!",
                                 "isAdded": 1,
                               };
-                              modelFieldNotifier.value = {
-                                "missing": model.text.isEmpty,
-                                "value": "Model is required!",
-                                "isAdded": 1,
-                              };
+                              // modelFieldNotifier.value = {
+                              //   "missing": model.text.isEmpty,
+                              //   "value": "Model is required!",
+                              //   "isAdded": 1,
+                              // };
                               return;
                             }
 
@@ -711,9 +712,9 @@ class _PartState extends State<Part> {
                                       ),
                                     ),
                                     const SizedBox(width: 10),
-                                    Expanded(
+                                     Expanded(
                                       child: Text(
-                                        "Model: ${item["U_ck_model"]}",
+                                        "Model : ${((item["U_ck_model"] ?? "").toString().trim().isEmpty) ? "N/A" : item["U_ck_model"]}",
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
@@ -741,9 +742,9 @@ class _PartState extends State<Part> {
                                       ),
                                     ),
                                     const SizedBox(width: 10),
-                                    Expanded(
+                                  Expanded(
                                       child: Text(
-                                        "Part: ${item["U_ck_PartNum"]}",
+                                        "Part : ${((item["U_ck_PartNum"] ?? "").toString().trim().isEmpty) ? "N/A" : item["U_ck_PartNum"]}",
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
@@ -751,6 +752,7 @@ class _PartState extends State<Part> {
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                     ),
+
                                   ],
                                 ),
                               ),

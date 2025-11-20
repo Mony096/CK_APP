@@ -96,7 +96,7 @@ class EquipmentListProvider extends ChangeNotifier {
 
     try {
       final response = await dio.get(
-          "/CK_CUSEQUI?\$select=U_ck_AttachmentEntry,U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry,U_ck_siteCode,U_ck_eqStatus,U_ck_eqBrand,U_ck_Remark,U_ck_InstalDate,U_ck_NsvDate,U_ck_WarExpDate,CK_CUSEQUI01Collection,CK_CUSEQUI02Collection &\$orderby=DocEntry desc");
+          "/CK_CUSEQUI?\$select=U_ck_AttachmentEntry,U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry,U_ck_siteCode,U_ck_eqStatus,U_ck_eqBrand,U_ck_Remark,U_ck_InstalDate,U_ck_NsvDate,U_ck_WarExpDate,CK_CUSEQUI01Collection,CK_CUSEQUI02Collection &\$orderby=DocEntry desc &\$top=50");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data["value"] ;
