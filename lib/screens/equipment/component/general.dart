@@ -28,36 +28,11 @@ class _GeneralState extends State<General> {
   List<dynamic> eqtype = ["Active", "Retired", "Suspended", "Inactive"];
   @override
   Widget build(BuildContext context) {
-    // print(widget.controller?["customerCode"].text);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 40),
-        padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
-            topRight: Radius.circular(12),
-            topLeft: Radius.circular(12),
-            bottomLeft: Radius.circular(12),
-            bottomRight: Radius.circular(12),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          color: Colors.white,
-          // borderRadius: BorderRadius.circular(12),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 7),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(15, 10, 15, 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
               const ComponentTitle(
                 label: "Infomation",
               ),
@@ -233,8 +208,6 @@ class _GeneralState extends State<General> {
                   detail: widget.data.isNotEmpty),
             ],
           ),
-        ),
-      ),
     );
   }
 

@@ -12,6 +12,7 @@ import 'package:bizd_tech_service/screens/equipment/component/component.dart';
 import 'package:bizd_tech_service/screens/equipment/component/part.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/dio_client.dart';
+import 'package:bizd_tech_service/core/core.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -456,306 +457,80 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.data.isNotEmpty;
+    
     return WillPopScope(
       onWillPop: () async {
         final provider =
             Provider.of<EquipmentOfflineProvider>(context, listen: false);
         provider.clearCollection();
-
-        return true; // Allow navigation to pop
+        return true;
       },
       child: Scaffold(
-        body: Stack(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          title: Text(
+            isEditing ? "Equipment Detail" : "New Equipment",
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Colors.black,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+            onPressed: () {
+              if (isEditing) {
+                Provider.of<EquipmentOfflineProvider>(context, listen: false)
+                    .clearCollection();
+                Navigator.of(context).pop();
+              } else {
+                onBackScreen();
+              }
+            },
+          ),
+          actions: isEditing
+              ? null
+              : [
+                  TextButton(
+                    onPressed: onCreateEQ,
+                    child: const Text(
+                      "Save",
+                      style: TextStyle(
+                        color: Color(0xFF22C55E),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+        ),
+        body: Column(
           children: [
-            // HEADER (positioned at the back)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 280,
-                width: MediaQuery.of(context).size.width,
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 66, 83, 100),
-                ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      top: 40,
-                      left: 25,
-                      right: 15,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                              onTap: () {
-                                if (widget.data.isNotEmpty) {
-                                  Provider.of<EquipmentOfflineProvider>(context,
-                                          listen: false)
-                                      .clearCollection();
-                                  Navigator.of(context).pop();
-                                } else {
-                                  onBackScreen();
-                                }
-                              },
-                              child: Container(
-                                  width: 28,
-                                  height: 28,
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    color: Colors.white,
-                                  ),
-                                  child: SvgPicture.asset(
-                                    color: const Color.fromARGB(
-                                        255, 102, 103, 104),
-                                    'images/svg/reply.svg',
-                                    width: 15,
-                                  ))),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () async {
-                                  if (widget.data.isNotEmpty) {
-                                    _initOffline();
-                                  } else {
-                                    clearAllFields();
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.refresh,
-                                  size: 27,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              // IconButton(
-                              //   onPressed: () async {
-                              //     MaterialDialog.loading(context);
-                              //     await Provider.of<AuthProvider>(context,
-                              //             listen: false)
-                              //         .logout();
-                              //     Navigator.of(context).pop();
-                              //     Navigator.of(context).pushAndRemoveUntil(
-                              //       MaterialPageRoute(
-                              //           builder: (_) => const LoginScreenV2()),
-                              //       (route) => false,
-                              //     );
-                              //   },
-                              //   icon: const Icon(
-                              //     Icons.logout,
-                              //     size: 27,
-                              //     color: Colors.white,
-                              //   ),
-                              // ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                        top: 105,
-                        left: 25,
-                        right: 30,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'images/svg/key.svg',
-                                      width: 30,
-                                      height: 30,
-                                      color: Colors.green,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  "Equipment Setup",
-                                  style: TextStyle(
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.05,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            GestureDetector(
-                              onTap: () =>
-                                  widget.data.isEmpty ? onCreateEQ() : null,
-                              child: Container(
-                                width: 65,
-                                height: 35,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: Colors.green,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          const Color.fromARGB(255, 56, 67, 80)
-                                              .withOpacity(
-                                                  0.3), // Light gray shadow
-                                      spreadRadius: 3, // Smaller spread
-                                      blurRadius: 3, // Smaller blur
-                                      offset: const Offset(
-                                          0, 1), // Minimal vertical offset
-                                    ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 0, 3, 3),
-                                  child: Center(
-                                    child: Text(
-                                      widget.data.isEmpty ? "Save" : "Detail",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )),
-                    Positioned(
-                      top: 175,
-                      left: 28,
-                      right: 28,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTabTapped(0),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                                padding: _selectedIndex != 0
-                                    ? const EdgeInsets.all(9)
-                                    : const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: _selectedIndex == 0
-                                      ? const Border(
-                                          bottom: BorderSide(
-                                            color: Colors.green,
-                                            width: 5,
-                                          ),
-                                        )
-                                      : null,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "General",
-                                    style: TextStyle(
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.036),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTabTapped(1),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                                padding: _selectedIndex != 1
-                                    ? const EdgeInsets.all(9)
-                                    : const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: _selectedIndex == 1
-                                      ? const Border(
-                                          bottom: BorderSide(
-                                            color: Colors.green,
-                                            width: 5,
-                                          ),
-                                        )
-                                      : null,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "Component",
-                                    style: TextStyle(
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.036),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTabTapped(2),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                                padding: _selectedIndex != 2
-                                    ? const EdgeInsets.all(9)
-                                    : const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: _selectedIndex == 2
-                                      ? const Border(
-                                          bottom: BorderSide(
-                                            color: Colors.green,
-                                            width: 5,
-                                          ),
-                                        )
-                                      : null,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "Part",
-                                    style: TextStyle(
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.036),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 185,
-                      left: 22,
-                      right: 25,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
-                        child: const Row(
-                          children: [],
-                        ),
-                      ),
-                    )
-                  ],
+            // Tab Bar
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
                 ),
               ),
+              child: Row(
+                children: [
+                  _buildTabButton("General", 0),
+                  const SizedBox(width: 8),
+                  _buildTabButton("Component", 1),
+                  const SizedBox(width: 8),
+                  _buildTabButton("Part", 2),
+                ],
+              ),
             ),
-            // CONTENT (positioned on top)
-            Positioned(
-              top: 230, // Adjust this value for the desired overlap
-              left: 0,
-              right: 0,
-              bottom: 0,
+            // Content
+            Expanded(
               child: PageView(
                 controller: _pageController,
                 onPageChanged: (index) {
@@ -800,6 +575,70 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
               ),
             ),
           ],
+        ),
+        bottomNavigationBar: AdaptiveBottomNavBar(
+          selectedIndex: 2, // Equipment tab
+          onItemTapped: (index) {
+            if (index != 2) {
+              // Navigate back and let MainScreen handle the tab change
+              Provider.of<EquipmentOfflineProvider>(context, listen: false)
+                  .clearCollection();
+              Navigator.of(context).pop(index);
+            }
+          },
+          items: const [
+            AdaptiveNavItem(
+              label: 'Home',
+              icon: Icons.dashboard_outlined,
+              activeIcon: Icons.dashboard,
+            ),
+            AdaptiveNavItem(
+              label: 'Service',
+              icon: Icons.miscellaneous_services_outlined,
+              activeIcon: Icons.miscellaneous_services,
+            ),
+            AdaptiveNavItem(
+              label: 'Equipment',
+              icon: Icons.build_outlined,
+              activeIcon: Icons.build,
+            ),
+            AdaptiveNavItem(
+              label: 'Sync',
+              icon: Icons.sync_outlined,
+              activeIcon: Icons.sync,
+            ),
+            AdaptiveNavItem(
+              label: 'Account',
+              icon: Icons.person_outline,
+              activeIcon: Icons.person,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String label, int index) {
+    final isSelected = _selectedIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onTabTapped(index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF22C55E) : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : Colors.grey.shade600,
+              ),
+            ),
+          ),
         ),
       ),
     );

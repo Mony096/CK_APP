@@ -904,39 +904,28 @@ class _DashboardState extends State<Dashboard>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+        backgroundColor: Colors.white,
+        elevation: 0,
         centerTitle: true,
-        title: Text(
-          'Bizd Service Mobile',
+        title: const Text(
+          'Home',
           style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width * 0.042,
-              color: Colors.white),
-          textScaleFactor: 1.0,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.black),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                _selectedJob = "All"; // All, Open, Closed
-                _selectedService = "All"; // All, Open, Closed
-                _selectedPriority = "All"; // All, High, Medium, Low
-              });
-              _fetchTicketCounts();
-            },
-          ),
-        ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(55.0),
+          preferredSize: const Size.fromHeight(44.0),
           child: Container(
             color: Colors.white,
             child: Stack(
               children: [
                 // ✅ TabBar
                 TabBar(
-                  padding: const EdgeInsets.only(top: 6), // Push labels down for better symmetry
+                  padding: EdgeInsets.zero,
                   controller: _tabController,
                   indicator: const CustomTabIndicator(
                     indicatorWidth: 80,
