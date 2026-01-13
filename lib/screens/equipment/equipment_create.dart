@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bizd_tech_service/helper/helper.dart';
-import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
@@ -538,7 +538,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                               //     Navigator.of(context).pop();
                               //     Navigator.of(context).pushAndRemoveUntil(
                               //       MaterialPageRoute(
-                              //           builder: (_) => const LoginScreen()),
+                              //           builder: (_) => const LoginScreenV2()),
                               //       (route) => false,
                               //     );
                               //   },

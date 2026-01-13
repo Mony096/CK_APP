@@ -1,7 +1,8 @@
-import 'package:bizd_tech_service/constant/style.dart';
+import 'package:bizd_tech_service/core/core.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -14,9 +15,8 @@ class _SettingScreenState extends State<SettingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _hostConfig = TextEditingController(text: "https://svr10.biz-dimension.com");
   final _portConfig = TextEditingController(text: "9093");
-  // final _companyDB = TextEditingController(text: "SBOLK");
 
-  bool loading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -27,137 +27,199 @@ class _SettingScreenState extends State<SettingScreen> {
   Future<void> _loadSettings() async {
     final host = await LocalStorageManger.getString('host');
     final port = await LocalStorageManger.getString('port');
-    // final companyDB = await LocalStorageManger.getString('companyDB');
 
     setState(() {
-      if (host.isNotEmpty) {
-        _hostConfig.text = host;
-      }
-      if (port.isNotEmpty) {
-        _portConfig.text = port;
-      }
-      // if (companyDB.isNotEmpty) {
-      //   _companyDB.text = companyDB;
-      // }
+      if (host.isNotEmpty) _hostConfig.text = host;
+      if (port.isNotEmpty) _portConfig.text = port;
     });
   }
 
-  Future<void> saveSetting() async {
+  Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => loading = true);
+    setState(() => _isLoading = true);
 
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       await LocalStorageManger.setString('host', _hostConfig.text);
       await LocalStorageManger.setString('port', _portConfig.text);
-      // await LocalStorageManger.setString('companyDB', _companyDB.text);
 
       if (mounted) {
-        setState(() => loading = false);
-        MaterialDialog.snackBar(context, "Settings saved successfully.");
+        setState(() => _isLoading = false);
+        // Using ScaffoldMessenger directly for more control or keeping existing helper
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Settings saved successfully', style: GoogleFonts.inter()),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         Navigator.of(context).pop();
       }
     } catch (error) {
-      setState(() => loading = false);
-      MaterialDialog.snackBar(
-          context, "Failed to save settings. Please try again.");
+      if (mounted) {
+        setState(() => _isLoading = false);
+        AdaptiveDialog.showAlert(
+          context: context,
+          title: 'Error',
+          content: 'Failed to save settings. Please try again.',
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        elevation: 0.6,
-        iconTheme: const IconThemeData(color: Colors.black),
+        elevation: 0,
         backgroundColor: Colors.white,
-        title: const Text("Settings",
-            style: TextStyle(color: Colors.black, fontSize: 18)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          "System Settings",
+          style: GoogleFonts.inter(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(size(context).width * 0.055),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Address Configuration",
-                        style: TextStyle(fontSize: 18, height: 1.7)),
-                    const SizedBox(height: 30),
-                    _buildTextField(_hostConfig, 'Web Server Address',
-                        'Enter Web Server Address', TextInputType.url),
-                    const SizedBox(height: 25),
-                    _buildTextField(_portConfig, 'Port', 'Enter Port',
-                        TextInputType.number),
-                    const SizedBox(height: 25),
-                    // _buildTextField(_companyDB, 'CompanyDB', 'Enter CompanyDB',
-                    //     TextInputType.text),
-                    const SizedBox(height: 40),
-                    ElevatedButton(
-                      onPressed: saveSetting,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        backgroundColor:
-                            Color.fromARGB(255, 66, 83, 100),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Connectivity",
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black,
+                          letterSpacing: -0.5,
                         ),
                       ),
-                      child: loading
-                          ? const SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3.0, // Smaller size
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white), // White color
-                              ),
-                            )
-                          : const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(
+                        "Configure your server address and port",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: const Color(0xFF737373),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      _buildTextField(
+                        controller: _hostConfig,
+                        label: 'Web Server Address',
+                        hint: 'https://example.com',
+                        inputType: TextInputType.url,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildTextField(
+                        controller: _portConfig,
+                        label: 'Port',
+                        hint: '9090',
+                        inputType: TextInputType.number,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            _buildFooter(),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: _buildSaveButton(),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      String hint, TextInputType inputType) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: inputType,
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Please enter $label' : null,
-      decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          hintText: hint,
-          isDense: true),
-    );
-  }
-
-  Widget _buildFooter() {
-    return const Column(
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required TextInputType inputType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Copyright © 2023 BizDimension Cambodia",
-            style: TextStyle(fontSize: 14.5, color: Colors.grey)),
-        SizedBox(height: 10),
-        Text("All rights reserved",
-            style: TextStyle(fontSize: 14.5, color: Colors.grey)),
-        SizedBox(height: 30),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFEFEF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: TextFormField(
+            controller: controller,
+            keyboardType: inputType,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.black),
+            validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.inter(color: const Color(0xFFA3A3A3), fontSize: 13),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              border: InputBorder.none,
+              isDense: true,
+            ),
+          ),
+        ),
       ],
     );
   }
+
+  Widget _buildSaveButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _handleSave,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                'Save Settings',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+      ),
+    );
+  }
+
 }

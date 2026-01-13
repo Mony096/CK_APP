@@ -3,7 +3,7 @@
 // import 'package:bizd_tech_service/provider/service_provider.dart';
 // import 'package:bizd_tech_service/provider/live_location_provider.dart';
 // import 'package:crypto/crypto.dart';
-// import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+// import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 // import 'package:bizd_tech_service/provider/auth_provider.dart';
 // import 'package:bizd_tech_service/provider/update_status_provider.dart';
 // import 'package:bizd_tech_service/screens/signature/signature.dart';
@@ -366,7 +366,7 @@
 //                   .pop(); // Close loading dialog AFTER logout finishes
 
 //               Navigator.of(context).pushAndRemoveUntil(
-//                 MaterialPageRoute(builder: (_) => const LoginScreen()),
+//                 MaterialPageRoute(builder: (_) => const LoginScreenV2()),
 //                 (route) => false,
 //               );
 //             },

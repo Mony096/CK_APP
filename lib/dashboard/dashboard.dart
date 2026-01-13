@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:bizd_tech_service/helper/helper.dart';
-import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
@@ -1102,7 +1102,7 @@ class _DashboardState extends State<Dashboard>
                     .logout();
                 Navigator.of(context).pop();
                 Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  MaterialPageRoute(builder: (_) => const LoginScreenV2()),
                   (route) => false,
                 );
               },

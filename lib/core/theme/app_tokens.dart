@@ -11,25 +11,25 @@ class AppColors {
   // Private constructor to prevent instantiation
   AppColors._();
 
-  // Primary Brand Colors
-  static const Color primary = Color(0xFF425364);
-  static const Color primaryLight = Color(0xFF6B7B8A);
-  static const Color primaryDark = Color(0xFF2C3A47);
+  // Primary Brand Colors (Extracted from logo.png)
+  static const Color primary = Color(0xFF22C55E); // Vibrant Logo Green
+  static const Color primaryLight = Color(0xFF4ADE80);
+  static const Color primaryDark = Color(0xFF16A34A);
 
   // Accent Colors
-  static const Color accent = Color(0xFF27CC27);
-  static const Color accentLight = Color(0xFF4DD74D);
-  static const Color accentDark = Color(0xFF1E9E1E);
+  static const Color accent = Color(0xFF0F172A); // Deep Slate for professional contrast
+  static const Color accentLight = Color(0xFF334155);
+  static const Color accentDark = Color(0xFF020617);
 
   // Semantic Colors
-  static const Color success = Color(0xFF27CC27);
-  static const Color successLight = Color(0xFFE8F8E8);
-  static const Color warning = Color(0xFFFFB84D);
-  static const Color warningLight = Color(0xFFFFF3E0);
-  static const Color error = Color(0xFFE74C3C);
-  static const Color errorLight = Color(0xFFFDEDEC);
-  static const Color info = Color(0xFF3498DB);
-  static const Color infoLight = Color(0xFFE8F4FC);
+  static const Color success = Color(0xFF22C55E);
+  static const Color successLight = Color(0xFFF0FDF4);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningLight = Color(0xFFFFFBEB);
+  static const Color error = Color(0xFFEF4444);
+  static const Color errorLight = Color(0xFFFEF2F2);
+  static const Color info = Color(0xFF3B82F6);
+  static const Color infoLight = Color(0xFFEFF6FF);
 
   // Neutral Colors
   static const Color background = Color(0xFFECEEF0);

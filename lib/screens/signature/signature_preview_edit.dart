@@ -1,4 +1,4 @@
-import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +35,7 @@ class PDFViewerScreen extends StatelessWidget {
                   .pop(); // Close loading dialog AFTER logout finishes
 
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                MaterialPageRoute(builder: (_) => const LoginScreenV2()),
                 (route) => false,
               );
             },

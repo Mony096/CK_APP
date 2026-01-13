@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:bizd_tech_service/main.dart';
-import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/screens/signature/signature_preview_edit.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -140,7 +140,7 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
                   .pop(); // Close loading dialog AFTER logout finishes
 
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                MaterialPageRoute(builder: (_) => const LoginScreenV2()),
                 (route) => false,
               );
             },

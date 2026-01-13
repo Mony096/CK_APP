@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:bizd_tech_service/helper/helper.dart';
-import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
@@ -205,7 +205,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   Navigator.of(context).pop(); // Close loading
                                   Navigator.of(context).pushAndRemoveUntil(
                                     MaterialPageRoute(
-                                        builder: (_) => const LoginScreen()),
+                                        builder: (_) => const LoginScreenV2()),
                                     (route) => false,
                                   );
                                 },

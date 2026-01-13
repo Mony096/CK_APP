@@ -10,15 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, this.fromLogout});
+class LoginScreenOld extends StatefulWidget {
+  const LoginScreenV2({super.key, this.fromLogout});
   final dynamic fromLogout;
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreenOld> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreenOld> {
   final _userName = TextEditingController(text: "");
   final _password = TextEditingController(text: "");
   late bool _obscureText = true;

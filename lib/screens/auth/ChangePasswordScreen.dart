@@ -1,6 +1,6 @@
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/main.dart';
-import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
 import 'package:bizd_tech_service/screens/auth/setting.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
@@ -242,7 +242,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const LoginScreen()),
+                                    builder: (context) => const LoginScreenV2()),
                                 (route) => false,
                               );
                             }
