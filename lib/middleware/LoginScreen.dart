@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     const interval = Duration(milliseconds: 100); // update every 0.1s
     int ticks = 0;
-    int maxTicks = 100; // 6 seconds / 0.1s = 60 ticks
+    int maxTicks = 30; // 3 seconds / 0.1s = 30 ticks
 
     _timer = Timer.periodic(interval, (timer) {
       ticks++;
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (ticks >= maxTicks) {
         timer.cancel();
-        print("✅ Held for 10 seconds!");
+        print("✅ Held for 3 seconds!");
         goTo(context, const SettingScreen());
         // Trigger your action here
         _endHold(); // optional, hide text after 10 sec
@@ -393,17 +393,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(
                         height: 6,
                       ),
-                      // Button(
-                      //   variant: ButtonVariant.ghost,
-                      //   loading: false,
-                      //   child: const Text(
-                      //     'Setting',
-                      //     style: TextStyle(
-                      //         color: Color.fromARGB(255, 8, 8, 8),
-                      //         fontSize: 14),
-                      //   ),
-                      //   onPressed: () => goTo(context, const SettingScreen()),
-                      // ),
+                      TextButton(
+                        onPressed: () => goTo(context, const SettingScreen()),
+                        child: const Text(
+                          'Setting (Temp)',
+                          style: TextStyle(
+                            color: Colors.blueGrey,
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
                     ]),
                   ),
                   // const Expanded(

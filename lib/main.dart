@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:bizd_tech_service/core/disble_ssl.dart';
+import 'package:bizd_tech_service/core/app_initializer.dart';
+import 'package:bizd_tech_service/core/config/environment.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
@@ -23,8 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vibration/vibration.dart';
 
@@ -34,7 +32,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   _showIncomingCallNotification();
-  _startVibrationLoop(); // Optional: long vibration when background
+  _startVibrationLoop();
 }
 
 @pragma('vm:entry-point')
@@ -47,59 +45,30 @@ Future<void> _onActionReceivedMethod(ReceivedAction action) async {
       MaterialPageRoute(builder: (_) => const WrapperScreen()),
       (route) => false,
     );
-    // Stop vibration when accepted
     Vibration.cancel();
   } else {
-    print("❌ User ignored the call");
+    debugPrint("❌ User ignored the call");
     Vibration.cancel();
   }
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  HttpOverrides.global = DisableSSL();
+  // Initialize all app dependencies
+  await AppInitializer.init(environment: Environment.dev);
+  
+  // Set up Firebase messaging handlers
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  AwesomeNotifications().initialize(
-    null,
-    [
-      NotificationChannel(
-        channelKey: 'call_channel',
-        channelName: 'Incoming Call',
-        channelDescription: 'Call notifications',
-        importance: NotificationImportance.Max,
-        playSound: true,
-        enableVibration: true,
-        vibrationPattern:
-            Int64List.fromList([0, 1000, 500, 1000, 500, 1000, 500, 1000]),
-        defaultRingtoneType: DefaultRingtoneType.Ringtone,
-        locked: true,
-        criticalAlerts: true,
-      ),
-    ],
-  );
-
+  
   AwesomeNotifications().setListeners(
     onActionReceivedMethod: _onActionReceivedMethod,
   );
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     _showIncomingCallNotification();
-    _startVibrationLoop(); // Optional: long vibration when foreground
+    _startVibrationLoop();
   });
-    var dir = await getApplicationDocumentsDirectory();
-  print(dir);
-  await Hive.initFlutter();
-  await Hive.openBox('service_lists');
-  await Hive.openBox('equipment_box');
-  await Hive.openBox('customer_lists');
-  await Hive.openBox('item_lists');
-  await Hive.openBox('site_lists');
-  await FirebaseMessaging.instance.requestPermission();
 
-  // // 🔹 Get token
-  // await initFCM();
+  // Run the app with all providers
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -110,51 +79,29 @@ void main() async {
       ChangeNotifierProvider(create: (_) => EquipmentCreateProvider()),
       ChangeNotifierProvider(create: (_) => ServiceListProvider()),
       ChangeNotifierProvider(create: (_) => CompletedServiceProvider()),
-      ChangeNotifierProvider(create: (_) => HelperProvider()), // <-- Added
-      ChangeNotifierProvider(
-          create: (_) =>
-              ItemListProvider()), // <-- AddedServiceListProviderOffline
-      ChangeNotifierProvider(create: (_) => SiteListProvider()), // <-- Added
-      ChangeNotifierProvider(
-          create: (_) => ServiceListProviderOffline()), // <-- Added
-      // ChangeNotifierProvider(create: (_) => ServiceTicketListProviderOffline()), // <-- Added
+      ChangeNotifierProvider(create: (_) => HelperProvider()),
+      ChangeNotifierProvider(create: (_) => ItemListProvider()),
+      ChangeNotifierProvider(create: (_) => SiteListProvider()),
+      ChangeNotifierProvider(create: (_) => ServiceListProviderOffline()),
       ChangeNotifierProvider(create: (_) => CustomerListProviderOffline()),
       ChangeNotifierProvider(create: (_) => ItemListProviderOffline()),
       ChangeNotifierProvider(create: (_) => EquipmentOfflineProvider()),
       ChangeNotifierProvider(create: (_) => SiteListProviderOffline()),
-
-      // ChangeNotifierProvider(create: (_) => LocationProvider()),
     ],
     child: const MyApp(),
   ));
 }
 
-// Future<void> initFCM() async {
-//   // 🔹 Delete existing token (forces a new token)
-//   await FirebaseMessaging.instance.deleteToken();
-//   print("🗑 Old token deleted");
-
-//   // 🔹 Get a new token
-//   String? token = await FirebaseMessaging.instance.getToken();
-//   print("✅ New FCM Token: $token");
-
-//   // 🔹 Listen for token refresh (optional)
-//   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-//     print("🔄 Refreshed Token: $newToken");
-//     // send newToken to your backend if needed
-//   });
-// }
-
 void _showIncomingCallNotification() async {
   await AwesomeNotifications().createNotification(
     content: NotificationContent(
       id: 1,
-      channelKey: 'call_channel_1',
+      channelKey: 'call_channel',
       title: '🛠️ Technicon Service Alert',
       body: 'A new Service has been assigned to you. Open now!',
-      fullScreenIntent: false, // ❌ Turn off full screen intent
-      autoDismissible: true, // ✅ Allow dismissing
-      locked: true, // ✅ Let the user swipe it away
+      fullScreenIntent: false,
+      autoDismissible: true,
+      locked: true,
       notificationLayout: NotificationLayout.Default,
     ),
     actionButtons: [
@@ -172,7 +119,7 @@ void _showIncomingCallNotification() async {
   );
 }
 
-/// 🔁 Optional: Start vibration manually for longer duration
+/// Start vibration manually for longer duration
 void _startVibrationLoop() async {
   if (await Vibration.hasVibrator() ?? false) {
     Vibration.vibrate(
@@ -190,9 +137,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Demo',
+      title: 'BizD Tech Service',
       home: const WrapperScreen(),
-      // home: DownloadScreen(),
     );
   }
 }
