@@ -20,6 +20,7 @@ import 'package:bizd_tech_service/screens/service/service.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -910,9 +911,9 @@ class _DashboardState extends State<Dashboard>
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Home',
-          style: TextStyle(
+          style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: Colors.black),

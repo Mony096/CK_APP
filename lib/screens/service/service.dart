@@ -21,6 +21,7 @@ import 'package:bizd_tech_service/utilities/dio_client.dart';
 import 'package:bizd_tech_service/utilities/storage/locale_storage.dart';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -181,46 +182,20 @@ class _ServiceScreenState extends State<ServiceScreen> {
         }).toList();
         final isLoading = serviceProvider.isLoading;
         return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: Colors.white,
+            elevation: 0,
             centerTitle: true,
             title: Text(
-              "$userName' Service",
-              style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.width * 0.042,
-                  color: Colors.white),
-              textScaleFactor: 1.0,
-            ),
-            // Right-aligned actions (scan barcode)
-            actions: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      _refreshData();
-                    },
-                    icon:
-                        const Icon(Icons.refresh_rounded, color: Colors.white),
-                  ),
-                  // SizedBox(width: 3),
-                  IconButton(
-                    onPressed: () async {
-                      MaterialDialog.loading(context);
-                      await clearOfflineDataWithLogout(context);
-                      await Provider.of<AuthProvider>(context, listen: false)
-                          .logout();
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-                        (route) => false,
-                      );
-                    },
-                    icon: const Icon(Icons.logout, color: Colors.white),
-                  )
-                ],
+              "Service",
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
               ),
-            ],
+            ),
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
