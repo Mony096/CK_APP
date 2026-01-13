@@ -2,7 +2,7 @@ import 'package:bizd_tech_service/component/text_remark_dialog.dart';
 import 'package:bizd_tech_service/component/title_break%20copy.dart';
 import 'package:bizd_tech_service/component/title_break.dart';
 import 'package:bizd_tech_service/helper/helper.dart';
-import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';

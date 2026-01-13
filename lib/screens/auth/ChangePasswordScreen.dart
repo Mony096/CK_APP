@@ -1,7 +1,7 @@
 import 'package:bizd_tech_service/helper/helper.dart';
 import 'package:bizd_tech_service/main.dart';
-import 'package:bizd_tech_service/middleware/LoginScreen.dart';
-import 'package:bizd_tech_service/middleware/setting.dart';
+import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/setting.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/utilities/dialog/dialog.dart';
 import 'package:bizd_tech_service/wrapper_screen.dart';

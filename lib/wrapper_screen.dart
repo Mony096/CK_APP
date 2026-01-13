@@ -1,6 +1,6 @@
 import 'package:bizd_tech_service/dashboard/dashboard.dart';
-import 'package:bizd_tech_service/middleware/ChangePasswordScreen.dart';
-import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/ChangePasswordScreen.dart';
+import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/view_notification_service.dart';
 import 'package:flutter/material.dart';

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bizd_tech_service/helper/helper.dart';
-import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/provider/equipment_create_provider.dart';

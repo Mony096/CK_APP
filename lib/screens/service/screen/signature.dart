@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bizd_tech_service/middleware/LoginScreen.dart';
+import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/helper_provider.dart';
