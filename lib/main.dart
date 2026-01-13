@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:bizd_tech_service/core/app_initializer.dart';
 import 'package:bizd_tech_service/core/config/environment.dart';
+import 'package:bizd_tech_service/core/theme/app_theme.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/provider/customer_list_provider.dart';
@@ -138,6 +139,9 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'BizD Tech Service',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.light, // Can be changed to ThemeMode.system
       home: const WrapperScreen(),
     );
   }
