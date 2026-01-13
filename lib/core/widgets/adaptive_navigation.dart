@@ -150,9 +150,11 @@ class AdaptiveBottomNavBar extends StatelessWidget {
     return NavigationBar(
       selectedIndex: selectedIndex,
       onDestinationSelected: onItemTapped,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      height: 70,
       destinations: items.map((item) => NavigationDestination(
-        icon: Icon(item.icon),
-        selectedIcon: Icon(item.activeIcon ?? item.icon),
+        icon: Icon(item.icon, size: 24),
+        selectedIcon: Icon(item.activeIcon ?? item.icon, size: 24, color: AppColors.primary),
         label: item.label,
       )).toList(),
     );
@@ -164,9 +166,16 @@ class AdaptiveBottomNavBar extends StatelessWidget {
       onTap: onItemTapped,
       activeColor: AppColors.primary,
       inactiveColor: AppColors.textSecondary,
+      iconSize: 24,
       items: items.map((item) => BottomNavigationBarItem(
-        icon: Icon(item.icon),
-        activeIcon: Icon(item.activeIcon ?? item.icon),
+        icon: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Icon(item.icon),
+        ),
+        activeIcon: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Icon(item.activeIcon ?? item.icon),
+        ),
         label: item.label,
       )).toList(),
     );

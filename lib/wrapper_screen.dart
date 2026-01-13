@@ -2,6 +2,7 @@ import 'package:bizd_tech_service/core/theme/app_tokens.dart';
 import 'package:bizd_tech_service/dashboard/dashboard.dart';
 import 'package:bizd_tech_service/screens/auth/ChangePasswordScreen.dart';
 import 'package:bizd_tech_service/screens/auth/login_screen_v2.dart';
+import 'package:bizd_tech_service/screens/main/main_screen.dart';
 import 'package:bizd_tech_service/provider/auth_provider.dart';
 import 'package:bizd_tech_service/view_notification_service.dart';
 import 'package:flutter/material.dart';
@@ -53,8 +54,8 @@ class WrapperScreen extends StatelessWidget {
           return const LoginScreenV2();
         }
 
-        // STEP 4: All good → show dashboard
-        return Dashboard();
+        // STEP 4: All good → show main screen with bottom nav
+        return const MainScreen();
       },
     );
   }

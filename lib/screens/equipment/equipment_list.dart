@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class EquipmentListScreen extends StatefulWidget {
@@ -31,6 +32,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   bool _initialLoading = true;
   final ScrollController _scrollController = ScrollController();
   final filter = TextEditingController();
+  bool _isSearchExpanded = false;
 
   final bool _isLoading = false;
   List<dynamic> documents = [];
@@ -143,324 +145,121 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
         // final isLoadingMore = provider.isLoading && provider.hasMore;
         const loading = false;
         return Scaffold(
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // HEADER (not scrollable)
-              Container(
-                height: 265,
-                width: MediaQuery.of(context).size.width,
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 66, 83, 100),
-                  // borderRadius: BorderRadius.only(
-                  //   bottomLeft: Radius.circular(12),
-                  //   bottomRight: Radius.circular(12),
-                  // ),
-                ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      top: 40,
-                      left: 25,
-                      right: 15,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                              onTap: () => Navigator.of(context).pop(),
-                              child: Container(
-                                  width: 28,
-                                  height: 28,
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    color: Colors.white,
-                                  ),
-                                  child: SvgPicture.asset(
-                                    color: const Color.fromARGB(
-                                        255, 102, 103, 104),
-                                    'images/svg/reply.svg',
-                                    width: 15,
-                                  ))),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  _refreshData();
-                                },
-                                icon: const Icon(
-                                  Icons.refresh,
-                                  size: 27,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () async {
-                                  MaterialDialog.loading(context);
-                                  await clearOfflineDataWithLogout(context);
-                                  await Provider.of<AuthProvider>(context,
-                                          listen: false)
-                                      .logout();
-                                  Navigator.of(context).pop(); // Close loading
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (_) => const LoginScreenV2()),
-                                    (route) => false,
-                                  );
-                                },
-                                icon: const Icon(
-                                  Icons.logout,
-                                  size: 27,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
+          backgroundColor: const Color(0xFFF8FAFC),
+          appBar: AppBar(
+            title: Text(
+              "Equipment",
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: Colors.black,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              await goTo(context, EquipmentCreateScreen(data: const {}))
+                  .then((_) => _refreshData());
+            },
+            backgroundColor: const Color(0xFF22C55E),
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+          body: RefreshIndicator(
+            onRefresh: () async {
+              await _refreshData();
+            },
+            color: const Color(0xFF22C55E),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Search Bar Section
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
                     ),
-                    Positioned(
-                        top: 105,
-                        left: 25,
-                        right: 30,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                SvgPicture.asset(
-                                  color: const Color.fromARGB(255, 39, 204, 39),
-                                  'images/svg/kjav_list.svg',
-                                  width: 33,
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  textScaleFactor: 1.0,
-                                  "Equipment Overview",
-                                  style: TextStyle(
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.05,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                await goTo(
-                                        context,
-                                        EquipmentCreateScreen(
-                                          data: const {},
-                                        ))
-                                    .then(
-                                        (res) => {print(res), _refreshData()});
-                              },
-                              child: Container(
-                                width: 65,
-                                height: 35,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          const Color.fromARGB(255, 56, 67, 80)
-                                              .withOpacity(
-                                                  0.3), // Light gray shadow
-                                      spreadRadius: 3, // Smaller spread
-                                      blurRadius: 3, // Smaller blur
-                                      offset: const Offset(
-                                          0, 1), // Minimal vertical offset
-                                    ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 4),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.add,
-                                          size: 16,
-                                          color: Color.fromARGB(
-                                              255, 104, 104, 110)),
-                                      Text(
-                                        textScaleFactor: 1.0,
-                                        "New",
-                                        style: TextStyle(
-                                            fontSize: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.034,
-                                            color: const Color.fromARGB(
-                                                255, 104, 104, 110)),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // SizedBox(width: 2,)
-                          ],
-                        )),
-                    Positioned(
-                        top: 170,
-                        left: 20,
-                        right: 20,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Transform.rotate(
-                                  angle: 265 *
-                                      3.1415926535897932 /
-                                      180, // 90 degrees in radians
-                                  child: SvgPicture.asset(
-                                    'images/svg/reply.svg',
-                                    color: const Color.fromARGB(
-                                        255, 255, 255, 255),
-                                    width: 17,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  textScaleFactor: 1.0,
-                                  "Matches Your Filter",
-                                  style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.035,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              ],
-                            ),
-
-                            // SizedBox(width: 2,)
-                          ],
-                        )),
-                    Positioned(
-                      top: 185,
-                      left: 22,
-                      right: 25,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
-                        child: Row(
-                          children: [
-                            // smaller search field
-                            Expanded(
-                              child: SizedBox(
-                                height: 40,
-                                child: TextField(
-                                  controller: filter,
-                                  style: const TextStyle(fontSize: 14),
-                                  decoration: InputDecoration(
-                                    hintText: "Search",
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.034),
-                                    // Decrease vertical and horizontal padding to shrink the field
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 4, // Reduced from 8
-                                        horizontal: 12 // Reduced from 12
-                                        ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            // smaller button
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 10),
-                                textStyle: const TextStyle(fontSize: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: () {
-                                provider.setFilter(filter.text);
-                                provider.loadEquipments();
-                                // example: print search text
-                                // print("Search for: ${controller.text}");
-                              },
-                              child: Text(
-                                "GO",
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.034),
-                              ),
-                            ),
-                          ],
+                  ),
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextField(
+                      controller: filter,
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        hintText: "Search equipment...",
+                        hintStyle: GoogleFonts.inter(
+                          color: Colors.grey.shade400,
+                          fontSize: 14,
                         ),
+                        prefixIcon: Icon(Icons.search, color: Colors.grey.shade400, size: 20),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios, color: Color(0xFF22C55E), size: 18),
+                          onPressed: () {
+                            provider.setFilter(filter.text);
+                            provider.loadEquipments();
+                            FocusScope.of(context).unfocus();
+                          },
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        border: InputBorder.none,
                       ),
-                    )
-
-                    // ),
-                  ],
+                      onSubmitted: (_) {
+                        provider.setFilter(filter.text);
+                        provider.loadEquipments();
+                      },
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              // CONTENT
-              Expanded(
-                child: loading
-                    ? const Padding(
-                        padding: EdgeInsets.only(bottom: 100),
-                        child: Center(
-                          child: SpinKitFadingCircle(
-                            color: Colors.green,
-                            size: 50.0,
-                          ),
-                        ),
-                      )
-                    : documents.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "No Equipment",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
+                // CONTENT
+                Expanded(
+                  child: loading
+                      ? const Padding(
+                          padding: EdgeInsets.only(bottom: 100),
+                          child: Center(
+                            child: SpinKitFadingCircle(
+                              color: Colors.green,
+                              size: 50.0,
                             ),
-                          )
-                        : Container(
-                            // padding: const EdgeInsets.all(0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
+                          ),
+                        )
+                      : documents.isEmpty
+                          ? ListView(
+                              children: const [
+                                SizedBox(height: 200),
+                                Center(
+                                  child: Text(
+                                    "No Equipment",
+                                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  ),
                                 ),
                               ],
-                            ),
-                            // margin: const EdgeInsets.all(10),
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.only(top: 5),
-                              itemCount: documents.length,
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ListView.builder(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.only(top: 5),
+                                itemCount: documents.length,
                               // documents.length + (isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
                                 // if (index == documents.length &&
@@ -689,6 +488,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               ),
             ],
           ),
+        ),
         );
       },
     );

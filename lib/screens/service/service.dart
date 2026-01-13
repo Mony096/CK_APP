@@ -182,24 +182,15 @@ class _ServiceScreenState extends State<ServiceScreen> {
         final isLoading = serviceProvider.isLoading;
         return Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,
             backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-            // Leading menu icon on the left
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Handle menu button press or keep it empty for default Drawer action
-              },
-            ),
-            // Centered title
-            title: Center(
-              child: Text(
-                "$userName' Service",
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.042,
-                    color: Colors.white),
-                textScaleFactor: 1.0,
-              ),
+            centerTitle: true,
+            title: Text(
+              "$userName' Service",
+              style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.042,
+                  color: Colors.white),
+              textScaleFactor: 1.0,
             ),
             // Right-aligned actions (scan barcode)
             actions: [

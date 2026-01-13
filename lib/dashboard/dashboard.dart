@@ -82,6 +82,7 @@ class _DashboardState extends State<Dashboard>
 
   Future<void> _loadUserName() async {
     final name = await LocalStorageManger.getString('FullName');
+    final user = await LocalStorageManger.getString('UserName');
     final isDownLoadDone = await LocalStorageManger.getString('isDownloaded');
     setState(() {
       userName = name;
@@ -904,19 +905,15 @@ class _DashboardState extends State<Dashboard>
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        title: Center(
-          child: Text(
-            'Bizd Service Mobile',
-            style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.042,
-                color: Colors.white),
-            textScaleFactor: 1.0,
-          ),
+        centerTitle: true,
+        title: Text(
+          'Bizd Service Mobile',
+          style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.042,
+              color: Colors.white),
+          textScaleFactor: 1.0,
         ),
         actions: [
           IconButton(
@@ -939,19 +936,22 @@ class _DashboardState extends State<Dashboard>
               children: [
                 // ✅ TabBar
                 TabBar(
+                  padding: const EdgeInsets.only(top: 6), // Push labels down for better symmetry
                   controller: _tabController,
                   indicator: const CustomTabIndicator(
-                    indicatorWidth: 70,
+                    indicatorWidth: 80,
                     indicatorHeight: 3,
                     color: Colors.green,
                   ),
-                  indicatorSize: TabBarIndicatorSize.label,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelPadding: EdgeInsets.zero,
                   tabs: [
                     Tab(
                       child: Text(
                         "Tickets",
                         style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.036,
+                          fontSize: MediaQuery.of(context).size.width * 0.038,
+                          fontWeight: FontWeight.w600,
                           color: const Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
@@ -960,7 +960,8 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         "KPI",
                         style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.036,
+                          fontSize: MediaQuery.of(context).size.width * 0.038,
+                          fontWeight: FontWeight.w600,
                           color: const Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
@@ -969,148 +970,18 @@ class _DashboardState extends State<Dashboard>
                 ),
 
                 // ✅ Divider line in center
-                Container(
-                  margin: const EdgeInsets.only(top: 7),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.grey.shade400,
-                    ),
+                const Align(
+                  alignment: Alignment.center,
+                  child: VerticalDivider(
+                    indent: 14, // Balanced indentation
+                    endIndent: 14,
+                    thickness: 1,
+                    color: Color(0xFFE0E0E0),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            UserAccountsDrawerHeader(
-              decoration:
-                  const BoxDecoration(color: Color.fromARGB(255, 66, 83, 100)),
-              currentAccountPicture: SvgPicture.asset(
-                'images/svg/key.svg',
-                color: const Color.fromARGB(255, 49, 134, 69),
-                fit: BoxFit.contain,
-              ),
-              accountName: Text(
-                userName ?? '...',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: MediaQuery.of(context).size.width * 0.038),
-              ),
-              accountEmail: Text(
-                'George_Keeng88@gmail.com',
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: MediaQuery.of(context).size.width * 0.035),
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  _buildDrawerItem(Icons.settings, "Service", 0,
-                      const ServiceScreen(), false),
-                  _buildDrawerItem(Icons.build, "Equipment", 1,
-                      const EquipmentListScreen(), false),
-                ],
-              ),
-            ),
-            ListTile(
-              leading:
-                  const Icon(Icons.cloud_upload, size: 23, color: Colors.green),
-              title: Text("Sync to SAP",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: MediaQuery.of(context).size.width * 0.039)),
-              onTap: () async {
-                // if (completedService.isEmpty) return;
-
-                final res = await syncAllProcessToSAP();
-                if (res) {
-                  _fetchTicketCounts();
-                }
-
-                Navigator.of(context).pop();
-              },
-            ),
-            // ListTile(
-            //   leading:
-            //       const Icon(Icons.done_rounded, size: 23, color: Colors.green),
-            //   title: const Text("Completed",
-            //       style: TextStyle(color: Colors.black)),
-            //   onTap: () async {
-            //     // if (completedService.isEmpty) return;
-
-            //     final res = await syncAllProcessToSAP();
-            //     if (res) {
-            //       _fetchTicketCounts();
-            //     }
-
-            //     Navigator.of(context).pop();
-            //   },
-            // ),
-            ListTile(
-              leading: Icon(Icons.download,
-                  color: isDownloaded == "true"
-                      ? const Color.fromARGB(255, 159, 162, 163)
-                      : Colors.blue),
-              title: Text(
-                "Download",
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.039,
-                    color: isDownloaded == "true"
-                        ? const Color.fromARGB(255, 159, 162, 163)
-                        : Colors.black),
-              ),
-              onTap: () async {
-                downloadAllDocuments(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.clear,
-                  color: isDownloaded == "false"
-                      ? const Color.fromARGB(255, 159, 162, 163)
-                      : Colors.red),
-              title: Text("Clear",
-                  style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width * 0.039,
-                      color: isDownloaded == "false"
-                          ? const Color.fromARGB(255, 159, 162, 163)
-                          : Colors.black)),
-              onTap: () async {
-                clearOfflineData(context);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.black54),
-              title: Text(
-                "Log out",
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.039),
-              ),
-              onTap: () async {
-                MaterialDialog.loading(context);
-                await clearOfflineDataWithLogout(context);
-                await Provider.of<AuthProvider>(context, listen: false)
-                    .logout();
-                Navigator.of(context).pop();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-                  (route) => false,
-                );
-              },
-            ),
-            const SizedBox(
-              height: 45,
-            )
-          ],
         ),
       ),
       body: TabBarView(

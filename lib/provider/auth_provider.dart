@@ -97,7 +97,7 @@ class AuthProvider with ChangeNotifier {
         await LocalStorageManger.setString(
             'UserId', response.data["employeeID"].toString());
         await LocalStorageManger.setString(
-            'UserName', response.data["firstName"].toString());
+            'UserName', username);
         await LocalStorageManger.setString('FullName',
             '${response.data["firstName"].toString()} ${response.data["lastName"].toString()}');
         debugPrint('✅ Session data saved!');
