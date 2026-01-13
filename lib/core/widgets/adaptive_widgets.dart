@@ -163,6 +163,7 @@ class AdaptiveButton extends StatelessWidget {
     this.isLoading = false,
     this.isDestructive = false,
     this.style = AdaptiveButtonStyle.filled,
+    this.fullWidth = true,
   });
 
   final VoidCallback? onPressed;
@@ -170,35 +171,45 @@ class AdaptiveButton extends StatelessWidget {
   final bool isLoading;
   final bool isDestructive;
   final AdaptiveButtonStyle style;
+  final bool fullWidth;
 
   @override
   Widget build(BuildContext context) {
+    Widget button;
+    
     if (isLoading) {
-      return _buildLoadingButton(context);
+      button = _buildLoadingButton(context);
+    } else if (Platform.isIOS) {
+      button = _buildCupertinoButton(context);
+    } else {
+      button = _buildMaterialButton(context);
     }
-
-    if (Platform.isIOS) {
-      return _buildCupertinoButton(context);
+    
+    // Handle full width
+    if (fullWidth) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: button,
+      );
     }
-    return _buildMaterialButton(context);
+    return button;
   }
 
   Widget _buildLoadingButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: null,
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: Platform.isIOS
-              ? const CupertinoActivityIndicator(color: Colors.white)
-              : const CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-        ),
+    return ElevatedButton(
+      onPressed: null,
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.minPositive, 50),
+      ),
+      child: SizedBox(
+        width: 24,
+        height: 24,
+        child: Platform.isIOS
+            ? const CupertinoActivityIndicator(color: Colors.white)
+            : const CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
       ),
     );
   }
@@ -206,23 +217,21 @@ class AdaptiveButton extends StatelessWidget {
   Widget _buildMaterialButton(BuildContext context) {
     switch (style) {
       case AdaptiveButtonStyle.filled:
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style: isDestructive
-                ? ElevatedButton.styleFrom(backgroundColor: AppColors.error)
-                : null,
-            child: child,
+        return ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.minPositive, 50),
+            backgroundColor: isDestructive ? AppColors.error : null,
           ),
+          child: child,
         );
       case AdaptiveButtonStyle.outlined:
-        return SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: onPressed,
-            child: child,
+        return OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.minPositive, 50),
           ),
+          child: child,
         );
       case AdaptiveButtonStyle.text:
         return TextButton(
@@ -233,34 +242,30 @@ class AdaptiveButton extends StatelessWidget {
   }
 
   Widget _buildCupertinoButton(BuildContext context) {
-    final color = isDestructive ? CupertinoColors.destructiveRed : AppColors.primary;
-    
     switch (style) {
       case AdaptiveButtonStyle.filled:
-        return SizedBox(
-          width: double.infinity,
-          child: CupertinoButton.filled(
-            onPressed: onPressed,
-            child: child,
-          ),
+        return CupertinoButton.filled(
+          onPressed: onPressed,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: child,
         );
       case AdaptiveButtonStyle.outlined:
-        return SizedBox(
-          width: double.infinity,
-          child: CupertinoButton(
-            onPressed: onPressed,
-            color: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(color: color),
-                borderRadius: AppRadius.radiusSm,
-              ),
-              child: child,
+        return CupertinoButton(
+          onPressed: onPressed,
+          color: Colors.transparent,
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.md,
             ),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isDestructive ? CupertinoColors.destructiveRed : AppColors.primary,
+              ),
+              borderRadius: AppRadius.radiusSm,
+            ),
+            child: child,
           ),
         );
       case AdaptiveButtonStyle.text:

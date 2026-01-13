@@ -1,3 +1,4 @@
+import 'package:bizd_tech_service/core/theme/app_tokens.dart';
 import 'package:bizd_tech_service/dashboard/dashboard.dart';
 import 'package:bizd_tech_service/screens/auth/ChangePasswordScreen.dart';
 import 'package:bizd_tech_service/screens/auth/LoginScreen.dart';
@@ -14,44 +15,39 @@ class WrapperScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
-        print(auth.isLoggedIn);
+        debugPrint('Auth state: isLoggedIn=${auth.isLoggedIn}');
+        
         // STEP 1: Still checking session → show loading screen
         if (auth.isCheckSessionId) {
           return Scaffold(
+            backgroundColor: AppColors.background,
             body: Center(
-                child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SpinKitFadingCircle(
-                      color: Colors.green,
-                      size: 60.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitFadingCircle(
+                    color: AppColors.accent,
+                    size: 60.0,
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    'Loading',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textSecondary,
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Text(
-                      "Loading",
-                      style: TextStyle(
-                          fontSize: 15, color: Color.fromARGB(255, 94, 96, 97)),
-                    )
-                  ],
-                ),
+                  )
+                ],
               ),
-            )),
+            ),
           );
         }
+        
+        // STEP 2: Password change required
         if (auth.isChangePassword) {
           return const ChangePasswordScreen();
         }
-        // // STEP 2: Notification screen has priority
-        // if (auth.isCheckPendingObj) {
-        //   return const ViewNotification();
-        // }
-
+        
         // STEP 3: Not logged in → show login screen
         if (!auth.isLoggedIn) {
           return const LoginScreen();
