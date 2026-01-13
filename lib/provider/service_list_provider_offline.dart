@@ -124,10 +124,7 @@ class ServiceListProviderOffline extends ChangeNotifier {
     if (_completedBox == null) await _initBox();
     final raw =
         _completedBox!.get('completed', defaultValue: []) as List<dynamic>;
-    _completedServices = raw
-        .whereType<Map>()
-        .map((doc) => Map<String, dynamic>.from(doc))
-        .toList();
+    _completedServices = List<dynamic>.from(raw);
     notifyListeners();
   }
 
@@ -135,7 +132,7 @@ class ServiceListProviderOffline extends ChangeNotifier {
   Future<void> addCompletedService(Map<dynamic, dynamic> payload) async {
     if (_completedBox == null) await _initBox();
     // Add a status to the payload for sync tracking
-    final payloadWithStatus = payload as dynamic;
+    final Map<dynamic, dynamic> payloadWithStatus = Map<dynamic, dynamic>.from(payload);
     payloadWithStatus['sync_status'] = 'pending';
 
     _completedServices.add(payloadWithStatus);
