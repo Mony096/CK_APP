@@ -74,6 +74,15 @@ class AuthProvider with ChangeNotifier {
         "userName": username,
         "password": password,
       });
+      
+      // Log the full response for debugging
+      debugPrint('════════════════════════════════════════════');
+      debugPrint('🔐 LOGIN RESPONSE');
+      debugPrint('════════════════════════════════════════════');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Data: ${response.data}');
+      debugPrint('════════════════════════════════════════════');
+      
       if (response.statusCode == 200) {
         if (response.data["requirePasswordChange"] == true) {
           await LocalStorageManger.setString(
@@ -82,6 +91,8 @@ class AuthProvider with ChangeNotifier {
           notifyListeners();
           return true; // Indicate that password change is required
         }
+        
+        debugPrint('📦 Saving session data...');
         await LocalStorageManger.setString('SessionId', response.data['token']);
         await LocalStorageManger.setString(
             'UserId', response.data["employeeID"].toString());
@@ -89,21 +100,35 @@ class AuthProvider with ChangeNotifier {
             'UserName', response.data["firstName"].toString());
         await LocalStorageManger.setString('FullName',
             '${response.data["firstName"].toString()} ${response.data["lastName"].toString()}');
+        debugPrint('✅ Session data saved!');
 
-        final FirebaseMessaging messaging = FirebaseMessaging.instance;
-        await messaging.requestPermission(
-            alert: true, badge: true, sound: true);
-        final token = await messaging.getToken();
-        if (token != null) {
-          await updateToken(token);
-          await LocalStorageManger.setString('frmToken', token);
+        // FCM Token update - optional (won't work on iOS simulator)
+        debugPrint('📱 Getting FCM token...');
+        try {
+          final FirebaseMessaging messaging = FirebaseMessaging.instance;
+          await messaging.requestPermission(
+              alert: true, badge: true, sound: true);
+          final token = await messaging.getToken();
+          if (token != null) {
+            await updateToken(token);
+            await LocalStorageManger.setString('frmToken', token);
+            debugPrint('✅ FCM token saved!');
+          }
+        } catch (e) {
+          debugPrint('⚠️ FCM Token not available (simulator?): $e');
+          // Continue login even if FCM fails - this is expected on iOS simulator
         }
+        
+        debugPrint('🔄 Checking session...');
         checkSession();
         _isLoggedIn = true;
         notifyListeners();
+        debugPrint('✅ Login complete! Returning true');
         return true;
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('❌ LOGIN ERROR: $e');
+      debugPrint('📍 Stack trace: $stackTrace');
       MaterialDialog.warning(
         context,
         title: 'Error',

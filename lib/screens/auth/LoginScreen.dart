@@ -330,13 +330,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () async {
                           try {
                             setState(() => _isLoading = true);
+                            debugPrint('🔄 Attempting login...');
 
                             final isLogined = await Provider.of<AuthProvider>(
                               context,
                               listen: false,
                             ).login(context, _userName.text, _password.text);
 
+                            debugPrint('✅ Login result: $isLogined');
+
                             if (isLogined) {
+                              debugPrint('📝 Saving credentials...');
                               if (_rememberMe) {
                                 await LocalStorageManger.setString(
                                     'username', _userName.text);
@@ -349,11 +353,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     'password');
                               }
 
+                              debugPrint('🚀 Navigating to WrapperScreen...');
                               Navigator.of(context).pushAndRemoveUntil(
                                 MaterialPageRoute(
                                     builder: (_) => const WrapperScreen()),
                                 (route) => false,
                               );
+                              debugPrint('✅ Navigation complete!');
+                            } else {
+                              debugPrint('❌ Login returned false');
                             }
 
                             setState(() => _isLoading = false);
