@@ -1778,4 +1778,3 @@ class _CustomPainter extends BoxPainter {
     );
   }
 }
-
