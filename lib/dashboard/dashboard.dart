@@ -24,6 +24,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
+import 'package:bizd_tech_service/core/theme/app_tokens.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key, this.fromNotification = false});
@@ -328,11 +330,11 @@ class _DashboardState extends State<Dashboard>
 
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           "Reset",
                           style: TextStyle(
                               fontSize: 15,
-                              color: Colors.red,
+                              color: context.colors.error,
                               fontWeight: FontWeight.normal),
                         ),
                       ),
@@ -343,8 +345,9 @@ class _DashboardState extends State<Dashboard>
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                              255, 66, 83, 100), // button color
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer, // button color
                           shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.circular(7), // rounded corners
@@ -352,9 +355,12 @@ class _DashboardState extends State<Dashboard>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 25, vertical: 5), // optional
                         ),
-                        child: const Text(
+                        child: Text(
                           "Confirm",
-                          style: TextStyle(color: Colors.white), // text color
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer), // text color
                         ),
                       )
                     ],
@@ -448,25 +454,25 @@ class _DashboardState extends State<Dashboard>
   Color _statusColor(String status) {
     switch (status) {
       case "Open":
-        return Colors.redAccent;
+        return context.colors.error;
       case "In Progress":
         return Colors.orangeAccent;
       case "Closed":
-        return Colors.green;
+        return context.colors.primary;
       case "Pending":
-        return Colors.grey;
+        return context.colors.onSurfaceVariant;
       default:
-        return Colors.blueGrey;
+        return context.colors.outline;
     }
   }
 
   Widget _buildDrawerItem(
       IconData icon, String title, int index, Widget screen, bool disabled) {
     return ListTile(
-      leading: Icon(icon, color: Colors.black87),
+      leading: Icon(icon, color: context.onSurfaceColor),
       title: Text(title,
           style: TextStyle(
-              color: Colors.black87,
+              color: context.onSurfaceColor,
               fontSize: MediaQuery.of(context).size.width * 0.039)),
       onTap: () {
         // Navigator.push(
@@ -609,7 +615,8 @@ class _DashboardState extends State<Dashboard>
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.inverseSurface,
                       behavior: SnackBarBehavior.floating,
                       elevation: 10,
                       margin: const EdgeInsets.symmetric(
@@ -635,7 +642,9 @@ class _DashboardState extends State<Dashboard>
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                             0.033,
-                                    color: Colors.white,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onInverseSurface,
                                   ),
                                 ),
                               ],
@@ -673,8 +682,8 @@ class _DashboardState extends State<Dashboard>
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.cloud_download,
-                      size: 40, color: Colors.blue),
+                  Icon(Icons.cloud_download,
+                      size: 40, color: context.colors.tertiary),
                   const SizedBox(height: 16),
                   LinearProgressIndicator(value: progress),
                   const SizedBox(height: 12),
@@ -687,7 +696,9 @@ class _DashboardState extends State<Dashboard>
                   const SizedBox(height: 6),
                   Text(
                     "${(progress * 100).toStringAsFixed(0)}%",
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: context.colors.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -725,9 +736,9 @@ class _DashboardState extends State<Dashboard>
         showDialog(
           context: context,
           barrierDismissible: false, // prevent closing by tapping outside
-          builder: (_) => const Center(
+          builder: (_) => Center(
             child: CircularProgressIndicator(
-              color: Colors.green,
+              color: context.colors.primary,
             ),
           ),
         );
@@ -750,7 +761,7 @@ class _DashboardState extends State<Dashboard>
           MaterialDialog.close(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+              backgroundColor: Theme.of(context).colorScheme.inverseSurface,
               behavior: SnackBarBehavior.floating,
               elevation: 10,
               margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
@@ -758,10 +769,12 @@ class _DashboardState extends State<Dashboard>
                 borderRadius: BorderRadius.circular(9),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.remove_circle, color: Colors.white, size: 28),
-                  SizedBox(width: 16),
+                  Icon(Icons.remove_circle,
+                      color: Theme.of(context).colorScheme.onInverseSurface,
+                      size: 28),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -771,7 +784,8 @@ class _DashboardState extends State<Dashboard>
                           "Offline data cleared successfully!.",
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white,
+                            color:
+                                Theme.of(context).colorScheme.onInverseSurface,
                           ),
                         ),
                       ],
@@ -848,7 +862,7 @@ class _DashboardState extends State<Dashboard>
       if (res1 == false && res2 == false) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: Theme.of(context).colorScheme.inverseSurface,
             behavior: SnackBarBehavior.floating,
             elevation: 10,
             margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
@@ -856,10 +870,12 @@ class _DashboardState extends State<Dashboard>
               borderRadius: BorderRadius.circular(9),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.remove_circle, color: Colors.white, size: 28),
-                SizedBox(width: 16),
+                Icon(Icons.remove_circle,
+                    color: Theme.of(context).colorScheme.onInverseSurface,
+                    size: 28),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -869,7 +885,7 @@ class _DashboardState extends State<Dashboard>
                         "No offline data to synchronize.",
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onInverseSurface,
                         ),
                       ),
                     ],
@@ -905,10 +921,10 @@ class _DashboardState extends State<Dashboard>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: context.surfaceColor,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -916,22 +932,22 @@ class _DashboardState extends State<Dashboard>
           style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Colors.black),
+              color: Theme.of(context).colorScheme.onSurface),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(44.0),
           child: Container(
-            color: Colors.white,
+            color: context.surfaceColor,
             child: Stack(
               children: [
                 // ✅ TabBar
                 TabBar(
                   padding: EdgeInsets.zero,
                   controller: _tabController,
-                  indicator: const CustomTabIndicator(
+                  indicator: CustomTabIndicator(
                     indicatorWidth: 80,
                     indicatorHeight: 3,
-                    color: Colors.green,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   labelPadding: EdgeInsets.zero,
@@ -942,7 +958,7 @@ class _DashboardState extends State<Dashboard>
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.width * 0.038,
                           fontWeight: FontWeight.w600,
-                          color: const Color.fromARGB(255, 62, 62, 67),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -952,7 +968,7 @@ class _DashboardState extends State<Dashboard>
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.width * 0.038,
                           fontWeight: FontWeight.w600,
-                          color: const Color.fromARGB(255, 62, 62, 67),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -960,13 +976,13 @@ class _DashboardState extends State<Dashboard>
                 ),
 
                 // ✅ Divider line in center
-                const Align(
+                Align(
                   alignment: Alignment.center,
                   child: VerticalDivider(
                     indent: 14, // Balanced indentation
                     endIndent: 14,
                     thickness: 1,
-                    color: Color(0xFFE0E0E0),
+                    color: context.colors.outlineVariant,
                   ),
                 ),
               ],
@@ -993,11 +1009,15 @@ class _DashboardState extends State<Dashboard>
           margin: const EdgeInsets.only(top: 10),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-              top: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
+            color: context.surfaceColor,
+              border: Border(
+                bottom: BorderSide(
+                    color: context.colors.onSurfaceVariant.withOpacity(0.3),
+                    width: 1),
+                top: BorderSide(
+                    color: context.colors.onSurfaceVariant.withOpacity(0.3),
+                    width: 1),
+              ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1008,9 +1028,9 @@ class _DashboardState extends State<Dashboard>
               Expanded(
                 child: Text(
                   "Job: $_selectedJob | Service: $_selectedService | Priority: $_selectedPriority",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Colors.black87,
+                    color: context.onSurfaceColor.withOpacity(0.87),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1020,7 +1040,7 @@ class _DashboardState extends State<Dashboard>
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 0),
                   height: 30,
-                  child: const Icon(Icons.filter_alt, color: Colors.green),
+                  child: Icon(Icons.filter_alt, color: context.colors.primary),
                 ),
               )
             ],
@@ -1029,7 +1049,7 @@ class _DashboardState extends State<Dashboard>
 
         // 🔹 Ticket list
         load == true
-            ? const SizedBox(
+            ? SizedBox(
                 height: 450,
                 child: Center(
                     child: Column(
@@ -1040,7 +1060,7 @@ class _DashboardState extends State<Dashboard>
                       height: 25,
                       child: CircularProgressIndicator(
                         strokeWidth: 3,
-                        color: Colors.green,
+                        color: context.colors.primary,
                       ),
                     ),
                     SizedBox(
@@ -1065,15 +1085,18 @@ class _DashboardState extends State<Dashboard>
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 255, 255),
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(7),
                         border: Border.all(
-                          color: Colors.grey.shade200,
+                          color: Theme.of(context).colorScheme.outlineVariant,
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.08),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -1084,9 +1107,12 @@ class _DashboardState extends State<Dashboard>
                             .copyWith(dividerColor: Colors.transparent),
                         child: ExpansionTile(
                           leading: CircleAvatar(
-                            backgroundColor: Colors.indigo[50],
-                            child: const Icon(Icons.date_range,
-                                color: Color.fromARGB(255, 76, 99, 122)),
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.3),
+                            child: Icon(Icons.date_range,
+                                color: context.colors.onPrimaryContainer),
                           ),
                           title: Row(
                             children: [
@@ -1100,13 +1126,9 @@ class _DashboardState extends State<Dashboard>
                               ),
                               const SizedBox(width: 15),
                               group["isLoadingCount"] == true
-                                  ? const SizedBox(
-                                      width: 15,
-                                      height: 15,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.green,
-                                      ),
+                                  ? CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: context.colors.primary,
                                     )
                                   : Container()
                             ],
@@ -1114,7 +1136,7 @@ class _DashboardState extends State<Dashboard>
                           subtitle: Text(
                             "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
                             style: TextStyle(
-                                color: Colors.grey,
+                                color: context.colors.onSurfaceVariant,
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.031),
                           ),
@@ -1127,7 +1149,7 @@ class _DashboardState extends State<Dashboard>
                           //   duration: const Duration(milliseconds: 200),
                           //   child: const Icon(
                           //     Icons.keyboard_arrow_down,
-                          //     color: Colors.grey,
+                          //     color: Theme.of(context).colorScheme.onSurfaceVariant,
                           //   ),
                           // ),
 
@@ -1153,37 +1175,38 @@ class _DashboardState extends State<Dashboard>
                               horizontal: 16, vertical: 10),
                           children: tickets.isEmpty
                               ? [
-                                  const Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: Text(
-                                      "No tickets available!",
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 13),
-                                    ),
-                                  )
+                                   Padding(
+                                     padding: const EdgeInsets.all(12.0),
+                                     child: Text(
+                                       "No tickets available!",
+                                       style: TextStyle(
+                                           color: context.colors.onSurfaceVariant,
+                                           fontSize: 13),
+                                     ),
+                                   )
                                 ]
                               : tickets[0] == "loading"
                                   ? [
                                       Column(
                                         children: [
-                                          const Padding(
-                                            padding: EdgeInsets.all(8),
-                                            child: Center(
-                                                child: SizedBox(
-                                                    width: 21,
-                                                    height: 21,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      color: Colors.green,
-                                                    ))),
-                                          ),
+                                           Padding(
+                                             padding: const EdgeInsets.all(8),
+                                             child: Center(
+                                                 child: SizedBox(
+                                                     width: 21,
+                                                     height: 21,
+                                                     child:
+                                                         CircularProgressIndicator(
+                                                       strokeWidth: 2,
+                                                       color: context.colors.primary,
+                                                     ))),
+                                           ),
                                           const SizedBox(height: 5),
                                           Text(
                                             "Loading ${group["date"]}' Ticket...",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontSize: 13,
-                                                color: Colors.grey),
+                                                color: context.colors.onSurfaceVariant),
                                           ),
                                           const SizedBox(height: 10),
                                         ],
@@ -1213,9 +1236,9 @@ class _DashboardState extends State<Dashboard>
         children: [
           Row(
             children: [
-              _kpiCard("Monthly Closed Tickets", "0", Colors.redAccent),
+              _kpiCard("Monthly Closed Tickets", "0", context.colors.error),
               const SizedBox(width: 12),
-              _kpiCard("Yearly In-Service Rate", "100%", Colors.green),
+              _kpiCard("Yearly In-Service Rate", "100%", context.colors.primary),
             ],
           ),
           const SizedBox(height: 20),
@@ -1234,15 +1257,16 @@ class _DashboardState extends State<Dashboard>
       margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
       decoration: BoxDecoration(
-        border: const Border(
+        border: Border(
           left: BorderSide(
-            color: Color.fromARGB(255, 66, 83, 100),
+            color: context.colors.primaryContainer,
             width: 8,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromARGB(255, 133, 136, 138).withOpacity(0.2),
+            color:
+                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.2),
             spreadRadius: 2,
             blurRadius: 2,
             offset: const Offset(1, 1),
@@ -1267,16 +1291,16 @@ class _DashboardState extends State<Dashboard>
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.settings,
+                          Icon(Icons.settings,
                               size: 19,
-                              color: Color.fromARGB(255, 188, 189, 190)),
+                              color: context.colors.onSurfaceVariant),
                           const SizedBox(width: 3),
                           Text(
                             "Ticket - No. ${index + 1}",
                             style: TextStyle(
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.030,
-                                color: Colors.grey),
+                                color: context.colors.onSurfaceVariant),
                             textScaleFactor: 1.0,
                           ),
                         ],
@@ -1297,19 +1321,18 @@ class _DashboardState extends State<Dashboard>
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.025,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white,
+                                color: context.surfaceColor,
                               ),
                             ),
                           ),
 
                           const SizedBox(width: 8),
 
-                          // Entry Tag
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF4CAF50), // Green
+                              color: context.colors.primary, // Green
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
@@ -1318,7 +1341,7 @@ class _DashboardState extends State<Dashboard>
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.025,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white,
+                                color: context.surfaceColor,
                               ),
                             ),
                           ),
@@ -1333,10 +1356,10 @@ class _DashboardState extends State<Dashboard>
                       padding: const EdgeInsets.only(left: 10),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.person,
                             size: 21,
-                            color: Colors.blue, // you can change the color
+                            color: context.colors.tertiary, // you can change the color
                           ),
                           const SizedBox(
                               width: 5), // spacing between icon and text
@@ -1380,9 +1403,11 @@ class _DashboardState extends State<Dashboard>
                   Container(
                     padding: const EdgeInsets.fromLTRB(0, 9, 10, 0),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.surfaceColor,
                       border: Border(
-                        top: BorderSide(color: Colors.grey.shade300, width: 1),
+                        top: BorderSide(
+                            color: context.colors.onSurfaceVariant.withOpacity(0.3),
+                            width: 1),
                       ),
                     ),
                     margin: const EdgeInsets.fromLTRB(20, 10, 0, 0),
@@ -1430,7 +1455,7 @@ class _DashboardState extends State<Dashboard>
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
                               style: TextStyle(
-                                  color: Colors.black87,
+                                  color: context.onSurfaceColor,
                                   fontSize: MediaQuery.of(context).size.width *
                                       0.030),
                             ),
@@ -1457,14 +1482,13 @@ class _DashboardState extends State<Dashboard>
                                             MediaQuery.of(context).size.width *
                                                 0.030),
                                   ),
-                                  const Text(
+                                  Text(
                                     ":",
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     textScaleFactor: 1.0,
                                     style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 133, 134, 137),
+                                        color: context.colors.onSurfaceVariant,
                                         fontSize: 13),
                                   ),
                                 ],
@@ -1476,7 +1500,7 @@ class _DashboardState extends State<Dashboard>
                               overflow: TextOverflow.ellipsis,
                               textScaleFactor: 1.0,
                               style: TextStyle(
-                                  color: Colors.red,
+                                  color: context.colors.error,
                                   fontSize: MediaQuery.of(context).size.width *
                                       0.030),
                             ),
@@ -1500,11 +1524,14 @@ class _DashboardState extends State<Dashboard>
       child: Container(
         height: 150,
         decoration: BoxDecoration(
-          color: Colors.white, // same as Card background
+          color: context.surfaceColor, // same as Card background
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1), // soft shadow
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withOpacity(0.1), // soft shadow
               blurRadius: 4,
               offset: const Offset(0, 2), // subtle elevation
             ),
@@ -1557,7 +1584,7 @@ class _DashboardState extends State<Dashboard>
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1573,9 +1600,11 @@ class _DashboardState extends State<Dashboard>
           ),
           const SizedBox(height: 12),
           if (items.isEmpty)
-            const Text(
+            Text(
               "No data available",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(
+                color: context.colors.onSurfaceVariant,
+                fontSize: 14),
             )
           else
             Column(
@@ -1602,7 +1631,7 @@ class CustomTabIndicator extends Decoration {
   const CustomTabIndicator({
     this.indicatorWidth = 40,
     this.indicatorHeight = 3,
-    this.color = Colors.green,
+    required this.color,
   });
 
   @override

@@ -1,27 +1,47 @@
 import 'package:flutter/material.dart';
 
-/// App color palette
-/// 
-/// Usage:
+/// App color palette - Material Design 3 Compatible
+///
+/// This file contains legacy color constants for backward compatibility.
+/// For new code, prefer using Theme.of(context).colorScheme for M3 colors.
+///
+/// Usage (legacy):
 /// ```dart
 /// Container(color: AppColors.primary)
 /// Text('Hello', style: TextStyle(color: AppColors.textPrimary))
+/// ```
+///
+/// Usage (Material 3 - preferred):
+/// ```dart
+/// Container(color: Theme.of(context).colorScheme.primary)
+/// Text('Hello', style: TextStyle(color: Theme.of(context).colorScheme.onSurface))
 /// ```
 class AppColors {
   // Private constructor to prevent instantiation
   AppColors._();
 
-  // Primary Brand Colors (Extracted from logo.png)
+  // ============================================
+  // PRIMARY BRAND COLORS (Seed for M3 theming)
+  // ============================================
+
+  /// Primary brand green - used as seed color for Material 3
   static const Color primary = Color(0xFF22C55E); // Vibrant Logo Green
   static const Color primaryLight = Color(0xFF4ADE80);
   static const Color primaryDark = Color(0xFF16A34A);
 
-  // Accent Colors
-  static const Color accent = Color(0xFF0F172A); // Deep Slate for professional contrast
+  // ============================================
+  // ACCENT / SECONDARY COLORS
+  // ============================================
+
+  /// Deep slate for professional contrast
+  static const Color accent = Color(0xFF0F172A);
   static const Color accentLight = Color(0xFF334155);
   static const Color accentDark = Color(0xFF020617);
 
-  // Semantic Colors
+  // ============================================
+  // SEMANTIC COLORS
+  // ============================================
+
   static const Color success = Color(0xFF22C55E);
   static const Color successLight = Color(0xFFF0FDF4);
   static const Color warning = Color(0xFFF59E0B);
@@ -31,21 +51,48 @@ class AppColors {
   static const Color info = Color(0xFF3B82F6);
   static const Color infoLight = Color(0xFFEFF6FF);
 
-  // Neutral Colors
+  // ============================================
+  // SURFACE / BACKGROUND COLORS
+  // ============================================
+
+  /// Main scaffold background (light grey)
   static const Color background = Color(0xFFECEEF0);
+
+  /// Card/container surface (white)
   static const Color surface = Color(0xFFFFFFFF);
+
+  /// Variant surface for inputs/chips
   static const Color surfaceVariant = Color(0xFFF5F7F9);
+
+  /// Divider lines
   static const Color divider = Color(0xFFE0E0E0);
+
+  /// Input borders
   static const Color border = Color(0xFFCBCBCB);
 
-  // Text Colors
+  // ============================================
+  // TEXT COLORS
+  // ============================================
+
+  /// Primary text on light backgrounds
   static const Color textPrimary = Color(0xFF2C3A47);
+
+  /// Secondary/muted text
   static const Color textSecondary = Color(0xFF6B7B8A);
+
+  /// Hint/placeholder text
   static const Color textHint = Color(0xFF9E9E9E);
+
+  /// Text on primary color
   static const Color textOnPrimary = Color(0xFFFFFFFF);
+
+  /// Text on accent color
   static const Color textOnAccent = Color(0xFFFFFFFF);
 
-  // Status Colors (for service tickets)
+  // ============================================
+  // STATUS COLORS (Service Tickets)
+  // ============================================
+
   static const Color statusOpen = Color(0xFF9E9E9E);
   static const Color statusAccept = Color(0xFF3498DB);
   static const Color statusTravel = Color(0xFFFFB84D);
@@ -69,10 +116,25 @@ class AppColors {
         return statusOpen;
     }
   }
+
+  // ============================================
+  // LEGACY HARDCODED COLORS (for migration reference)
+  // ============================================
+  // These are commonly used hardcoded colors found in the codebase.
+  // Use this as a reference when migrating to theme-based colors.
+
+  /// Common app bar / button background color
+  /// Replace with: Theme.of(context).colorScheme.primaryContainer
+  static const Color legacyAppBarBg =
+      Color(0xFF425364); // Color.fromARGB(255, 66, 83, 100)
+
+  /// Common green used for indicators/icons
+  /// Replace with: Theme.of(context).colorScheme.primary
+  static const Color legacyGreen = Color(0xFF4CAF50); // Colors.green
 }
 
 /// App spacing constants
-/// 
+///
 /// Usage:
 /// ```dart
 /// SizedBox(height: AppSpacing.md)
@@ -98,12 +160,16 @@ class AppSpacing {
   static const EdgeInsets paddingXl = EdgeInsets.all(xl);
 
   // Horizontal padding
-  static const EdgeInsets paddingHorizontalLg = EdgeInsets.symmetric(horizontal: lg);
-  static const EdgeInsets paddingHorizontalXl = EdgeInsets.symmetric(horizontal: xl);
+  static const EdgeInsets paddingHorizontalLg =
+      EdgeInsets.symmetric(horizontal: lg);
+  static const EdgeInsets paddingHorizontalXl =
+      EdgeInsets.symmetric(horizontal: xl);
 
   // Vertical padding
-  static const EdgeInsets paddingVerticalSm = EdgeInsets.symmetric(vertical: sm);
-  static const EdgeInsets paddingVerticalMd = EdgeInsets.symmetric(vertical: md);
+  static const EdgeInsets paddingVerticalSm =
+      EdgeInsets.symmetric(vertical: sm);
+  static const EdgeInsets paddingVerticalMd =
+      EdgeInsets.symmetric(vertical: md);
 }
 
 /// Border radius constants
@@ -130,26 +196,26 @@ class AppShadows {
   AppShadows._();
 
   static List<BoxShadow> get small => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.05),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ];
 
   static List<BoxShadow> get medium => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.08),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-  ];
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
   static List<BoxShadow> get large => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.12),
-      blurRadius: 16,
-      offset: const Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
+        ),
+      ];
 }

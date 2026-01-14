@@ -26,6 +26,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
 
 class ServiceScreen extends StatefulWidget {
   const ServiceScreen({super.key});
@@ -182,10 +183,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
         }).toList();
         final isLoading = serviceProvider.isLoading;
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
+          backgroundColor: context.colors.surfaceContainerHighest,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            backgroundColor: Colors.white,
+            backgroundColor: context.surfaceColor,
             elevation: 0,
             centerTitle: true,
             title: Text(
@@ -193,7 +194,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Colors.black,
+                color: context.onSurfaceColor,
               ),
             ),
           ),
@@ -219,7 +220,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                       width: 50,
                       height: 46,
                       decoration: BoxDecoration(
-                        color: Colors.green,
+                        color: context.colors.primary,
                         borderRadius: BorderRadius.circular(5.0),
                       ),
                       child: TextButton(
@@ -257,7 +258,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                         ),
                         child: Text("GO",
                             style: TextStyle(
-                                color: const Color.fromARGB(255, 255, 255, 255),
+                                color: context.onPrimaryColor,
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.035),
                             textScaleFactor: 1.0),
@@ -275,9 +276,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                   child: isLoading || _isLoading
                       ? SizedBox(
                           height: MediaQuery.of(context).size.height * 0.65,
-                          child: const Center(
+                          child: Center(
                             child: SpinKitFadingCircle(
-                              color: Colors.green,
+                              color: context.colors.primary,
                               size: 50.0,
                             ),
                           ),
@@ -285,11 +286,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
                       : documents.isEmpty
                           ? SizedBox(
                               height: MediaQuery.of(context).size.height * 0.5,
-                              child: const Center(
+                              child: Center(
                                 child: Text(
                                   "No Service Available",
                                   style: TextStyle(
-                                      fontSize: 16, color: Colors.grey),
+                                      fontSize: 16, color: context.colors.onSurfaceVariant),
                                 ),
                               ),
                             )

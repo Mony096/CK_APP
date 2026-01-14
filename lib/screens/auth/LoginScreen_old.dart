@@ -11,7 +11,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreenOld extends StatefulWidget {
-  const LoginScreenV2({super.key, this.fromLogout});
+  const LoginScreenOld({super.key, this.fromLogout});
   final dynamic fromLogout;
 
   @override

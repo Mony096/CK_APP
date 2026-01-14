@@ -2,6 +2,7 @@ import 'package:bizd_tech_service/constant/style.dart';
 import 'package:bizd_tech_service/form/loading_circle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
 
 class MaterialDialog {
   static Future<void> success(
@@ -16,14 +17,12 @@ class MaterialDialog {
       builder: (BuildContext context) {
         return AlertDialog(
           key: const Key('_dialog'),
-          // backgroundColor: Colors.white,
-          // surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
+          backgroundColor: context.surfaceColor,
+          surfaceTintColor: context.colors.surfaceTint,
           title: Text(
             title ?? 'Scucess',
             style: TextStyle(
-                color: Colors.black,
+                color: context.onSurfaceColor,
                 fontSize: size(context).width * 0.045,
                 fontWeight: FontWeight.w500),
           ),
@@ -66,10 +65,8 @@ class MaterialDialog {
       builder: (BuildContext context) {
         return AlertDialog(
           key: const Key('_dialog'),
-          // backgroundColor: Colors.white,
-          // surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
+          backgroundColor: context.surfaceColor,
+          surfaceTintColor: context.colors.surfaceTint,
           title: Text(
             title ?? 'Success',
             style: TextStyle(
@@ -121,10 +118,8 @@ class MaterialDialog {
       builder: (BuildContext context) {
         return AlertDialog(
           key: const Key('_dialog'),
-          // backgroundColor: Colors.white,
-          // surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
+          backgroundColor: context.surfaceColor,
+          surfaceTintColor: context.colors.surfaceTint,
 
           title: Text(
             title ?? 'Success',
@@ -191,10 +186,8 @@ class MaterialDialog {
       builder: (BuildContext context) {
         return AlertDialog(
           key: const Key('_dialog'),
-          // backgroundColor: Colors.white,
-          // surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
+          backgroundColor: context.surfaceColor,
+          surfaceTintColor: context.colors.surfaceTint,
 
           title: Text(
             title ?? 'Success',
@@ -264,7 +257,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           surfaceTintColor: Colors.white,
           titlePadding:
               const EdgeInsets.fromLTRB(0, 10, 0, 10), // Custom padding
@@ -284,19 +277,18 @@ class MaterialDialog {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white, // White background
+                      color: context.surfaceColor, // Theme surface background
                       borderRadius: BorderRadius.circular(
                           25), // Fully rounded (half of width/height)
                       border: Border.all(
-                        color: Colors.blue, // Solid blue border
+                        color: context.colors.tertiary, // Use tertiary for alert blue
                         width: 2, // Border width of 5 pixels
                       ),
                     ),
                     child: Icon(
                       icon, // The icon you pass in
                       size: 18,
-                      color: Colors
-                          .blue, // Or a color that matches your app's theme
+                      color: context.colors.tertiary,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -305,8 +297,8 @@ class MaterialDialog {
                     child: Text(
                       title ?? 'Alert',
                       // textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 64, 64, 70),
+                      style: TextStyle(
+                        color: context.onSurfaceColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -325,7 +317,7 @@ class MaterialDialog {
               const SizedBox(height: 5),
             ],
           ),
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text(
@@ -333,7 +325,7 @@ class MaterialDialog {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
-                    color: Color.fromARGB(221, 77, 78, 82),
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -354,9 +346,9 @@ class MaterialDialog {
                   },
                   child: Text(
                     cancelLabel,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: Colors.red,
+                      color: context.colors.error,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -374,8 +366,8 @@ class MaterialDialog {
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.primaryContainer,
+                      foregroundColor: context.colors.onPrimaryContainer,
                       elevation: 3,
                       // Adjust the padding to make the button smaller
                       padding: const EdgeInsets.symmetric(
@@ -425,7 +417,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           surfaceTintColor: Colors.white,
           titlePadding:
               const EdgeInsets.fromLTRB(0, 10, 0, 10), // Custom padding
@@ -445,19 +437,18 @@ class MaterialDialog {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white, // White background
+                      color: context.surfaceColor, // Theme surface background
                       borderRadius: BorderRadius.circular(
                           25), // Fully rounded (half of width/height)
                       border: Border.all(
-                        color: Colors.blue, // Solid blue border
+                        color: context.colors.tertiary, // Use tertiary for alert blue
                         width: 2, // Border width of 5 pixels
                       ),
                     ),
                     child: Icon(
                       icon, // The icon you pass in
                       size: 18,
-                      color: Colors
-                          .blue, // Or a color that matches your app's theme
+                      color: context.colors.tertiary,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -496,7 +487,7 @@ class MaterialDialog {
                     fontSize: MediaQuery.of(context).size.width * 0.036,
                     height:
                         1.6, // ✅ line height (1.0 = normal, >1.0 = more space)
-                    color: Color.fromARGB(221, 77, 78, 82),
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -537,8 +528,8 @@ class MaterialDialog {
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.primaryContainer,
+                      foregroundColor: context.colors.onPrimaryContainer,
                       elevation: 3,
                       // Adjust the padding to make the button smaller
                       padding: const EdgeInsets.symmetric(
@@ -581,7 +572,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           surfaceTintColor: Colors.white,
           titlePadding:
               const EdgeInsets.fromLTRB(0, 10, 0, 10), // Custom padding
@@ -601,19 +592,17 @@ class MaterialDialog {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white, // White background
-                      borderRadius: BorderRadius.circular(
-                          25), // Fully rounded (half of width/height)
+                      color: context.surfaceColor,
+                      borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: Colors.green, // Solid blue border
-                        width: 2, // Border width of 5 pixels
+                        color: context.colors.primary,
+                        width: 2,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.done_all, // The icon you pass in
+                    child: Icon(
+                      Icons.done_all,
                       size: 18,
-                      color: Colors
-                          .green, // Or a color that matches your app's theme
+                      color: context.colors.primary,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -642,7 +631,7 @@ class MaterialDialog {
               const SizedBox(height: 5),
             ],
           ),
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text(
@@ -650,7 +639,7 @@ class MaterialDialog {
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 15,
-                    color: Color.fromARGB(221, 77, 78, 82),
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -672,8 +661,8 @@ class MaterialDialog {
                       Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.primaryContainer,
+                      foregroundColor: context.colors.onPrimaryContainer,
                       elevation: 3,
                       // Adjust the padding to make the button smaller
                       padding: const EdgeInsets.symmetric(
@@ -716,7 +705,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(13.0), // Rounded corners
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           surfaceTintColor: Colors.white,
           titlePadding:
               const EdgeInsets.fromLTRB(0, 10, 0, 10), // Custom padding
@@ -736,19 +725,17 @@ class MaterialDialog {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white, // White background
-                      borderRadius: BorderRadius.circular(
-                          25), // Fully rounded (half of width/height)
+                      color: context.surfaceColor,
+                      borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: Colors.green, // Solid blue border
-                        width: 2, // Border width of 5 pixels
+                        color: context.colors.primary,
+                        width: 2,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.done_all, // The icon you pass in
+                    child: Icon(
+                      Icons.done_all,
                       size: 18,
-                      color: Colors
-                          .green, // Or a color that matches your app's theme
+                      color: context.colors.primary,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -777,7 +764,7 @@ class MaterialDialog {
               const SizedBox(height: 5),
             ],
           ),
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text(
@@ -785,7 +772,7 @@ class MaterialDialog {
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 15,
-                    color: Color.fromARGB(221, 77, 78, 82),
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -806,8 +793,8 @@ class MaterialDialog {
                       Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.colors.primaryContainer,
+                      foregroundColor: context.colors.onPrimaryContainer,
                       elevation: 3,
                       // Adjust the padding to make the button smaller
                       padding: const EdgeInsets.symmetric(
@@ -856,7 +843,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           titlePadding: const EdgeInsets.fromLTRB(15, 15, 0, 0),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -875,10 +862,10 @@ class MaterialDialog {
               Expanded(
                 child: Text(
                   title ?? 'Detail View',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                    color: context.onSurfaceColor,
                   ),
                 ),
               ),
@@ -887,9 +874,9 @@ class MaterialDialog {
           content: SingleChildScrollView(
             child: Text(
               body ?? "Check equipment information?",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
-                color: Color.fromARGB(221, 110, 110, 115),
+                color: context.colors.onSurfaceVariant,
               ),
             ),
           ),
@@ -900,8 +887,8 @@ class MaterialDialog {
                 if (onCancel != null) onCancel();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: iconColor,
-                foregroundColor: Colors.white,
+                backgroundColor: iconColor == Colors.green ? context.colors.primary : iconColor,
+                foregroundColor: iconColor == Colors.green ? context.colors.onPrimary : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -931,7 +918,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           titlePadding: const EdgeInsets.fromLTRB(15, 15, 0, 0),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -962,9 +949,9 @@ class MaterialDialog {
           content: SingleChildScrollView(
             child: Text(
               body ?? "Are you sure you want to clear all the data?",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color.fromARGB(221, 110, 110, 115),
+                color: context.colors.onSurfaceVariant,
               ),
             ),
           ),
@@ -993,8 +980,8 @@ class MaterialDialog {
                 if (onCancel != null) onCancel();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: iconColor,
-                foregroundColor: Colors.white,
+                backgroundColor: iconColor == Colors.green ? context.colors.primary : iconColor,
+                foregroundColor: iconColor == Colors.green ? context.colors.onPrimary : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1024,7 +1011,7 @@ class MaterialDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           titlePadding: const EdgeInsets.fromLTRB(15, 15, 0, 0),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -1055,9 +1042,9 @@ class MaterialDialog {
           content: SingleChildScrollView(
             child: Text(
               body ?? "Check equipment information?",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
-                color: Color.fromARGB(221, 110, 110, 115),
+                color: context.colors.onSurfaceVariant,
               ),
             ),
           ),
@@ -1068,8 +1055,8 @@ class MaterialDialog {
                 if (onCancel != null) onCancel();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                foregroundColor: Colors.white,
+                backgroundColor: context.colors.primaryContainer,
+                foregroundColor: context.colors.onPrimaryContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1098,19 +1085,19 @@ class MaterialDialog {
       builder: (BuildContext context) {
         return AlertDialog(
           elevation: 3,
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaceColor,
           contentPadding: const EdgeInsets.all(16),
           insetPadding: const EdgeInsets.symmetric(horizontal: 130),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          content: const Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
                 height: 55,
                 child: SpinKitFadingCircle(
-                  color: Colors.green,
+                  color: context.colors.primary,
                   size: 45.0,
                 ),
               ),
@@ -1130,12 +1117,12 @@ class MaterialDialog {
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
         decoration: BoxDecoration(
-          color: Colors.grey.shade600,
+          color: context.colors.inverseSurface,
           borderRadius: BorderRadius.circular(
             30,
           ),
         ),
-        child: Text(message),
+        child: Text(message, style: TextStyle(color: context.colors.onInverseSurface)),
       ),
       padding: const EdgeInsets.all(12),
     );
