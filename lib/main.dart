@@ -1,24 +1,24 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:bizd_tech_service/core/disble_ssl.dart';
-import 'package:bizd_tech_service/provider/auth_provider.dart';
-import 'package:bizd_tech_service/provider/completed_service_provider.dart';
-import 'package:bizd_tech_service/provider/customer_list_provider.dart';
-import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
-import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
-import 'package:bizd_tech_service/provider/item_list_provider.dart';
-import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/service_list_provider.dart';
-import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/site_list_provider.dart';
-import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/update_status_provider.dart';
-import 'package:bizd_tech_service/wrapper_screen.dart';
+import 'package:bizd_tech_service/core/network/disable_ssl.dart';
+import 'package:bizd_tech_service/features/auth/providers/auth_provider.dart';
+import 'package:bizd_tech_service/features/service/providers/completed_service_provider.dart';
+import 'package:bizd_tech_service/features/customer/providers/customer_list_provider.dart';
+import 'package:bizd_tech_service/features/customer/providers/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/equipment/providers/equipment_offline_provider.dart';
+import 'package:bizd_tech_service/features/equipment/providers/equipment_create_provider.dart';
+import 'package:bizd_tech_service/features/equipment/providers/equipment_list_provider.dart';
+import 'package:bizd_tech_service/features/helper/providers/helper_provider.dart';
+import 'package:bizd_tech_service/features/item/providers/item_list_provider.dart';
+import 'package:bizd_tech_service/features/item/providers/item_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/providers/service_list_provider.dart';
+import 'package:bizd_tech_service/features/service/providers/service_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/providers/service_provider.dart';
+import 'package:bizd_tech_service/features/site/providers/site_list_provider.dart';
+import 'package:bizd_tech_service/features/site/providers/site_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/status/providers/update_status_provider.dart';
+import 'package:bizd_tech_service/app/wrapper_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,7 +50,7 @@ Future<void> _onActionReceivedMethod(ReceivedAction action) async {
     // Stop vibration when accepted
     Vibration.cancel();
   } else {
-    print("❌ User ignored the call");
+    print("âŒ User ignored the call");
     Vibration.cancel();
   }
 }
@@ -88,7 +88,7 @@ void main() async {
     _showIncomingCallNotification();
     _startVibrationLoop(); // Optional: long vibration when foreground
   });
-    var dir = await getApplicationDocumentsDirectory();
+  var dir = await getApplicationDocumentsDirectory();
   print(dir);
   await Hive.initFlutter();
   await Hive.openBox('service_lists');
@@ -98,7 +98,7 @@ void main() async {
   await Hive.openBox('site_lists');
   await FirebaseMessaging.instance.requestPermission();
 
-  // // 🔹 Get token
+  // // ðŸ”¹ Get token
   // await initFCM();
   runApp(MultiProvider(
     providers: [
@@ -130,17 +130,17 @@ void main() async {
 }
 
 // Future<void> initFCM() async {
-//   // 🔹 Delete existing token (forces a new token)
+//   // ðŸ”¹ Delete existing token (forces a new token)
 //   await FirebaseMessaging.instance.deleteToken();
-//   print("🗑 Old token deleted");
+//   print("ðŸ—‘ Old token deleted");
 
-//   // 🔹 Get a new token
+//   // ðŸ”¹ Get a new token
 //   String? token = await FirebaseMessaging.instance.getToken();
-//   print("✅ New FCM Token: $token");
+//   print("âœ… New FCM Token: $token");
 
-//   // 🔹 Listen for token refresh (optional)
+//   // ðŸ”¹ Listen for token refresh (optional)
 //   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-//     print("🔄 Refreshed Token: $newToken");
+//     print("ðŸ”„ Refreshed Token: $newToken");
 //     // send newToken to your backend if needed
 //   });
 // }
@@ -150,11 +150,11 @@ void _showIncomingCallNotification() async {
     content: NotificationContent(
       id: 1,
       channelKey: 'call_channel_1',
-      title: '🛠️ Technicon Service Alert',
+      title: 'ðŸ› ï¸ Technicon Service Alert',
       body: 'A new Service has been assigned to you. Open now!',
-      fullScreenIntent: false, // ❌ Turn off full screen intent
-      autoDismissible: true, // ✅ Allow dismissing
-      locked: true, // ✅ Let the user swipe it away
+      fullScreenIntent: false, // âŒ Turn off full screen intent
+      autoDismissible: true, // âœ… Allow dismissing
+      locked: true, // âœ… Let the user swipe it away
       notificationLayout: NotificationLayout.Default,
     ),
     actionButtons: [
@@ -172,7 +172,7 @@ void _showIncomingCallNotification() async {
   );
 }
 
-/// 🔁 Optional: Start vibration manually for longer duration
+/// ðŸ” Optional: Start vibration manually for longer duration
 void _startVibrationLoop() async {
   if (await Vibration.hasVibrator() ?? false) {
     Vibration.vibrate(
