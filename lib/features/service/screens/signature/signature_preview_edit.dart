@@ -4,6 +4,7 @@ import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 
 class PDFViewerScreen extends StatelessWidget {
@@ -15,15 +16,23 @@ class PDFViewerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme:
-            const IconThemeData(color: Colors.white), // 👈 back arrow color
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        title: const Text(
-          "Signature Here",
-          style: TextStyle(
-              color: Color.fromARGB(255, 255, 255, 255), fontSize: 18),
-        ),
+        backgroundColor: const Color(0xFF425364),
+        elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: Text(
+          "Signature Here",
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -39,9 +48,9 @@ class PDFViewerScreen extends StatelessWidget {
                 (route) => false,
               );
             },
-            icon: Icon(Icons.logout, size: 22),
+            icon: const Icon(Icons.logout, color: Colors.white, size: 22),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
         ],
       ),
       body: SfPdfViewer.file(File(filePath)),

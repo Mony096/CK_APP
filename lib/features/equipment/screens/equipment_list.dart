@@ -231,11 +231,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: Colors.black,
+                color: Colors.white,
               ),
             ),
             centerTitle: true,
-            backgroundColor: Colors.white,
+             backgroundColor: Color.fromARGB(255, 66, 83, 100),
             elevation: 0,
             automaticallyImplyLeading: false,
           ),

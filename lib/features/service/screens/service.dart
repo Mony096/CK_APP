@@ -186,7 +186,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
           backgroundColor: context.colors.surfaceContainerHighest,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            backgroundColor: context.surfaceColor,
+             backgroundColor: Color.fromARGB(255, 66, 83, 100),
             elevation: 0,
             centerTitle: true,
             title: Text(
@@ -194,7 +194,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: context.onSurfaceColor,
+                color: Colors.white,
               ),
             ),
           ),

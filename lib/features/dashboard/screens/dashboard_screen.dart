@@ -16,7 +16,7 @@ import 'package:bizd_tech_service/features/service/provider/service_list_provide
 import 'package:bizd_tech_service/features/site/provider/site_list_provider.dart';
 import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/screens/equipment_list.dart';
-import 'package:bizd_tech_service/features/service/screens/service.dart';
+import 'package:bizd_tech_service/features/service/screens/screen/serviceById.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +26,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
 import 'package:bizd_tech_service/core/theme/app_tokens.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key, this.fromNotification = false});
@@ -924,41 +925,38 @@ class _DashboardState extends State<Dashboard>
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: context.surfaceColor,
+        backgroundColor: Color.fromARGB(255, 66, 83, 100),
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Home',
+          'Dashboard',
           style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: context.colors.onPrimary),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(44.0),
+          preferredSize: const Size.fromHeight(55.0),
           child: Container(
-            color: context.surfaceColor,
+            color: Colors.white,
             child: Stack(
               children: [
                 // ✅ TabBar
                 TabBar(
-                  padding: EdgeInsets.zero,
                   controller: _tabController,
-                  indicator: CustomTabIndicator(
-                    indicatorWidth: 80,
+                  indicator: const CustomTabIndicator(
+                    indicatorWidth: 70,
                     indicatorHeight: 3,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Colors.green,
                   ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelPadding: EdgeInsets.zero,
+                  indicatorSize: TabBarIndicatorSize.label,
                   tabs: [
                     Tab(
                       child: Text(
                         "Tickets",
                         style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.038,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: MediaQuery.of(context).size.width * 0.036,
+                          color: const Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
                     ),
@@ -966,9 +964,8 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         "KPI",
                         style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.038,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: MediaQuery.of(context).size.width * 0.036,
+                          color: const Color.fromARGB(255, 62, 62, 67),
                         ),
                       ),
                     ),
@@ -976,13 +973,15 @@ class _DashboardState extends State<Dashboard>
                 ),
 
                 // ✅ Divider line in center
-                Align(
-                  alignment: Alignment.center,
-                  child: VerticalDivider(
-                    indent: 14, // Balanced indentation
-                    endIndent: 14,
-                    thickness: 1,
-                    color: context.colors.outlineVariant,
+                Container(
+                  margin: const EdgeInsets.only(top: 7),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 1,
+                      height: 30,
+                      color: Colors.grey.shade400,
+                    ),
                   ),
                 ),
               ],
@@ -1001,104 +1000,164 @@ class _DashboardState extends State<Dashboard>
   }
 
   /// Ticket Tab
+  /// Ticket Tab
   Widget _ticketTab() {
     return Column(
       children: [
         // 🔹 Filter bar
         Container(
-          margin: const EdgeInsets.only(top: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           decoration: BoxDecoration(
             color: context.surfaceColor,
-              border: Border(
-                bottom: BorderSide(
-                    color: context.colors.onSurfaceVariant.withOpacity(0.3),
-                    width: 1),
-                top: BorderSide(
-                    color: context.colors.onSurfaceVariant.withOpacity(0.3),
-                    width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                offset: const Offset(0, 4),
+                blurRadius: 8,
               ),
+            ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SizedBox(
-                width: 7,
-              ),
-              Expanded(
-                child: Text(
-                  "Job: $_selectedJob | Service: $_selectedService | Priority: $_selectedPriority",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.onSurfaceColor.withOpacity(0.87),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              GestureDetector(
+              // Filter Button
+              InkWell(
                 onTap: _showFilterDialog,
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  margin: const EdgeInsets.only(bottom: 0),
-                  height: 30,
-                  child: Icon(Icons.filter_alt, color: context.colors.primary),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical:6),
+                  decoration: BoxDecoration(
+                    color: context.colors.primary,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    children: [
+                     const Icon(Icons.filter_list_rounded,
+                          size: 18, color: Colors.white),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Filters",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              )
+              ),
+              const SizedBox(width: 12),
+              
+              // Vertical Divider
+              Container(
+                height: 24,
+                width: 1,
+                color: context.colors.outlineVariant,
+              ),
+              const SizedBox(width: 10),
+
+              // Active Filters List
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      if (_selectedJob == "All" &&
+                          _selectedService == "All" &&
+                          _selectedPriority == "All")
+                        Text(
+                          "All Tickets Shown",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+
+                      if (_selectedJob != "All") ...[
+                        _buildFilterChip("Job: $_selectedJob", () {
+                          setState(() {
+                            _selectedJob = "All";
+                          });
+                          _fetchTicketCounts();
+                        }),
+                        const SizedBox(width: 8),
+                      ],
+                      if (_selectedService != "All") ...[
+                         _buildFilterChip("Svc: $_selectedService", () {
+                           setState(() {
+                              _selectedService = "All";
+                           });
+                           _fetchTicketCounts();
+                         }),
+                        const SizedBox(width: 8),
+                      ],
+                      if (_selectedPriority != "All") ...[
+                         _buildFilterChip("Pri: $_selectedPriority", () {
+                           setState(() {
+                              _selectedPriority = "All";
+                           });
+                           _fetchTicketCounts();
+                         }),
+                        const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
 
         // 🔹 Ticket list
         load == true
-            ? SizedBox(
-                height: 450,
+            ? Expanded(
                 child: Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SpinKitFadingCircle(
                         color: context.colors.primary,
+                        size: 40.0,
                       ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      "Loading...",
-                      style: TextStyle(fontSize: 17),
-                    ),
-                  ],
-                )),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Loading tickets...",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: context.colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               )
             : Expanded(
-                // <<< Fix: constrain ListView inside Column
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
                   itemCount: ticketGroups.length,
                   itemBuilder: (context, index) {
                     final group = ticketGroups[index];
                     final tickets = group["tickets"] as List;
+                    final isToday = index == 0;
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 13),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(7),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                          width: 1,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant
+                              .withOpacity(0.5),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.08),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 5,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -1106,53 +1165,60 @@ class _DashboardState extends State<Dashboard>
                         data: Theme.of(context)
                             .copyWith(dividerColor: Colors.transparent),
                         child: ExpansionTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0.3),
-                            child: Icon(Icons.date_range,
-                                color: context.colors.onPrimaryContainer),
+                          iconColor: context.colors.primary,
+                          collapsedIconColor: context.colors.onSurfaceVariant,
+                          tilePadding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 8),
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: isToday
+                                  ? context.colors.primaryContainer
+                                  : context.colors.surfaceContainerHighest,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.calendar_today_rounded,
+                              size: 20,
+                              color: isToday
+                                  ? context.colors.onPrimaryContainer
+                                  : context.colors.onSurfaceVariant,
+                            ),
                           ),
                           title: Row(
                             children: [
                               Text(
                                 group["date"],
-                                style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.035,
-                                  fontWeight: FontWeight.bold,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.onSurfaceColor,
                                 ),
                               ),
-                              const SizedBox(width: 15),
-                              group["isLoadingCount"] == true
-                                  ? CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: context.colors.primary,
-                                    )
-                                  : Container()
+                              if (group["isLoadingCount"] == true) ...[
+                                const SizedBox(width: 12),
+                                SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: context.colors.primary,
+                                  ),
+                                )
+                              ]
                             ],
                           ),
-                          subtitle: Text(
-                            "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
-                            style: TextStyle(
-                                color: context.colors.onSurfaceVariant,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.031),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              "${group["count"]} Tickets",
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                          // ✅ custom right icon
-                          // ✅ custom rotating arrow
-                          // trailing: AnimatedRotation(
-                          //   turns: _isExpanded
-                          //       ? 0.5
-                          //       : 0.0, // 0.5 = 180°, 0.25 = 90°
-                          //   duration: const Duration(milliseconds: 200),
-                          //   child: const Icon(
-                          //     Icons.keyboard_arrow_down,
-                          //     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          //   ),
-                          // ),
-
                           onExpansionChanged: (expanded) async {
                             setState(() {
                               _isExpanded = expanded;
@@ -1160,9 +1226,9 @@ class _DashboardState extends State<Dashboard>
                             if (expanded && tickets.isEmpty) {
                               setState(() {
                                 group["tickets"] = ["loading"];
-                                _isExpanded = expanded;
-                                print(expanded);
                               });
+                              // Check standard or offline? 
+                              // Current implementation calls _fetchTicketsFromOffline
                               final fetchedTickets =
                                   await _fetchTicketsFromOffline(
                                       group["dateValue"]);
@@ -1171,52 +1237,49 @@ class _DashboardState extends State<Dashboard>
                               });
                             }
                           },
-                          childrenPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
+                          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
                           children: tickets.isEmpty
                               ? [
-                                   Padding(
-                                     padding: const EdgeInsets.all(12.0),
-                                     child: Text(
-                                       "No tickets available!",
-                                       style: TextStyle(
-                                           color: context.colors.onSurfaceVariant,
-                                           fontSize: 13),
-                                     ),
-                                   )
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          Icon(Icons.inbox_rounded,
+                                              size: 30,
+                                              color: context.colors.outline),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            "No tickets available",
+                                            style: GoogleFonts.inter(
+                                              color:Colors.grey,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
                                 ]
                               : tickets[0] == "loading"
                                   ? [
-                                      Column(
-                                        children: [
-                                           Padding(
-                                             padding: const EdgeInsets.all(8),
-                                             child: Center(
-                                                 child: SizedBox(
-                                                     width: 21,
-                                                     height: 21,
-                                                     child:
-                                                         CircularProgressIndicator(
-                                                       strokeWidth: 2,
-                                                       color: context.colors.primary,
-                                                     ))),
-                                           ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            "Loading ${group["date"]}' Ticket...",
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: context.colors.onSurfaceVariant),
+                                      Padding(
+                                        padding: const EdgeInsets.all(24.0),
+                                        child: Center(
+                                          child: SpinKitThreeBounce(
+                                            color: context.colors.primary,
+                                            size: 20.0,
                                           ),
-                                          const SizedBox(height: 10),
-                                        ],
+                                        ),
                                       )
                                     ]
                                   : tickets.asMap().entries.map((entry) {
                                       final index = entry.key;
                                       final ticket = entry.value;
-
-                                      return _cardTicket(ticket, index);
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        child: _cardTicket(ticket, index),
+                                      );
                                     }).toList(),
                         ),
                       ),
@@ -1227,6 +1290,43 @@ class _DashboardState extends State<Dashboard>
       ],
     );
   }
+
+  Widget _buildFilterChip(String label, VoidCallback? onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: context.colors.secondaryContainer,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: context.colors.secondary.withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: context.colors.onSecondaryContainer,
+              ),
+            ),
+             const SizedBox(width: 6),
+             Icon(
+               Icons.close,
+               size: 14,
+               color: context.colors.onSecondaryContainer.withOpacity(0.7),
+             )
+          ],
+        ),
+      ),
+    );
+  }
+
 
   /// KPI Tab
   Widget _kpiTab() {
@@ -1253,318 +1353,299 @@ class _DashboardState extends State<Dashboard>
   }
 
   Widget _cardTicket(dynamic data, int index) {
+    // Determine status color
+    Color statusColor;
+    Color statusBgColor;
+    String status = data["U_CK_Status"] ?? "N/A";
+
+    switch (status) {
+      case "Open":
+        statusColor = context.colors.error;
+        statusBgColor = context.colors.errorContainer;
+        break;
+      case "Service":
+      case "Travel":
+      case "Entry":
+      case "Accept":
+        statusColor = const Color(0xFF2E7D32); // Green 800
+        statusBgColor = const Color(0xFFE8F5E9); // Green 50
+        break;
+      default:
+        statusColor = context.colors.primary;
+        statusBgColor = context.colors.primaryContainer;
+    }
+
+    // Determine Job Type color (Corrective/Preventive)
+    Color jobTypeColor = const Color(0xFF1565C0); // Blue 800
+    Color jobTypeBgColor = const Color(0xFFE3F2FD); // Blue 50
+    if (data["U_CK_JobType"] == "Preventive") {
+      jobTypeColor = const Color(0xFFE65100); // Orange 900
+      jobTypeBgColor = const Color(0xFFFFF3E0); // Orange 50
+    }
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-      padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: context.colors.primaryContainer,
-            width: 8,
-          ),
+        color: const Color.fromARGB(255, 249, 250, 250),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.colors.outlineVariant.withOpacity(0.5),
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 2,
-            offset: const Offset(1, 1),
-          )
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
         ],
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
       ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5),
-        child: Row(
-          children: [
-            const SizedBox(width: 5),
-            Expanded(
-              flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ✅ Header row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.settings,
-                              size: 19,
-                              color: context.colors.onSurfaceVariant),
-                          const SizedBox(width: 3),
-                          Text(
-                            "Ticket - No. ${index + 1}",
-                            style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.030,
-                                color: context.colors.onSurfaceVariant),
-                            textScaleFactor: 1.0,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          // Corrective Tag
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37), // Gold yellow
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              "${data["U_CK_JobType"] ?? "N/A"}",
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.025,
-                                fontWeight: FontWeight.w500,
-                                color: context.surfaceColor,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: context.colors.primary, // Green
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              "${data["U_CK_Status"] ?? "N/A"}",
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.025,
-                                fontWeight: FontWeight.w500,
-                                color: context.surfaceColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  // ✅ Item code & model row
-                  Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.person,
-                            size: 21,
-                            color: context.colors.tertiary, // you can change the color
-                          ),
-                          const SizedBox(
-                              width: 5), // spacing between icon and text
-                          Text(
-                            "${data["U_CK_CardCode"] ?? "N/A"} - ${data["CustomerName"] ?? "N/A"}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textScaleFactor: 1.0,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.032,
-                            ),
-                          ),
-                        ],
-                      )),
-                  const SizedBox(height: 7.5),
-
-                  // ✅ Brand & part row
-                  Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        child: Text(
-                          ((data["CustomerAddress"] as List?)?.isNotEmpty ==
-                                  true)
-                              ? "# / ${(data["CustomerAddress"].first["StreetNo"] ?? "N/A")}"
-                              : "No Address",
-                          // maxLines: 1,
-                          // overflow:
-                          //     TextOverflow
-                          //         .ellipsis,
-                          softWrap: true,
-                          textScaleFactor: 1.0,
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.030),
-                        ),
-                      )),
-
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(0, 9, 10, 0),
-                    decoration: BoxDecoration(
-                      color: context.surfaceColor,
-                      border: Border(
-                        top: BorderSide(
-                            color: context.colors.onSurfaceVariant.withOpacity(0.3),
-                            width: 1),
-                      ),
-                    ),
-                    margin: const EdgeInsets.fromLTRB(20, 10, 0, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // Navigate to Detail Screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ServiceByIdScreen(data: data as Map<String, dynamic>),
+              ),
+            ).then((value)=>_fetchTicketCounts());
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Row: Ticket ID and Status
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 85,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Service Type",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(
-                                        color: const Color.fromARGB(
-                                            255, 133, 134, 137),
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.030),
-                                  ),
-                                  Text(
-                                    ":",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(
-                                        color: const Color.fromARGB(
-                                            255, 133, 134, 137),
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.030),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              " ${data["U_CK_ServiceType"] ?? "N/A"}",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textScaleFactor: 1.0,
-                              style: TextStyle(
-                                  color: context.onSurfaceColor,
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.030),
-                            ),
-                          ],
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: context.colors.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.confirmation_number_outlined,
+                              size: 16, color: context.colors.onSurfaceVariant),
                         ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 85,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Priority",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(
-                                        color: const Color.fromARGB(
-                                            255, 133, 134, 137),
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.030),
-                                  ),
-                                  Text(
-                                    ":",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textScaleFactor: 1.0,
-                                    style: TextStyle(
-                                        color: context.colors.onSurfaceVariant,
-                                        fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              " ${data["U_CK_Priority"] ?? "N/A"}",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textScaleFactor: 1.0,
-                              style: TextStyle(
-                                  color: context.colors.error,
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.030),
-                            ),
-                          ],
+                        const SizedBox(width: 8),
+                        Text(
+                          "Ticket #${index + 1}",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusBgColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        status == "Entry" ? "Completed" : status,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Customer Info
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.business_rounded,
+                        size: 20, color: context.colors.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            data["CustomerName"] ?? "Unknown Customer",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: context.onSurfaceColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "${data["U_CK_CardCode"] ?? "N/A"}",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Address
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 18, color: context.colors.onSurfaceVariant),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        ((data["CustomerAddress"] as List?)?.isNotEmpty == true)
+                            ? "${data["CustomerAddress"].first["StreetNo"] ?? "No Street Address"}"
+                            : "No Address Available",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: context.colors.onSurfaceVariant,
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+                Divider(height: 1, color: context.colors.outlineVariant.withOpacity(0.5)),
+                const SizedBox(height: 12),
+
+
+                // Footer: Job Type, Service Type, Priority
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildTag(
+                      label: data["U_CK_JobType"] ?? "N/A",
+                      color: jobTypeColor,
+                      bgColor: jobTypeBgColor,
+                    ),
+                    _buildTag(
+                      label: data["U_CK_ServiceType"] ?? "Service",
+                      color: context.colors.tertiary,
+                      bgColor: context.colors.tertiaryContainer.withOpacity(0.4),
+                    ),
+                    if (data["U_CK_Priority"] != null)
+                      _buildTag(
+                        label: "${data["U_CK_Priority"]}",
+                        color: data["U_CK_Priority"] == "High"
+                            ? context.colors.error
+                            : context.colors.secondary,
+                        bgColor: data["U_CK_Priority"] == "High"
+                            ? context.colors.errorContainer
+                            : context.colors.secondaryContainer,
+                        icon: Icons.flag_rounded,
+                      ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 5),
-          ],
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildTag({
+    required String label,
+    required Color color,
+    required Color bgColor,
+    IconData? icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   Widget _kpiCard(String title, String value, Color color) {
     return Expanded(
       child: Container(
-        height: 150,
+        height: 140,
         decoration: BoxDecoration(
-          color: context.surfaceColor, // same as Card background
-          borderRadius: BorderRadius.circular(10),
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withOpacity(0.1), // soft shadow
-              blurRadius: 4,
-              offset: const Offset(0, 2), // subtle elevation
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(13),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12.5,
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: context.colors.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 25),
+            const Spacer(),
             Row(
               children: [
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: color,
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.trending_up, // Or dynamic logic
+                    color: color,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(
-                  width: 5,
-                ),
+                const SizedBox(width: 8),
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 28,
+                  style: GoogleFonts.inter(
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: color,
+                    color: context.onSurfaceColor,
                   ),
                 ),
               ],

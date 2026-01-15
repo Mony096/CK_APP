@@ -49,36 +49,40 @@ class _MainScreenState extends State<MainScreen> {
           child: _screens[_selectedIndex],
         ),
       ),
-      bottomNavigationBar: AdaptiveBottomNavBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-        items: const [
-          AdaptiveNavItem(
-            label: 'Home',
-            icon: Icons.dashboard_outlined,
-            activeIcon: Icons.dashboard,
-          ),
-          AdaptiveNavItem(
-            label: 'Service',
-            icon: Icons.miscellaneous_services_outlined,
-            activeIcon: Icons.miscellaneous_services,
-          ),
-          AdaptiveNavItem(
-            label: 'Equipment',
-            icon: Icons.build_outlined,
-            activeIcon: Icons.build,
-          ),
-          AdaptiveNavItem(
-            label: 'Sync',
-            icon: Icons.sync_outlined,
-            activeIcon: Icons.sync,
-          ),
-          AdaptiveNavItem(
-            label: 'Account',
-            icon: Icons.person_outline,
-            activeIcon: Icons.person,
-          ),
-        ],
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 8, ),
+        child: AdaptiveBottomNavBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+          items: const [
+            AdaptiveNavItem(
+              label: 'Home',
+              icon: Icons.dashboard_outlined,      
+              activeIcon: Icons.dashboard,
+            ),
+            AdaptiveNavItem(
+              label: 'Service',
+              icon: Icons.miscellaneous_services_outlined,
+              activeIcon: Icons.miscellaneous_services,
+            ),
+            AdaptiveNavItem(
+              label: 'Equipment',
+              icon: Icons.build_outlined,
+              activeIcon: Icons.build,
+            ),
+            AdaptiveNavItem(
+              label: 'Sync',
+              icon: Icons.sync_outlined,
+              activeIcon: Icons.sync,
+            ),
+            AdaptiveNavItem(
+              label: 'Account',
+              icon: Icons.person_outline,
+              activeIcon: Icons.person,
+            ),
+          ],
+        ),
       ),
     );
   }

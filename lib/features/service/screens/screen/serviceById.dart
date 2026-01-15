@@ -11,11 +11,14 @@ import 'package:bizd_tech_service/features/service/provider/service_list_provide
 import 'package:bizd_tech_service/features/service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/features/service/screens/component/detail_row.dart';
 import 'package:bizd_tech_service/features/service/screens/component/row_item.dart';
+import 'package:bizd_tech_service/features/service/screens/component/status_stepper.dart';
+import 'package:bizd_tech_service/features/service/screens/component/service_info_card.dart';
 import 'package:bizd_tech_service/features/service/screens/screen/sericeEntry.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -189,47 +192,31 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        // Leading menu icon on the left
+        backgroundColor: const Color(0xFF425364),
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.of(context).pop();
-            // Handle menu button press or keep it empty for default Drawer action
           },
         ),
-        // Centered title
-        title: Center(
-          child: Text('Service Infomation',
-              style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
-              textScaleFactor: 1.0),
+        title: Text(
+          'Service Information',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
-        // Right-aligned actions (scan barcode)
         actions: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  _refreshData();
-                },
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-              ),
-              // SizedBox(width: 3),
-              // IconButton(
-              //   onPressed: () async {
-              //     MaterialDialog.loading(context);
-              //     await Provider.of<AuthProvider>(context, listen: false)
-              //         .logout();
-              //     Navigator.of(context).pop();
-              //     Navigator.of(context).pushAndRemoveUntil(
-              //       MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-              //       (route) => false,
-              //     );
-              //   },
-              //   icon: const Icon(Icons.logout, color: Colors.white),
-              // )
-            ],
+          IconButton(
+            onPressed: () {
+              _refreshData();
+            },
+            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
           ),
         ],
       ),
@@ -240,509 +227,16 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
             height: double.infinity,
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  height: 80,
-                  color: const Color.fromARGB(255, 66, 83, 100),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Accept" ||
-                                      widget.data["U_CK_Status"] == "Travel" ||
-                                      widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(
-                            Icons.check,
-                            size: 20,
-                            color: widget.data["U_CK_Status"] == "Accept" ||
-                                    widget.data["U_CK_Status"] == "Travel" ||
-                                    widget.data["U_CK_Status"] == "Service" ||
-                                    widget.data["U_CK_Status"] == "Entry"
-                                ? Colors.green
-                                : Colors.white,
-                          ))),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Travel" ||
-                                      widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(
-                            Icons.car_crash,
-                            color: widget.data["U_CK_Status"] == "Travel" ||
-                                    widget.data["U_CK_Status"] == "Service" ||
-                                    widget.data["U_CK_Status"] == "Entry"
-                                ? Colors.green
-                                : Colors.white,
-                          ))),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                            child: SvgPicture.asset('images/svg/key.svg',
-                                width: 23,
-                                height: 23,
-                                color: widget.data["U_CK_Status"] ==
-                                            "Service" ||
-                                        widget.data["U_CK_Status"] == "Entry"
-                                    ? Colors.green
-                                    : Colors.white),
-                          )),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(Icons.flag,
-                                  color: widget.data["U_CK_Status"] == "Entry"
-                                      ? Colors.green
-                                      : Colors.white))),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
+                // Status Stepper
+                StatusStepper(status: widget.data["U_CK_Status"] ?? "Open"),
+                
+                const SizedBox(height: 10),
                 Expanded(
-                    child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    border: Border.all(
-                      color: Colors.green, // Border color
-                      width: 1.0, // Border width
-                    ),
-                    borderRadius: BorderRadius.circular(5.0), // Rounded corners
-                  ),
-                  child: ListView(children: [
-                    SizedBox(
-                      // margin: EdgeInsets.only(bottom: 1),
-                      width: double.infinity,
-                      height: 240,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                    flex: 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            height: 45,
-                                            width:
-                                                45, // Ensure the width and height are equal for a perfect circle
-                                            decoration: BoxDecoration(
-                                              color: Colors.green,
-                                              shape: BoxShape
-                                                  .circle, // Makes the container circular
-                                              border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255,
-                                                    79,
-                                                    78,
-                                                    78), // Optional: Add a border if needed
-                                                width: 1.0, // Border width
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: SvgPicture.asset(
-                                                'images/svg/key.svg',
-                                                width: 30,
-                                                height: 30,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                                Expanded(
-                                    flex: 4,
-                                    child: Container(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            4, 10, 4, 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                                widget.data["CustomerName"] ??
-                                                    "N/A", //////aaaaaaaaaaaaa
-                                                style: TextStyle(
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                textScaleFactor: 1.0),
-                                            const SizedBox(
-                                              height: 6,
-                                            ),
-                                            Text(
-                                                ((widget.data["CustomerAddress"]
-                                                                as List?)
-                                                            ?.isNotEmpty ==
-                                                        true)
-                                                    ? (widget
-                                                            .data[
-                                                                "CustomerAddress"]
-                                                            .first["StreetNo"] ??
-                                                        "N/A")
-                                                    : "N/A",
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.032,
-                                                  fontWeight: FontWeight.bold,
-                                                  height: 2,
-                                                ),
-                                                textScaleFactor: 1.0),
-                                          ],
-                                        ))),
-                                Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 10),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "No: ",
-                                                style: TextStyle(
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                textScaleFactor: 1.0,
-                                              ),
-                                              Text(
-                                                "${widget.data["DocNum"]}",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                textScaleFactor: 1.0,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ))
-                              ],
-                            ),
-                          ),
-                          Container(
-                            height: 130,
-                            padding: const EdgeInsets.all(10),
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            width: double.infinity,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 4,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                          flex: 3,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.date_range,
-                                                    size: 19,
-                                                    color: Colors.white,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                      "${showDateOnService(widget.data["U_CK_Date"]?.split("T")[0] ?? "")} ",
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.031),
-                                                      textScaleFactor: 1.0),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  const Icon(
-                                                    Icons.timer,
-                                                    size: 19,
-                                                    color: Colors.white,
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                      "${widget.data["U_CK_Time"] ?? "No Time"} - ${widget.data["U_CK_EndTime"] ?? "No Time"}",
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.031),
-                                                      textScaleFactor: 1.0),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 15,
-                                              ),
-                                              Container(
-                                                margin: const EdgeInsets.only(
-                                                    left: 3),
-                                                width: 100,
-                                                height: 35,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.yellow,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5.0),
-                                                ),
-                                                child: TextButton(
-                                                  onPressed: () {
-                                                    // Define your button's action here
-                                                  },
-                                                  style: TextButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5.0),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                      "${widget.data["U_CK_JobType"] ?? "N/A"}",
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.030),
-                                                      textScaleFactor: 1.0),
-                                                ),
-                                              ),
-                                            ],
-                                          )),
-                                      const SizedBox(
-                                        height: 5,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      const SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          const Icon(
-                                            Icons.person,
-                                            size: 20,
-                                            color: Colors.white,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Flexible(
-                                            child: Text(
-                                              userName ?? "...",
-                                              style: TextStyle(
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.031,
-                                                color: Colors.white,
-                                              ),
-                                              textScaleFactor: 1.0,
-                                              overflow: TextOverflow
-                                                  .ellipsis, // ⬅️ important
-                                              maxLines:
-                                                  1, // ⬅️ keep it one line
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: const Center(
-                          child: Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.green,
-                            size: 35,
-                          ),
-                        )),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-                      child: Row(
-                        children: [
-                          // Left line
-                          Expanded(
-                            child: Divider(
-                              color: Colors.grey[400],
-                              thickness: 1,
-                            ),
-                          ),
-
-                          // Center text
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "${widget.data["CustomerName"] ?? "N/A"}s' Information",
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.034,
-                                // fontWeight: FontWeight.w500,
-                                color: const Color.fromARGB(221, 85, 81, 81),
-                              ),
-                            ),
-                          ),
-
-                          // Right line
-                          Expanded(
-                            child: Divider(
-                              color: Colors.grey[400],
-                              thickness: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(
-                      height: 15,
-                    ),
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                    children: [
+                      ServiceInfoCard(data: widget.data),
+                      const SizedBox(height: 16),
                     DetailRow(
                       title: "Contact:",
                       svg: SvgPicture.asset(
@@ -990,85 +484,71 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                   MediaQuery.of(context).size.width * 0.033),
                           textScaleFactor: 1.0),
                     ),
-                    Container(
-                      color: const Color.fromARGB(255, 255, 255, 255),
-                      height: 70,
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Expanded(flex: 1, child: Container()),
-                          Expanded(
-                            child: widget.data["U_CK_Status"] == "Pending"
-                                ? TextButton(
-                                    onPressed: () {
-                                      _onReject();
-                                    },
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                    ),
-                                    child: Text("Reject",
-                                        style: TextStyle(
-                                            color: const Color.fromARGB(
-                                                255, 255, 255, 255),
-                                            fontSize: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.031),
-                                        textScaleFactor: 1.0),
-                                  )
-                                : Container(),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextButton(
-                              onPressed: () {
-                                onUpdateStatus();
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor:
-                                    widget.data["U_CK_Status"] == "Accept"
-                                        ? Colors.yellow
-                                        : Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                              ),
-                              child: Text(
-                                  widget.data["U_CK_Status"] == "Pending"
-                                      ? "Accept"
-                                      : widget.data["U_CK_Status"] == "Accept"
-                                          ? "Travel"
-                                          : widget.data["U_CK_Status"] ==
-                                                  "Travel"
-                                              ? "Service"
-                                              : "Entry",
-                                  style: TextStyle(
-                                      color: widget.data["U_CK_Status"] ==
-                                              "Accept"
-                                          ? const Color.fromARGB(255, 8, 8, 8)
-                                          : const Color.fromARGB(
-                                              255, 255, 255, 255),
-                                      fontSize:  MediaQuery.of(context).size.width *
-                                              0.031),
-                                  textScaleFactor: 1.0),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    )
-                    /////do somthing
-                  ]),
-                )),
+                  ]
+                ),
+              ),
               ],
-            )),
+            ),
+          ),
+        ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+        child: Row(
+          children: [
+             widget.data["U_CK_Status"] == "Pending"
+                ? Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _onReject();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade600,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text("Reject",
+                          style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+                widget.data["U_CK_Status"] == "Pending" ? const SizedBox(width: 12) : const SizedBox.shrink(),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      onUpdateStatus();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          widget.data["U_CK_Status"] == "Accept"
+                              ? Colors.amber.shade700
+                              : Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                        widget.data["U_CK_Status"] == "Pending"
+                            ? "Accept"
+                            : widget.data["U_CK_Status"] == "Accept"
+                                ? "Start Travel"
+                                : widget.data["U_CK_Status"] == "Travel"
+                                    ? "Start Service"
+                                    : "Enter Service",
+                        style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600)),
+                  ),
+                ),
+          ],
+        ),
       ),
       // bottomNavigationBar: Container(
       //   color: const Color.fromARGB(255, 255, 255, 255),

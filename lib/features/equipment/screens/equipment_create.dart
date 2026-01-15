@@ -474,14 +474,14 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
           centerTitle: true,
-          backgroundColor: Colors.white,
+         backgroundColor: Color.fromARGB(255, 66, 83, 100),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
             onPressed: () {
               if (isEditing) {
                 Provider.of<EquipmentOfflineProvider>(context, listen: false)
