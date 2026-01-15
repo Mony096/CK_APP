@@ -19,6 +19,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 
 class EquipmentListScreen extends StatefulWidget {
@@ -133,6 +134,83 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
     // Show loading popup
   }
 
+  void _scanQrCode(BuildContext context) {
+    final provider = Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Padding(
+          padding: EdgeInsets.only(bottom: 5),
+          child: Row(
+            children: [
+              Icon(
+                Icons.qr_code_scanner,
+                color: Color.fromARGB(255, 33, 46, 57),
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Scan Equipment QR',
+                style: TextStyle(
+                  fontSize: 17,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: MobileScanner(
+            onDetect: (BarcodeCapture capture) {
+              final scannedCode = capture.barcodes.isNotEmpty
+                  ? capture.barcodes.first.rawValue
+                  : null;
+              
+              if (scannedCode == null) return;
+              
+              Navigator.pop(dialogContext); // Close scanner dialog
+              
+              // Search for equipment by code
+              final equipment = provider.equipments.firstWhere(
+                (e) => e['Code'] == scannedCode,
+                orElse: () => null,
+              );
+              
+              if (equipment != null) {
+                goTo(context, EquipmentCreateScreen(data: equipment));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Equipment not found: $scannedCode'),
+                    backgroundColor: Colors.red.shade400,
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: 15,
+                color: Color.fromARGB(255, 65, 66, 67),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<EquipmentOfflineProvider>(
@@ -160,13 +238,28 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
             elevation: 0,
             automaticallyImplyLeading: false,
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              await goTo(context, EquipmentCreateScreen(data: const {}))
-                  .then((_) => _refreshData());
-            },
-            backgroundColor: const Color(0xFF22C55E),
-            child: const Icon(Icons.add, color: Colors.white),
+          floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // QR Scanner FAB
+              FloatingActionButton(
+                heroTag: 'qr_scanner',
+                onPressed: () => _scanQrCode(context),
+                backgroundColor: const Color(0xFF22C55E),
+                child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              // Add Equipment FAB
+              FloatingActionButton(
+                heroTag: 'add_equipment',
+                onPressed: () async {
+                  await goTo(context, EquipmentCreateScreen(data: const {}))
+                      .then((_) => _refreshData());
+                },
+                backgroundColor: const Color(0xFF22C55E),
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
+            ],
           ),
           body: RefreshIndicator(
             onRefresh: () async {
