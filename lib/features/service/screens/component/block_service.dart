@@ -72,7 +72,6 @@
 //                  Divider(height: 1, color: Colors.grey.shade200),
 //                  const SizedBox(height: 8             ),
 
-
 //                 // 🔹 Action Footer
 //                 Row(
 //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -134,7 +133,7 @@
 //     if (status == "Entry") return Colors.purple; // Or a completed color
 //     return Colors.green; // Default for Pending -> Accept
 //   }
-  
+
 //   String _getActionLabel(String status) {
 //      if (status == "Pending") return "Accept";
 //      if (status == "Accept") return "Start Travel";
@@ -274,9 +273,10 @@ class BlockService extends StatelessWidget {
                               Text(
                                 data["CustomerName"] ?? "N/A",
                                 style: TextStyle(
+                                    fontWeight: FontWeight.w600,
                                     fontSize:
                                         MediaQuery.of(context).size.width *
-                                            0.034),
+                                            0.030),
                                 textScaleFactor: 1.0,
                               ),
                               const SizedBox(height: 6),
@@ -286,11 +286,12 @@ class BlockService extends StatelessWidget {
                                         true)
                                     ? (data["CustomerAddress"]
                                             .first["StreetNo"] ??
-                                        "N/A")
-                                    : "N/A",
+                                        "No Address Available")
+                                    : "No Address Available",
                                 style: TextStyle(
+                                  color: Colors.grey,
                                   fontSize:
-                                      MediaQuery.of(context).size.width * 0.033,
+                                      MediaQuery.of(context).size.width * 0.030,
                                   fontWeight: FontWeight.bold,
                                   height: 2,
                                 ),
@@ -326,7 +327,7 @@ class BlockService extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                       fontSize:
                                           MediaQuery.of(context).size.width *
-                                              0.034),
+                                              0.030),
                                   textScaleFactor: 1.0,
                                 ),
                               ],
@@ -616,7 +617,6 @@ class BlockService extends StatelessWidget {
                                       //     textScaleFactor: 1.0),
                                       Row(
                                         children: [
-                     
                                           Text(data["U_CK_CardCode"] ?? "N/A",
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
@@ -624,24 +624,29 @@ class BlockService extends StatelessWidget {
                                                       MediaQuery.of(context)
                                                               .size
                                                               .width *
-                                                          0.033),
+                                                          0.030),
                                               textScaleFactor: 1.0),
 
                                           const Text(" - "),
 
                                           // Name
                                           SizedBox(
-                                            width: 150,
+                                            width: 120,
                                             child: Text(
-                                                data["CustomerName"] ?? "N/A",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                textScaleFactor: 1.0),
+                                              data["CustomerName"] ?? "N/A",
+                                              softWrap: true,
+                                              maxLines:
+                                                  null, // allow multiple lines
+                                              overflow: TextOverflow.ellipsis,
+
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.030,
+                                              ),
+                                              textScaleFactor: 1.0,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -649,7 +654,7 @@ class BlockService extends StatelessWidget {
                                         height: 6,
                                       ),
                                       Text(
-                                        "SN: ${(data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] == "" ? "N/A" : data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] : "N/A"}",
+                                        "SN: ${(data["CK_JOB_EQUIPMENTCollection"] as List?)?.isNotEmpty == true ? data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] == "" ? "No Serial No." : data["CK_JOB_EQUIPMENTCollection"].first["U_CK_SerialNum"] : "No Serial No."}",
                                         style: TextStyle(
                                           fontSize: MediaQuery.of(context)
                                                   .size

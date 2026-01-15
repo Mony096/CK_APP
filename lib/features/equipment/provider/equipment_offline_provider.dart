@@ -41,10 +41,26 @@ class EquipmentOfflineProvider with ChangeNotifier {
   List<File> _imagesList = [];
   String? _filter;
 
+  // Pagination State
+  int _currentPage = 1;
+  final int _pageSize = 10;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  List<dynamic> _allFilteredEquipments = [];
+
   String? get filter => _filter;
   List<dynamic> get components => _components;
   List<dynamic> get parts => _parts;
   List<File> get imagesList => _imagesList;
+
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+  int get totalRecords => _allFilteredEquipments.length;
+  int get currentCount => _equipments.length;
+  int get currentPage => _currentPage;
+  int get totalPages => (_allFilteredEquipments.length / _pageSize).ceil();
+  bool get canNext => _currentPage < totalPages;
+  bool get canPrev => _currentPage > 1;
 
   EquipmentOfflineProvider() {
     _initHive();
@@ -107,52 +123,98 @@ class EquipmentOfflineProvider with ChangeNotifier {
     final box = Hive.box(_boxName);
     try {
       final raw = box.get(_keyEquipments, defaultValue: []);
-      var equipments = (raw as List)
+      var allDocs = (raw as List)
           .whereType<Map>()
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
 
       // Apply filter if provided
       if (_filter != null && _filter!.isNotEmpty) {
-        equipments = equipments.where((equip) {
+        allDocs = allDocs.where((equip) {
           final code = equip["Code"] ?? "";
+          final name = equip["Name"] ?? "";
           try {
-            return code
-                .toString()
-                .toLowerCase()
-                .contains(_filter!.toLowerCase());
+            final query = _filter!.toLowerCase();
+            return code.toString().toLowerCase().contains(query) ||
+                name.toString().toLowerCase().contains(query);
           } catch (e) {
             return false;
           }
         }).toList();
       }
 
-      // Sort by savedAt descending; if missing, order by DocEntry descending
-      equipments.sort((a, b) {
+      // Sort by savedAt descending
+      allDocs.sort((a, b) {
         final aSavedAt = a['savedAt']?.toString();
         final bSavedAt = b['savedAt']?.toString();
 
         if (aSavedAt != null && bSavedAt != null) {
           return bSavedAt.compareTo(aSavedAt);
         } else if (aSavedAt != null) {
-          return -1; // a comes first
+          return -1;
         } else if (bSavedAt != null) {
-          return 1; // b comes first
+          return 1;
         } else {
-          // both savedAt missing, fallback to DocEntry descending
           final aDoc = a['DocEntry'] ?? 0;
           final bDoc = b['DocEntry'] ?? 0;
           return (bDoc as int).compareTo(aDoc as int);
         }
       });
 
-      _equipments = equipments;
+      _allFilteredEquipments = allDocs;
+      _currentPage = 1;
+
+      // Load first page
+      final endIndex = _pageSize < _allFilteredEquipments.length
+          ? _pageSize
+          : _allFilteredEquipments.length;
+
+      _equipments = _allFilteredEquipments.sublist(0, endIndex);
+      _hasMore = _equipments.length < _allFilteredEquipments.length;
     } catch (e) {
       debugPrint("Error loading offline equipments: $e");
       _equipments = [];
+      _allFilteredEquipments = [];
+      _hasMore = false;
     } finally {
       notifyListeners();
     }
+  }
+
+  /// Load items for a specific page
+  void _updateVisibleEquipments() {
+    final int startIndex = (_currentPage - 1) * _pageSize;
+    final int endIndex =
+        (startIndex + _pageSize) < _allFilteredEquipments.length
+            ? (startIndex + _pageSize)
+            : _allFilteredEquipments.length;
+
+    if (startIndex < _allFilteredEquipments.length) {
+      _equipments = _allFilteredEquipments.sublist(startIndex, endIndex);
+    } else {
+      _equipments = [];
+    }
+    _hasMore = _currentPage < totalPages;
+    notifyListeners();
+  }
+
+  void nextPage() {
+    if (canNext) {
+      _currentPage++;
+      _updateVisibleEquipments();
+    }
+  }
+
+  void previousPage() {
+    if (canPrev) {
+      _currentPage--;
+      _updateVisibleEquipments();
+    }
+  }
+
+  /// Load more items for pagination (Keeping this for compatibility if needed, but redesigned)
+  Future<void> loadMore() async {
+    nextPage();
   }
 
   Future<void> saveDocuments(List<dynamic> docs) async {

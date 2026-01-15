@@ -698,8 +698,7 @@ class _DashboardState extends State<Dashboard>
                   Text(
                     "${(progress * 100).toStringAsFixed(0)}%",
                     style: TextStyle(
-                        fontSize: 12,
-                        color: context.colors.onSurfaceVariant),
+                        fontSize: 12, color: context.colors.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -1024,14 +1023,15 @@ class _DashboardState extends State<Dashboard>
                 onTap: _showFilterDialog,
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical:6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: context.colors.primary,
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: Row(
                     children: [
-                     const Icon(Icons.filter_list_rounded,
+                      const Icon(Icons.filter_list_rounded,
                           size: 18, color: Colors.white),
                       const SizedBox(width: 6),
                       Text(
@@ -1047,7 +1047,7 @@ class _DashboardState extends State<Dashboard>
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Vertical Divider
               Container(
                 height: 24,
@@ -1068,12 +1068,11 @@ class _DashboardState extends State<Dashboard>
                         Text(
                           "All Tickets Shown",
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w500,
-                            color: context.colors.onSurfaceVariant,
+                            color: Colors.grey,
                           ),
                         ),
-
                       if (_selectedJob != "All") ...[
                         _buildFilterChip("Job: $_selectedJob", () {
                           setState(() {
@@ -1084,21 +1083,21 @@ class _DashboardState extends State<Dashboard>
                         const SizedBox(width: 8),
                       ],
                       if (_selectedService != "All") ...[
-                         _buildFilterChip("Svc: $_selectedService", () {
-                           setState(() {
-                              _selectedService = "All";
-                           });
-                           _fetchTicketCounts();
-                         }),
+                        _buildFilterChip("Svc: $_selectedService", () {
+                          setState(() {
+                            _selectedService = "All";
+                          });
+                          _fetchTicketCounts();
+                        }),
                         const SizedBox(width: 8),
                       ],
                       if (_selectedPriority != "All") ...[
-                         _buildFilterChip("Pri: $_selectedPriority", () {
-                           setState(() {
-                              _selectedPriority = "All";
-                           });
-                           _fetchTicketCounts();
-                         }),
+                        _buildFilterChip("Pri: $_selectedPriority", () {
+                          setState(() {
+                            _selectedPriority = "All";
+                          });
+                          _fetchTicketCounts();
+                        }),
                         const SizedBox(width: 8),
                       ],
                     ],
@@ -1111,114 +1110,110 @@ class _DashboardState extends State<Dashboard>
 
         // 🔹 Ticket list
         load == true
-            ? Expanded(
+            ? SizedBox(
+                height: 450,
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SpinKitFadingCircle(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
                         color: context.colors.primary,
-                        size: 40.0,
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "Loading tickets...",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: context.colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Loading...",
+                      style: TextStyle(fontSize: 17),
+                    ),
+                  ],
+                )),
               )
             : Expanded(
+                // <<< Fix: constrain ListView inside Column
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
+                  padding: const EdgeInsets.all(12),
                   itemCount: ticketGroups.length,
                   itemBuilder: (context, index) {
                     final group = ticketGroups[index];
                     final tickets = group["tickets"] as List;
-                    final isToday = index == 0;
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 13),
+                      margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(7),
                         border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outlineVariant
-                              .withOpacity(0.5),
+                          color: const Color.fromARGB(255, 233, 233, 235),
+                          width: 1,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 5,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Theme.of(context)
+                        //         .colorScheme
+                        //         .onSurface
+                        //         .withOpacity(0.08),
+                        //     blurRadius: 4,
+                        //     offset: const Offset(0, 2),
+                        //   ),
+                        // ],
                       ),
                       child: Theme(
                         data: Theme.of(context)
                             .copyWith(dividerColor: Colors.transparent),
                         child: ExpansionTile(
-                          iconColor: context.colors.primary,
-                          collapsedIconColor: context.colors.onSurfaceVariant,
-                          tilePadding: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 8),
-                          leading: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: isToday
-                                  ? context.colors.primaryContainer
-                                  : context.colors.surfaceContainerHighest,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.calendar_today_rounded,
-                              size: 20,
-                              color: isToday
-                                  ? context.colors.onPrimaryContainer
-                                  : context.colors.onSurfaceVariant,
-                            ),
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.3),
+                            child: Icon(Icons.date_range,
+                                color: context.colors.onPrimaryContainer),
                           ),
                           title: Row(
                             children: [
                               Text(
                                 group["date"],
-                                style: GoogleFonts.inter(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.onSurfaceColor,
+                                style: TextStyle(
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.035,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (group["isLoadingCount"] == true) ...[
-                                const SizedBox(width: 12),
-                                SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: context.colors.primary,
-                                  ),
-                                )
-                              ]
+                              const SizedBox(width: 15),
+                              group["isLoadingCount"] == true
+                                  ? CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: context.colors.primary,
+                                    )
+                                  : Container()
                             ],
                           ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(
-                              "${group["count"]} Tickets",
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
+                          subtitle: Text(
+                            "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
+                            style: TextStyle(
                                 color: Colors.grey,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.031),
                           ),
+                          // ✅ custom right icon
+                          // ✅ custom rotating arrow
+                          // trailing: AnimatedRotation(
+                          //   turns: _isExpanded
+                          //       ? 0.5
+                          //       : 0.0, // 0.5 = 180°, 0.25 = 90°
+                          //   duration: const Duration(milliseconds: 200),
+                          //   child: const Icon(
+                          //     Icons.keyboard_arrow_down,
+                          //     color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          //   ),
+                          // ),
+
                           onExpansionChanged: (expanded) async {
                             setState(() {
                               _isExpanded = expanded;
@@ -1226,9 +1221,9 @@ class _DashboardState extends State<Dashboard>
                             if (expanded && tickets.isEmpty) {
                               setState(() {
                                 group["tickets"] = ["loading"];
+                                _isExpanded = expanded;
+                                print(expanded);
                               });
-                              // Check standard or offline? 
-                              // Current implementation calls _fetchTicketsFromOffline
                               final fetchedTickets =
                                   await _fetchTicketsFromOffline(
                                       group["dateValue"]);
@@ -1237,49 +1232,55 @@ class _DashboardState extends State<Dashboard>
                               });
                             }
                           },
-                          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                          childrenPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
                           children: tickets.isEmpty
                               ? [
                                   Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          Icon(Icons.inbox_rounded,
-                                              size: 30,
-                                              color: context.colors.outline),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            "No tickets available",
-                                            style: GoogleFonts.inter(
-                                              color:Colors.grey,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                      "No tickets available!",
+                                      style: TextStyle(
+                                          color:
+                                              context.colors.onSurfaceVariant,
+                                          fontSize: 13),
                                     ),
                                   )
                                 ]
                               : tickets[0] == "loading"
                                   ? [
-                                      Padding(
-                                        padding: const EdgeInsets.all(24.0),
-                                        child: Center(
-                                          child: SpinKitThreeBounce(
-                                            color: context.colors.primary,
-                                            size: 20.0,
+                                      Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8),
+                                            child: Center(
+                                                child: SizedBox(
+                                                    width: 21,
+                                                    height: 21,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: context
+                                                          .colors.primary,
+                                                    ))),
                                           ),
-                                        ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            "Loading ${group["date"]}' Ticket...",
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: context
+                                                    .colors.onSurfaceVariant),
+                                          ),
+                                          const SizedBox(height: 10),
+                                        ],
                                       )
                                     ]
                                   : tickets.asMap().entries.map((entry) {
                                       final index = entry.key;
                                       final ticket = entry.value;
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                                        child: _cardTicket(ticket, index),
-                                      );
+
+                                      return _cardTicket(ticket, index);
                                     }).toList(),
                         ),
                       ),
@@ -1315,18 +1316,17 @@ class _DashboardState extends State<Dashboard>
                 color: context.colors.onSecondaryContainer,
               ),
             ),
-             const SizedBox(width: 6),
-             Icon(
-               Icons.close,
-               size: 14,
-               color: context.colors.onSecondaryContainer.withOpacity(0.7),
-             )
+            const SizedBox(width: 6),
+            Icon(
+              Icons.close,
+              size: 14,
+              color: context.colors.onSecondaryContainer.withOpacity(0.7),
+            )
           ],
         ),
       ),
     );
   }
-
 
   /// KPI Tab
   Widget _kpiTab() {
@@ -1338,7 +1338,8 @@ class _DashboardState extends State<Dashboard>
             children: [
               _kpiCard("Monthly Closed Tickets", "0", context.colors.error),
               const SizedBox(width: 12),
-              _kpiCard("Yearly In-Service Rate", "100%", context.colors.primary),
+              _kpiCard(
+                  "Yearly In-Service Rate", "100%", context.colors.primary),
             ],
           ),
           const SizedBox(height: 20),
@@ -1409,9 +1410,10 @@ class _DashboardState extends State<Dashboard>
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ServiceByIdScreen(data: data as Map<String, dynamic>),
+                builder: (context) =>
+                    ServiceByIdScreen(data: data as Map<String, dynamic>),
               ),
-            ).then((value)=>_fetchTicketCounts());
+            ).then((value) => _fetchTicketCounts());
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -1524,9 +1526,10 @@ class _DashboardState extends State<Dashboard>
                 ),
 
                 const SizedBox(height: 16),
-                Divider(height: 1, color: context.colors.outlineVariant.withOpacity(0.5)),
+                Divider(
+                    height: 1,
+                    color: context.colors.outlineVariant.withOpacity(0.5)),
                 const SizedBox(height: 12),
-
 
                 // Footer: Job Type, Service Type, Priority
                 Wrap(
@@ -1541,7 +1544,8 @@ class _DashboardState extends State<Dashboard>
                     _buildTag(
                       label: data["U_CK_ServiceType"] ?? "Service",
                       color: context.colors.tertiary,
-                      bgColor: context.colors.tertiaryContainer.withOpacity(0.4),
+                      bgColor:
+                          context.colors.tertiaryContainer.withOpacity(0.4),
                     ),
                     if (data["U_CK_Priority"] != null)
                       _buildTag(
@@ -1595,7 +1599,6 @@ class _DashboardState extends State<Dashboard>
       ),
     );
   }
-
 
   Widget _kpiCard(String title, String value, Color color) {
     return Expanded(
@@ -1656,7 +1659,7 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
- Widget _listCard(String title, List<String> items) {
+  Widget _listCard(String title, List<String> items) {
     return Container(
       height: 150,
       width: MediaQuery.of(context).size.width,
@@ -1684,8 +1687,7 @@ class _DashboardState extends State<Dashboard>
             Text(
               "No data available",
               style: TextStyle(
-                color: context.colors.onSurfaceVariant,
-                fontSize: 14),
+                  color: context.colors.onSurfaceVariant, fontSize: 14),
             )
           else
             Column(
@@ -1703,8 +1705,6 @@ class _DashboardState extends State<Dashboard>
     );
   }
 }
-
-
 
 class CustomTabIndicator extends Decoration {
   final double indicatorWidth;

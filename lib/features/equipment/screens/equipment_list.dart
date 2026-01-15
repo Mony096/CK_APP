@@ -44,18 +44,6 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) => _init());
-
-    // _scrollController.addListener(() {
-    //   final provider =
-    //       Provider.of<EquipmentListProvider>(context, listen: false);
-    //   if (_scrollController.position.pixels >=
-    //           _scrollController.position.maxScrollExtent - 200 &&
-    //       provider.hasMore &&
-    //       !provider.isLoading) {
-    //     provider.fetchDocuments(loadMore: true);
-    //   }
-    // });
   }
 
   // Future<void> _init() async {
@@ -179,7 +167,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                 (e) => e['Code'] == scannedCode,
                 orElse: () => null,
               );
-              print( provider.equipments);
+              print(provider.equipments);
               if (equipment != null) {
                 goTo(context, EquipmentCreateScreen(data: equipment));
               } else {
@@ -235,33 +223,29 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               ),
             ),
             centerTitle: true,
-             backgroundColor: Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: Color.fromARGB(255, 66, 83, 100),
             elevation: 0,
             automaticallyImplyLeading: false,
-          ),
-          floatingActionButton: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // QR Scanner FAB
-              FloatingActionButton(
-                heroTag: 'qr_scanner',
+            actions: [
+              IconButton(
                 onPressed: () => _scanQrCode(context),
-                backgroundColor: const Color(0xFF22C55E),
-                child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                icon: const Icon(Icons.qr_code_scanner,
+                    color: Colors.white, size: 22),
+                tooltip: 'Scan QR',
               ),
-              const SizedBox(height: 12),
-              // Add Equipment FAB
-              FloatingActionButton(
-                heroTag: 'add_equipment',
+              IconButton(
                 onPressed: () async {
                   await goTo(context, EquipmentCreateScreen(data: const {}))
                       .then((_) => _refreshData());
                 },
-                backgroundColor: const Color(0xFF22C55E),
-                child: const Icon(Icons.add, color: Colors.white),
+                icon: const Icon(Icons.add_rounded,
+                    color: Colors.white, size: 26),
+                tooltip: 'Add Equipment',
               ),
+              const SizedBox(width: 8),
             ],
           ),
+          floatingActionButton: null,
           body: RefreshIndicator(
             onRefresh: () async {
               await _refreshData();
@@ -272,332 +256,384 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               children: [
                 // Search Bar Section
                 Container(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    border: Border(
-                      bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 2,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
                   ),
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextField(
-                      controller: filter,
-                      style:
-                          const TextStyle(fontSize: 14, color: Colors.black87),
-                      textInputAction: TextInputAction.search,
-                      decoration: InputDecoration(
-                        hintText: "Search equipment...",
-                        hintStyle: GoogleFonts.inter(
-                          color: Colors.grey.shade400,
-                          fontSize: 14,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: TextField(
+                            controller: filter,
+                            style: GoogleFonts.inter(
+                                fontSize: 14, color: const Color(0xFF1E293B)),
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              hintText: "Search by name or code...",
+                              hintStyle: GoogleFonts.inter(
+                                color: Colors.grey.shade500,
+                                fontSize: 13,
+                              ),
+                              prefixIcon: Icon(Icons.search_rounded,
+                                  color: Colors.grey.shade400, size: 22),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 16),
+                              border: InputBorder.none,
+                            ),
+                            onSubmitted: (_) {
+                              provider.setFilter(filter.text);
+                              provider.loadEquipments();
+                            },
+                          ),
                         ),
-                        prefixIcon: Icon(Icons.search,
-                            color: Colors.grey.shade400, size: 20),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios,
-                              color: Color(0xFF22C55E), size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF425364),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF425364).withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
                           onPressed: () {
                             provider.setFilter(filter.text);
                             provider.loadEquipments();
                             FocusScope.of(context).unfocus();
                           },
+                          icon: const Icon(Icons.tune_rounded,
+                              color: Colors.white, size: 20),
+                          tooltip: 'Apply Filter',
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0, horizontal: 12),
-                        border: InputBorder.none,
                       ),
-                      onSubmitted: (_) {
-                        provider.setFilter(filter.text);
-                        provider.loadEquipments();
-                      },
-                    ),
+                    ],
                   ),
                 ),
+                if (documents.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Showing ${deliveryProvider.currentCount} of ${deliveryProvider.totalRecords} items",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        if (deliveryProvider.isLoadingMore)
+                          Text(
+                            "Loading...",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF22C55E),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 // CONTENT
                 Expanded(
                   child: loading
-                      ? const Padding(
-                          padding: EdgeInsets.only(bottom: 100),
-                          child: Center(
-                            child: SpinKitFadingCircle(
-                              color: Colors.green,
-                              size: 50.0,
-                            ),
+                      ? const Center(
+                          child: SpinKitFadingCircle(
+                            color: Color(0xFF22C55E),
+                            size: 40.0,
                           ),
                         )
                       : documents.isEmpty
                           ? ListView(
-                              children: const [
-                                SizedBox(height: 200),
+                              children: [
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.2),
                                 Center(
-                                  child: Text(
-                                    "No Equipment",
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.grey),
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.inventory_2_outlined,
+                                          size: 64,
+                                          color: Colors.grey.shade300),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        "No Equipment Found",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey.shade400,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             )
-                          : Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: ListView.builder(
-                                controller: _scrollController,
-                                padding: const EdgeInsets.only(top: 5),
-                                itemCount: documents.length,
-                                // documents.length + (isLoadingMore ? 1 : 0),
-                                itemBuilder: (context, index) {
-                                  // if (index == documents.length &&
-                                  //     isLoadingMore) {
-                                  //   return const Padding(
-                                  //     padding: EdgeInsets.symmetric(vertical: 16),
-                                  //     child: SizedBox(
-                                  //       height: 40,
-                                  //       child: Align(
-                                  //         alignment: Alignment.center,
-                                  //         child: SpinKitFadingCircle(
-                                  //           color: Colors.green,
-                                  //           size: 50.0,
-                                  //         ),
-                                  //       ),
-                                  //     ),
-                                  //   );
-                                  // }
-
-                                  final item = documents[index];
-
-                                  return GestureDetector(
-                                    onTap: () {
-                                      onDetail(item, index);
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          10, 6.5, 10, 10),
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 2, horizontal: 5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: const Color.fromARGB(
-                                              255, 239, 239, 240),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          // Circle icon
-                                          Container(
-                                            height: 45,
-                                            width: 45,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255, 39, 204, 39),
-                                                width: 1.0,
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: SvgPicture.asset(
-                                                'images/svg/key.svg',
-                                                width: 20,
-                                                height: 20,
-                                                color: const Color.fromARGB(
-                                                    255, 39, 204, 39),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-
-                                          // Info section
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        // Code
-                                                        // SizedBox(
-                                                        //   width: 90,
-                                                        //   child: Text(
-                                                        //     item["Code"] ?? "N/A",
-                                                        //     overflow: TextOverflow
-                                                        //         .ellipsis,
-                                                        //     style:
-                                                        //         const TextStyle(
-                                                        //       fontWeight:
-                                                        //           FontWeight.bold,
-                                                        //       fontSize: 11,
-                                                        //     ),
-                                                        //   ),
-                                                        // ),
-                                                        Text(
-                                                          item["Code"] ?? "N/A",
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 11,
-                                                          ),
-                                                        ),
-
-                                                        const Text(" - "),
-
-                                                        // Name
-                                                        SizedBox(
-                                                          width: 90,
-                                                          child: Text(
-                                                            item["Name"] ??
-                                                                "N/A",
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style:
-                                                                const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 11,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const Icon(
-                                                      Icons
-                                                          .keyboard_arrow_right,
-                                                      size: 25,
-                                                      color: Color.fromARGB(
-                                                          255, 135, 137, 138),
-                                                    ),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 104,
-                                                      child: Text(
-                                                          textScaleFactor: 1.0,
-                                                          "Serial Number",
-                                                          style: TextStyle(
-                                                              fontSize: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.031)),
-                                                    ),
-                                                    Text(
-                                                        textScaleFactor: 1.0,
-                                                        ": ${item["U_ck_eqSerNum"] ?? "N/A"}",
-                                                        style: TextStyle(
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.031)),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        SizedBox(
-                                                          width: 104,
-                                                          child: Text(
-                                                              textScaleFactor:
-                                                                  1.0,
-                                                              "Customer Name",
-                                                              style: TextStyle(
-                                                                  fontSize: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.031)),
-                                                        ),
-                                                        // Text(
-                                                        //     textScaleFactor: 1.0,
-                                                        //     ": ${item["U_ck_CusName"] ?? "N/A"}",
-                                                        //     style: TextStyle(
-                                                        //         color:
-                                                        //             Colors.green,
-                                                        //         fontSize: MediaQuery.of(
-                                                        //                     context)
-                                                        //                 .size
-                                                        //                 .width *
-                                                        //             0.031)),
-                                                        SizedBox(
-                                                          width: 120,
-                                                          child: Text(
-                                                            item["U_ck_CusName"] ??
-                                                                "N/A",
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style:
-                                                                const TextStyle(
-                                                              color:
-                                                                  Colors.green,
-                                                              fontSize: 11,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Text("No : ${index + 1}",
-                                                        style: TextStyle(
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.031)),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                          : ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.fromLTRB(5, 8, 5, 20),
+                              itemCount: documents.length,
+                              itemBuilder: (context, index) {
+                                final item = documents[index];
+                                return _buildEquipmentCard(item, index);
+                              },
                             ),
                 ),
+                // Pagination Footer
+                if (documents.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Previous Button
+                        Opacity(
+                          opacity: deliveryProvider.canPrev ? 1.0 : 0.3,
+                          child: InkWell(
+                            onTap: deliveryProvider.canPrev
+                                ? () => deliveryProvider.previousPage()
+                                : null,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 18,
+                                  color: Color(0xFF425364)),
+                            ),
+                          ),
+                        ),
+                        // Page Info
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages}",
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Total ${deliveryProvider.totalRecords} records",
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Next Button
+                        Opacity(
+                          opacity: deliveryProvider.canNext ? 1.0 : 0.3,
+                          child: InkWell(
+                            onTap: deliveryProvider.canNext
+                                ? () => deliveryProvider.nextPage()
+                                : null,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF22C55E).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.arrow_forward_ios_rounded,
+                                  size: 18, color: Color(0xFF22C55E)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEquipmentCard(dynamic item, int index) {
+    return GestureDetector(
+      onTap: () => onDetail(item, index),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 0),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: Colors.grey.shade100),
+        ),
+        child: Row(
+          children: [
+            // Circular key icon - User's specifically requested aesthetic
+            Container(
+              height: 46,
+              width: 46,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF22C55E).withAlpha(25),
+                border: Border.all(
+                  color: const Color(0xFF22C55E),
+                  width: 1.5,
+                ),
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  'images/svg/key.svg',
+                  width: 22,
+                  height: 22,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF22C55E),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Info content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item["Name"] ?? "Unknown Equipment",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1E293B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.keyboard_arrow_right_rounded,
+                        size: 20,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        item["Code"] ?? "N/A",
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
+                        height: 3,
+                        width: 3,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFCBD5E1),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          "S/N: ${item["U_ck_eqSerNum"] ?? "N/A"}",
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.person_pin_rounded,
+                        size: 13,
+                        color: Color(0xFF22C55E),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          item["U_ck_CusName"] ?? "No Customer Assigned",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF15803D),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        "#${index + 1}",
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -15,6 +15,7 @@ import 'package:bizd_tech_service/core/network/dio_client.dart';
 import 'package:bizd_tech_service/core/core.dart';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -458,7 +459,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.data.isNotEmpty;
-    
+
     return WillPopScope(
       onWillPop: () async {
         final provider =
@@ -478,10 +479,11 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             ),
           ),
           centerTitle: true,
-         backgroundColor: Color.fromARGB(255, 66, 83, 100),
+          backgroundColor: Color.fromARGB(255, 66, 83, 100),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+            icon:
+                const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
             onPressed: () {
               if (isEditing) {
                 Provider.of<EquipmentOfflineProvider>(context, listen: false)
@@ -510,22 +512,19 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
         ),
         body: Column(
           children: [
-            // Tab Bar
+            // Premium Tab Bar
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
-                ),
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  _buildTabButton("General", 0),
-                  const SizedBox(width: 8),
-                  _buildTabButton("Component", 1),
-                  const SizedBox(width: 8),
-                  _buildTabButton("Part", 2),
+                  _buildTabButton('General', 0),
+                  _buildTabButton('Component', 1),
+                  _buildTabButton('Part', 2),
                 ],
               ),
             ),
@@ -623,19 +622,30 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     return Expanded(
       child: GestureDetector(
         onTap: () => _onTabTapped(index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF22C55E) : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8),
+            color: isSelected ? Colors.green : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : [],
           ),
           child: Center(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : Colors.grey.shade600,
+              style: GoogleFonts.inter(
+                color:
+                    isSelected ? const Color.fromARGB(255, 255, 255, 255) : Colors.grey.shade500,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ),

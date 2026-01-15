@@ -147,100 +147,8 @@
 // //     );
 // //   }
 // // }
-// import 'package:bizd_tech_service/features/service/screens/component/row_item.dart';
-// import 'package:flutter/material.dart';
-
-// class DetailRow extends StatelessWidget {
-//   const DetailRow({
-//     super.key,
-//     required this.title,
-//     required this.rows,
-//     required this.svg,
-//   });
-
-//   final String title;
-//   final List<RowItem> rows;
-//   final Widget svg;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-//       child: Row(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Expanded(
-//               flex: 1,
-//               child: Padding(
-//                 padding: const EdgeInsets.only(right: 4),
-//                 child: svg,
-//               )),
-//           Expanded(
-//             flex: 7,
-//             child: Padding(
-//               padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     title,
-//                     style: const TextStyle(
-//                         fontWeight: FontWeight.bold, fontSize: 13.5),
-//                     textScaleFactor: 1.0,
-//                   ),
-//                   ...rows.map((row) => Padding(
-//                         padding: const EdgeInsets.only(top: 10),
-//                         child: Row(
-//                           children: [
-//                             Expanded(
-//                               flex: 3,
-//                               child: Text(
-//                                 row.left,
-//                                 textScaleFactor: 1.0,
-//                                 style: const TextStyle(
-//                                   fontSize: 12.5,
-//                                   height: 1.5, // Added line height
-//                                 ),
-//                               ),
-//                             ),
-//                             Expanded(
-//                               flex: 3,
-//                               child: row.right != null
-//                                   ? Padding(
-//                                       padding: const EdgeInsets.fromLTRB(
-//                                           25, 0, 5, 0),
-//                                       child: row.isRightIcon
-//                                           ? Align(
-//                                               alignment: Alignment.centerRight,
-//                                               child: row.right,
-//                                             )
-//                                           : Text(
-//                                               row.right.toString(),
-//                                               textAlign: TextAlign.right,
-//                                               textScaleFactor: 1.0,
-//                                               style: const TextStyle(
-//                                                 fontSize: 12.5,
-//                                                 height:
-//                                                     1.5, // Added line height
-//                                               ),
-//                                             ),
-//                                     )
-//                                   : Container(),
-//                             ),
-//                           ],
-//                         ),
-//                       ))
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+import 'package:bizd_tech_service/features/service/screens/component/row_item.dart';
 import 'package:flutter/material.dart';
-import 'row_item.dart';
 
 class DetailRow extends StatelessWidget {
   const DetailRow({
@@ -261,14 +169,14 @@ class DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left icon (keeps its natural size)
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: svg,
-          ),
-
-          // Main content
           Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: svg,
+              )),
+          Expanded(
+            flex: 7,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
               child: Column(
@@ -276,53 +184,49 @@ class DetailRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize:  MediaQuery.of(context).size.width * 0.032,
-                    ),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13.5),
                     textScaleFactor: 1.0,
                   ),
-
-                  // Generate rows
                   ...rows.map((row) => Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Left text takes only needed space
-                            Flexible(
-                              fit: FlexFit.loose,
+                            Expanded(
+                              flex: 3,
                               child: Text(
                                 row.left,
                                 textScaleFactor: 1.0,
-                                style: TextStyle(
-                                  fontSize:  MediaQuery.of(context).size.width * 0.031,
-                                  height: 1.5,
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  height: 1.5, // Added line height
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-
-                            // Right widget or text
-                            if (row.right != null)
-                              row.isRightIcon
-                                  ? row.right
-                                  : Flexible(
-                                      fit: FlexFit.loose,
-                                      child: Text(
-                                        row.right.toString(),
-                                        textAlign: TextAlign.right,
-                                        textScaleFactor: 1.0,
-                                        style: TextStyle(
-                                          fontSize:  MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.031,
-                                          height: 1.5,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
+                            Expanded(
+                              flex: 3,
+                              child: row.right != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          25, 0, 5, 0),
+                                      child: row.isRightIcon
+                                          ? Align(
+                                              alignment: Alignment.centerRight,
+                                              child: row.right,
+                                            )
+                                          : Text(
+                                              row.right.toString(),
+                                              textAlign: TextAlign.right,
+                                              textScaleFactor: 1.0,
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                height:
+                                                    1.5, // Added line height
+                                              ),
+                                            ),
+                                    )
+                                  : Container(),
+                            ),
                           ],
                         ),
                       ))

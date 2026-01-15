@@ -2,10 +2,10 @@ import 'package:bizd_tech_service/core/widgets/text_field_dialog.dart';
 import 'package:bizd_tech_service/core/widgets/title_break.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/features/equipment/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/features/equipment/screens/select/itemMasterPage.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -160,7 +160,8 @@ class _PartState extends State<Part> {
                         child: Text(
                           "Cancel",
                           style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.036,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.036,
                               color: Color.fromARGB(255, 66, 83, 100)),
                         ),
                       ),
@@ -173,9 +174,9 @@ class _PartState extends State<Part> {
                             //   onConfirm();
                             // }
                             if (code.text.isEmpty ||
-                                name.text.isEmpty ||
-                                // part.text.isEmpty ||
-                                brand.text.isEmpty
+                                    name.text.isEmpty ||
+                                    // part.text.isEmpty ||
+                                    brand.text.isEmpty
                                 //  ||  model.text.isEmpty
                                 ) {
                               codeFieldNotifier.value = {
@@ -227,7 +228,8 @@ class _PartState extends State<Part> {
                             child: Text(
                               isEditPart >= 0 ? "Edit" : "Add",
                               style: TextStyle(
-                                fontSize: MediaQuery.of(context).size.width * 0.036,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.036,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -573,8 +575,10 @@ class _PartState extends State<Part> {
                         child: Text(
                           // 'Add Component',
                           "Add Part",
-                          style: TextStyle(color: Colors.white,fontSize: MediaQuery.of(context).size.width *
-                                                0.034),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.034),
                         ),
                       ),
                     )
@@ -598,11 +602,11 @@ class _PartState extends State<Part> {
                             'images/svg/kjav3.svg',
                             width: 25,
                           ),
-                           Text(
+                          Text(
                             "No Part",
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width *
-                                                0.034,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.034,
                               // fontWeight: FontWeight.w500,
                               color: Color.fromARGB(221, 168, 168, 171),
                             ),
@@ -619,12 +623,8 @@ class _PartState extends State<Part> {
                   .map((entry) {
                 final index = entry.key;
                 final item = entry.value;
-                // if (itemKeys.length < componentList.length) {
-                //   itemKeys.add(GlobalKey());
-                // }
 
                 return GestureDetector(
-                  // key: itemKeys[index],
                   onTap: () {
                     if (widget.data.isEmpty) {
                       onEditPart(item, index);
@@ -633,133 +633,125 @@ class _PartState extends State<Part> {
                     }
                   },
                   child: Container(
-                    margin: const EdgeInsets.fromLTRB(10, 0, 10, 13),
-                    padding: const EdgeInsets.fromLTRB(0, 6.5, 10, 10),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      border: const Border(
-                        left: BorderSide(
-                          color: Color.fromARGB(255, 66, 83, 100),
-                          width: 8,
-                        ),
-                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color.fromARGB(255, 133, 136, 138)
-                              .withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: const Offset(1, 1),
-                        )
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade200, width: 1),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(width: 5),
-                        Expanded(
-                          flex: 6,
-                          child: Column(
+                        // Card Header
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // 🔹 Header row
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.settings,
-                                          size: 19,
-                                          color: Color.fromARGB(
-                                              255, 188, 189, 190)),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        "Parts Created - No. ${index + 1}",
-                                        style: const TextStyle(
-                                            fontSize: 13, color: Colors.grey),
-                                        textScaleFactor: 1.0,
-                                      ),
-                                    ],
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF425364)
+                                          .withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.extension_rounded,
+                                      size: 14,
+                                      color: Color(0xFF425364),
+                                    ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 1),
-                                    child: SvgPicture.asset(
-                                      'images/svg/check-cycle.svg',
-                                      width: 20,
-                                      height: 20,
-                                      color: Colors.green,
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "Part ${index + 1}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF425364),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
-
-                              // 🔹 Item Code & Model row
-                              Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        "${item["U_ck_ItemCode"]} - ${item["U_ck_ItemName"]}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textScaleFactor: 1.0,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                     Expanded(
-                                      child: Text(
-                                        "Model : ${((item["U_ck_model"] ?? "").toString().trim().isEmpty) ? "N/A" : item["U_ck_model"]}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.right,
-                                        textScaleFactor: 1.0,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-                                  ],
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                              ),
-                              const SizedBox(height: 7.5),
-
-                              // 🔹 Brand & Part row
-                              Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        "Brand: ${item["U_ck_brand"]}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textScaleFactor: 1.0,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                  Expanded(
-                                      child: Text(
-                                        "Part : ${((item["U_ck_PartNum"] ?? "").toString().trim().isEmpty) ? "N/A" : item["U_ck_PartNum"]}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.right,
-                                        textScaleFactor: 1.0,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    ),
-
-                                  ],
+                                child: Text(
+                                  "INSTALL",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.blue.shade700,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 5),
+
+                        // Card Body
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${item["U_ck_ItemName"] ?? "Unknown Part"}",
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1E293B),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Code: ${item["U_ck_ItemCode"]}",
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Info Row
+                              Row(
+                                children: [
+                                  _buildMiniInfo(
+                                      Icons.branding_watermark_outlined,
+                                      "Brand",
+                                      item["U_ck_brand"]),
+                                  const SizedBox(width: 24),
+                                  _buildMiniInfo(
+                                      Icons.settings_input_component_rounded,
+                                      "Part#",
+                                      item["U_ck_PartNum"]),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -769,6 +761,37 @@ class _PartState extends State<Part> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMiniInfo(IconData icon, String label, String? value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 12, color: Colors.grey.shade400),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value?.isNotEmpty == true ? value! : "N/A",
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF334155),
+          ),
+        ),
+      ],
     );
   }
 
