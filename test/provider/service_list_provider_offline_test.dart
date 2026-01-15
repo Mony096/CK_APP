@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
 
 void main() {
   group('ServiceListProviderOffline Tests', () {

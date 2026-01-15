@@ -1,73 +1,33 @@
-import 'dart:typed_data';
-
 import 'package:bizd_tech_service/core/app_initializer.dart';
 import 'package:bizd_tech_service/core/config/environment.dart';
 import 'package:bizd_tech_service/core/theme/app_theme.dart';
-import 'package:bizd_tech_service/provider/auth_provider.dart';
-import 'package:bizd_tech_service/provider/completed_service_provider.dart';
-import 'package:bizd_tech_service/provider/customer_list_provider.dart';
-import 'package:bizd_tech_service/provider/customer_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/provider/equipment_create_provider.dart';
-import 'package:bizd_tech_service/provider/equipment_list_provider.dart';
-import 'package:bizd_tech_service/provider/helper_provider.dart';
-import 'package:bizd_tech_service/provider/item_list_provider.dart';
-import 'package:bizd_tech_service/provider/item_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/service_list_provider.dart';
-import 'package:bizd_tech_service/provider/service_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/service_provider.dart';
-import 'package:bizd_tech_service/provider/site_list_provider.dart';
-import 'package:bizd_tech_service/provider/site_list_provider_offline.dart';
-import 'package:bizd_tech_service/provider/update_status_provider.dart';
-import 'package:bizd_tech_service/wrapper_screen.dart';
+import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
+import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/features/customer/provider/customer_list_provider.dart';
+import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
+import 'package:bizd_tech_service/features/equipment/provider/equipment_create_provider.dart';
+import 'package:bizd_tech_service/features/equipment/provider/equipment_list_provider.dart';
+import 'package:bizd_tech_service/core/providers/helper_provider.dart';
+import 'package:bizd_tech_service/features/item/provider/item_list_provider.dart';
+import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/service_provider.dart';
+import 'package:bizd_tech_service/features/site/provider/site_list_provider.dart';
+import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/update_status_provider.dart';
+import 'package:bizd_tech_service/features/main/screens/wrapper_screen.dart';
+import 'package:bizd_tech_service/services/notification_service.dart';
 import 'package:flutter/material.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
-import 'package:vibration/vibration.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-@pragma("vm:entry-point")
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  _showIncomingCallNotification();
-  _startVibrationLoop();
-}
-
-@pragma('vm:entry-point')
-Future<void> _onActionReceivedMethod(ReceivedAction action) async {
-  if (action.buttonKeyPressed == 'ACCEPT') {
-    final context = navigatorKey.currentContext!;
-    Provider.of<AuthProvider>(context, listen: false).checkSession();
-
-    navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const WrapperScreen()),
-      (route) => false,
-    );
-    Vibration.cancel();
-  } else {
-    debugPrint("❌ User ignored the call");
-    Vibration.cancel();
-  }
-}
 
 void main() async {
   // Initialize all app dependencies
   await AppInitializer.init(environment: Environment.dev);
   
-  // Set up Firebase messaging handlers
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  
-  AwesomeNotifications().setListeners(
-    onActionReceivedMethod: _onActionReceivedMethod,
-  );
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    _showIncomingCallNotification();
-    _startVibrationLoop();
-  });
+  // Initialize Notification Service
+  await NotificationService.initialize();
 
   // Run the app with all providers
   runApp(MultiProvider(
@@ -93,50 +53,13 @@ void main() async {
   ));
 }
 
-void _showIncomingCallNotification() async {
-  await AwesomeNotifications().createNotification(
-    content: NotificationContent(
-      id: 1,
-      channelKey: 'call_channel',
-      title: '🛠️ Technicon Service Alert',
-      body: 'A new Service has been assigned to you. Open now!',
-      fullScreenIntent: false,
-      autoDismissible: true,
-      locked: true,
-      notificationLayout: NotificationLayout.Default,
-    ),
-    actionButtons: [
-      NotificationActionButton(
-        key: 'ACCEPT',
-        label: 'Open App',
-        actionType: ActionType.Default,
-      ),
-      NotificationActionButton(
-        key: 'IGNORE',
-        label: 'Ignore',
-        actionType: ActionType.SilentAction,
-      ),
-    ],
-  );
-}
-
-/// Start vibration manually for longer duration
-void _startVibrationLoop() async {
-  if (await Vibration.hasVibrator() ?? false) {
-    Vibration.vibrate(
-      pattern: [500, 1000, 500, 1000, 500, 1000],
-      repeat: 0,
-    );
-  }
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: navigatorKey,
+      navigatorKey: NotificationService.navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'BizD Tech Service',
       theme: AppTheme.light,

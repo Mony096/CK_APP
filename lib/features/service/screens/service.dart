@@ -1,0 +1,334 @@
+import 'dart:async';
+import 'package:bizd_tech_service/core/widgets/DateForServiceList.dart';
+import 'package:bizd_tech_service/core/widgets/DatePickerDialog.dart';
+import 'package:bizd_tech_service/core/utils/helper_utils.dart';
+import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
+import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
+import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
+import 'package:bizd_tech_service/core/providers/helper_provider.dart';
+import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/service_provider.dart';
+import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/update_status_provider.dart';
+import 'package:bizd_tech_service/features/service/screens/component/block_service.dart';
+import 'package:bizd_tech_service/features/service/screens/screen/sericeEntry.dart';
+import 'package:bizd_tech_service/features/service/screens/screen/serviceById.dart';
+import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
+import 'package:bizd_tech_service/core/network/dio_client.dart';
+import 'package:bizd_tech_service/core/utils/local_storage.dart';
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
+
+class ServiceScreen extends StatefulWidget {
+  const ServiceScreen({super.key});
+  @override
+  _ServiceScreenState createState() => _ServiceScreenState();
+}
+
+class _ServiceScreenState extends State<ServiceScreen> {
+  final DioClient dio = DioClient(); // Your custom Dio client
+
+  final bool _isLoading = false;
+  List<dynamic> documents = [];
+  List<dynamic> warehouses = [];
+  String? userName;
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _initOffline(); // this safely runs after first build
+    // });
+  }
+
+  // Future<void> _init() async {
+  //   if (!mounted) return;
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //   await _loadUserName();
+  //   final svProvider = Provider.of<ServiceListProvider>(context, listen: false);
+
+  //   if (svProvider.documents.isEmpty) {
+  //     await svProvider.fetchDocuments(context: context);
+  //   }
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
+  // }
+  // Future<void> _initOffline() async {
+  //   if (!mounted) return;
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //   final _userId = await LocalStorageManger.getString('UserId');
+
+  //   await _loadUserName();
+  //   final offlineProvider =
+  //       Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+  //   await offlineProvider.loadDocuments();
+
+  //   // Use filteredDocs in UI
+  //   print("Offline filtered docs: ${offlineProvider");
+
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
+  // }
+
+  Future<void> _loadUserName() async {
+    final name = await getName();
+    setState(() {
+      userName = name;
+    });
+  }
+
+  Future<String?> getName() async {
+    return await LocalStorageManger.getString('UserName');
+  }
+
+  Future<void> onUpdateStatus(entry, currentStatus) async {
+    MaterialDialog.loading(context);
+
+    try {
+      // ⏳ Wait 1 seconds before updating
+      await Future.delayed(const Duration(seconds: 1));
+
+      await Provider.of<ServiceListProviderOffline>(context, listen: false)
+          .updateDocumentAndStatusOffline(
+        docEntry: entry,
+        status: currentStatus == "Pending"
+            ? "Accept"
+            : currentStatus == "Accept"
+                ? "Travel"
+                : currentStatus == "Travel"
+                    ? "Service"
+                    : "Entry",
+        context: context,
+      );
+      final provider = context.read<ServiceListProviderOffline>();
+      provider.refreshDocuments(); // clear filter + reload all
+      MaterialDialog.close(context);
+      //✅ Close loading after update
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Error: $e')),
+      );
+    }
+  }
+
+  Future<void> _refreshData() async {
+    _dateController.clear(); // Clear the date controller
+    // final provider = context.read<ServiceListProvider>();
+    // provider.resetPagination();
+    // provider.clearCurrentDate();
+    // await provider.resfreshFetchDocuments(context);
+    final provider = context.read<ServiceListProviderOffline>();
+    provider.refreshDocuments(); // clear filter + reload all
+  }
+
+  Future<void> clearOfflineDataWithLogout(BuildContext context) async {
+    final offlineProviderService =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final offlineProviderServiceItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
+
+    try {
+      // Clear service data
+      await offlineProviderService.clearDocuments();
+      await offlineProviderServiceCustomer.clearDocuments();
+      await offlineProviderServiceItem.clearDocuments();
+      await offlineProviderEquipment.clearEquipments();
+      await offlineProviderSite.clearDocuments();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to clear data: $e")),
+      );
+    }
+    // Show loading popup
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ServiceListProviderOffline>(
+      builder: (context, serviceProvider, _) {
+        final documents = serviceProvider.documents.where((doc) {
+          final status = doc['U_CK_Status']?.toString() ?? '';
+          final date = doc['U_CK_Date']?.toString() ?? '';
+          final dateNow = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+          return status != 'Open' &&
+              status != 'Entry' &&
+              date.compareTo(dateNow) >= 0;
+          // works if date is in yyyy-MM-dd or ISO format
+        }).toList();
+        final isLoading = serviceProvider.isLoading;
+        return Scaffold(
+          backgroundColor: context.colors.surfaceContainerHighest,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: context.surfaceColor,
+            elevation: 0,
+            centerTitle: true,
+            title: Text(
+              "Service",
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.onSurfaceColor,
+              ),
+            ),
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: DateForServiceList(
+                      controller: _dateController,
+                      star: true,
+                      detail: false, // set true if you want read-only mode
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      width: 50,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: context.colors.primary,
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      child: TextButton(
+                        // onPressed: () {
+                        //   final provider = context.read<ServiceListProvider>();
+
+                        //   if (_dateController.text.isNotEmpty) {
+                        //     print(_dateController.text);
+
+                        //     // Parse using the correct format
+                        //     final parsedDate = DateFormat("dd MMMM yyyy")
+                        //         .parse(_dateController.text);
+
+                        //     provider.setDate(parsedDate, context);
+                        //   }
+                        // },
+                        onPressed: () {
+                          final provider =
+                              context.read<ServiceListProviderOffline>();
+
+                          if (_dateController.text.isNotEmpty) {
+                            final parsedDate = DateFormat("dd MMMM yyyy")
+                                .parse(_dateController.text);
+
+                            provider.setDate(parsedDate);
+                            provider.loadDocuments(); // ✅ apply filter
+                          }
+                        },
+
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                        child: Text("GO",
+                            style: TextStyle(
+                                color: context.onPrimaryColor,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.035),
+                            textScaleFactor: 1.0),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  )
+                ],
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: isLoading || _isLoading
+                      ? SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.65,
+                          child: Center(
+                            child: SpinKitFadingCircle(
+                              color: context.colors.primary,
+                              size: 50.0,
+                            ),
+                          ),
+                        )
+                      : documents.isEmpty
+                          ? SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              child: Center(
+                                child: Text(
+                                  "No Service Available",
+                                  style: TextStyle(
+                                      fontSize: 16, color: context.colors.onSurfaceVariant),
+                                ),
+                              ),
+                            )
+                          : Column(children: [
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              ...documents.map((travel) => BlockService(
+                                    data: travel as dynamic,
+                                    onTap: () async {
+                                      if (travel["U_CK_Status"] == "Service") {
+                                        goTo(
+                                                context,
+                                                ServiceEntryScreen(
+                                                    data: travel))
+                                            .then((e) {
+                                          if (e == true) {
+                                            _refreshData();
+                                          }
+
+                                          // Handle any actions after returning from ServiceEntryScreen
+                                        });
+                                        return;
+                                      }
+                                      onUpdateStatus(travel["DocEntry"],
+                                          travel["U_CK_Status"]);
+                                    },
+                                  )),
+                              const SizedBox(
+                                height: 45,
+                              ),
+                            ]),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
