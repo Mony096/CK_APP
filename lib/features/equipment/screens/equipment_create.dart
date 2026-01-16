@@ -244,15 +244,10 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       final provider =
           Provider.of<EquipmentOfflineProvider>(context, listen: false);
 
-      // --- Load offline equipments ---
-      await provider.loadEquipments();
-
-      // --- Find the equipment by code or unique identifier ---
-      final offlineData = provider.equipments.firstWhere(
-        (e) => e['Code'] == widget.data['Code'],
-        orElse: () => <String, dynamic>{},
-      );
-      if (offlineData.isEmpty) {
+      // --- Find the equipment by code from ALL stored equipments ---
+      final offlineData = await provider.findEquipmentByCode(widget.data['Code']);
+      
+      if (offlineData == null) {
         // Not found offline, fallback to default or show warning
         await MaterialDialog.warning(
           context,

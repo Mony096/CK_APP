@@ -149,7 +149,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
       decoration: const BoxDecoration(
         color: Color.fromARGB(255, 66, 83, 100),
         borderRadius: BorderRadius.only(
@@ -213,7 +213,7 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
           Text(
-            "Username: ${_userName ?? '...'}",
+            "User Code: ${_userName ?? '...'}",
             style: GoogleFonts.inter(
               fontSize: 12,
               color: Colors.white70,
@@ -221,7 +221,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            "George_Keeng88@gmail.com",
+            "Example009@gmail.com",
             style: GoogleFonts.inter(
               fontSize: 12,
               color: Colors.white54,

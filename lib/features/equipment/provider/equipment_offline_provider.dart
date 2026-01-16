@@ -212,17 +212,54 @@ class EquipmentOfflineProvider with ChangeNotifier {
     }
   }
 
+  /// Jump to first page
+  void firstPage() {
+    if (_currentPage != 1) {
+      _currentPage = 1;
+      _updateVisibleEquipments();
+    }
+  }
+
+  /// Jump to last page
+  void lastPage() {
+    if (_currentPage != totalPages && totalPages > 0) {
+      _currentPage = totalPages;
+      _updateVisibleEquipments();
+    }
+  }
+
   /// Load more items for pagination (Keeping this for compatibility if needed, but redesigned)
   Future<void> loadMore() async {
     nextPage();
+  }
+
+  /// Find equipment by code from ALL stored equipments (not just current page)
+  Future<Map<String, dynamic>?> findEquipmentByCode(String code) async {
+    final box = Hive.box(_boxName);
+    try {
+      final raw = box.get(_keyEquipments, defaultValue: []);
+      final allDocs = (raw as List)
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+
+      final equipment = allDocs.firstWhere(
+        (e) => e['Code'] == code,
+        orElse: () => <String, dynamic>{},
+      );
+
+      return equipment.isEmpty ? null : equipment;
+    } catch (e) {
+      debugPrint("Error finding equipment by code: $e");
+      return null;
+    }
   }
 
   Future<void> saveDocuments(List<dynamic> docs) async {
     try {
       final box = await Hive.openBox(_boxName); // make sure the box is open
       await box.put(_keyEquipments, docs); // save the list
-      _equipments = docs; // update local state
-      notifyListeners();
+      await loadEquipments(); // Apply pagination after saving
     } catch (e) {
       debugPrint("Error saving offline equipments: $e");
     }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:bizd_tech_service/core/widgets/DateForServiceList.dart';
 import 'package:bizd_tech_service/core/widgets/DatePickerDialog.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
@@ -43,13 +44,76 @@ class _ServiceScreenState extends State<ServiceScreen> {
   String? userName;
   final TextEditingController _dateController = TextEditingController();
 
+  bool _isSyncing = false;
+
   @override
   void initState() {
     super.initState();
     _loadUserName();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   _initOffline(); // this safely runs after first build
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoSyncServices(); // Auto-sync on screen load
+    });
+  }
+
+  /// Auto-sync services when screen loads (if online)
+  Future<void> _autoSyncServices() async {
+    if (_isSyncing) return;
+
+    try {
+      setState(() => _isSyncing = true);
+
+      // Check internet connectivity
+      final hasInternet = await _checkInternetConnection();
+      if (!hasInternet) {
+        debugPrint("📴 No internet connection - skipping sync");
+        return;
+      }
+
+      debugPrint("📡 Internet available - starting auto-sync...");
+
+      // Get providers
+      final onlineProvider =
+          Provider.of<ServiceListProvider>(context, listen: false);
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+      // Get existing DocEntries from offline storage
+      final existingDocEntries = await offlineProvider.getExistingDocEntries();
+      debugPrint(
+          "📦 Found ${existingDocEntries.length} existing offline records");
+
+      // Fetch only NEW services from API
+      final newServices = await onlineProvider.fetchNewServicesForSync(
+        existingDocEntries: existingDocEntries,
+      );
+
+      if (newServices.isNotEmpty) {
+        // Merge new services with existing offline data
+        await offlineProvider.mergeNewDocuments(newServices);
+        debugPrint(
+            "✅ Auto-sync complete: ${newServices.length} new services added");
+      } else {
+        debugPrint("✅ Auto-sync complete: No new services to add");
+        // Still load documents to refresh the view
+        await offlineProvider.loadDocuments();
+      }
+    } catch (e) {
+      debugPrint("❌ Auto-sync error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isSyncing = false);
+      }
+    }
+  }
+
+  /// Check if device has internet connection
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   // Future<void> _init() async {
@@ -186,7 +250,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
           backgroundColor: context.colors.surfaceContainerHighest,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-             backgroundColor: Color.fromARGB(255, 66, 83, 100),
+            backgroundColor: Color.fromARGB(255, 66, 83, 100),
             elevation: 0,
             centerTitle: true,
             title: Text(
@@ -197,6 +261,36 @@ class _ServiceScreenState extends State<ServiceScreen> {
                 color: Colors.white,
               ),
             ),
+            actions: [
+              if (_isSyncing)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.greenAccent,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Syncing...",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,24 +367,40 @@ class _ServiceScreenState extends State<ServiceScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.only(top: 5),
-                  child: isLoading || _isLoading
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.65,
-                          child: Center(
-                            child: SpinKitFadingCircle(
-                              color: context.colors.primary,
-                              size: 50.0,
-                            ),
-                          ),
-                        )
-                      : documents.isEmpty
+                  child:
+                      //  _isSyncing
+                      //     ?
+
+                      //     SizedBox(
+                      //         height: MediaQuery.of(context).size.height * 0.70,
+                      //         child: Center(
+                      //             child: Column(
+                      //           mainAxisAlignment: MainAxisAlignment.center,
+                      //           children: [
+                      //             SpinKitFadingCircle(
+                      //               color: Colors.green,
+                      //               size: 45.0,
+                      //             ),
+                      //             SizedBox(
+                      //               height: 20,
+                      //             ),
+                      //             Text(
+                      //               "Loading Service...",
+                      //               style: TextStyle(fontSize: 17),
+                      //             ),
+                      //           ],
+                      //         )),
+                      //       )
+                      // :
+                      documents.isEmpty
                           ? SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.5,
+                              height: MediaQuery.of(context).size.height * 0.70,
                               child: Center(
                                 child: Text(
                                   "No Service Available",
                                   style: TextStyle(
-                                      fontSize: 16, color: context.colors.onSurfaceVariant),
+                                      fontSize: 16,
+                                      color: context.colors.onSurfaceVariant),
                                 ),
                               ),
                             )

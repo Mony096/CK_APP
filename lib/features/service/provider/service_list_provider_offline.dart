@@ -85,6 +85,67 @@ class ServiceListProviderOffline extends ChangeNotifier {
     }
   }
 
+  /// Get list of existing DocEntries from offline storage
+  Future<List<int>> getExistingDocEntries() async {
+    if (_box == null) await _initBox();
+    try {
+      final rawDocs = _box!.get('documents', defaultValue: []) as List<dynamic>;
+      final entries = rawDocs
+          .whereType<Map>()
+          .map((doc) => doc['DocEntry'] as int?)
+          .where((entry) => entry != null)
+          .cast<int>()
+          .toList();
+      return entries;
+    } catch (e) {
+      debugPrint("Error getting existing DocEntries: $e");
+      return [];
+    }
+  }
+
+  /// Merge new documents with existing ones (avoids duplicates)
+  Future<void> mergeNewDocuments(List<dynamic> newDocs) async {
+    if (_box == null) await _initBox();
+    if (newDocs.isEmpty) return;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final rawDocs = _box!.get('documents', defaultValue: []) as List<dynamic>;
+      final existingDocs = rawDocs
+          .whereType<Map>()
+          .map((doc) => Map<String, dynamic>.from(doc))
+          .toList();
+      
+      // Get existing DocEntries
+      final existingEntries = existingDocs
+          .map((doc) => doc['DocEntry'] as int?)
+          .where((entry) => entry != null)
+          .toSet();
+      
+      // Filter out duplicates and add only new ones
+      final uniqueNewDocs = newDocs.where((doc) {
+        final entry = doc['DocEntry'] as int?;
+        return entry != null && !existingEntries.contains(entry);
+      }).map((doc) => Map<String, dynamic>.from(doc as Map)).toList();
+      
+      if (uniqueNewDocs.isNotEmpty) {
+        existingDocs.addAll(uniqueNewDocs);
+        await _box!.put('documents', existingDocs);
+        debugPrint("✅ Merged ${uniqueNewDocs.length} new documents");
+      }
+      
+      // Reload to apply any filters
+      await loadDocuments();
+    } catch (e) {
+      debugPrint("Error merging new documents: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Save documents
   Future<void> saveDocuments(List<dynamic> docs) async {
     if (_box == null) await _initBox();

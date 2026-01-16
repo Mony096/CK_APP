@@ -404,7 +404,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                 if (documents.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 20),
+                        vertical: 12, horizontal: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
@@ -418,41 +418,67 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Previous Button
-                        Opacity(
-                          opacity: deliveryProvider.canPrev ? 1.0 : 0.3,
-                          child: InkWell(
-                            onTap: deliveryProvider.canPrev
-                                ? () => deliveryProvider.previousPage()
-                                : null,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(10),
+                        // First & Previous Buttons
+                        Row(
+                          children: [
+                            // First Page Button
+                            Opacity(
+                              opacity: deliveryProvider.canPrev ? 1.0 : 0.3,
+                              child: InkWell(
+                                onTap: deliveryProvider.canPrev
+                                    ? () => deliveryProvider.firstPage()
+                                    : null,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                      Icons.first_page_rounded,
+                                      size: 20,
+                                      color: Color(0xFF425364)),
+                                ),
                               ),
-                              child: const Icon(
-                                  Icons.arrow_back_ios_new_rounded,
-                                  size: 18,
-                                  color: Color(0xFF425364)),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            // Previous Button
+                            Opacity(
+                              opacity: deliveryProvider.canPrev ? 1.0 : 0.3,
+                              child: InkWell(
+                                onTap: deliveryProvider.canPrev
+                                    ? () => deliveryProvider.previousPage()
+                                    : null,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                      Icons.chevron_left_rounded,
+                                      size: 20,
+                                      color: Color(0xFF425364)),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         // Page Info
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages}",
+                              "${deliveryProvider.currentPage} / ${deliveryProvider.totalPages}",
                               style: GoogleFonts.inter(
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1E293B),
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              "Total ${deliveryProvider.totalRecords} records",
+                              "${deliveryProvider.totalRecords} items",
                               style: GoogleFonts.inter(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
@@ -461,23 +487,47 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                             ),
                           ],
                         ),
-                        // Next Button
-                        Opacity(
-                          opacity: deliveryProvider.canNext ? 1.0 : 0.3,
-                          child: InkWell(
-                            onTap: deliveryProvider.canNext
-                                ? () => deliveryProvider.nextPage()
-                                : null,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF22C55E).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
+                        // Next & Last Buttons
+                        Row(
+                          children: [
+                            // Next Button
+                            Opacity(
+                              opacity: deliveryProvider.canNext ? 1.0 : 0.3,
+                              child: InkWell(
+                                onTap: deliveryProvider.canNext
+                                    ? () => deliveryProvider.nextPage()
+                                    : null,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF22C55E).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.chevron_right_rounded,
+                                      size: 20, color: Color(0xFF22C55E)),
+                                ),
                               ),
-                              child: const Icon(Icons.arrow_forward_ios_rounded,
-                                  size: 18, color: Color(0xFF22C55E)),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            // Last Page Button
+                            Opacity(
+                              opacity: deliveryProvider.canNext ? 1.0 : 0.3,
+                              child: InkWell(
+                                onTap: deliveryProvider.canNext
+                                    ? () => deliveryProvider.lastPage()
+                                    : null,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF22C55E).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.last_page_rounded,
+                                      size: 20, color: Color(0xFF22C55E)),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

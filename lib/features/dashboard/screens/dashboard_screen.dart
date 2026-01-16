@@ -419,7 +419,7 @@ class _DashboardState extends State<Dashboard>
 
       // Make sure documents are loaded
       await offlineProvider.loadDocuments();
-
+      print(offlineProvider.documents);
       // Filter offline documents
       final filteredDocs = offlineProvider.documents.where((doc) {
         bool match = doc["U_CK_Date"] == '${date}T00:00:00Z';
@@ -452,269 +452,269 @@ class _DashboardState extends State<Dashboard>
     }
   }
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case "Open":
-        return context.colors.error;
-      case "In Progress":
-        return Colors.orangeAccent;
-      case "Closed":
-        return context.colors.primary;
-      case "Pending":
-        return context.colors.onSurfaceVariant;
-      default:
-        return context.colors.outline;
-    }
-  }
+  // Color _statusColor(String status) {
+  //   switch (status) {
+  //     case "Open":
+  //       return context.colors.error;
+  //     case "In Progress":
+  //       return Colors.orangeAccent;
+  //     case "Closed":
+  //       return context.colors.primary;
+  //     case "Pending":
+  //       return context.colors.onSurfaceVariant;
+  //     default:
+  //       return context.colors.outline;
+  //   }
+  // }
 
-  Widget _buildDrawerItem(
-      IconData icon, String title, int index, Widget screen, bool disabled) {
-    return ListTile(
-      leading: Icon(icon, color: context.onSurfaceColor),
-      title: Text(title,
-          style: TextStyle(
-              color: context.onSurfaceColor,
-              fontSize: MediaQuery.of(context).size.width * 0.039)),
-      onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => screen),
-        // );
-        goTo(context, screen).then((e) => {_fetchTicketCounts()});
-      },
-    );
-  }
+  // Widget _buildDrawerItem(
+  //     IconData icon, String title, int index, Widget screen, bool disabled) {
+  //   return ListTile(
+  //     leading: Icon(icon, color: context.onSurfaceColor),
+  //     title: Text(title,
+  //         style: TextStyle(
+  //             color: context.onSurfaceColor,
+  //             fontSize: MediaQuery.of(context).size.width * 0.039)),
+  //     onTap: () {
+  //       // Navigator.push(
+  //       //   context,
+  //       //   MaterialPageRoute(builder: (context) => screen),
+  //       // );
+  //       goTo(context, screen).then((e) => {_fetchTicketCounts()});
+  //     },
+  //   );
+  // }
 
-  Future<void> downloadAllDocuments(BuildContext context) async {
-    final onlineProvider =
-        Provider.of<ServiceListProvider>(context, listen: false);
-    final offlineProvider =
-        Provider.of<ServiceListProviderOffline>(context, listen: false);
-    final onlineProviderCustomer =
-        Provider.of<CustomerListProvider>(context, listen: false);
-    final offlineProviderCustomer =
-        Provider.of<CustomerListProviderOffline>(context, listen: false);
-    final onlineProviderItem =
-        Provider.of<ItemListProvider>(context, listen: false);
-    final offlineProviderItem =
-        Provider.of<ItemListProviderOffline>(context, listen: false);
-    final onlineProviderSite =
-        Provider.of<SiteListProvider>(context, listen: false);
-    final offlineProviderSite =
-        Provider.of<SiteListProviderOffline>(context, listen: false);
-    final onlineProviderEquipment =
-        Provider.of<EquipmentListProvider>(context, listen: false);
-    final offlineProviderEquipment =
-        Provider.of<EquipmentOfflineProvider>(context, listen: false);
-    final offlineDocument = offlineProvider.documents;
-    if (isDownloaded == "true") return;
+  // Future<void> downloadAllDocuments(BuildContext context) async {
+  //   // final onlineProvider =
+  //   //     Provider.of<ServiceListProvider>(context, listen: false);
+  //   // final offlineProvider =
+  //   Provider.of<ServiceListProviderOffline>(context, listen: false);
+  //   final onlineProviderCustomer =
+  //       Provider.of<CustomerListProvider>(context, listen: false);
+  //   final offlineProviderCustomer =
+  //       Provider.of<CustomerListProviderOffline>(context, listen: false);
+  //   final onlineProviderItem =
+  //       Provider.of<ItemListProvider>(context, listen: false);
+  //   final offlineProviderItem =
+  //       Provider.of<ItemListProviderOffline>(context, listen: false);
+  //   final onlineProviderSite =
+  //       Provider.of<SiteListProvider>(context, listen: false);
+  //   final offlineProviderSite =
+  //       Provider.of<SiteListProviderOffline>(context, listen: false);
+  //   final onlineProviderEquipment =
+  //       Provider.of<EquipmentListProvider>(context, listen: false);
+  //   final offlineProviderEquipment =
+  //       Provider.of<EquipmentOfflineProvider>(context, listen: false);
+  //   // final offlineDocument = offlineProvider.documents;
+  //   if (isDownloaded == "true") return;
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        String statusMessage = "Starting download...";
-        double progress = 0.0;
-        bool isDownloadStarted = false;
+  //   await showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (dialogContext) {
+  //       String statusMessage = "Starting download...";
+  //       double progress = 0.0;
+  //       bool isDownloadStarted = false;
 
-        final steps = [
-          "Downloading Service Tickets...",
-          "Saving Service Tickets...",
-          "Downloading Customers...",
-          "Saving Customers...",
-          "Downloading Items...",
-          "Saving Items...",
-          "Downloading Sites...",
-          "Saving Sites...",
-          "Downloading Equipment...",
-          "Saving Equipment...",
-        ];
+  //       final steps = [
+  //         // "Downloading Service Tickets...",
+  //         // "Saving Service Tickets...",
+  //         "Downloading Customers...",
+  //         "Saving Customers...",
+  //         "Downloading Items...",
+  //         "Saving Items...",
+  //         "Downloading Sites...",
+  //         "Saving Sites...",
+  //         "Downloading Equipment...",
+  //         "Saving Equipment...",
+  //       ];
 
-        return StatefulBuilder(
-          builder: (statefulContext, setState) {
-            Future<void> updateStep(int index, String message) async {
-              setState(() {
-                statusMessage = message;
-                progress = (index + 1) / steps.length;
-              });
-            }
+  //       return StatefulBuilder(
+  //         builder: (statefulContext, setState) {
+  //           Future<void> updateStep(int index, String message) async {
+  //             setState(() {
+  //               statusMessage = message;
+  //               progress = (index + 1) / steps.length;
+  //             });
+  //           }
 
-            if (!isDownloadStarted) {
-              isDownloadStarted = true;
-              Future.microtask(() async {
-                try {
-                  // --- Step 1: Service Tickets ---
-                  await updateStep(0, steps[0]);
-                  await onlineProvider.fetchDocumentTicket(
-                    loadMore: false,
-                    isSetFilter: false,
-                    context: statefulContext,
-                  );
+  //           if (!isDownloadStarted) {
+  //             isDownloadStarted = true;
+  //             Future.microtask(() async {
+  //               try {
+  //                 // --- Step 1: Service Tickets ---
+  //                 await updateStep(0, steps[0]);
+  //                 // await onlineProvider.fetchDocumentTicket(
+  //                 //   loadMore: false,
+  //                 //   isSetFilter: false,
+  //                 //   context: statefulContext,
+  //                 // );
 
-                  await updateStep(1, steps[1]);
-                  await offlineProvider
-                      .saveDocuments(onlineProvider.documentsTicket);
+  //                 // await updateStep(1, steps[1]);
+  //                 // await offlineProvider
+  //                 //     .saveDocuments(onlineProvider.documentsTicket);
 
-                  // --- Step 2: Customers ---
-                  await updateStep(2, steps[2]);
-                  await onlineProviderCustomer.fetchDocumentOffline(
-                    loadMore: false,
-                    isSetFilter: false,
-                    context: statefulContext,
-                  );
+  //                 // // --- Step 2: Customers ---
+  //                 await updateStep(2, steps[2]);
+  //                 await onlineProviderCustomer.fetchDocumentOffline(
+  //                   loadMore: false,
+  //                   isSetFilter: false,
+  //                   context: statefulContext,
+  //                 );
 
-                  await updateStep(3, steps[3]);
-                  await offlineProviderCustomer
-                      .saveDocuments(onlineProviderCustomer.documentOffline);
+  //                 await updateStep(3, steps[3]);
+  //                 await offlineProviderCustomer
+  //                     .saveDocuments(onlineProviderCustomer.documentOffline);
 
-                  // --- Step 3: Items ---
-                  await updateStep(4, steps[4]);
-                  await onlineProviderItem.fetchDocumentOffline(
-                    loadMore: false,
-                    isSetFilter: false,
-                    context: statefulContext,
-                  );
+  //                 // --- Step 3: Items ---
+  //                 await updateStep(4, steps[4]);
+  //                 await onlineProviderItem.fetchDocumentOffline(
+  //                   loadMore: false,
+  //                   isSetFilter: false,
+  //                   context: statefulContext,
+  //                 );
 
-                  await updateStep(5, steps[5]);
-                  await offlineProviderItem
-                      .saveDocuments(onlineProviderItem.documentOffline);
+  //                 await updateStep(5, steps[5]);
+  //                 await offlineProviderItem
+  //                     .saveDocuments(onlineProviderItem.documentOffline);
 
-                  // --- Step 4: Sites ---
-                  await updateStep(6, steps[6]);
-                  await onlineProviderSite.fetchOfflineDocuments(
-                    loadMore: false,
-                    isSetFilter: false,
-                  );
+  //                 // --- Step 4: Sites ---
+  //                 await updateStep(6, steps[6]);
+  //                 await onlineProviderSite.fetchOfflineDocuments(
+  //                   loadMore: false,
+  //                   isSetFilter: false,
+  //                 );
 
-                  await updateStep(7, steps[7]);
-                  await offlineProviderSite
-                      .saveDocuments(onlineProviderSite.documentOffline);
+  //                 await updateStep(7, steps[7]);
+  //                 await offlineProviderSite
+  //                     .saveDocuments(onlineProviderSite.documentOffline);
 
-                  // --- Step 5: Equipment ---
-                  await updateStep(8, steps[8]);
-                  await onlineProviderEquipment.fetchOfflineDocuments(
-                    loadMore: false,
-                    isSetFilter: false,
-                  );
+  //                 // --- Step 5: Equipment ---
+  //                 await updateStep(8, steps[8]);
+  //                 await onlineProviderEquipment.fetchOfflineDocuments(
+  //                   loadMore: false,
+  //                   isSetFilter: false,
+  //                 );
 
-                  await updateStep(9, steps[9]);
-                  await offlineProviderEquipment
-                      .saveDocuments(onlineProviderEquipment.documentOffline);
+  //                 await updateStep(9, steps[9]);
+  //                 await offlineProviderEquipment
+  //                     .saveDocuments(onlineProviderEquipment.documentOffline);
 
-                  //All download Done
-                  await _fetchTicketCounts();
-                  await LocalStorageManger.setString('isDownloaded', 'true');
-                  setState(() {
-                    progress = 1.0;
-                    isDownloaded = "true";
-                    statusMessage = "All documents downloaded successfully!";
-                  });
-                  await Future.delayed(const Duration(seconds: 1));
-                  // ✅ Done
-                  MaterialDialog.close(context);
-                  MaterialDialog.close(context);
+  //                 //All download Done
+  //                 await _fetchTicketCounts();
+  //                 await LocalStorageManger.setString('isDownloaded', 'true');
+  //                 setState(() {
+  //                   progress = 1.0;
+  //                   isDownloaded = "true";
+  //                   statusMessage = "All documents downloaded successfully!";
+  //                 });
+  //                 await Future.delayed(const Duration(seconds: 1));
+  //                 // ✅ Done
+  //                 MaterialDialog.close(context);
+  //                 MaterialDialog.close(context);
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.inverseSurface,
-                      behavior: SnackBarBehavior.floating,
-                      elevation: 10,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 14),
-                      content: Row(
-                        children: [
-                          // Icon(Icons.remove_circle,
-                          //     color: Colors.white, size: 28),
-                          // SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "✅ All documents downloaded successfully!",
-                                  style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.033,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onInverseSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      duration: const Duration(seconds: 4),
-                    ),
-                  );
-                } catch (e) {
-                  await offlineProvider.clearDocuments();
-                  await offlineProviderCustomer.clearDocuments();
-                  await offlineProviderItem.clearDocuments();
-                  // await offlineProviderEquipment.clearEquipments();
-                  await offlineProviderSite.clearDocuments();
-                  await LocalStorageManger.setString('isDownloaded', 'false');
-                  setState(() {
-                    isDownloaded = "false";
-                  });
-                  await _fetchTicketCounts();
-                  MaterialDialog.close(context);
-                  await MaterialDialog.warning(
-                    context,
-                    title: "Error",
-                    body: e.toString(),
-                  );
-                }
-              });
-            }
+  //                 ScaffoldMessenger.of(context).showSnackBar(
+  //                   SnackBar(
+  //                     backgroundColor:
+  //                         Theme.of(context).colorScheme.inverseSurface,
+  //                     behavior: SnackBarBehavior.floating,
+  //                     elevation: 10,
+  //                     margin: const EdgeInsets.symmetric(
+  //                         horizontal: 30, vertical: 15),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(9),
+  //                     ),
+  //                     padding: const EdgeInsets.symmetric(
+  //                         horizontal: 14, vertical: 14),
+  //                     content: Row(
+  //                       children: [
+  //                         // Icon(Icons.remove_circle,
+  //                         //     color: Colors.white, size: 28),
+  //                         // SizedBox(width: 16),
+  //                         Expanded(
+  //                           child: Column(
+  //                             mainAxisSize: MainAxisSize.min,
+  //                             crossAxisAlignment: CrossAxisAlignment.start,
+  //                             children: [
+  //                               Text(
+  //                                 "✅ All documents downloaded successfully!",
+  //                                 style: TextStyle(
+  //                                   fontSize:
+  //                                       MediaQuery.of(context).size.width *
+  //                                           0.033,
+  //                                   color: Theme.of(context)
+  //                                       .colorScheme
+  //                                       .onInverseSurface,
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     duration: const Duration(seconds: 4),
+  //                   ),
+  //                 );
+  //               } catch (e) {
+  //                 // await offlineProvider.clearDocuments();
+  //                 await offlineProviderCustomer.clearDocuments();
+  //                 await offlineProviderItem.clearDocuments();
+  //                 await offlineProviderEquipment.clearEquipments();
+  //                 await offlineProviderSite.clearDocuments();
+  //                 await LocalStorageManger.setString('isDownloaded', 'false');
+  //                 setState(() {
+  //                   isDownloaded = "false";
+  //                 });
+  //                 await _fetchTicketCounts();
+  //                 MaterialDialog.close(context);
+  //                 await MaterialDialog.warning(
+  //                   context,
+  //                   title: "Error",
+  //                   body: e.toString(),
+  //                 );
+  //               }
+  //             });
+  //           }
 
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.cloud_download,
-                      size: 40, color: context.colors.tertiary),
-                  const SizedBox(height: 16),
-                  LinearProgressIndicator(value: progress),
-                  const SizedBox(height: 12),
-                  Text(
-                    statusMessage,
-                    style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.032,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "${(progress * 100).toStringAsFixed(0)}%",
-                    style: TextStyle(
-                        fontSize: 12, color: context.colors.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-    setState(() {
-      load = true;
-    });
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      load = false;
-    });
-  }
+  //           return AlertDialog(
+  //             shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(12)),
+  //             content: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Icon(Icons.cloud_download,
+  //                     size: 40, color: context.colors.tertiary),
+  //                 const SizedBox(height: 16),
+  //                 LinearProgressIndicator(value: progress),
+  //                 const SizedBox(height: 12),
+  //                 Text(
+  //                   statusMessage,
+  //                   style: TextStyle(
+  //                       fontSize: MediaQuery.of(context).size.width * 0.032,
+  //                       fontWeight: FontWeight.w500),
+  //                 ),
+  //                 const SizedBox(height: 6),
+  //                 Text(
+  //                   "${(progress * 100).toStringAsFixed(0)}%",
+  //                   style: TextStyle(
+  //                       fontSize: 12, color: context.colors.onSurfaceVariant),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  //   setState(() {
+  //     load = true;
+  //   });
+  //   await Future.delayed(const Duration(seconds: 1));
+  //   setState(() {
+  //     load = false;
+  //   });
+  // }
 
   Future<void> clearOfflineData(BuildContext context) async {
     final offlineProviderService =
@@ -1111,19 +1111,15 @@ class _DashboardState extends State<Dashboard>
         // 🔹 Ticket list
         load == true
             ? SizedBox(
-                height: 450,
+                height: 550,
                 child: Center(
                     child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: context.colors.primary,
+                   SpinKitFadingCircle(
+                        color: Colors.green,
+                        size: 45.0,
                       ),
-                    ),
                     SizedBox(
                       height: 20,
                     ),

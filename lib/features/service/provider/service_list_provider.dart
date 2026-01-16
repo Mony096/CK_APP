@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ServiceListProvider extends ChangeNotifier {
-  List<dynamic>_documents = [];
+  List<dynamic> _documents = [];
   List<dynamic> _documentTicket = [];
 
   bool _isLoading = false;
@@ -144,7 +144,7 @@ class ServiceListProvider extends ChangeNotifier {
 
     String filter =
         // "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' and U_CK_Date ge '$dateNow'";
- "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
+        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
     // Add text filter
     if (_currentFilter.isNotEmpty) {
       filter += " and contains(Code,'$_currentFilter')";
@@ -203,5 +203,58 @@ class ServiceListProvider extends ChangeNotifier {
 
   void clearCurrentDate() {
     _currentDate = null;
+  }
+
+  /// Fetch NEW services from API that don't exist in offline storage
+  /// Returns the list of new documents fetched (or empty list if offline/error)
+  Future<List<dynamic>> fetchNewServicesForSync({
+    required List<int> existingDocEntries,
+  }) async {
+    if (_isLoading) return [];
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final userId = await LocalStorageManger.getString('UserId');
+
+      // Build filter to exclude existing DocEntries
+      // String filter =
+      //     "U_CK_TechnicianId eq $userId and U_CK_Status eq 'Pending'";
+String today = DateTime.now().toIso8601String().split('T')[0];
+
+      String filter =
+          "U_CK_TechnicianId eq $userId "
+          "and U_CK_Status eq 'Pending' "
+          "and U_CK_Date ge '$today'";
+
+      // Add DocEntry exclusion filter if there are existing entries
+      if (existingDocEntries.isNotEmpty) {
+        // Build filter like: DocEntry ne 1 and DocEntry ne 2 and DocEntry ne 3
+        final excludeFilter = existingDocEntries
+            .map((entry) => "DocEntry ne $entry")
+            .join(" and ");
+        filter += " and $excludeFilter";
+      }
+
+      debugPrint("📡 Fetching new services with filter: $filter");
+
+      final response =
+          await dio.get("/script/test/GetCkServiceLists?\$filter=$filter");
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        debugPrint("✅ Fetched ${data.length} new services from API");
+        return data;
+      } else {
+        debugPrint("❌ Failed to fetch services: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching new services: $e");
+      return [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

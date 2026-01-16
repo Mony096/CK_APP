@@ -23,6 +23,17 @@ class CustomerListProvider extends ChangeNotifier {
   bool get isLoadingSetFilter => _isLoadingSetFilter;
 
   String get currentFilter => _currentFilter;
+
+  /// Batch size for fetching records
+  static const int _batchSize = 2000;
+
+  /// Progress tracking for UI feedback
+  int _fetchedCount = 0;
+  int _totalCount = 0;
+
+  int get fetchedCount => _fetchedCount;
+  int get totalCount => _totalCount;
+
   Future<void> resfreshFetchDocuments() async {
     _isLoading = true;
     notifyListeners();
@@ -97,27 +108,78 @@ class CustomerListProvider extends ChangeNotifier {
       _isLoadingSetFilter = true;
     }
     _isLoading = true;
+    _fetchedCount = 0;
+    _totalCount = 0;
     notifyListeners();
 
     try {
-      final query =
-          "/BusinessPartners?\$select=CardCode,CardName,ShipToDefault";
-      final response = await dio.get(query);
+      // Step 1: Get total count first
+      final countResponse = await dio
+          .get("/BusinessPartners/\$count?\$filter=CardType eq 'cCustomer'");
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data["value"];
-        if (loadMore) {
-          _documentOffline.addAll(data);
-        } else {
-          _documentOffline = data;
-        }
-
-        // _hasMore = data.length == _limit;
-        // _skip += _limit;
-      } else {
-        throw Exception("Failed to Download Customer");
+      if (countResponse.statusCode != 200) {
+        throw Exception("Failed to get customer count");
       }
+
+      _totalCount = int.tryParse(countResponse.data.toString()) ?? 0;
+      debugPrint("👥 Total customer count: $_totalCount");
+      notifyListeners();
+
+      if (_totalCount == 0) {
+        _documentOffline = [];
+        return;
+      }
+
+      // Step 2: Calculate number of batches needed
+      final int totalBatches = (_totalCount / _batchSize).ceil();
+      debugPrint(
+          "👥 Will fetch in $totalBatches batches of $_batchSize records");
+
+      // Step 3: Fetch in batches
+      List<dynamic> allRecords = [];
+
+      for (int batch = 0; batch < totalBatches; batch++) {
+        final int skip = batch * _batchSize;
+
+        debugPrint(
+            "👥 Fetching batch ${batch + 1}/$totalBatches (skip=$skip, top=$_batchSize)");
+
+        final response = await dio.get(
+            "/BusinessPartners?\$filter=CardType eq 'cCustomer'&\$select=CardCode,CardName,ShipToDefault&\$top=$_batchSize&\$skip=$skip");
+
+        if (response.statusCode == 200) {
+          final List<dynamic> batchData = response.data["value"] ?? [];
+          allRecords.addAll(batchData);
+
+          // Update progress
+          _fetchedCount = allRecords.length;
+          notifyListeners();
+
+          debugPrint(
+              "👥 Batch ${batch + 1} fetched: ${batchData.length} records. Total so far: $_fetchedCount");
+
+          // If we got less than batch size, we've reached the end
+          if (batchData.length < _batchSize) {
+            debugPrint(
+                "👥 Reached end of records (got ${batchData.length} < $_batchSize)");
+            break;
+          }
+        } else {
+          throw Exception("Failed to fetch batch ${batch + 1}");
+        }
+      }
+
+      // Step 4: Set the final result
+      if (loadMore) {
+        _documentOffline.addAll(allRecords);
+      } else {
+        _documentOffline = allRecords;
+      }
+
+      debugPrint(
+          "✅ Successfully fetched ${_documentOffline.length} customer records");
     } catch (e) {
+      debugPrint("❌ Error fetching customers: $e");
       throw Exception(e.toString());
     } finally {
       if (isSetFilter) _isLoadingSetFilter = false;
