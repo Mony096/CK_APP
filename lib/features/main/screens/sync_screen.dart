@@ -201,7 +201,7 @@ class _SyncScreenState extends State<SyncScreen> {
           _buildSyncItem(
             icon: Icons.download_outlined,
             title: "Download Data",
-            subtitle: "Update local tickets and master data",
+            subtitle: "Update your master data",
             onTap: _handleDownload,
             color: Colors.blue,
             enabled: _isDownloaded != "true",
@@ -351,25 +351,20 @@ class _SyncScreenState extends State<SyncScreen> {
 // Premium Download Dialog Widget
 // ============================================================================
 
-enum _DownloadStepStatus { waiting, downloading, completed, error }
+enum _DownloadStepStatus { waiting, downloading, completed }
 
 class _DownloadStep {
   final String name;
   final IconData icon;
   final Color color;
-  _DownloadStepStatus status;
-  int count;
-  int total;
-  String? error;
+  _DownloadStepStatus status = _DownloadStepStatus.waiting;
+  int count = 0;
+  int total = 0;
 
   _DownloadStep({
     required this.name,
     required this.icon,
     required this.color,
-    this.status = _DownloadStepStatus.waiting,
-    this.count = 0,
-    this.total = 0,
-    this.error,
   });
 }
 
@@ -518,10 +513,39 @@ class _DownloadDialogState extends State<_DownloadDialog>
         widget.onComplete();
       }
     } catch (e) {
+      if (e.toString().contains("cancelled")) {
+        debugPrint("Download truly cancelled. Cleaning up UI...");
+        return;
+      }
       if (mounted) {
         Navigator.of(context).pop();
         widget.onError(e.toString());
       }
+    }
+  }
+
+  Future<void> _cancelDownload() async {
+    // 1. Tell all providers to stop
+    widget.onlineProviderCustomer.cancelDownload();
+    widget.onlineProviderItem.cancelDownload();
+    widget.onlineProviderSite.cancelDownload();
+    widget.onlineProviderEquipment.cancelDownload();
+
+    // 2. Clear already saved data to avoid partial sync
+    await widget.offlineProviderCustomer.clearDocuments();
+    await widget.offlineProviderItem.clearDocuments();
+    await widget.offlineProviderSite.clearDocuments();
+    await widget.offlineProviderEquipment.clearEquipments();
+
+    if (mounted) {
+      Navigator.of(context).pop();
+      // Optional: show a message that it was cancelled
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Download cancelled and data removed"),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -690,6 +714,63 @@ class _DownloadDialogState extends State<_DownloadDialog>
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 itemCount: _steps.length,
                 itemBuilder: (context, index) => _buildStepItem(_steps[index]),
+              ),
+            ),
+            const Divider(height: 1),
+
+            // Actions
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  if (!_isCompleted)
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: _cancelDownload,
+                        icon: const Icon(Icons.close_rounded,
+                            size: 18, color: Color(0xFFEF4444)),
+                        label: Text(
+                          "Cancel Download",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFEF4444),
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                                color:
+                                    const Color(0xFFEF4444).withOpacity(0.2)),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF22C55E),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          "Close",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],

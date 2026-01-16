@@ -98,121 +98,124 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme:
-            const IconThemeData(color: Colors.white), // 👈 back arrow color
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        title: const Text(
-          "Signature Capture",
-          style: TextStyle(
-              color: Color.fromARGB(255, 255, 255, 255), fontSize: 18),
-        ),
-        centerTitle: true,
-        actions: [
-          widget.prevFile != null && widget.prevFile!.existsSync()
-              ? IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            PDFViewerScreen(filePath: widget.prevFile!.path),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.remove_red_eye, size: 22),
-                )
-              : const SizedBox.shrink(),
-// returns empty widget
-
-          IconButton(
-            onPressed: _toggleOrientation,
-            icon: const Icon(Icons.screen_rotation, size: 22),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          iconTheme:
+              const IconThemeData(color: Colors.white), // 👈 back arrow color
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          title: const Text(
+            "Signature Capture",
+            style: TextStyle(
+                color: Color.fromARGB(255, 255, 255, 255), fontSize: 18),
           ),
-          IconButton(
-            onPressed: () async {
-              MaterialDialog.loading(context); // Show loading dialog
-
-              await Provider.of<AuthProvider>(context, listen: false).logout();
-
-              Navigator.of(context)
-                  .pop(); // Close loading dialog AFTER logout finishes
-
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-                (route) => false,
-              );
-            },
-            icon: const Icon(Icons.logout, size: 22),
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: isLandscape ? 1 : 3,
-            child: Signature(
-              controller: _controller,
-              backgroundColor: Colors.grey[200]!,
+          centerTitle: true,
+          actions: [
+            widget.prevFile != null && widget.prevFile!.existsSync()
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PDFViewerScreen(filePath: widget.prevFile!.path),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.remove_red_eye, size: 22),
+                  )
+                : const SizedBox.shrink(),
+      // returns empty widget
+      
+            IconButton(
+              onPressed: _toggleOrientation,
+              icon: const Icon(Icons.screen_rotation, size: 22),
             ),
-          ),
-          // SizedBox(height: 10),
-          isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () => _controller.clear(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            IconButton(
+              onPressed: () async {
+                MaterialDialog.loading(context); // Show loading dialog
+      
+                await Provider.of<AuthProvider>(context, listen: false).logout();
+      
+                Navigator.of(context)
+                    .pop(); // Close loading dialog AFTER logout finishes
+      
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreenV2()),
+                  (route) => false,
+                );
+              },
+              icon: const Icon(Icons.logout, size: 22),
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              flex: isLandscape ? 1 : 3,
+              child: Signature(
+                controller: _controller,
+                backgroundColor: Colors.grey[200]!,
+              ),
+            ),
+            // SizedBox(height: 10),
+            isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _controller.clear(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.edit, size: 18, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text(
+                        "Clear",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.edit, size: 18, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text(
-                      "Clear",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+                ElevatedButton(
+                  onPressed: _exportAsPDF,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 78, 178, 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
-                ),
-              ),
-              ElevatedButton(
-                onPressed: _exportAsPDF,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 78, 178, 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.edit, size: 18, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text(
+                        "Save Signature",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.edit, size: 18, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text(
-                      "Save Signature",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 50),
-        ],
+              ],
+            ),
+            isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

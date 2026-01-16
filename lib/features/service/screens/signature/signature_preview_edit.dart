@@ -6,11 +6,19 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
+import 'dart:typed_data';
 
 class PDFViewerScreen extends StatelessWidget {
-  final String filePath;
+  final String? filePath;
+  final Uint8List? memoryData;
+  final String title;
 
-  const PDFViewerScreen({Key? key, required this.filePath}) : super(key: key);
+  const PDFViewerScreen({
+    Key? key,
+    this.filePath,
+    this.memoryData,
+    this.title = "Document Viewer",
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,34 +34,19 @@ class PDFViewerScreen extends StatelessWidget {
           },
         ),
         title: Text(
-          "Signature Here",
+          title,
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              MaterialDialog.loading(context); // Show loading dialog
-
-              await Provider.of<AuthProvider>(context, listen: false).logout();
-
-              Navigator.of(context)
-                  .pop(); // Close loading dialog AFTER logout finishes
-
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-                (route) => false,
-              );
-            },
-            icon: const Icon(Icons.logout, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 12),
-        ],
       ),
-      body: SfPdfViewer.file(File(filePath)),
+      body: memoryData != null
+          ? SfPdfViewer.memory(memoryData!)
+          : filePath != null
+              ? SfPdfViewer.file(File(filePath!))
+              : const Center(child: Text("No document to display")),
     );
   }
 }

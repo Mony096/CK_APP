@@ -11,6 +11,20 @@ class CustomerListProviderOffline extends ChangeNotifier {
   String? get filter => _filter;
   late final Box _box;
 
+  // Pagination State
+  int _currentPage = 1;
+  final int _pageSize = 10;
+  bool _hasMore = true;
+  List<dynamic> _allFilteredDocuments = [];
+
+  bool get hasMore => _hasMore;
+  int get totalRecords => _allFilteredDocuments.length;
+  int get currentCount => _documents.length;
+  int get currentPage => _currentPage;
+  int get totalPages => (_allFilteredDocuments.length / _pageSize).ceil();
+  bool get canNext => _currentPage < totalPages;
+  bool get canPrev => _currentPage > 1;
+
   CustomerListProviderOffline() {
     _initBox();
   }
@@ -35,41 +49,86 @@ class CustomerListProviderOffline extends ChangeNotifier {
     await loadDocuments();
   }
 
-  /// Load offline documents
-
+  /// Load offline documents with pagination
   Future<void> loadDocuments() async {
     _isLoading = true;
     notifyListeners();
     try {
       final rawDocs = _box.get('documents', defaultValue: []) as List<dynamic>;
-      var docs = rawDocs
+      var allDocs = rawDocs
           .whereType<Map>()
           .map((doc) => Map<String, dynamic>.from(doc))
           .toList();
 
-      // ✅ Apply date filter if set
+      // Apply filter if set
       if (_filter != null && _filter!.isNotEmpty) {
-        docs = docs.where((doc) {
-          final code = doc["CardCode"];
-          if (code == null) return false;
-          try {
-            return code
-                .toString()
-                .toLowerCase()
-                .contains(_filter!.toLowerCase());
-          } catch (e) {
-            return false;
-          }
+        final query = _filter!.toLowerCase();
+        allDocs = allDocs.where((doc) {
+          final code = doc["CardCode"]?.toString().toLowerCase() ?? "";
+          final name = doc["CardName"]?.toString().toLowerCase() ?? "";
+          return code.contains(query) || name.contains(query);
         }).toList();
       }
 
-      _documents = docs;
+      // Sort by CardCode
+      allDocs
+          .sort((a, b) => (a["CardCode"] ?? "").compareTo(b["CardCode"] ?? ""));
+
+      _allFilteredDocuments = allDocs;
+      _currentPage = 1;
+
+      _updateVisibleDocuments();
     } catch (e) {
       debugPrint("Error loading offline docs: $e");
       _documents = [];
+      _allFilteredDocuments = [];
+      _hasMore = false;
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  void _updateVisibleDocuments() {
+    final int startIndex = (_currentPage - 1) * _pageSize;
+    final int endIndex = (startIndex + _pageSize) < _allFilteredDocuments.length
+        ? (startIndex + _pageSize)
+        : _allFilteredDocuments.length;
+
+    if (startIndex < _allFilteredDocuments.length) {
+      _documents = _allFilteredDocuments.sublist(startIndex, endIndex);
+    } else {
+      _documents = [];
+    }
+    _hasMore = _currentPage < totalPages;
+    notifyListeners();
+  }
+
+  void nextPage() {
+    if (canNext) {
+      _currentPage++;
+      _updateVisibleDocuments();
+    }
+  }
+
+  void previousPage() {
+    if (canPrev) {
+      _currentPage--;
+      _updateVisibleDocuments();
+    }
+  }
+
+  void firstPage() {
+    if (_currentPage != 1) {
+      _currentPage = 1;
+      _updateVisibleDocuments();
+    }
+  }
+
+  void lastPage() {
+    if (_currentPage != totalPages && totalPages > 0) {
+      _currentPage = totalPages;
+      _updateVisibleDocuments();
     }
   }
 
@@ -79,7 +138,7 @@ class CustomerListProviderOffline extends ChangeNotifier {
     notifyListeners();
     try {
       await _box.put('documents', docs);
-      _documents = docs;
+      await loadDocuments();
     } catch (e) {
       debugPrint("Error saving offline docs: $e");
     } finally {
@@ -94,6 +153,8 @@ class CustomerListProviderOffline extends ChangeNotifier {
     try {
       await _box.delete('documents');
       _documents = [];
+      _allFilteredDocuments = [];
+      _hasMore = false;
     } catch (e) {
       debugPrint("Error clearing offline docs: $e");
     } finally {

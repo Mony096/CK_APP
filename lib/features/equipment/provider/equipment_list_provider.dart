@@ -94,14 +94,23 @@ class EquipmentListProvider extends ChangeNotifier {
   /// Progress tracking for UI feedback
   int _fetchedCount = 0;
   int _totalCount = 0;
-  
+
   int get fetchedCount => _fetchedCount;
   int get totalCount => _totalCount;
+
+  bool _isCancelled = false;
+
+  void cancelDownload() {
+    _isCancelled = true;
+    _isLoading = false;
+    notifyListeners();
+  }
 
   Future<void> fetchOfflineDocuments(
       {bool loadMore = false, bool isSetFilter = false}) async {
     if (_isLoading) return;
     _isLoading = true;
+    _isCancelled = false;
     _fetchedCount = 0;
     _totalCount = 0;
     notifyListeners();
@@ -109,11 +118,11 @@ class EquipmentListProvider extends ChangeNotifier {
     try {
       // Step 1: Get total count first
       final countResponse = await dio.get("/CK_CUSEQUI/\$count");
-      
+
       if (countResponse.statusCode != 200) {
         throw Exception("Failed to get equipment count");
       }
-      
+
       _totalCount = int.tryParse(countResponse.data.toString()) ?? 0;
       debugPrint("📦 Total equipment count: $_totalCount");
       notifyListeners();
@@ -125,33 +134,42 @@ class EquipmentListProvider extends ChangeNotifier {
 
       // Step 2: Calculate number of batches needed
       final int totalBatches = (_totalCount / _batchSize).ceil();
-      debugPrint("📦 Will fetch in $totalBatches batches of $_batchSize records");
+      debugPrint(
+          "📦 Will fetch in $totalBatches batches of $_batchSize records");
 
       // Step 3: Fetch in batches
       List<dynamic> allRecords = [];
-      
+
       for (int batch = 0; batch < totalBatches; batch++) {
+        if (_isCancelled) {
+          debugPrint("📦 Download cancelled by user");
+          _isCancelled = false; // Reset for next time
+          throw Exception("cancelled");
+        }
+
         final int skip = batch * _batchSize;
-        
-        debugPrint("📦 Fetching batch ${batch + 1}/$totalBatches (skip=$skip, top=$_batchSize)");
-        
+
+        debugPrint(
+            "📦 Fetching batch ${batch + 1}/$totalBatches (skip=$skip, top=$_batchSize)");
+
         final response = await dio.get(
-          "/CK_CUSEQUI?\$select=U_ck_AttachmentEntry,U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry,U_ck_siteCode,U_ck_eqStatus,U_ck_eqBrand,U_ck_eqModel,U_ck_Remark,U_ck_InstalDate,U_ck_NsvDate,U_ck_WarExpDate,CK_CUSEQUI01Collection,CK_CUSEQUI02Collection&\$orderby=DocEntry desc&\$top=$_batchSize&\$skip=$skip"
-        );
+            "/CK_CUSEQUI?\$select=U_ck_AttachmentEntry,U_ck_CusCode,U_ck_CusName,U_ck_eqSerNum,Code,Name,DocEntry,U_ck_siteCode,U_ck_eqStatus,U_ck_eqBrand,U_ck_eqModel,U_ck_Remark,U_ck_InstalDate,U_ck_NsvDate,U_ck_WarExpDate,CK_CUSEQUI01Collection,CK_CUSEQUI02Collection&\$orderby=DocEntry desc&\$top=$_batchSize&\$skip=$skip");
 
         if (response.statusCode == 200) {
           final List<dynamic> batchData = response.data["value"] ?? [];
           allRecords.addAll(batchData);
-          
+
           // Update progress
           _fetchedCount = allRecords.length;
           notifyListeners();
-          
-          debugPrint("📦 Batch ${batch + 1} fetched: ${batchData.length} records. Total so far: $_fetchedCount");
-          
+
+          debugPrint(
+              "📦 Batch ${batch + 1} fetched: ${batchData.length} records. Total so far: $_fetchedCount");
+
           // If we got less than batch size, we've reached the end
           if (batchData.length < _batchSize) {
-            debugPrint("📦 Reached end of records (got ${batchData.length} < $_batchSize)");
+            debugPrint(
+                "📦 Reached end of records (got ${batchData.length} < $_batchSize)");
             break;
           }
         } else {
@@ -165,10 +183,15 @@ class EquipmentListProvider extends ChangeNotifier {
       } else {
         _documentOffline = allRecords;
       }
-      
-      debugPrint("✅ Successfully fetched ${_documentOffline.length} equipment records");
-      
+
+      debugPrint(
+          "✅ Successfully fetched ${_documentOffline.length} equipment records");
     } catch (e) {
+      if (e.toString().contains("cancelled")) {
+        debugPrint("📦 Cleaning up after cancellation...");
+        _documentOffline = [];
+        throw Exception("cancelled");
+      }
       debugPrint("❌ Error fetching equipment: $e");
       throw Exception(e.toString());
     } finally {

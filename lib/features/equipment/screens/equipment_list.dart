@@ -418,114 +418,46 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // First & Previous Buttons
+                        Text(
+                          "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages} (${deliveryProvider.totalRecords} total)",
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
                         Row(
                           children: [
-                            // First Page Button
-                            Opacity(
-                              opacity: deliveryProvider.canPrev ? 1.0 : 0.3,
-                              child: InkWell(
-                                onTap: deliveryProvider.canPrev
-                                    ? () => deliveryProvider.firstPage()
-                                    : null,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                      Icons.first_page_rounded,
-                                      size: 20,
-                                      color: Color(0xFF425364)),
-                                ),
-                              ),
+                            _buildPageButton(
+                              icon: Icons.first_page_rounded,
+                              onTap: deliveryProvider.canPrev
+                                  ? deliveryProvider.firstPage
+                                  : null,
+                              isEnabled: deliveryProvider.canPrev,
                             ),
                             const SizedBox(width: 8),
-                            // Previous Button
-                            Opacity(
-                              opacity: deliveryProvider.canPrev ? 1.0 : 0.3,
-                              child: InkWell(
-                                onTap: deliveryProvider.canPrev
-                                    ? () => deliveryProvider.previousPage()
-                                    : null,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                      Icons.chevron_left_rounded,
-                                      size: 20,
-                                      color: Color(0xFF425364)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Page Info
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "${deliveryProvider.currentPage} / ${deliveryProvider.totalPages}",
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1E293B),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "${deliveryProvider.totalRecords} items",
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Next & Last Buttons
-                        Row(
-                          children: [
-                            // Next Button
-                            Opacity(
-                              opacity: deliveryProvider.canNext ? 1.0 : 0.3,
-                              child: InkWell(
-                                onTap: deliveryProvider.canNext
-                                    ? () => deliveryProvider.nextPage()
-                                    : null,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF22C55E).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(Icons.chevron_right_rounded,
-                                      size: 20, color: Color(0xFF22C55E)),
-                                ),
-                              ),
+                            _buildPageButton(
+                              icon: Icons.chevron_left_rounded,
+                              onTap: deliveryProvider.canPrev
+                                  ? deliveryProvider.previousPage
+                                  : null,
+                              isEnabled: deliveryProvider.canPrev,
                             ),
                             const SizedBox(width: 8),
-                            // Last Page Button
-                            Opacity(
-                              opacity: deliveryProvider.canNext ? 1.0 : 0.3,
-                              child: InkWell(
-                                onTap: deliveryProvider.canNext
-                                    ? () => deliveryProvider.lastPage()
-                                    : null,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF22C55E).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(Icons.last_page_rounded,
-                                      size: 20, color: Color(0xFF22C55E)),
-                                ),
-                              ),
+                            _buildPageButton(
+                              icon: Icons.chevron_right_rounded,
+                              onTap: deliveryProvider.canNext
+                                  ? deliveryProvider.nextPage
+                                  : null,
+                              isEnabled: deliveryProvider.canNext,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildPageButton(
+                              icon: Icons.last_page_rounded,
+                              onTap: deliveryProvider.canNext
+                                  ? deliveryProvider.lastPage
+                                  : null,
+                              isEnabled: deliveryProvider.canNext,
                             ),
                           ],
                         ),
@@ -566,7 +498,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               width: 46,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF22C55E).withAlpha(25),
+                color: const Color(0xFF22C55E).withAlpha(15),
                 border: Border.all(
                   color: const Color(0xFF22C55E),
                   width: 1.5,
@@ -682,6 +614,32 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPageButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool isEnabled,
+  }) {
+    return Opacity(
+      opacity: isEnabled ? 1.0 : 0.3,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: const Color(0xFF475569),
+          ),
         ),
       ),
     );

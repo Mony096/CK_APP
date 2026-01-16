@@ -97,6 +97,14 @@ class ItemListProvider extends ChangeNotifier {
     }
   }
 
+  bool _isCancelled = false;
+
+  void cancelDownload() {
+    _isCancelled = true;
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> fetchDocumentOffline({
     bool loadMore = false,
     bool isSetFilter = false,
@@ -108,6 +116,7 @@ class ItemListProvider extends ChangeNotifier {
       _isLoadingSetFilter = true;
     }
     _isLoading = true;
+    _isCancelled = false;
     _fetchedCount = 0;
     _totalCount = 0;
     notifyListeners();
@@ -138,6 +147,12 @@ class ItemListProvider extends ChangeNotifier {
       List<dynamic> allRecords = [];
 
       for (int batch = 0; batch < totalBatches; batch++) {
+        if (_isCancelled) {
+          debugPrint("📦 Download cancelled by user");
+          _isCancelled = false; // Reset for next time
+          throw Exception("cancelled");
+        }
+
         final int skip = batch * _batchSize;
 
         debugPrint(
@@ -180,6 +195,11 @@ class ItemListProvider extends ChangeNotifier {
       debugPrint(
           "✅ Successfully fetched ${_documentOffline.length} item records");
     } catch (e) {
+      if (e.toString().contains("cancelled")) {
+        debugPrint("📦 Cleaning up after cancellation...");
+        _documentOffline = [];
+        throw Exception("cancelled");
+      }
       debugPrint("❌ Error fetching items: $e");
       await MaterialDialog.warning(
         context,

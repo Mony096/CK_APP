@@ -101,12 +101,21 @@ class SiteListProvider extends ChangeNotifier {
     }
   }
 
+  bool _isCancelled = false;
+
+  void cancelDownload() {
+    _isCancelled = true;
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> fetchOfflineDocuments(
       {bool loadMore = false,
       bool isSetFilter = false,
       String customer = ''}) async {
     if (_isLoading) return;
     _isLoading = true;
+    _isCancelled = false;
     _fetchedCount = 0;
     _totalCount = 0;
     notifyListeners();
@@ -138,6 +147,12 @@ class SiteListProvider extends ChangeNotifier {
       List<dynamic> allRecords = [];
 
       for (int batch = 0; batch < totalBatches; batch++) {
+        if (_isCancelled) {
+          debugPrint("🏢 Download cancelled by user");
+          _isCancelled = false; // Reset for next time
+          throw Exception("cancelled");
+        }
+
         final int skip = batch * _batchSize;
 
         debugPrint(
@@ -178,6 +193,11 @@ class SiteListProvider extends ChangeNotifier {
       debugPrint(
           "✅ Successfully fetched ${_documentOffline.length} site records");
     } catch (e) {
+      if (e.toString().contains("cancelled")) {
+        debugPrint("🏢 Cleaning up after cancellation...");
+        _documentOffline = [];
+        throw Exception("cancelled");
+      }
       debugPrint("❌ Error fetching sites: $e");
       throw Exception(e.toString());
     } finally {

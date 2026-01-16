@@ -1,31 +1,19 @@
-import 'dart:convert';
-
-import 'package:bizd_tech_service/core/utils/helper_utils.dart';
-import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
-import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
 import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
-import 'package:bizd_tech_service/features/customer/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_create_provider.dart';
-import 'package:bizd_tech_service/features/equipment/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/features/item/provider/item_list_provider.dart';
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/site/provider/site_list_provider.dart';
 import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/equipment/screens/equipment_list.dart';
 import 'package:bizd_tech_service/features/service/screens/screen/serviceById.dart';
+import 'package:bizd_tech_service/features/service/screens/detail/service_detail_screen.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
-import 'package:bizd_tech_service/core/theme/app_tokens.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Dashboard extends StatefulWidget {
@@ -202,7 +190,7 @@ class _DashboardState extends State<Dashboard>
     }
 
     // optional small delay for smooth UI
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
       setState(() {
         load = false; // hide overall loading
@@ -213,168 +201,246 @@ class _DashboardState extends State<Dashboard>
   void _showFilterDialog() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 12,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Matches Your Filter",
-                      style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.043,
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 20),
-
-                  // Status filter
-                  const Align(
-                      alignment: Alignment.centerLeft, child: Text("Job Type")),
-                  Container(
-                    margin: const EdgeInsets.only(right: 45),
-                    child: Wrap(
-                      spacing: 5,
-                      children: ["All", "Corrective", "Preventve"].map((jType) {
-                        return ChoiceChip(
-                          label: Text(jType,
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.034,
-                              )),
-                          selected: _selectedJob == jType,
-                          onSelected: (_) {
-                            setModalState(() {
-                              _selectedJob = jType;
-                            });
-                          },
-                        );
-                      }).toList(),
+                  // Grab Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // Priority filter
-                  const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Service Type")),
-                  Container(
-                    margin: const EdgeInsets.only(left: 0),
-                    child: Wrap(
-                      spacing: 5,
-                      children: [
-                        "All",
-                        "Breakdown",
-                        "Emergency",
-                        "Installation",
-                        "Overhaul",
-                        "Maintenance"
-                      ].map((serice) {
-                        return ChoiceChip(
-                          label: Text(serice,
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.034,
-                              )),
-                          selected: _selectedService == serice,
-                          onSelected: (_) {
-                            setModalState(() {
-                              _selectedService = serice;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Priority filter
-                  const Align(
-                      alignment: Alignment.centerLeft, child: Text("Priority")),
-                  Container(
-                    margin: const EdgeInsets.only(right: 30),
-                    child: Wrap(
-                      spacing: 5,
-                      children:
-                          ["All", "High", "Medium", "Low"].map((priority) {
-                        return ChoiceChip(
-                          label: Text(priority,
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.034,
-                              )),
-                          selected: _selectedPriority == priority,
-                          onSelected: (_) {
-                            setModalState(() {
-                              _selectedPriority = priority;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
+                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedJob = "All";
-                            _selectedService = "All";
-                            _selectedPriority = "All";
-                          });
-                          _fetchTicketCounts();
-
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "Reset",
-                          style: TextStyle(
-                              fontSize: 15,
-                              color: context.colors.error,
-                              fontWeight: FontWeight.normal),
+                      Text(
+                        "Filter Tickets",
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1E293B),
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {}); // refresh tickets with filter
-                          _fetchTicketCounts();
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer, // button color
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(7), // rounded corners
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 25, vertical: 5), // optional
-                        ),
-                        child: Text(
-                          "Confirm",
-                          style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer), // text color
-                        ),
-                      )
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close_rounded),
+                        visualDensity: VisualDensity.compact,
+                      ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 30,
-                  )
+                  const SizedBox(height: 24),
+
+                  // Job Type section
+                  _buildFilterHeader("Job Type"),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children:
+                        ["All", "Corrective", "Preventative"].map((jType) {
+                      final isSelected = _selectedJob == jType;
+                      return _buildFilterSelectionChip(
+                        label: jType,
+                        isSelected: isSelected,
+                        onSelected: () {
+                          setModalState(() {
+                            _selectedJob = jType;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  _buildFilterHeader("Service Type"),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      "All",
+                      "Breakdown",
+                      "Emergency",
+                      "Installation",
+                      "Overhaul",
+                      "Maintenance"
+                    ].map((serice) {
+                      final isSelected = _selectedService == serice;
+                      return _buildFilterSelectionChip(
+                        label: serice,
+                        isSelected: isSelected,
+                        onSelected: () {
+                          setModalState(() {
+                            _selectedService = serice;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  _buildFilterHeader("Priority"),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: ["All", "High", "Medium", "Low"].map((priority) {
+                      final isSelected = _selectedPriority == priority;
+                      return _buildFilterSelectionChip(
+                        label: priority,
+                        isSelected: isSelected,
+                        onSelected: () {
+                          setModalState(() {
+                            _selectedPriority = priority;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 32),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedJob = "All";
+                              _selectedService = "All";
+                              _selectedPriority = "All";
+                            });
+                            _fetchTicketCounts();
+                            Navigator.pop(context);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10), // 🔽 smaller
+                            minimumSize: const Size(0, 38), // 🔽 control height
+                            tapTargetSize: MaterialTapTargetSize
+                                .shrinkWrap, // 🔽 remove extra space
+                            side: BorderSide(
+                                color: context.colors.outlineVariant),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  10), // optional smaller radius
+                            ),
+                          ),
+                          child: Text(
+                            "Reset",
+                            style: GoogleFonts.inter(
+                              fontSize: 13, // optional smaller text
+                              fontWeight: FontWeight.w600,
+                              color: context.colors.error,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {});
+                            _fetchTicketCounts();
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 66, 83, 100),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10), // 🔽 smaller
+                            minimumSize: const Size(0, 38), // 🔽 control height
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "Apply Filters",
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildFilterHeader(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF64748B),
+        letterSpacing: 0.2,
+      ),
+    );
+  }
+
+  Widget _buildFilterSelectionChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onSelected,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      labelStyle: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        color: isSelected
+            ? context.colors.onPrimary
+            : context.colors.onSurfaceVariant,
+      ),
+      selected: isSelected,
+      selectedColor: Color.fromARGB(255, 66, 83, 100),
+      backgroundColor: context.colors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: isSelected
+              ? Color.fromARGB(255, 66, 83, 100)
+              : context.colors.outlineVariant,
+          width: 1,
+        ),
+      ),
+      showCheckmark: false,
+      onSelected: (_) => onSelected(),
     );
   }
 
@@ -919,81 +985,84 @@ class _DashboardState extends State<Dashboard>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Color.fromARGB(255, 66, 83, 100),
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Dashboard',
-          style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.colors.onPrimary),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(55.0),
-          child: Container(
-            color: Colors.white,
-            child: Stack(
-              children: [
-                // ✅ TabBar
-                TabBar(
-                  controller: _tabController,
-                  indicator: const CustomTabIndicator(
-                    indicatorWidth: 70,
-                    indicatorHeight: 3,
-                    color: Colors.green,
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Color.fromARGB(255, 66, 83, 100),
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            'Dashboard',
+            style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.colors.onPrimary),
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(55.0),
+            child: Container(
+              color: Colors.white,
+              child: Stack(
+                children: [
+                  // ✅ TabBar
+                  TabBar(
+                    controller: _tabController,
+                    indicator: const CustomTabIndicator(
+                      indicatorWidth: 70,
+                      indicatorHeight: 3,
+                      color: Colors.green,
+                    ),
+                    indicatorSize: TabBarIndicatorSize.label,
+                    tabs: [
+                      Tab(
+                        child: Text(
+                          "Tickets",
+                          style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.036,
+                            color: const Color.fromARGB(255, 62, 62, 67),
+                          ),
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "KPI",
+                          style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.036,
+                            color: const Color.fromARGB(255, 62, 62, 67),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  indicatorSize: TabBarIndicatorSize.label,
-                  tabs: [
-                    Tab(
-                      child: Text(
-                        "Tickets",
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.036,
-                          color: const Color.fromARGB(255, 62, 62, 67),
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Text(
-                        "KPI",
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.036,
-                          color: const Color.fromARGB(255, 62, 62, 67),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
 
-                // ✅ Divider line in center
-                Container(
-                  margin: const EdgeInsets.only(top: 7),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.grey.shade400,
+                  // ✅ Divider line in center
+                  Container(
+                    margin: const EdgeInsets.only(top: 7),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 1,
+                        height: 30,
+                        color: Colors.grey.shade400,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _ticketTab(),
-          _kpiTab(),
-        ],
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _ticketTab(),
+            _kpiTab(),
+          ],
+        ),
       ),
     );
   }
@@ -1116,10 +1185,10 @@ class _DashboardState extends State<Dashboard>
                     child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                   SpinKitFadingCircle(
-                        color: Colors.green,
-                        size: 45.0,
-                      ),
+                    SpinKitFadingCircle(
+                      color: Colors.green,
+                      size: 45.0,
+                    ),
                     SizedBox(
                       height: 20,
                     ),
@@ -1291,14 +1360,14 @@ class _DashboardState extends State<Dashboard>
   Widget _buildFilterChip(String label, VoidCallback? onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(25),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: context.colors.secondaryContainer,
-          borderRadius: BorderRadius.circular(10),
+          color: context.colors.secondaryContainer.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: context.colors.secondary.withOpacity(0.3),
+            color: context.colors.secondary.withOpacity(0.2),
           ),
         ),
         child: Row(
@@ -1307,16 +1376,16 @@ class _DashboardState extends State<Dashboard>
             Text(
               label,
               style: GoogleFonts.inter(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: context.colors.onSecondaryContainer,
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Icon(
-              Icons.close,
-              size: 14,
-              color: context.colors.onSecondaryContainer.withOpacity(0.7),
+              Icons.cancel_rounded,
+              size: 16,
+              color: context.colors.onSecondaryContainer.withOpacity(0.6),
             )
           ],
         ),
@@ -1368,8 +1437,8 @@ class _DashboardState extends State<Dashboard>
         statusBgColor = const Color(0xFFE8F5E9); // Green 50
         break;
       default:
-        statusColor = context.colors.primary;
-        statusBgColor = context.colors.primaryContainer;
+        statusColor = Colors.black38;
+        statusBgColor = const Color.fromARGB(255, 253, 244, 156);
     }
 
     // Determine Job Type color (Corrective/Preventive)
@@ -1402,7 +1471,18 @@ class _DashboardState extends State<Dashboard>
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            // Navigate to Detail Screen
+            if (status == "Entry") {
+              // Navigate to Detail Screen for completed services
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ServiceDetailScreen(data: data as Map<String, dynamic>),
+                ),
+              ).then((value) => _fetchTicketCounts());
+              return;
+            }
+            // Navigate to Active Operation Screen
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -1444,17 +1524,22 @@ class _DashboardState extends State<Dashboard>
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: statusBgColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: statusColor.withOpacity(0.25),
+                          width: 1.2,
+                        ),
                       ),
                       child: Text(
-                        status == "Entry" ? "Completed" : status,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                        status == "Entry" ? "COMPLETED" : status.toUpperCase(),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
                           color: statusColor,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
@@ -1502,7 +1587,7 @@ class _DashboardState extends State<Dashboard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.location_on_outlined,
-                        size: 18, color: context.colors.onSurfaceVariant),
+                        size: 18, color: Colors.blue),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -1529,19 +1614,23 @@ class _DashboardState extends State<Dashboard>
 
                 // Footer: Job Type, Service Type, Priority
                 Wrap(
-                  spacing: 8,
+                  spacing: 10,
                   runSpacing: 8,
                   children: [
                     _buildTag(
                       label: data["U_CK_JobType"] ?? "N/A",
                       color: jobTypeColor,
                       bgColor: jobTypeBgColor,
+                      icon: data["U_CK_JobType"] == "Preventive"
+                          ? Icons.event_repeat_rounded
+                          : Icons.build_circle_outlined,
                     ),
                     _buildTag(
                       label: data["U_CK_ServiceType"] ?? "Service",
                       color: context.colors.tertiary,
                       bgColor:
-                          context.colors.tertiaryContainer.withOpacity(0.4),
+                          context.colors.tertiaryContainer.withOpacity(0.3),
+                      icon: Icons.settings_suggest_rounded,
                     ),
                     if (data["U_CK_Priority"] != null)
                       _buildTag(
@@ -1550,9 +1639,12 @@ class _DashboardState extends State<Dashboard>
                             ? context.colors.error
                             : context.colors.secondary,
                         bgColor: data["U_CK_Priority"] == "High"
-                            ? context.colors.errorContainer
-                            : context.colors.secondaryContainer,
-                        icon: Icons.flag_rounded,
+                            ? context.colors.errorContainer.withOpacity(0.8)
+                            : context.colors.secondaryContainer
+                                .withOpacity(0.8),
+                        icon: data["U_CK_Priority"] == "High"
+                            ? Icons.priority_high_rounded
+                            : Icons.low_priority_rounded,
                       ),
                   ],
                 ),
@@ -1571,24 +1663,36 @@ class _DashboardState extends State<Dashboard>
     IconData? icon,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withOpacity(0.15),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 12, color: color),
-            const SizedBox(width: 4),
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 5),
           ],
           Text(
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: color,
+              letterSpacing: 0.3,
             ),
           ),
         ],
@@ -1676,7 +1780,11 @@ class _DashboardState extends State<Dashboard>
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+                color: const Color(0xFF1E293B)),
           ),
           const SizedBox(height: 12),
           if (items.isEmpty)

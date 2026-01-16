@@ -212,7 +212,7 @@ class ServiceListProviderOffline extends ChangeNotifier {
     for (var doc in docs) {
       if (doc['DocEntry'] == docEntry) {
         doc['U_CK_Status'] = 'Entry';
-        doc['U_CK_EndTime'] = now;
+        doc['U_CK_EndTime'] = now.split("T")[1];
       }
     }
 

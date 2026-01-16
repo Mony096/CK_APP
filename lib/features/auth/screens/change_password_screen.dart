@@ -1,12 +1,9 @@
-import 'package:bizd_tech_service/core/utils/helper_utils.dart';
-import 'package:bizd_tech_service/main.dart';
 import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
-import 'package:bizd_tech_service/features/auth/screens/settings_screen.dart';
 import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
-import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
-import 'package:bizd_tech_service/features/main/screens/wrapper_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key, this.fromLogout});
@@ -16,323 +13,387 @@ class ChangePasswordScreen extends StatefulWidget {
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final _currentPassword = TextEditingController(text: "");
-  final _newPassword = TextEditingController(text: "");
-  late bool _obscureText = true;
+class _ChangePasswordScreenState extends State<ChangePasswordScreen>
+    with SingleTickerProviderStateMixin {
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  final _currentPasswordFocus = FocusNode();
+  final _newPasswordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
+
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimations();
+  }
+
+  void _setupAnimations() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    _currentPasswordFocus.dispose();
+    _newPasswordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleChangePassword() async {
+    if (_currentPasswordController.text.isEmpty ||
+        _newPasswordController.text.isEmpty) {
+      HapticFeedback.vibrate();
+      _showError('Please fill in all fields');
+      return;
+    }
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      HapticFeedback.vibrate();
+      _showError('New passwords do not match');
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    HapticFeedback.mediumImpact();
+    setState(() => _isLoading = true);
+
+    try {
+      final success = await Provider.of<AuthProvider>(context, listen: false)
+          .changePassword(context, _currentPasswordController.text,
+              _newPasswordController.text);
+
+      if (success && mounted) {
+        _showSuccess('Password changed successfully!');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreenV2()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('Incorrect password or server error');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter()),
+        backgroundColor: const Color(0xFFEF4444),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter()),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('images/bg.png'), // Path to your image
-              fit: BoxFit.cover, // Adjust how the image fits into the container
-            ),
-          ),
-          child: Consumer<AuthProvider>(
-            builder: (context, auth, _) => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Title
-                  // const SizedBox(
-                  //   height: 40,
-                  // ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width - 100,
-                    child: const Opacity(
-                      opacity:
-                          0.8, // Set the opacity level (0.0 is fully transparent, 1.0 is fully opaque)
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                            "Deliver Smarter",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(255, 238, 239, 241),
-                              fontSize: 30,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            "Simplify your workflow with real-time tracking.",
-                            style: TextStyle(
-                                fontSize: 14.5,
-                                color: Color.fromARGB(255, 255, 255, 255)),
-                          ),
-                          SizedBox(
-                            height: 60,
-                          ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.arrow_circle_right,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Please reset your password",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: Color.fromARGB(255, 255, 255, 255)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  // const SizedBox(height: 50), // Space between Title and boxes
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-                    margin: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 96, 100, 105)
-                              .withOpacity(0.25),
-                          blurRadius: 4,
-                          spreadRadius: 2,
-                          offset: const Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(children: [
-                      Image.asset(
-                        'images/logo.png',
-                        width: 90,
-                        height: 90,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      TextField(
-                        controller: _currentPassword,
-                        decoration: const InputDecoration(
-                          labelText: 'Current Password',
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey, // Set border color to gray
-                              width:
-                                  1.0, // Optional: Adjust the border thickness
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey, // Gray border when enabled
-                              width: 1.0,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey, // Gray border when focused
-                              width: 1.0,
-                            ),
-                          ),
-                          hintText: 'New Password',
-                          isDense: true, // Reduces the vertical space
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical:
-                                12.0, // Adjusts the height of the input field
-                            horizontal:
-                                12.0, // Adjusts horizontal padding inside the field
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      TextField(
-                        obscureText: _obscureText,
-                        controller: _newPassword,
-                        decoration: InputDecoration(
-                          labelText: 'New Password',
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey, // Set border color to gray
-                              width: 1.0, // Optional: Border thickness
-                            ),
-                          ),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey, // Gray border when enabled
-                              width: 1.0,
-                            ),
-                          ),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey, // Gray border when focused
-                              width: 1.0,
-                            ),
-                          ),
-                          hintText: 'Enter New Password',
-                          isDense: true, // Makes the TextField smaller
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical:
-                                8.0, // Adjust the height of the input field
-                            horizontal:
-                                12.0, // Adjust horizontal padding inside the field
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureText
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 35,
-                      ),
-                      ElevatedButton(
-                        // onPressed: () async {
-                        //   // setState(() => _isLoading = true);
-                        //   // final success = await Provider.of<AuthProvider>(
-                        //   //         context,
-                        //   //         listen: false)
-                        //   //     .login(context, _userName.text, _password.text);
-
-                        //   // if (success) {
-                        //   //   Navigator.of(context).pushAndRemoveUntil(
-                        //   //     MaterialPageRoute(
-                        //   //         builder: (_) => const WrapperScreen()),
-                        //   //     (route) => false,
-                        //   //   );
-                        //   // }
-                        //   // setState(() => _isLoading = false);
-
-                        // },
-                        onPressed: () async {
-                          try {
-                            setState(() => _isLoading = true);
-                            final success = await Provider.of<AuthProvider>(
-                                    context,
-                                    listen: false)
-                                .changePassword(context, _currentPassword.text,
-                                    _newPassword.text);
-                            if (success) {
-                              // Go to login screen and remove previous routes
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginScreenV2()),
-                                (route) => false,
-                              );
-                            }
-                            // if( await Provider.of<AuthProvider>(context, listen: false).isChangePassword){
-                            //   goTo(context, const ChangePasswordScreen())
-                            // }
-
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (_) => const WrapperScreen()),
-                              (route) => false,
-                            );
-                            setState(() => _isLoading = false);
-                          } catch (e) {
-                            setState(() => _isLoading = false);
-                            MaterialDialog.warning(
-                              context,
-                              title: 'Login Failed',
-                              body:
-                                  "Incorrect username/password or server error.",
-                            );
-                          }
-                        },
-
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          backgroundColor:
-                              const Color.fromARGB(255, 33, 107, 243),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 25,
-                                height: 25,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.0,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                ),
-                              )
-                            : const Text(
-                                'New Password',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                      ),
-                      const SizedBox(
-                        height: 6,
-                      ),
-                      // Button(
-                      //   variant: ButtonVariant.ghost,
-                      //   loading: false,
-                      //   child: const Text(
-                      //     'Setting',
-                      //     style: TextStyle(
-                      //         color: Color.fromARGB(255, 8, 8, 8),
-                      //         fontSize: 14),
-                      //   ),
-                      //   onPressed: () => goTo(context, const SettingScreen()),
-                      // ),
-                    ]),
-                  ),
-                  // const Expanded(
-                  // flex: 1,
-                  const SizedBox(height: 120),
-                  const SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Copyright@ 2023 BizDimension Cambodia",
-                          style: TextStyle(fontSize: 14.5, color: Colors.grey),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          "All rights reserved",
-                          style: TextStyle(fontSize: 14.5, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // ),
-                ],
+      backgroundColor: const Color(0xFFF3F4F6),
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          Positioned(
+            top: -50,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF3B82F6).withOpacity(0.05),
               ),
             ),
           ),
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Container(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      // Header
+                      Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.lock_reset_rounded,
+                              size: 40,
+                              color: Color(0xFF111827),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Reset Password',
+                            style: GoogleFonts.inter(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF1F2937),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Please create a new secure password',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Card
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildPasswordField(
+                              controller: _currentPasswordController,
+                              focusNode: _currentPasswordFocus,
+                              label: 'Current Password',
+                              hintText: 'Enter current password',
+                              obscureText: _obscureCurrentPassword,
+                              onToggle: () => setState(() =>
+                                  _obscureCurrentPassword =
+                                      !_obscureCurrentPassword),
+                              onSubmitted: (_) =>
+                                  _newPasswordFocus.requestFocus(),
+                            ),
+                            const SizedBox(height: 20),
+                            _buildPasswordField(
+                              controller: _newPasswordController,
+                              focusNode: _newPasswordFocus,
+                              label: 'New Password',
+                              hintText: 'Minimum 6 characters',
+                              obscureText: _obscureNewPassword,
+                              onToggle: () => setState(() =>
+                                  _obscureNewPassword = !_obscureNewPassword),
+                              onSubmitted: (_) =>
+                                  _confirmPasswordFocus.requestFocus(),
+                            ),
+                            const SizedBox(height: 20),
+                            _buildPasswordField(
+                              controller: _confirmPasswordController,
+                              focusNode: _confirmPasswordFocus,
+                              label: 'Confirm New Password',
+                              hintText: 'Repeat new password',
+                              obscureText: _obscureConfirmPassword,
+                              onToggle: () => setState(() =>
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword),
+                              onSubmitted: (_) => _handleChangePassword(),
+                              textInputAction: TextInputAction.done,
+                            ),
+                            const SizedBox(height: 32),
+                            _buildSubmitButton(),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Footer
+                      if (!keyboardVisible)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 40, bottom: 24),
+                          child: Text(
+                            '© 2025 BizDimension Cambodia',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: const Color(0xFF9CA3AF),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String label,
+    required String hintText,
+    required bool obscureText,
+    required VoidCallback onToggle,
+    ValueChanged<String>? onSubmitted,
+    TextInputAction textInputAction = TextInputAction.next,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF374151),
+          ),
         ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFE5E7EB),
+              width: 1,
+            ),
+          ),
+          child: TextFormField(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            textInputAction: textInputAction,
+            onFieldSubmitted: onSubmitted,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              color: const Color(0xFF111827),
+            ),
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: GoogleFonts.inter(
+                color: const Color(0xFF9CA3AF),
+                fontSize: 14,
+              ),
+              prefixIcon: const Icon(
+                Icons.lock_outline_rounded,
+                color: Color(0xFF9CA3AF),
+                size: 20,
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 20,
+                  color: const Color(0xFF9CA3AF),
+                ),
+                onPressed: onToggle,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _handleChangePassword,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF111827),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                'Update Password',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
