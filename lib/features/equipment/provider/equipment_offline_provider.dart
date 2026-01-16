@@ -62,6 +62,13 @@ class EquipmentOfflineProvider with ChangeNotifier {
   bool get canNext => _currentPage < totalPages;
   bool get canPrev => _currentPage > 1;
 
+  int get pendingSyncCount {
+    final box = Hive.box(_boxName);
+    final raw = box.get(_keyEquipments, defaultValue: []);
+    final all = (raw as List).whereType<Map>().toList();
+    return all.where((e) => e['sync_status'] == 'pending').length;
+  }
+
   EquipmentOfflineProvider() {
     _initHive();
   }

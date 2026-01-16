@@ -563,15 +563,13 @@ class CompletedServiceProvider extends ChangeNotifier {
           false,
           data: sapPayload,
         );
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 || response.statusCode == 204) {
           await offlineProvider.markServiceSynced(docEntry);
           debugPrint("✅ Synced DocEntry: $docEntry");
         } else {
           throw Exception(
               "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
         }
-
-        return true;
       } catch (e) {
         throw Exception("Your Service Failed: ${e.toString()}");
       } finally {
@@ -579,6 +577,7 @@ class CompletedServiceProvider extends ChangeNotifier {
         deleteTempFiles(filesToUpload);
       }
     }
+    return true;
   }
 
   // Helper function: convert File → { ext, data }

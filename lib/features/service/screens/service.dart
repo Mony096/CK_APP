@@ -1,30 +1,21 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:bizd_tech_service/core/widgets/DateForServiceList.dart';
-import 'package:bizd_tech_service/core/widgets/DatePickerDialog.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
-import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
-import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/core/providers/helper_provider.dart';
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/service/provider/service_provider.dart';
-import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/features/service/screens/component/block_service.dart';
+import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/screen/sericeEntry.dart';
-import 'package:bizd_tech_service/features/service/screens/screen/serviceById.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
@@ -163,34 +154,94 @@ class _ServiceScreenState extends State<ServiceScreen> {
     return await LocalStorageManger.getString('UserName');
   }
 
-  Future<void> onUpdateStatus(entry, currentStatus) async {
+  Future<void> onUpdateStatus(int entry, String currentStatus) async {
     MaterialDialog.loading(context);
 
     try {
-      // ⏳ Wait 1 seconds before updating
-      await Future.delayed(const Duration(seconds: 1));
+      // ⏳ Small delay for better UX
+      await Future.delayed(const Duration(milliseconds: 300));
 
-      await Provider.of<ServiceListProviderOffline>(context, listen: false)
-          .updateDocumentAndStatusOffline(
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+      final onlineProvider =
+          Provider.of<ServiceListProvider>(context, listen: false);
+
+      final cachedDoc = await offlineProvider.getDocumentByDocEntry(entry);
+      if (cachedDoc == null) {
+        throw "Document not found";
+      }
+
+      final now = DateTime.now();
+      final timeStamp = DateFormat("HH:mm:ss").format(now);
+      // Determine next status
+      String nextStatus;
+      switch (currentStatus) {
+        case "Pending":
+          nextStatus = "Accept";
+          break;
+        case "Accept":
+          nextStatus = "Travel";
+          break;
+        case "Travel":
+          nextStatus = "Service";
+          break;
+        default:
+          nextStatus = "Entry";
+      }
+
+      // Prepare payload
+      final updatePayload = {
+        // ...cachedDoc,
+        "U_CK_Time": cachedDoc["U_CK_Time"] ?? "",
+        "U_CK_EndTime": cachedDoc["U_CK_EndTime"] ?? "",
+        'DocEntry': entry,
+        'U_CK_Status': nextStatus,
+      };
+
+      if (currentStatus == "Pending") {
+        updatePayload["U_CK_Time"] = timeStamp;
+      } else {
+        updatePayload["U_CK_EndTime"] = timeStamp;
+      }
+
+      debugPrint("📤 Updating status to $nextStatus for DocEntry: $entry");
+
+      // 1. Update Online if internet is available
+      final hasInternet = await _checkInternetConnection();
+      if (hasInternet) {
+        await onlineProvider.updateStatusDirectToSAP(
+          updatePayload: updatePayload,
+          context: context,
+        );
+      } else {
+        debugPrint("📡 Offline mode: Skipping SAP update, will sync later.");
+      }
+
+      // 2. Update Offline storage
+      await offlineProvider.updateDocumentAndStatusOffline(
         docEntry: entry,
-        status: currentStatus == "Pending"
-            ? "Accept"
-            : currentStatus == "Accept"
-                ? "Travel"
-                : currentStatus == "Travel"
-                    ? "Service"
-                    : "Entry",
+        status: nextStatus,
+        time: timeStamp,
         context: context,
       );
-      final provider = context.read<ServiceListProviderOffline>();
-      provider.refreshDocuments(); // clear filter + reload all
-      MaterialDialog.close(context);
-      //✅ Close loading after update
+
+      // 3. Refresh and Close
+      offlineProvider.refreshDocuments();
+
+      if (mounted) {
+        MaterialDialog.close(context);
+      }
     } catch (e) {
-      Navigator.of(context).pop(); // Close loading
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e')),
-      );
+      debugPrint("❌ Error in onUpdateStatus: $e");
+      if (mounted) {
+        MaterialDialog.close(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

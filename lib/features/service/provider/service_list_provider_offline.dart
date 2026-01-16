@@ -85,6 +85,21 @@ class ServiceListProviderOffline extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>?> getDocumentByDocEntry(int docEntry) async {
+    if (_box == null) await _initBox();
+    try {
+      final rawDocs = _box!.get('documents', defaultValue: []) as List<dynamic>;
+      final docs = rawDocs
+          .whereType<Map>()
+          .map((doc) => Map<String, dynamic>.from(doc))
+          .toList();
+      return docs.firstWhere((doc) => doc['DocEntry'] == docEntry);
+    } catch (e) {
+      debugPrint("Error getting document by DocEntry: $e");
+      return null;
+    }
+  }
+
   /// Get list of existing DocEntries from offline storage
   Future<List<int>> getExistingDocEntries() async {
     if (_box == null) await _initBox();
@@ -107,35 +122,38 @@ class ServiceListProviderOffline extends ChangeNotifier {
   Future<void> mergeNewDocuments(List<dynamic> newDocs) async {
     if (_box == null) await _initBox();
     if (newDocs.isEmpty) return;
-    
+
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       final rawDocs = _box!.get('documents', defaultValue: []) as List<dynamic>;
       final existingDocs = rawDocs
           .whereType<Map>()
           .map((doc) => Map<String, dynamic>.from(doc))
           .toList();
-      
+
       // Get existing DocEntries
       final existingEntries = existingDocs
           .map((doc) => doc['DocEntry'] as int?)
           .where((entry) => entry != null)
           .toSet();
-      
+
       // Filter out duplicates and add only new ones
-      final uniqueNewDocs = newDocs.where((doc) {
-        final entry = doc['DocEntry'] as int?;
-        return entry != null && !existingEntries.contains(entry);
-      }).map((doc) => Map<String, dynamic>.from(doc as Map)).toList();
-      
+      final uniqueNewDocs = newDocs
+          .where((doc) {
+            final entry = doc['DocEntry'] as int?;
+            return entry != null && !existingEntries.contains(entry);
+          })
+          .map((doc) => Map<String, dynamic>.from(doc as Map))
+          .toList();
+
       if (uniqueNewDocs.isNotEmpty) {
         existingDocs.addAll(uniqueNewDocs);
         await _box!.put('documents', existingDocs);
         debugPrint("✅ Merged ${uniqueNewDocs.length} new documents");
       }
-      
+
       // Reload to apply any filters
       await loadDocuments();
     } catch (e) {
@@ -164,13 +182,13 @@ class ServiceListProviderOffline extends ChangeNotifier {
 
   /// Clear documents
   Future<void> clearDocuments() async {
-    if (_box == null) await _initBox();
+    if (_box == null || _completedBox == null) await _initBox();
     _isLoading = true;
     notifyListeners();
     try {
       await _box!.delete('documents');
       _documents = [];
-      await _box!.delete('completed');
+      await _completedBox!.delete('completed');
       _completedServices = [];
     } catch (e) {
       debugPrint("Error clearing offline docs: $e");
@@ -193,7 +211,8 @@ class ServiceListProviderOffline extends ChangeNotifier {
   Future<void> addCompletedService(Map<dynamic, dynamic> payload) async {
     if (_completedBox == null) await _initBox();
     // Add a status to the payload for sync tracking
-    final Map<dynamic, dynamic> payloadWithStatus = Map<dynamic, dynamic>.from(payload);
+    final Map<dynamic, dynamic> payloadWithStatus =
+        Map<dynamic, dynamic>.from(payload);
     payloadWithStatus['sync_status'] = 'pending';
 
     _completedServices.add(payloadWithStatus);
@@ -232,62 +251,85 @@ class ServiceListProviderOffline extends ChangeNotifier {
     return pendingServices.cast<Map<dynamic, dynamic>>();
   }
 
-  Future<void> updateDocumentAndStatusOffline(
-      {required int docEntry,
-      required String status,
-      required BuildContext context}) async {
+  int get pendingSyncCount {
+    if (_completedBox == null) return 0;
+    final raw =
+        _completedBox!.get('completed', defaultValue: []) as List<dynamic>;
+    return raw.where((service) => service['sync_status'] == 'pending').length;
+  }
+
+  Future<void> updateDocumentAndStatusOffline({
+    required int docEntry,
+    required String status,
+    String? time,
+    required BuildContext context,
+  }) async {
     if (_box == null) await _initBox();
-    List<dynamic> docs =
-        List<dynamic>.from(_box!.get('documents', defaultValue: []));
 
-    final now = DateTime.now();
-    final timeStamp = DateFormat("HH:mm:ss").format(now);
+    try {
+      final rawDocs = _box!.get('documents', defaultValue: []) as List<dynamic>;
+      List<Map<String, dynamic>> docs = rawDocs
+          .whereType<Map>()
+          .map((doc) => Map<String, dynamic>.from(doc))
+          .toList();
 
-    for (var doc in docs) {
-      if (doc['DocEntry'] == docEntry) {
-        doc['U_CK_Status'] = status;
+      final now = DateTime.now();
+      final timeStamp = time ?? DateFormat("HH:mm:ss").format(now);
 
-        if (status == "Accept") {
-          doc["U_CK_Time"] = timeStamp;
-        } else {
-          doc["U_CK_EndTime"] = timeStamp;
+      bool found = false;
+      for (var doc in docs) {
+        if (doc['DocEntry'] == docEntry) {
+          doc['U_CK_Status'] = status;
+
+          // Update time fields based on status
+          if (status == "Accept") {
+            doc["U_CK_Time"] = timeStamp;
+          } else {
+            doc["U_CK_EndTime"] = timeStamp;
+          }
+          found = true;
+          break;
         }
       }
-    }
-    await _box!.put('documents', docs);
-    _documents = docs;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-      behavior: SnackBarBehavior.floating,
-      elevation: 10,
-      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(9),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      content: const Row(
-        children: [
-          Icon(Icons.remove_circle, color: Colors.white, size: 28),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Status updated successfully!",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
+
+      if (found) {
+        await _box!.put('documents', docs);
+        _documents = docs;
+        notifyListeners();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor:
+                  const Color.fromARGB(255, 46, 125, 50), // Green for success
+              behavior: SnackBarBehavior.floating,
+              elevation: 4,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text(
+                    "Status updated to $status",
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                ),
-              ],
+                ],
+              ),
+              duration: const Duration(seconds: 2),
             ),
-          ),
-        ],
-      ),
-      duration: const Duration(seconds: 4),
-    ));
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("❌ Error updating offline document: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   /// Mark a service as successfully synced

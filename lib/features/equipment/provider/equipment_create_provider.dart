@@ -367,12 +367,6 @@ class EquipmentCreateProvider with ChangeNotifier {
         sapPayload.remove('files');
         sapPayload.remove('sync_status');
         sapPayload.remove('savedAt');
-        final index = offlineProvider.equipments
-            .indexWhere((e) => e['Code'] == equipmentPayload['Code']);
-        if (index != -1) {
-          equipmentPayload['sync_status'] = 'synced';
-          await offlineProvider.updateEquipment(equipmentPayload);
-        }
         // Send to SAP
         final response = await dio.post(
           "/CK_CUSEQUI",
@@ -388,8 +382,9 @@ class EquipmentCreateProvider with ChangeNotifier {
           final index = offlineProvider.equipments
               .indexWhere((e) => e['Code'] == equipmentPayload['Code']);
           if (index != -1) {
-            equipmentPayload['sync_status'] = 'synced';
-            await offlineProvider.updateEquipment(equipmentPayload);
+            final updatedPayload = Map<String, dynamic>.from(equipmentPayload);
+            updatedPayload['sync_status'] = 'synced';
+            await offlineProvider.updateEquipment(updatedPayload);
           }
         } else {
           throw Exception(

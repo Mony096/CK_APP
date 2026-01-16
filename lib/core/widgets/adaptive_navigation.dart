@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../theme/app_tokens.dart';
 
-/// Platform-adaptive tab bar that uses Material TabBar on Android 
+/// Platform-adaptive tab bar that uses Material TabBar on Android
 /// and CupertinoSlidingSegmentedControl on iOS
-/// 
+///
 /// Usage:
 /// ```dart
 /// AdaptiveTabBar(
@@ -55,10 +55,12 @@ class AdaptiveTabBar extends StatelessWidget {
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
-          tabs: tabs.map((tab) => Tab(
-            text: tab.label,
-            icon: tab.icon != null ? Icon(tab.icon, size: 20) : null,
-          )).toList(),
+          tabs: tabs
+              .map((tab) => Tab(
+                    text: tab.label,
+                    icon: tab.icon != null ? Icon(tab.icon, size: 20) : null,
+                  ))
+              .toList(),
         ),
       ),
     );
@@ -90,8 +92,8 @@ class AdaptiveTabBar extends StatelessWidget {
                     Icon(
                       tabs[i].icon,
                       size: 16,
-                      color: selectedIndex == i 
-                          ? AppColors.primary 
+                      color: selectedIndex == i
+                          ? AppColors.primary
                           : AppColors.textSecondary,
                     ),
                     const SizedBox(width: AppSpacing.xs),
@@ -100,8 +102,8 @@ class AdaptiveTabBar extends StatelessWidget {
                     tabs[i].label,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: selectedIndex == i 
-                          ? FontWeight.w600 
+                      fontWeight: selectedIndex == i
+                          ? FontWeight.w600
                           : FontWeight.normal,
                     ),
                   ),
@@ -152,11 +154,29 @@ class AdaptiveBottomNavBar extends StatelessWidget {
       onDestinationSelected: onItemTapped,
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       height: 70,
-      destinations: items.map((item) => NavigationDestination(
-        icon: Icon(item.icon, size: 24),
-        selectedIcon: Icon(item.activeIcon ?? item.icon, size: 24, color: AppColors.primary),
-        label: item.label,
-      )).toList(),
+      destinations: items.map((item) {
+        final icon = Icon(item.icon, size: 24);
+        final selectedIcon = Icon(item.activeIcon ?? item.icon,
+            size: 24, color: AppColors.primary);
+
+        return NavigationDestination(
+          icon: item.badgeCount != null && item.badgeCount! > 0
+              ? Badge(
+                  label: Text(item.badgeCount.toString()),
+                  alignment: const AlignmentDirectional(3, -1),
+                  child: icon,
+                )
+              : icon,
+          selectedIcon: item.badgeCount != null && item.badgeCount! > 0
+              ? Badge(
+                  label: Text(item.badgeCount.toString()),
+                  alignment: const AlignmentDirectional(5, -2),
+                  child: selectedIcon,
+                )
+              : selectedIcon,
+          label: item.label,
+        );
+      }).toList(),
     );
   }
 
@@ -167,17 +187,34 @@ class AdaptiveBottomNavBar extends StatelessWidget {
       activeColor: AppColors.primary,
       inactiveColor: AppColors.textSecondary,
       iconSize: 24,
-      items: items.map((item) => BottomNavigationBarItem(
-        icon: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Icon(item.icon),
-        ),
-        activeIcon: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Icon(item.activeIcon ?? item.icon),
-        ),
-        label: item.label,
-      )).toList(),
+      items: items.map((item) {
+        final icon = Icon(item.icon);
+        final activeIcon = Icon(item.activeIcon ?? item.icon);
+
+        return BottomNavigationBarItem(
+          icon: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: item.badgeCount != null && item.badgeCount! > 0
+                ? Badge(
+                    label: Text(item.badgeCount.toString()),
+                    alignment: const AlignmentDirectional(6, -2),
+                    child: icon,
+                  )
+                : icon,
+          ),
+          activeIcon: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: item.badgeCount != null && item.badgeCount! > 0
+                ? Badge(
+                    label: Text(item.badgeCount.toString()),
+                    alignment: const AlignmentDirectional(6, -2),
+                    child: activeIcon,
+                  )
+                : activeIcon,
+          ),
+          label: item.label,
+        );
+      }).toList(),
     );
   }
 }
@@ -188,11 +225,13 @@ class AdaptiveNavItem {
     required this.label,
     required this.icon,
     this.activeIcon,
+    this.badgeCount,
   });
 
   final String label;
   final IconData icon;
   final IconData? activeIcon;
+  final int? badgeCount;
 }
 
 /// Platform-adaptive app bar
@@ -218,7 +257,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
       return CupertinoNavigationBar(
         middle: Text(title),
         leading: leading,
-        trailing: actions != null && actions!.isNotEmpty 
+        trailing: actions != null && actions!.isNotEmpty
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: actions!,

@@ -25,6 +25,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   final GlobalKey _activityKey = GlobalKey();
   final GlobalKey _materialKey = GlobalKey();
   final GlobalKey _timeKey = GlobalKey();
+  final GlobalKey _issueKey = GlobalKey();
   final GlobalKey _checklistKey = GlobalKey();
   final GlobalKey _attachmentKey = GlobalKey();
 
@@ -160,6 +161,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   _buildSectionHeader(context, "Time Entry", key: _timeKey),
                   const SizedBox(height: 12),
                   _buildTimeSection(context),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, "Open Issues", key: _issueKey),
+                  const SizedBox(height: 12),
+                  _buildIssueSection(context),
                   const SizedBox(height: 24),
                   _buildSectionHeader(context, "Checklist", key: _checklistKey),
                   const SizedBox(height: 12),
@@ -357,6 +362,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 context, "Materials", Icons.inventory_2_rounded, _materialKey),
             _buildNavChip(context, "Time Logs",
                 Icons.access_time_filled_rounded, _timeKey),
+            _buildNavChip(
+                context, "Issues", Icons.report_problem_rounded, _issueKey),
             _buildNavChip(
                 context, "Checklist", Icons.fact_check_rounded, _checklistKey),
             _buildNavChip(
@@ -762,6 +769,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             item['U_CK_TrueOutput'] == 'Yes' ? 'Passed' : 'Failed';
         return "Status: $status";
       },
+    );
+  }
+
+  Widget _buildIssueSection(BuildContext context) {
+    final issues = _displayData['CK_JOB_ISSUECollection'] as List? ?? [];
+    return _buildItemList(
+      items: issues,
+      emptyMessage: "No open issues recorded.",
+      icon: Icons.report_problem_rounded,
+      titleKey: 'U_CK_IssueType',
+      subtitleKey: 'U_CK_IssueDesc',
+      subtitlePrefix: 'Desc: ',
     );
   }
 }

@@ -44,32 +44,44 @@ class _SyncScreenState extends State<SyncScreen> {
   }
 
   Future<void> _handleSyncToSAP() async {
-    MaterialDialog.loading(context);
-    try {
-      final res1 =
-          await Provider.of<CompletedServiceProvider>(context, listen: false)
+    MaterialDialog.warningBackScreen(
+      context,
+      title: "Sync to SAP",
+      body: "Are you sure you want to synchronize all offline work to SAP?",
+      confirmLabel: "Sync Now",
+      cancelLabel: "Cancel",
+      icon: Icons.sync_rounded,
+      onConfirm: () async {
+        if (!mounted) return;
+        MaterialDialog.loading(context);
+        try {
+          final res1 = await Provider.of<CompletedServiceProvider>(context,
+                  listen: false)
               .syncAllOfflineServicesToSAP(context);
-      final res2 =
-          await Provider.of<EquipmentCreateProvider>(context, listen: false)
-              .syncAllOfflineEquipmentToSAP(context);
+          final res2 =
+              await Provider.of<EquipmentCreateProvider>(context, listen: false)
+                  .syncAllOfflineEquipmentToSAP(context);
 
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading
-        if (res1 == false && res2 == false) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("No offline data to synchronize.")));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Synchronization complete!")));
+          if (mounted) {
+            MaterialDialog.close(context); // Safe close loading
+            if (res1 == false && res2 == false) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("No offline data to synchronize.")));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Synchronization complete!")));
+            }
+          }
+        } catch (e) {
+          debugPrint("Sync Error: $e");
+          if (mounted) {
+            MaterialDialog.close(context); // Safe close loading
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Sync failed: ${e.toString()}")));
+          }
         }
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Sync failed: $e")));
-      }
-    }
+      },
+    );
   }
 
   Future<void> _handleDownload() async {
@@ -185,38 +197,49 @@ class _SyncScreenState extends State<SyncScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        children: [
-          _buildInfoCard(),
-          const SizedBox(height: 32),
-          _buildSectionHeader("Sync Actions"),
-          _buildSyncItem(
-            icon: Icons.cloud_upload_outlined,
-            title: "Sync to SAP",
-            subtitle: "Upload your offline work to the server",
-            onTap: _handleSyncToSAP,
-            color: Colors.green,
-          ),
-          _buildSyncItem(
-            icon: Icons.download_outlined,
-            title: "Download Data",
-            subtitle: "Update your master data",
-            onTap: _handleDownload,
-            color: Colors.blue,
-            enabled: _isDownloaded != "true",
-          ),
-          const SizedBox(height: 24),
-          _buildSectionHeader("Danger Zone"),
-          _buildSyncItem(
-            icon: Icons.delete_outline,
-            title: "Clear Offline Data",
-            subtitle: "Remove all downloaded data from this device",
-            onTap: _handleClearData,
-            color: Colors.red,
-            // enabled: _isDownloaded == "true",
-          ),
-        ],
+      body: Consumer2<ServiceListProviderOffline, EquipmentOfflineProvider>(
+        builder: (context, serviceOffline, equipmentOffline, child) {
+          final serviceCount = serviceOffline.pendingSyncCount;
+          final equipmentCount = equipmentOffline.pendingSyncCount;
+          final totalPending = serviceCount + equipmentCount;
+
+          return ListView(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            children: [
+              _buildInfoCard(),
+              const SizedBox(height: 32),
+              _buildSectionHeader("Sync Actions"),
+              _buildSyncItem(
+                icon: Icons.cloud_upload_outlined,
+                title: "Sync to SAP",
+                subtitle: totalPending > 0
+                    ? "Ready to sync service ($serviceCount) and Equipment ($equipmentCount)"
+                    : "Upload your offline work to the server",
+                onTap: _handleSyncToSAP,
+                color: Colors.green,
+                trailingCount: totalPending > 0 ? totalPending : null,
+              ),
+              _buildSyncItem(
+                icon: Icons.download_outlined,
+                title: "Download Data",
+                subtitle: "Update your master data",
+                onTap: _handleDownload,
+                color: Colors.blue,
+                enabled: _isDownloaded != "true",
+              ),
+              const SizedBox(height: 24),
+              _buildSectionHeader("Danger Zone"),
+              _buildSyncItem(
+                icon: Icons.delete_outline,
+                title: "Clear Offline Data",
+                subtitle: "Remove all downloaded data from this device",
+                onTap: _handleClearData,
+                color: Colors.red,
+                // enabled: _isDownloaded == "true",
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -294,6 +317,7 @@ class _SyncScreenState extends State<SyncScreen> {
     required VoidCallback onTap,
     required Color color,
     bool enabled = true,
+    int? trailingCount,
   }) {
     return Opacity(
       opacity: enabled ? 1.0 : 0.5,
@@ -336,11 +360,28 @@ class _SyncScreenState extends State<SyncScreen> {
               color: Colors.grey.shade500,
             ),
           ),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            color: Colors.grey.shade300,
-            size: 14,
-          ),
+          trailing: trailingCount != null && trailingCount > 0
+              ? Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade500,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    trailingCount.toString(),
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              : Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey.shade300,
+                  size: 14,
+                ),
         ),
       ),
     );

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/screen/serviceById.dart';
@@ -38,6 +41,8 @@ class _DashboardState extends State<Dashboard>
   List<dynamic> documentOffline = [];
   List<dynamic> completedService = [];
   String isDownloaded = "false";
+  bool _isSyncing = false;
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +60,8 @@ class _DashboardState extends State<Dashboard>
       });
 
       // ✅ Fetch ticket counts after docs are loaded
+      await _fetchTicketCounts();
+      await _autoSyncServices();
       await _fetchTicketCounts();
     });
 
@@ -80,6 +87,67 @@ class _DashboardState extends State<Dashboard>
       userName = name;
       isDownloaded = isDownLoadDone;
     });
+  }
+
+  /// Check if device has internet connection
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Auto-sync services when screen loads (if online)
+  Future<void> _autoSyncServices() async {
+    if (_isSyncing) return;
+
+    try {
+      setState(() => _isSyncing = true);
+
+      // Check internet connectivity
+      final hasInternet = await _checkInternetConnection();
+      if (!hasInternet) {
+        debugPrint("📴 No internet connection - skipping sync");
+        return;
+      }
+
+      debugPrint("📡 Internet available - starting auto-sync...");
+
+      // Get providers
+      final onlineProvider =
+          Provider.of<ServiceListProvider>(context, listen: false);
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+      // Get existing DocEntries from offline storage
+      final existingDocEntries = await offlineProvider.getExistingDocEntries();
+      debugPrint(
+          "📦 Found ${existingDocEntries.length} existing offline records");
+
+      // Fetch only NEW services from API
+      final newServices = await onlineProvider.fetchNewServicesForSync(
+        existingDocEntries: existingDocEntries,
+      );
+
+      if (newServices.isNotEmpty) {
+        // Merge new services with existing offline data
+        await offlineProvider.mergeNewDocuments(newServices);
+        debugPrint(
+            "✅ Auto-sync complete: ${newServices.length} new services added");
+      } else {
+        debugPrint("✅ Auto-sync complete: No new services to add");
+        // Still load documents to refresh the view
+        await offlineProvider.loadDocuments();
+      }
+    } catch (e) {
+      debugPrint("❌ Auto-sync error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isSyncing = false);
+      }
+    }
   }
 
   void _initTicketDates() {
@@ -1002,6 +1070,36 @@ class _DashboardState extends State<Dashboard>
                 fontWeight: FontWeight.w700,
                 color: context.colors.onPrimary),
           ),
+          actions: [
+            if (_isSyncing)
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.greenAccent,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Syncing...",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(55.0),
             child: Container(
@@ -1178,28 +1276,29 @@ class _DashboardState extends State<Dashboard>
         ),
 
         // 🔹 Ticket list
-        load == true
-            ? SizedBox(
-                height: 550,
-                child: Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SpinKitFadingCircle(
-                      color: Colors.green,
-                      size: 45.0,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      "Loading...",
-                      style: TextStyle(fontSize: 17),
-                    ),
-                  ],
-                )),
-              )
-            : Expanded(
+        // _isSyncing == true
+        //     ? SizedBox(
+        //         height: 550,
+        //         child: Center(
+        //             child: Column(
+        //           mainAxisAlignment: MainAxisAlignment.center,
+        //           children: [
+        //             SpinKitFadingCircle(
+        //               color: Colors.green,
+        //               size: 45.0,
+        //             ),
+        //             SizedBox(
+        //               height: 20,
+        //             ),
+        //             Text(
+        //               "Loading...",
+        //               style: TextStyle(fontSize: 17),
+        //             ),
+        //           ],
+        //         )),
+        //       )
+        //     :
+             Expanded(
                 // <<< Fix: constrain ListView inside Column
                 child: ListView.builder(
                   padding: const EdgeInsets.all(12),

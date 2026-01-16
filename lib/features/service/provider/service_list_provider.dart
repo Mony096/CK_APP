@@ -98,6 +98,35 @@ class ServiceListProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> updateStatusDirectToSAP({
+    required dynamic updatePayload,
+    required BuildContext context,
+  }) async {
+    if (_isLoading) return;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await dio.patch(
+          "/CK_JOBORDER(${updatePayload['DocEntry']})", false, false,
+          data: updatePayload);
+
+      if (response.statusCode == 204) {
+       print("status updated to SAP");
+      }
+    } catch (e) {
+      await MaterialDialog.warning(
+        context,
+        title: "Error",
+        body: "Failed to update status to SAP",
+      );
+      print("Error updating status: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchDocumentTicket({
     bool loadMore = false,
     bool isSetFilter = false,
@@ -220,11 +249,10 @@ class ServiceListProvider extends ChangeNotifier {
       // Build filter to exclude existing DocEntries
       // String filter =
       //     "U_CK_TechnicianId eq $userId and U_CK_Status eq 'Pending'";
-String today = DateTime.now().toIso8601String().split('T')[0];
+      String today = DateTime.now().toIso8601String().split('T')[0];
 
-      String filter =
-          "U_CK_TechnicianId eq $userId "
-          "and U_CK_Status eq 'Pending' "
+      String filter = "U_CK_TechnicianId eq $userId "
+          "and (U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service' or U_CK_Status eq 'Entry') "
           "and U_CK_Date ge '$today'";
 
       // Add DocEntry exclusion filter if there are existing entries

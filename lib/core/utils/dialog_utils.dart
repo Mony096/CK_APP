@@ -120,7 +120,6 @@ class MaterialDialog {
           key: const Key('_dialog'),
           backgroundColor: context.surfaceColor,
           surfaceTintColor: context.colors.surfaceTint,
-
           title: Text(
             title ?? 'Success',
             style: TextStyle(
@@ -188,7 +187,6 @@ class MaterialDialog {
           key: const Key('_dialog'),
           backgroundColor: context.surfaceColor,
           surfaceTintColor: context.colors.surfaceTint,
-
           title: Text(
             title ?? 'Success',
             style: TextStyle(
@@ -281,7 +279,8 @@ class MaterialDialog {
                       borderRadius: BorderRadius.circular(
                           25), // Fully rounded (half of width/height)
                       border: Border.all(
-                        color: context.colors.tertiary, // Use tertiary for alert blue
+                        color: context
+                            .colors.tertiary, // Use tertiary for alert blue
                         width: 2, // Border width of 5 pixels
                       ),
                     ),
@@ -332,7 +331,6 @@ class MaterialDialog {
             ),
           ),
           actions: <Widget>[
-            // A horizontal line to separate the content from the buttons
             const SizedBox(
               height: 15,
             ),
@@ -341,8 +339,8 @@ class MaterialDialog {
               children: [
                 TextButton(
                   onPressed: () {
-                    if (onCancel != null) onCancel();
                     Navigator.of(context).pop();
+                    if (onCancel != null) onCancel();
                   },
                   child: Text(
                     cancelLabel,
@@ -360,16 +358,15 @@ class MaterialDialog {
                   height: 35,
                   child: ElevatedButton(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       if (onConfirm != null) {
                         onConfirm();
                       }
-                      Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colors.primaryContainer,
                       foregroundColor: context.colors.onPrimaryContainer,
                       elevation: 3,
-                      // Adjust the padding to make the button smaller
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 0),
                       shape: RoundedRectangleBorder(
@@ -441,7 +438,8 @@ class MaterialDialog {
                       borderRadius: BorderRadius.circular(
                           25), // Fully rounded (half of width/height)
                       border: Border.all(
-                        color: context.colors.tertiary, // Use tertiary for alert blue
+                        color: context
+                            .colors.tertiary, // Use tertiary for alert blue
                         width: 2, // Border width of 5 pixels
                       ),
                     ),
@@ -457,7 +455,7 @@ class MaterialDialog {
                     child: Text(
                       'Warning',
                       // textAlign: TextAlign.center,
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: Color.fromARGB(255, 64, 64, 70),
                         fontSize: MediaQuery.of(context).size.width * 0.039,
                         fontWeight: FontWeight.w600,
@@ -481,10 +479,11 @@ class MaterialDialog {
             child: ListBody(
               children: <Widget>[
                 Text(
-                  body ?? "Are you sure you want to go back without completing?",
+                  body ??
+                      "Are you sure you want to go back without completing?",
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.036,
+                    fontSize: MediaQuery.of(context).size.width * 0.034,
                     height:
                         1.6, // ✅ line height (1.0 = normal, >1.0 = more space)
                     color: context.colors.onSurfaceVariant,
@@ -494,7 +493,6 @@ class MaterialDialog {
             ),
           ),
           actions: <Widget>[
-            // A horizontal line to separate the content from the buttons
             const SizedBox(
               height: 15,
             ),
@@ -503,8 +501,8 @@ class MaterialDialog {
               children: [
                 TextButton(
                   onPressed: () {
-                    if (onCancel != null) onCancel();
                     Navigator.of(context).pop();
+                    if (onCancel != null) onCancel();
                   },
                   child: Text(
                     cancelLabel,
@@ -522,16 +520,15 @@ class MaterialDialog {
                   height: 35,
                   child: ElevatedButton(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       if (onConfirm != null) {
                         onConfirm();
                       }
-                      Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colors.primaryContainer,
                       foregroundColor: context.colors.onPrimaryContainer,
                       elevation: 3,
-                      // Adjust the padding to make the button smaller
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 0),
                       shape: RoundedRectangleBorder(
@@ -887,8 +884,12 @@ class MaterialDialog {
                 if (onCancel != null) onCancel();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: iconColor == Colors.green ? context.colors.primary : iconColor,
-                foregroundColor: iconColor == Colors.green ? context.colors.onPrimary : Colors.white,
+                backgroundColor: iconColor == Colors.green
+                    ? context.colors.primary
+                    : iconColor,
+                foregroundColor: iconColor == Colors.green
+                    ? context.colors.onPrimary
+                    : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -980,8 +981,12 @@ class MaterialDialog {
                 if (onCancel != null) onCancel();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: iconColor == Colors.green ? context.colors.primary : iconColor,
-                foregroundColor: iconColor == Colors.green ? context.colors.onPrimary : Colors.white,
+                backgroundColor: iconColor == Colors.green
+                    ? context.colors.primary
+                    : iconColor,
+                foregroundColor: iconColor == Colors.green
+                    ? context.colors.onPrimary
+                    : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1122,7 +1127,8 @@ class MaterialDialog {
             30,
           ),
         ),
-        child: Text(message, style: TextStyle(color: context.colors.onInverseSurface)),
+        child: Text(message,
+            style: TextStyle(color: context.colors.onInverseSurface)),
       ),
       padding: const EdgeInsets.all(12),
     );
