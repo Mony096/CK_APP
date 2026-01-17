@@ -46,21 +46,6 @@ class NotificationService {
       }
     });
 
-    // Initialize Firebase
-    await Firebase.initializeApp();
-    
-    // Request Firebase permissions
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: true,
-      provisional: false,
-      sound: true,
-    );
-
     // Set listeners
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: _onActionReceivedMethod,

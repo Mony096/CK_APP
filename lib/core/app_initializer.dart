@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -38,9 +37,6 @@ class AppInitializer {
     // Initialize local storage
     await _initHive();
     
-    // Initialize notifications
-    await _initNotifications();
-    
     // Request notification permissions
     await FirebaseMessaging.instance.requestPermission();
   }
@@ -62,26 +58,6 @@ class AppInitializer {
     ]);
   }
   
-  /// Initialize Awesome Notifications
-  static Future<void> _initNotifications() async {
-    await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelKey: 'call_channel',
-          channelName: 'Incoming Call',
-          channelDescription: 'Call notifications',
-          importance: NotificationImportance.Max,
-          playSound: true,
-          enableVibration: true,
-          vibrationPattern: Int64List.fromList([0, 1000, 500, 1000, 500, 1000, 500, 1000]),
-          defaultRingtoneType: DefaultRingtoneType.Ringtone,
-          locked: true,
-          criticalAlerts: true,
-        ),
-      ],
-    );
-  }
   
   /// Clear all local data (for logout)
   static Future<void> clearAllData() async {
