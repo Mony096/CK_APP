@@ -62,6 +62,9 @@ class EquipmentOfflineProvider with ChangeNotifier {
   bool get canNext => _currentPage < totalPages;
   bool get canPrev => _currentPage > 1;
 
+  // Get all filtered equipments (not just current page)
+  List<dynamic> get allFilteredEquipments => _allFilteredEquipments;
+
   int get pendingSyncCount {
     final box = Hive.box(_boxName);
     final raw = box.get(_keyEquipments, defaultValue: []);

@@ -162,12 +162,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
 
               Navigator.pop(dialogContext); // Close scanner dialog
 
-              // Search for equipment by code
-              final equipment = provider.equipments.firstWhere(
+              // Search for equipment by code (search all equipments, not just current page)
+              final equipment = provider.allFilteredEquipments.firstWhere(
                 (e) => e['Code'] == scannedCode,
                 orElse: () => null,
               );
-              print(provider.equipments);
               if (equipment != null) {
                 goTo(context, EquipmentCreateScreen(data: equipment));
               } else {
