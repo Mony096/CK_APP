@@ -204,7 +204,45 @@ class ServiceListProviderOffline extends ChangeNotifier {
     final raw =
         _completedBox!.get('completed', defaultValue: []) as List<dynamic>;
     _completedServices = List<dynamic>.from(raw);
+    await autoCleanupSyncedServices();
     notifyListeners();
+  }
+
+  /// Automatically remove synced services that are older than today
+  Future<void> autoCleanupSyncedServices() async {
+    if (_completedBox == null) await _initBox();
+
+    final List<dynamic> services =
+        List<dynamic>.from(_completedBox!.get('completed', defaultValue: []));
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    bool changed = false;
+    final List<dynamic> filteredServices = services.where((service) {
+      if (service['sync_status'] == 'synced') {
+        final dateStr = service['U_CK_Date'];
+        if (dateStr != null) {
+          try {
+            // Handle both YYYY-MM-DD and YYYY-MM-DDTHH:mm:ss
+            final date = DateTime.parse(dateStr.toString().split('T')[0]);
+            if (date.isBefore(today)) {
+              changed = true;
+              return false; // Remove this synced service
+            }
+          } catch (e) {
+            debugPrint("Error parsing date for cleanup: $e");
+          }
+        }
+      }
+      return true;
+    }).toList();
+
+    if (changed) {
+      await _completedBox!.put('completed', filteredServices);
+      _completedServices = filteredServices;
+      debugPrint(
+          "🧹 Auto-cleaned ${services.length - filteredServices.length} old synced services");
+    }
   }
 
   /// Add new completed payload and store it in Hive
@@ -336,16 +374,19 @@ class ServiceListProviderOffline extends ChangeNotifier {
   Future<void> markServiceSynced(dynamic docEntry) async {
     if (_completedBox == null) await _initBox();
     final List<dynamic> services =
-        _completedBox!.get('completed', defaultValue: []);
+        List<dynamic>.from(_completedBox!.get('completed', defaultValue: []));
     final index =
         services.indexWhere((service) => service['DocEntry'] == docEntry);
 
     if (index != -1) {
-      // Remove the service instead of updating status
-      services.removeAt(index);
+      // Update status to synced
+      services[index]['sync_status'] = 'synced';
 
       // Save back to Hive
       await _completedBox!.put('completed', services);
+
+      // Update local list
+      _completedServices = services;
 
       // Update listeners
       notifyListeners();

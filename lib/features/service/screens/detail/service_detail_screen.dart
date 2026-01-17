@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/signature/signature_preview_edit.dart';
+import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -31,11 +32,52 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   late Map<String, dynamic> _displayData;
   bool _isLoading = true;
+  GlobalKey? _activeKey;
 
   @override
   void initState() {
     super.initState();
+    _activeKey = _customerKey;
+    _scrollController.addListener(_onScroll);
     _enrichData();
+  }
+
+  void _onScroll() {
+    // List of keys in order
+    final keys = [
+      _customerKey,
+      _serviceKey,
+      _equipmentKey,
+      _activityKey,
+      _materialKey,
+      _timeKey,
+      _issueKey,
+      _checklistKey,
+      _attachmentKey,
+    ];
+
+    GlobalKey? mostVisibleKey;
+    double minDistance = double.infinity;
+
+    for (var key in keys) {
+      final context = key.currentContext;
+      if (context != null) {
+        final box = context.findRenderObject() as RenderBox;
+        final position = box.localToGlobal(Offset.zero).dy;
+        // Check distance to the top of the viewport (app bar height is roughly 150 incl header)
+        final distance = (position - 150).abs();
+        if (distance < minDistance) {
+          minDistance = distance;
+          mostVisibleKey = key;
+        }
+      }
+    }
+
+    if (mostVisibleKey != null && mostVisibleKey != _activeKey) {
+      setState(() {
+        _activeKey = mostVisibleKey;
+      });
+    }
   }
 
   @override
@@ -45,6 +87,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   void _scrollToSection(GlobalKey key) {
+    setState(() {
+      _activeKey = key;
+    });
     Scrollable.ensureVisible(
       key.currentContext!,
       duration: const Duration(milliseconds: 600),
@@ -54,7 +99,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Future<void> _enrichData() async {
     _displayData = Map<String, dynamic>.from(widget.data);
-
+    prettyPrint(widget.data);
     // If it's a completed service (Entry) and we're missing rich data, look it up in offline storage
     if (_displayData['U_CK_Status'] == 'Entry' &&
         (_displayData['CK_JOB_TIMECollection'] == null ||
@@ -62,8 +107,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       try {
         final offlineProvider =
             Provider.of<ServiceListProviderOffline>(context, listen: false);
-        final completedServices =
-            await offlineProvider.getCompletedServicesToSync();
+        final completedServices = offlineProvider.completedServices;
 
         // Find the matching payload by DocEntry (robust comparison)
         final richPayload = completedServices.firstWhere(
@@ -71,10 +115,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               s['DocEntry']?.toString() == _displayData['DocEntry']?.toString(),
           orElse: () => {},
         );
-
+        //  prettyPrint(richPayload);
         if (richPayload.isNotEmpty) {
+          print(richPayload);
           debugPrint(
               "✅ Found rich payload for DocEntry: ${_displayData['DocEntry']}");
+
           _displayData.addAll(Map<String, dynamic>.from(richPayload));
         } else {
           debugPrint(
@@ -376,21 +422,49 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildNavChip(
       BuildContext context, String label, IconData icon, GlobalKey key) {
+    final bool isActive = _activeKey == key;
+
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: ActionChip(
-        onPressed: () => _scrollToSection(key),
-        backgroundColor: Colors.white,
-        side: BorderSide(color: const Color(0xFFF1F5F9)),
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        avatar: Icon(icon, size: 16, color: const Color(0xFF64748B)),
-        label: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1E293B),
+      child: GestureDetector(
+        onTap: () => _scrollToSection(key),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF22C55E) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isActive ? Colors.transparent : const Color(0xFFF1F5F9),
+            ),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF22C55E).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    )
+                  ]
+                : [],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isActive ? Colors.white : const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                  color: isActive ? Colors.white : const Color(0xFF1E293B),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -758,7 +832,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildChecklistSection(BuildContext context) {
-    final checklist = _displayData['feedbackChecklistLine'] as List? ?? [];
+    final checklist = _displayData['checklistLine'] as List? ?? [];
     return _buildItemList(
       items: checklist,
       emptyMessage: "No checklist data recorded.",

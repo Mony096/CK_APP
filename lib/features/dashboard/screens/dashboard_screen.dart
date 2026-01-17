@@ -545,7 +545,7 @@ class _DashboardState extends State<Dashboard>
   //     return [];
   //   }
   // }
-  Future<List<Map<String, String>>> _fetchTicketsFromOffline(
+  Future<List<Map<String, dynamic>>> _fetchTicketsFromOffline(
       String date) async {
     try {
       final offlineProvider =
@@ -572,13 +572,8 @@ class _DashboardState extends State<Dashboard>
       }).toList();
 
       // Map to the same format as your API
-      return filteredDocs.map<Map<String, String>>((item) {
-        return {
-          "id": item["DocEntry"].toString(),
-          "title": item["U_CK_JobName"] ?? "No Title",
-          "status": item["U_CK_Status"] ?? "Open",
-          "priority": item["U_CK_Priority"] ?? "Low",
-        };
+      return filteredDocs.map<Map<String, dynamic>>((item) {
+        return Map<String, dynamic>.from(item);
       }).toList();
     } catch (e) {
       debugPrint("Error fetching tickets from offline for $date: $e");
@@ -1298,160 +1293,154 @@ class _DashboardState extends State<Dashboard>
         //         )),
         //       )
         //     :
-             Expanded(
-                // <<< Fix: constrain ListView inside Column
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: ticketGroups.length,
-                  itemBuilder: (context, index) {
-                    final group = ticketGroups[index];
-                    final tickets = group["tickets"] as List;
+        Expanded(
+          // <<< Fix: constrain ListView inside Column
+          child: ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: ticketGroups.length,
+            itemBuilder: (context, index) {
+              final group = ticketGroups[index];
+              final tickets = group["tickets"] as List;
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(7),
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 233, 233, 235),
-                          width: 1,
-                        ),
-                        // boxShadow: [
-                        //   BoxShadow(
-                        //     color: Theme.of(context)
-                        //         .colorScheme
-                        //         .onSurface
-                        //         .withOpacity(0.08),
-                        //     blurRadius: 4,
-                        //     offset: const Offset(0, 2),
-                        //   ),
-                        // ],
-                      ),
-                      child: Theme(
-                        data: Theme.of(context)
-                            .copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0.3),
-                            child: Icon(Icons.date_range,
-                                color: context.colors.onPrimaryContainer),
-                          ),
-                          title: Row(
-                            children: [
-                              Text(
-                                group["date"],
-                                style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.035,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 15),
-                              group["isLoadingCount"] == true
-                                  ? CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: context.colors.primary,
-                                    )
-                                  : Container()
-                            ],
-                          ),
-                          subtitle: Text(
-                            "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
-                            style: TextStyle(
-                                color: Colors.grey,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.031),
-                          ),
-                          // ✅ custom right icon
-                          // ✅ custom rotating arrow
-                          // trailing: AnimatedRotation(
-                          //   turns: _isExpanded
-                          //       ? 0.5
-                          //       : 0.0, // 0.5 = 180°, 0.25 = 90°
-                          //   duration: const Duration(milliseconds: 200),
-                          //   child: const Icon(
-                          //     Icons.keyboard_arrow_down,
-                          //     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          //   ),
-                          // ),
-
-                          onExpansionChanged: (expanded) async {
-                            setState(() {
-                              _isExpanded = expanded;
-                            });
-                            if (expanded && tickets.isEmpty) {
-                              setState(() {
-                                group["tickets"] = ["loading"];
-                                _isExpanded = expanded;
-                                print(expanded);
-                              });
-                              final fetchedTickets =
-                                  await _fetchTicketsFromOffline(
-                                      group["dateValue"]);
-                              setState(() {
-                                group["tickets"] = fetchedTickets;
-                              });
-                            }
-                          },
-                          childrenPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
-                          children: tickets.isEmpty
-                              ? [
-                                  Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(
-                                      "No tickets available!",
-                                      style: TextStyle(
-                                          color:
-                                              context.colors.onSurfaceVariant,
-                                          fontSize: 13),
-                                    ),
-                                  )
-                                ]
-                              : tickets[0] == "loading"
-                                  ? [
-                                      Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8),
-                                            child: Center(
-                                                child: SizedBox(
-                                                    width: 21,
-                                                    height: 21,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      color: context
-                                                          .colors.primary,
-                                                    ))),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            "Loading ${group["date"]}' Ticket...",
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: context
-                                                    .colors.onSurfaceVariant),
-                                          ),
-                                          const SizedBox(height: 10),
-                                        ],
-                                      )
-                                    ]
-                                  : tickets.asMap().entries.map((entry) {
-                                      final index = entry.key;
-                                      final ticket = entry.value;
-
-                                      return _cardTicket(ticket, index);
-                                    }).toList(),
-                        ),
-                      ),
-                    );
-                  },
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                    color: const Color.fromARGB(255, 233, 233, 235),
+                    width: 1,
+                  ),
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     color: Theme.of(context)
+                  //         .colorScheme
+                  //         .onSurface
+                  //         .withOpacity(0.08),
+                  //     blurRadius: 4,
+                  //     offset: const Offset(0, 2),
+                  //   ),
+                  // ],
                 ),
-              ),
+                child: Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withOpacity(0.3),
+                      child: Icon(Icons.date_range,
+                          color: context.colors.onPrimaryContainer),
+                    ),
+                    title: Row(
+                      children: [
+                        Text(
+                          group["date"],
+                          style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.035,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        group["isLoadingCount"] == true
+                            ? CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: context.colors.primary,
+                              )
+                            : Container()
+                      ],
+                    ),
+                    subtitle: Text(
+                      "Tickets:  ${group["isLoadingCount"] == true ? "fetching..." : group["count"]}",
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: MediaQuery.of(context).size.width * 0.031),
+                    ),
+                    // ✅ custom right icon
+                    // ✅ custom rotating arrow
+                    // trailing: AnimatedRotation(
+                    //   turns: _isExpanded
+                    //       ? 0.5
+                    //       : 0.0, // 0.5 = 180°, 0.25 = 90°
+                    //   duration: const Duration(milliseconds: 200),
+                    //   child: const Icon(
+                    //     Icons.keyboard_arrow_down,
+                    //     color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    //   ),
+                    // ),
+
+                    onExpansionChanged: (expanded) async {
+                      setState(() {
+                        _isExpanded = expanded;
+                      });
+                      if (expanded && tickets.isEmpty) {
+                        setState(() {
+                          group["tickets"] = ["loading"];
+                          _isExpanded = expanded;
+                          print(expanded);
+                        });
+                        final fetchedTickets =
+                            await _fetchTicketsFromOffline(group["dateValue"]);
+                        setState(() {
+                          group["tickets"] = fetchedTickets;
+                        });
+                      }
+                    },
+                    childrenPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    children: tickets.isEmpty
+                        ? [
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                "No tickets available!",
+                                style: TextStyle(
+                                    color: context.colors.onSurfaceVariant,
+                                    fontSize: 13),
+                              ),
+                            )
+                          ]
+                        : tickets[0] == "loading"
+                            ? [
+                                Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Center(
+                                          child: SizedBox(
+                                              width: 21,
+                                              height: 21,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: context.colors.primary,
+                                              ))),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      "Loading ${group["date"]}' Ticket...",
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color:
+                                              context.colors.onSurfaceVariant),
+                                    ),
+                                    const SizedBox(height: 10),
+                                  ],
+                                )
+                              ]
+                            : tickets.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final ticket = entry.value;
+
+                                return _cardTicket(ticket, index);
+                              }).toList(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -1524,20 +1513,30 @@ class _DashboardState extends State<Dashboard>
     String status = data["U_CK_Status"] ?? "N/A";
 
     switch (status) {
+      case "Pending":
       case "Open":
-        statusColor = context.colors.error;
-        statusBgColor = context.colors.errorContainer;
+        statusColor = const Color(0xFFE53935); // Red 600
+        statusBgColor = const Color(0xFFFFEBEE); // Red 50
+        break;
+      case "Accept":
+        statusColor = const Color(0xFF00897B); // Teal 600
+        statusBgColor = const Color(0xFFE0F2F1); // Teal 50
+        break;
+      case "Travel":
+        statusColor = const Color(0xFF1E88E5); // Blue 600
+        statusBgColor = const Color(0xFFE3F2FD); // Blue 50
         break;
       case "Service":
-      case "Travel":
+        statusColor = const Color(0xFF8E24AA); // Purple 600
+        statusBgColor = const Color(0xFFF3E5F5); // Purple 50
+        break;
       case "Entry":
-      case "Accept":
-        statusColor = const Color(0xFF2E7D32); // Green 800
+        statusColor = const Color(0xFF43A047); // Green 600
         statusBgColor = const Color(0xFFE8F5E9); // Green 50
         break;
       default:
-        statusColor = Colors.black38;
-        statusBgColor = const Color.fromARGB(255, 253, 244, 156);
+        statusColor = Colors.blueGrey;
+        statusBgColor = Colors.blueGrey.withOpacity(0.1);
     }
 
     // Determine Job Type color (Corrective/Preventive)
@@ -1619,6 +1618,34 @@ class _DashboardState extends State<Dashboard>
                             color: context.colors.onSurfaceVariant,
                           ),
                         ),
+                        if (status == "Entry") ...[
+                          const SizedBox(width: 8),
+                          Consumer<ServiceListProviderOffline>(
+                            builder: (context, offlineProvider, child) {
+                              final completed =
+                                  offlineProvider.completedServices;
+                              final richPayload = completed.firstWhere(
+                                (s) =>
+                                    s['DocEntry']?.toString() ==
+                                    data['DocEntry']?.toString(),
+                                orElse: () => {},
+                              );
+
+                              final isSynced =
+                                  richPayload['sync_status'] == 'synced';
+
+                              return Icon(
+                                isSynced
+                                    ? Icons.cloud_done_rounded
+                                    : Icons.cloud_off_rounded,
+                                size: 18,
+                                color: isSynced
+                                    ? const Color(0xFF43A047)
+                                    : const Color(0xFFEF6C00),
+                              );
+                            },
+                          ),
+                        ],
                       ],
                     ),
                     Container(

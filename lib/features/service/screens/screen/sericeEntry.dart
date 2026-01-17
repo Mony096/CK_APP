@@ -38,6 +38,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     // setState(() {
     //   print("asasa");
     // });
+    print(widget.data);
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onCompletedServiceOffline(
@@ -46,6 +47,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       docEntry: widget.data["DocEntry"],
       startTime: widget.data["U_CK_Time"],
       endTime: widget.data["U_CK_EndTime"],
+      customerName: widget.data["U_CK_Cardname"],
+      date: widget.data["U_CK_Date"] ?? "",
     );
     if (res) {
       Navigator.of(context).pop(true); // Return true to previous screen

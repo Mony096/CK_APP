@@ -209,12 +209,18 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Page ${provider.currentPage} of ${provider.totalPages} (${provider.totalRecords} total)",
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF64748B),
+                      Flexible(
+                        child: Text(
+                          MediaQuery.of(context).size.width < 380
+                              ? "Pg ${provider.currentPage}/${provider.totalPages} (${provider.totalRecords})"
+                              : "Page ${provider.currentPage} of ${provider.totalPages} (${provider.totalRecords} total)",
+                          style: GoogleFonts.inter(
+                            fontSize: responsiveFontSize(context,
+                                mobile: 11, tablet: 13),
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF64748B),
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Row(
@@ -349,5 +355,18 @@ class _SiteMasterPageState extends State<SiteMasterPage> {
         ),
       ),
     );
+  }
+}
+
+double responsiveFontSize(BuildContext context,
+    {double mobile = 12, double tablet = 13, double desktop = 14}) {
+  final double width = MediaQuery.of(context).size.width;
+
+  if (width < 600) {
+    return mobile; // Mobile
+  } else if (width < 1024) {
+    return tablet; // Tablet
+  } else {
+    return desktop; // Web / Desktop
   }
 }

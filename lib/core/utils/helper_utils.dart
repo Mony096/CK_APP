@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'dart:developer' as dev;
 
 Future<dynamic> goTo<T extends Widget>(BuildContext context, T route,
     {bool removeAllPreviousRoutes = false}) async {
@@ -76,7 +78,6 @@ String formatCustomTimePlusMinutes(String time, int minutesToAdd) {
   return formattedTime;
 }
 
-
 String showDateOnService(String? date) {
   if (date == null || date.isEmpty) {
     return "No Date";
@@ -89,3 +90,12 @@ String showDateOnService(String? date) {
   }
 }
 
+void prettyPrint(dynamic data) {
+  try {
+    const encoder = JsonEncoder.withIndent('  ');
+    final String prettyString = encoder.convert(data);
+    dev.log(prettyString);
+  } catch (e) {
+    dev.log(data.toString());
+  }
+}

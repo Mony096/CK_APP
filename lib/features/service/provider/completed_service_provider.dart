@@ -529,8 +529,6 @@ class CompletedServiceProvider extends ChangeNotifier {
         //   }
         // }
 
-        print(fileDataList);
-
         int? attachmentEntry;
 
         // 1. Upload attachments only if there are files
@@ -605,6 +603,8 @@ class CompletedServiceProvider extends ChangeNotifier {
     required dynamic docEntry,
     required dynamic startTime,
     required dynamic endTime,
+    required String customerName,
+    required String date,
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
@@ -696,6 +696,8 @@ class CompletedServiceProvider extends ChangeNotifier {
     // 2. Build the payload
     final payload = {
       "DocEntry": docEntry,
+      "U_CK_Cardname": customerName,
+      "U_CK_Date": date,
       "U_CK_Status": "Entry",
       "U_CK_AttachmentEntry": attachmentEntryExisting,
       "U_CK_Time": startTime,

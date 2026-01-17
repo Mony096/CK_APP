@@ -13,6 +13,7 @@ import 'package:bizd_tech_service/features/equipment/screens/component/part.dart
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
 import 'package:bizd_tech_service/core/core.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,8 +24,17 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 class EquipmentCreateScreen extends StatefulWidget {
-  EquipmentCreateScreen({super.key, required this.data});
-  Map<String, dynamic> data;
+  final Map<String, dynamic> data;
+  final VoidCallback? onBack;
+  final bool isNested;
+
+  const EquipmentCreateScreen({
+    super.key,
+    required this.data,
+    this.onBack,
+    this.isNested = false,
+  });
+
   @override
   _EquipmentCreateScreenState createState() => _EquipmentCreateScreenState();
 }
@@ -245,8 +255,9 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
           Provider.of<EquipmentOfflineProvider>(context, listen: false);
 
       // --- Find the equipment by code from ALL stored equipments ---
-      final offlineData = await provider.findEquipmentByCode(widget.data['Code']);
-      
+      final offlineData =
+          await provider.findEquipmentByCode(widget.data['Code']);
+
       if (offlineData == null) {
         // Not found offline, fallback to default or show warning
         await MaterialDialog.warning(
@@ -391,8 +402,9 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       );
       return;
     }
-    await Provider.of<EquipmentOfflineProvider>(context, listen: false)
-        .saveEquipmentOffline(data: {
+    final success =
+        await Provider.of<EquipmentOfflineProvider>(context, listen: false)
+            .saveEquipmentOffline(data: {
       "U_ck_eqStatus": equipType.text,
       "U_ck_CusCode": customerCode.text,
       "U_ck_CusName": customerName.text,
@@ -406,8 +418,17 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       "U_ck_InstalDate": installedDate.text,
       "U_ck_NsvDate": nextDate.text,
       "U_ck_WarExpDate": warrantyDate.text,
-      // Components, parts, and images are automatically included from provider
     }, context: context);
+
+    if (success && mounted) {
+      await MaterialDialog.createdSuccess(context);
+
+      if (widget.onBack != null) {
+        widget.onBack!();
+      } else {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   void clearAllFields() {
@@ -480,7 +501,9 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             icon:
                 const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
             onPressed: () {
-              if (isEditing) {
+              if (widget.onBack != null) {
+                widget.onBack!();
+              } else if (isEditing) {
                 Provider.of<EquipmentOfflineProvider>(context, listen: false)
                     .clearCollection();
                 Navigator.of(context).pop();
@@ -570,44 +593,60 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: AdaptiveBottomNavBar(
-          selectedIndex: 2, // Equipment tab
-          onItemTapped: (index) {
-            if (index != 2) {
-              // Navigate back and let MainScreen handle the tab change
-              Provider.of<EquipmentOfflineProvider>(context, listen: false)
-                  .clearCollection();
-              Navigator.of(context).pop(index);
-            }
-          },
-          items: const [
-            AdaptiveNavItem(
-              label: 'Home',
-              icon: Icons.dashboard_outlined,
-              activeIcon: Icons.dashboard,
-            ),
-            AdaptiveNavItem(
-              label: 'Service',
-              icon: Icons.miscellaneous_services_outlined,
-              activeIcon: Icons.miscellaneous_services,
-            ),
-            AdaptiveNavItem(
-              label: 'Equipment',
-              icon: Icons.build_outlined,
-              activeIcon: Icons.build,
-            ),
-            AdaptiveNavItem(
-              label: 'Sync',
-              icon: Icons.sync_outlined,
-              activeIcon: Icons.sync,
-            ),
-            AdaptiveNavItem(
-              label: 'Account',
-              icon: Icons.person_outline,
-              activeIcon: Icons.person,
-            ),
-          ],
-        ),
+        bottomNavigationBar: widget.isNested
+            ? null
+            : Container(
+                child: Consumer2<ServiceListProviderOffline,
+                    EquipmentOfflineProvider>(
+                  builder: (context, serviceOffline, equipmentOffline, child) {
+                    final totalPending = serviceOffline.pendingSyncCount +
+                        equipmentOffline.pendingSyncCount;
+
+                    return AdaptiveBottomNavBar(
+                      selectedIndex: 2, // 👈 FIXED to Equipment
+                      onItemTapped: (index) {
+                        if (index != 2) {
+                          Provider.of<EquipmentOfflineProvider>(
+                            context,
+                            listen: false,
+                          ).clearCollection();
+
+                          Navigator.of(context)
+                              .pop(index); // return index to MainScreen
+                        }
+                      },
+                      items: [
+                        const AdaptiveNavItem(
+                          label: 'Dashboard',
+                          icon: Icons.dashboard_outlined,
+                          activeIcon: Icons.dashboard,
+                        ),
+                        const AdaptiveNavItem(
+                          label: 'Service',
+                          icon: Icons.miscellaneous_services_outlined,
+                          activeIcon: Icons.miscellaneous_services,
+                        ),
+                        const AdaptiveNavItem(
+                          label: 'Equipment',
+                          icon: Icons.build_outlined,
+                          activeIcon: Icons.build,
+                        ),
+                        AdaptiveNavItem(
+                          label: 'Sync',
+                          icon: Icons.sync_outlined,
+                          activeIcon: Icons.sync,
+                          badgeCount: totalPending,
+                        ),
+                        const AdaptiveNavItem(
+                          label: 'Account',
+                          icon: Icons.person_outline,
+                          activeIcon: Icons.person,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
       ),
     );
   }
@@ -637,8 +676,9 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             child: Text(
               label,
               style: GoogleFonts.inter(
-                color:
-                    isSelected ? const Color.fromARGB(255, 255, 255, 255) : Colors.grey.shade500,
+                color: isSelected
+                    ? const Color.fromARGB(255, 255, 255, 255)
+                    : Colors.grey.shade500,
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),

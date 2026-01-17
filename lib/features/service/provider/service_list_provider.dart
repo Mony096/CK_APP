@@ -252,7 +252,7 @@ class ServiceListProvider extends ChangeNotifier {
       String today = DateTime.now().toIso8601String().split('T')[0];
 
       String filter = "U_CK_TechnicianId eq $userId "
-          "and (U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service' or U_CK_Status eq 'Entry') "
+          "and (U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service') "
           "and U_CK_Date ge '$today'";
 
       // Add DocEntry exclusion filter if there are existing entries

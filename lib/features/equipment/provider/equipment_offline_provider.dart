@@ -61,6 +61,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
   int get totalPages => (_allFilteredEquipments.length / _pageSize).ceil();
   bool get canNext => _currentPage < totalPages;
   bool get canPrev => _currentPage > 1;
+  int get pageSize => _pageSize;
 
   int get pendingSyncCount {
     final box = Hive.box(_boxName);
@@ -428,59 +429,52 @@ class EquipmentOfflineProvider with ChangeNotifier {
       {required Map<String, dynamic> data,
       required BuildContext context}) async {
     _submit = true;
-    MaterialDialog.loading(context); // Show loading dialog
-
     notifyListeners();
+    MaterialDialog.loading(context);
 
     try {
-      // --- Check for duplicate code ---
-      final existing = _equipments.firstWhere(
-        (e) => e['Code'] == data['Code'],
-        orElse: () => <String, dynamic>{},
-      );
+      // 1. Check for duplicates in the FULL list (not just current page)
+      final box = Hive.box(_boxName);
+      final List<dynamic> allStored = box.get(_keyEquipments, defaultValue: []);
+      final exists = allStored.any((e) => e['Code'] == data['Code']);
 
-      if (existing.isNotEmpty) {
-        MaterialDialog.close(context); // Close loading before throwing
+      if (exists) {
+        MaterialDialog.close(context);
         throw Exception("Equipment with code ${data['Code']} already exists!");
       }
 
-      // Convert images to base64
-      List<Map<String, String>> fileDataList = [];
-      for (File imageFile in _imagesList) {
-        fileDataList.add(await fileToBase64WithExt(imageFile));
-      }
+      // 2. Optimized: Convert images to base64 in parallel
+      final fileDataList = await Future.wait(
+        _imagesList.map((file) => fileToBase64WithExt(file)),
+      );
 
       final payload = {
         ...data,
         "files": fileDataList,
-        "CK_CUSEQUI01Collection": _components,
-        "CK_CUSEQUI02Collection": _parts,
-        "sync_status": "pending", // or use isPending: true
+        "CK_CUSEQUI01Collection": List.from(_components),
+        "CK_CUSEQUI02Collection": List.from(_parts),
+        "sync_status": "pending",
         "savedAt": DateTime.now().toIso8601String(),
       };
 
+      // 3. Save to Hive
       await addEquipment(payload);
-      print(_equipments);
-      // Clear temp collections
+
+      // 4. Cleanup
       clearCollection();
-      MaterialDialog.close(context); // Show loading dialog
+      MaterialDialog.close(context);
 
       _submit = false;
-      _components = [];
-      _parts = [];
-      _imagesList = [];
-      await MaterialDialog.createdSuccess(
-        context,
-      );
       notifyListeners();
-
       return true;
     } catch (e) {
+      MaterialDialog.close(context);
       await MaterialDialog.warningStayScreenWhenOk(
         context,
         title: "Error",
         body: e.toString(),
       );
+      _submit = false;
       notifyListeners();
       return false;
     }

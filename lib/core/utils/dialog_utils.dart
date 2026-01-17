@@ -655,7 +655,6 @@ class MaterialDialog {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop(true);
-                      Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colors.primaryContainer,

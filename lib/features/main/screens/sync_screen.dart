@@ -227,7 +227,27 @@ class _SyncScreenState extends State<SyncScreen> {
                 color: Colors.blue,
                 enabled: _isDownloaded != "true",
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
+              if (serviceOffline.completedServices
+                  .any((s) => s['sync_status'] != 'synced')) ...[
+                _buildSectionHeader("Completed Operations Service"),
+                ...serviceOffline.completedServices.reversed
+                    .where((service) => service['sync_status'] != 'synced')
+                    .map((service) {
+                  return _buildServiceListItem(service, serviceOffline);
+                }),
+                const SizedBox(height: 24),
+              ],
+              if (equipmentOffline.equipments
+                  .any((e) => e['sync_status'] == 'pending')) ...[
+                _buildSectionHeader("Pending Equipment Sync"),
+                ...equipmentOffline.equipments.reversed
+                    .where((e) => e['sync_status'] == 'pending')
+                    .map((equipment) {
+                  return _buildEquipmentListItem(equipment);
+                }),
+                const SizedBox(height: 24),
+              ],
               _buildSectionHeader("Danger Zone"),
               _buildSyncItem(
                 icon: Icons.delete_outline,
@@ -240,6 +260,268 @@ class _SyncScreenState extends State<SyncScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildServiceListItem(
+      Map<dynamic, dynamic> service, ServiceListProviderOffline provider) {
+    final docEntry = service['DocEntry'];
+
+    // Try to find the document to get the customer name
+    final doc = provider.documents.cast<Map<String, dynamic>>().firstWhere(
+          (d) => d['DocEntry'] == docEntry,
+          orElse: () => <String, dynamic>{},
+        );
+
+    final cardName = doc['U_CK_Cardname'] ?? "Unknown Customer";
+    final docNum = doc['DocNum'] ?? doc['id'] ?? 'N/A';
+
+    final address = (doc['CustomerAddress'] as List?)?.isNotEmpty == true
+        ? doc['CustomerAddress'][0]['StreetNo'] ?? 'No Address'
+        : doc['Address'] ?? 'No Address';
+    final date = doc['U_CK_Date'] != null
+        ? doc['U_CK_Date'].toString().split('T')[0]
+        : 'No Date';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.pending_actions_rounded,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cardName,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: const Color(0xFF1E293B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "Ticket #$docNum",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    "Ready to Sync",
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, thickness: 0.5),
+            ),
+            Row(
+              children: [
+                const Icon(Icons.location_on_rounded,
+                    size: 14, color: Color(0xFF64748B)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    address,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: const Color(0xFF64748B),
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today_rounded,
+                    size: 14, color: Color(0xFF64748B)),
+                const SizedBox(width: 6),
+                Text(
+                  date,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEquipmentListItem(Map<dynamic, dynamic> equipment) {
+    final name = equipment['Name'] ?? "Unknown Equipment";
+    final code = equipment['Code'] ?? "N/A";
+    final sn = equipment['U_ck_eqSerNum'] ?? "N/A";
+    final customer = equipment['U_ck_CusName'] ?? "No Customer";
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF22C55E).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.inventory_2_rounded,
+                    color: Color(0xFF22C55E),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: const Color(0xFF1E293B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "Code: $code",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    "NEW",
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, thickness: 0.5),
+            ),
+            Row(
+              children: [
+                const Icon(Icons.person_pin_rounded,
+                    size: 14, color: Color(0xFF64748B)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    "Customer: $customer",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: const Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  "S/N: $sn",
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

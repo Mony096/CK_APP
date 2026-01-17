@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
 import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
@@ -41,6 +40,9 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   List<dynamic> customers = [];
   String? userName;
 
+  bool _isCreatingOrEditing = false;
+  Map<String, dynamic> _selectedEquipmentData = {};
+
   @override
   void initState() {
     super.initState();
@@ -81,18 +83,17 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
     Navigator.pop(context, bp);
   }
 
+  void _navigateToCreateOrEdit(Map<String, dynamic> data) {
+    setState(() {
+      _selectedEquipmentData = data;
+      _isCreatingOrEditing = true;
+    });
+  }
+
   void onDetail(dynamic data, int index) {
     if (index < 0) return;
 
-    // MaterialDialog.viewDetailDialog(
-    //   context,
-    //   title: 'Equipment (${data['Code']})',
-    //   cancelLabel: "Go",
-    //   onCancel: () {
-    //     goTo(context, EquipmentCreateScreen(data: data));
-    //   },
-    // );
-    goTo(context, EquipmentCreateScreen(data: data));
+    _navigateToCreateOrEdit(Map<String, dynamic>.from(data));
   }
 
   Future<void> clearOfflineDataWithLogout(BuildContext context) async {
@@ -169,7 +170,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               );
               print(provider.equipments);
               if (equipment != null) {
-                goTo(context, EquipmentCreateScreen(data: equipment));
+                _navigateToCreateOrEdit(Map<String, dynamic>.from(equipment));
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -211,6 +212,20 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
         final provider = Provider.of<EquipmentOfflineProvider>(context);
         // final isLoadingMore = provider.isLoading && provider.hasMore;
         const loading = false;
+
+        if (_isCreatingOrEditing) {
+          return EquipmentCreateScreen(
+            data: _selectedEquipmentData,
+            isNested: true,
+            onBack: () {
+              setState(() {
+                _isCreatingOrEditing = false;
+              });
+              _refreshData();
+            },
+          );
+        }
+
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
@@ -234,9 +249,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                 tooltip: 'Scan QR',
               ),
               IconButton(
-                onPressed: () async {
-                  await goTo(context, EquipmentCreateScreen(data: const {}))
-                      .then((_) => _refreshData());
+                onPressed: () {
+                  _navigateToCreateOrEdit(const {});
                 },
                 icon: const Icon(Icons.add_rounded,
                     color: Colors.white, size: 26),
@@ -396,7 +410,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               itemCount: documents.length,
                               itemBuilder: (context, index) {
                                 final item = documents[index];
-                                return _buildEquipmentCard(item, index);
+                                final globalIndex =
+                                    (deliveryProvider.currentPage - 1) *
+                                            deliveryProvider.pageSize +
+                                        index;
+                                return _buildEquipmentCard(item, globalIndex);
                               },
                             ),
                 ),
@@ -418,14 +436,23 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages} (${deliveryProvider.totalRecords} total)",
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF64748B),
+                        /// PAGE INFO TEXT (Responsive)
+                        Flexible(
+                          child: Text(
+                            MediaQuery.of(context).size.width < 380
+                                ? "Pg ${deliveryProvider.currentPage}/${deliveryProvider.totalPages} (${deliveryProvider.totalRecords})"
+                                : "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages} (${deliveryProvider.totalRecords} total)",
+                            style: GoogleFonts.inter(
+                              fontSize: responsiveFontSize(context,
+                                  mobile: 11, tablet: 13),
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+
+                        /// PAGINATION BUTTONS
                         Row(
                           children: [
                             _buildPageButton(
@@ -643,5 +670,18 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
         ),
       ),
     );
+  }
+}
+
+double responsiveFontSize(BuildContext context,
+    {double mobile = 12, double tablet = 13, double desktop = 14}) {
+  final double width = MediaQuery.of(context).size.width;
+
+  if (width < 600) {
+    return mobile; // Mobile
+  } else if (width < 1024) {
+    return tablet; // Tablet
+  } else {
+    return desktop; // Web / Desktop
   }
 }
