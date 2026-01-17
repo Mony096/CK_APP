@@ -437,12 +437,11 @@ class EquipmentOfflineProvider with ChangeNotifier {
 
     try {
       // --- Check for duplicate code ---
-      final existing = _equipments.firstWhere(
+      final existingIndex = _allFilteredEquipments.indexWhere(
         (e) => e['Code'] == data['Code'],
-        orElse: () => <String, dynamic>{},
       );
 
-      if (existing.isNotEmpty) {
+      if (existingIndex != -1) {
         MaterialDialog.close(context); // Close loading before throwing
         throw Exception("Equipment with code ${data['Code']} already exists!");
       }

@@ -163,10 +163,10 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               Navigator.pop(dialogContext); // Close scanner dialog
 
               // Search for equipment by code (search all equipments, not just current page)
-              final equipment = provider.allFilteredEquipments.firstWhere(
+              final index = provider.allFilteredEquipments.indexWhere(
                 (e) => e['Code'] == scannedCode,
-                orElse: () => null,
               );
+              final equipment = index != -1 ? provider.allFilteredEquipments[index] : null;
               if (equipment != null) {
                 goTo(context, EquipmentCreateScreen(data: equipment));
               } else {
@@ -417,12 +417,15 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages} (${deliveryProvider.totalRecords} total)",
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF64748B),
+                        Expanded(
+                          child: Text(
+                            "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages} (${deliveryProvider.totalRecords} total)",
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Row(
