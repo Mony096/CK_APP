@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
 import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
-import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_create_provider.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';

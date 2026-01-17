@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:google_fonts/google_fonts.dart' as google_fonts;
 import 'package:intl/intl.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/signature/signature_preview_edit.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -20,6 +21,8 @@ class ServiceDetailScreen extends StatefulWidget {
 
 class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _navScrollController = ScrollController();
+
   final GlobalKey _customerKey = GlobalKey();
   final GlobalKey _serviceKey = GlobalKey();
   final GlobalKey _equipmentKey = GlobalKey();
@@ -30,6 +33,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   final GlobalKey _checklistKey = GlobalKey();
   final GlobalKey _attachmentKey = GlobalKey();
 
+  // Navigation Keys
+  final GlobalKey _navCustomerKey = GlobalKey();
+  final GlobalKey _navServiceKey = GlobalKey();
+  final GlobalKey _navEquipmentKey = GlobalKey();
+  final GlobalKey _navActivityKey = GlobalKey();
+  final GlobalKey _navMaterialKey = GlobalKey();
+  final GlobalKey _navTimeKey = GlobalKey();
+  final GlobalKey _navIssueKey = GlobalKey();
+  final GlobalKey _navChecklistKey = GlobalKey();
+  final GlobalKey _navAttachmentKey = GlobalKey();
+
+  late Map<GlobalKey, GlobalKey> _sectionToNavKey;
   late Map<String, dynamic> _displayData;
   bool _isLoading = true;
   GlobalKey? _activeKey;
@@ -38,6 +53,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   void initState() {
     super.initState();
     _activeKey = _customerKey;
+    _sectionToNavKey = {
+      _customerKey: _navCustomerKey,
+      _serviceKey: _navServiceKey,
+      _equipmentKey: _navEquipmentKey,
+      _activityKey: _navActivityKey,
+      _materialKey: _navMaterialKey,
+      _timeKey: _navTimeKey,
+      _issueKey: _navIssueKey,
+      _checklistKey: _navChecklistKey,
+      _attachmentKey: _navAttachmentKey,
+    };
     _scrollController.addListener(_onScroll);
     _enrichData();
   }
@@ -77,12 +103,26 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       setState(() {
         _activeKey = mostVisibleKey;
       });
+      _scrollNavToActive();
+    }
+  }
+
+  void _scrollNavToActive() {
+    final navKey = _sectionToNavKey[_activeKey];
+    if (navKey != null && navKey.currentContext != null) {
+      Scrollable.ensureVisible(
+        navKey.currentContext!,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        alignment: 0.5,
+      );
     }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _navScrollController.dispose();
     super.dispose();
   }
 
@@ -90,6 +130,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     setState(() {
       _activeKey = key;
     });
+    _scrollNavToActive();
     Scrollable.ensureVisible(
       key.currentContext!,
       duration: const Duration(milliseconds: 600),
@@ -153,16 +194,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       appBar: AppBar(
         title: Text(
           "Service Details",
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
+          style: google_fonts.GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w800,
+            fontSize: 18.sp,
             color: Colors.white,
+            letterSpacing: 0.5,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+        backgroundColor: const Color(0xFF1E293B),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: Colors.white, size: 18.sp),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
@@ -174,53 +216,53 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(4.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildStatusHeader(context),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 2.5.h),
                   _buildInfoCard(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Customer Information",
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "CUSTOMER INFORMATION",
                       key: _customerKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 1.5.h),
                   _buildCustomerDetails(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Services", key: _serviceKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "SERVICES", key: _serviceKey),
+                  SizedBox(height: 1.5.h),
                   _buildServiceSection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Equipment", key: _equipmentKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "EQUIPMENT", key: _equipmentKey),
+                  SizedBox(height: 1.5.h),
                   _buildEquipmentSection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Activities", key: _activityKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "ACTIVITIES", key: _activityKey),
+                  SizedBox(height: 1.5.h),
                   _buildActivitySection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Material Reserve",
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "MATERIAL RESERVE",
                       key: _materialKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 1.5.h),
                   _buildMaterialSection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Time Entry", key: _timeKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "TIME ENTRY", key: _timeKey),
+                  SizedBox(height: 1.5.h),
                   _buildTimeSection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Open Issues", key: _issueKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "OPEN ISSUES", key: _issueKey),
+                  SizedBox(height: 1.5.h),
                   _buildIssueSection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Checklist", key: _checklistKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "CHECKLIST", key: _checklistKey),
+                  SizedBox(height: 1.5.h),
                   _buildChecklistSection(context),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, "Attachments",
+                  SizedBox(height: 3.h),
+                  _buildSectionHeader(context, "ATTACHMENTS",
                       key: _attachmentKey),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 1.5.h),
                   _buildAttachmentSection(context),
-                  const SizedBox(height: 48),
+                  SizedBox(height: 6.h),
                 ],
               ),
             ),
@@ -232,38 +274,35 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildStatusHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Status Icon
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(3.w),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.12),
+              color: const Color(0xFF22C55E).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_circle_rounded,
-              color: Colors.green,
-              size: 22,
+              color: const Color(0xFF22C55E),
+              size: 20.sp,
             ),
           ),
-          const SizedBox(width: 14),
-
-          // Text Section
+          SizedBox(width: 4.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,18 +310,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               children: [
                 Text(
                   "COMPLETED SERVICE",
-                  style: GoogleFonts.inter(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.1,
+                  style: google_fonts.GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
                     color: const Color(0xFF64748B),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 0.5.h),
                 Text(
                   "Ticket #${_displayData['DocNum'] ?? _displayData['id'] ?? 'N/A'}",
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
+                  style: google_fonts.GoogleFonts.inter(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF0F172A),
                   ),
@@ -290,20 +329,25 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ],
             ),
           ),
-
-          // Optional badge (nice touch)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.12),
+              color: const Color(0xFF22C55E),
               borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF22C55E).withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Text(
               "DONE",
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.green,
+              style: google_fonts.GoogleFonts.inter(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
               ),
             ),
           ),
@@ -314,15 +358,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildInfoCard(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -330,19 +374,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         children: [
           _buildInfoRow(context, Icons.calendar_today_rounded, "Service Date",
               _formatDate(_displayData['U_CK_Date'])),
-          const Divider(height: 24, thickness: 0.5),
+          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.access_time_rounded, "Start Time",
               "${_displayData['U_CK_Time'] ?? 'N/A'}"),
-          const Divider(height: 24, thickness: 0.5),
+          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.access_time_rounded, "End Time",
               "${_displayData['U_CK_EndTime'] ?? 'N/A'}"),
-          const Divider(height: 24, thickness: 0.5),
+          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.category_rounded, "Job Type",
               _displayData['U_CK_JobType'] ?? 'N/A'),
-          const Divider(height: 24, thickness: 0.5),
+          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.category_rounded, "Service Type",
               "${_displayData['U_CK_ServiceType'] ?? 'N/A'}"),
-          const Divider(height: 24, thickness: 0.5),
+          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.priority_high_rounded, "Priority",
               _displayData['U_CK_Priority'] ?? 'Normal'),
         ],
@@ -354,21 +398,28 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       BuildContext context, IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF64748B)),
-        const SizedBox(width: 12),
+        Container(
+          padding: EdgeInsets.all(0.5.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16.sp, color: const Color(0xFF64748B)),
+        ),
+        SizedBox(width: 2.5.w),
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+          style: google_fonts.GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
             color: const Color(0xFF64748B),
           ),
         ),
         const Spacer(),
         Text(
           value,
-          style: GoogleFonts.inter(
-            fontSize: 14,
+          style: google_fonts.GoogleFonts.inter(
+            fontSize: 14.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1E293B),
           ),
@@ -380,69 +431,76 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _buildStickyNavigation(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 1.5.h),
       decoration: BoxDecoration(
         color: Colors.white,
+        border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.04),
+            offset: const Offset(0, 4),
             blurRadius: 10,
           ),
         ],
       ),
       child: SingleChildScrollView(
+        controller: _navScrollController,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 4.w),
         child: Row(
           children: [
+            _buildNavChip(context, "Customer", Icons.person_rounded,
+                _customerKey, _navCustomerKey),
+            _buildNavChip(context, "Services", Icons.room_service_rounded,
+                _serviceKey, _navServiceKey),
             _buildNavChip(
-                context, "Customer", Icons.person_rounded, _customerKey),
-            _buildNavChip(
-                context, "Services", Icons.room_service_rounded, _serviceKey),
-            _buildNavChip(context, "Equipment",
-                Icons.precision_manufacturing_rounded, _equipmentKey),
-            _buildNavChip(
-                context, "Activities", Icons.checklist_rounded, _activityKey),
-            _buildNavChip(
-                context, "Materials", Icons.inventory_2_rounded, _materialKey),
+                context,
+                "Equipment",
+                Icons.precision_manufacturing_rounded,
+                _equipmentKey,
+                _navEquipmentKey),
+            _buildNavChip(context, "Activities", Icons.checklist_rounded,
+                _activityKey, _navActivityKey),
+            _buildNavChip(context, "Materials", Icons.inventory_2_rounded,
+                _materialKey, _navMaterialKey),
             _buildNavChip(context, "Time Logs",
-                Icons.access_time_filled_rounded, _timeKey),
-            _buildNavChip(
-                context, "Issues", Icons.report_problem_rounded, _issueKey),
-            _buildNavChip(
-                context, "Checklist", Icons.fact_check_rounded, _checklistKey),
-            _buildNavChip(
-                context, "Files", Icons.attach_file_rounded, _attachmentKey),
+                Icons.access_time_filled_rounded, _timeKey, _navTimeKey),
+            _buildNavChip(context, "Issues", Icons.report_problem_rounded,
+                _issueKey, _navIssueKey),
+            _buildNavChip(context, "Checklist", Icons.fact_check_rounded,
+                _checklistKey, _navChecklistKey),
+            _buildNavChip(context, "Files", Icons.attach_file_rounded,
+                _attachmentKey, _navAttachmentKey),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavChip(
-      BuildContext context, String label, IconData icon, GlobalKey key) {
-    final bool isActive = _activeKey == key;
+  Widget _buildNavChip(BuildContext context, String label, IconData icon,
+      GlobalKey sectionKey, GlobalKey navKey) {
+    final bool isActive = _activeKey == sectionKey;
 
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      key: navKey,
+      padding: EdgeInsets.only(right: 2.5.w),
       child: GestureDetector(
-        onTap: () => _scrollToSection(key),
+        onTap: () => _scrollToSection(sectionKey),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF22C55E) : Colors.white,
-            borderRadius: BorderRadius.circular(10),
+            color: isActive ? const Color(0xFF22C55E) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isActive ? Colors.transparent : const Color(0xFFF1F5F9),
+              color: isActive ? Colors.transparent : const Color(0xFFE2E8F0),
             ),
             boxShadow: isActive
                 ? [
                     BoxShadow(
                       color: const Color(0xFF22C55E).withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     )
                   ]
                 : [],
@@ -452,16 +510,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             children: [
               Icon(
                 icon,
-                size: 16,
+                size: 15.sp,
                 color: isActive ? Colors.white : const Color(0xFF64748B),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 2.w),
               Text(
                 label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
+                style: google_fonts.GoogleFonts.inter(
+                  fontSize: 13.sp,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                  color: isActive ? Colors.white : const Color(0xFF1E293B),
+                  color: isActive ? Colors.white : const Color(0xFF475569),
                 ),
               ),
             ],
@@ -474,13 +532,28 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _buildSectionHeader(BuildContext context, String title, {Key? key}) {
     return Container(
       key: key,
-      child: Text(
-        title,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
-          color: const Color(0xFF1E293B),
-        ),
+      margin: EdgeInsets.only(left: 1.w, bottom: 0.5.h),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 18.sp,
+            decoration: BoxDecoration(
+              color: const Color(0xFF22C55E),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          SizedBox(width: 3.w),
+          Text(
+            title,
+            style: google_fonts.GoogleFonts.plusJakartaSans(
+              fontSize: 14.5.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1E293B),
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -489,68 +562,95 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final contactList = _displayData['CustomerContact'] as List? ?? [];
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            _displayData['CustomerName'] ?? 'No Customer Name',
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: context.colors.primary,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: context.colors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.business_rounded,
+                    size: 18.sp, color: context.colors.primary),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Text(
+                  _displayData['CustomerName'] ?? 'No Customer Name',
+                  style: google_fonts.GoogleFonts.inter(
+                    fontSize: 15.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.primary,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 2.h),
           Text(
             _getCustomerAddress(),
-            style: GoogleFonts.inter(
-              fontSize: 13,
+            style: google_fonts.GoogleFonts.inter(
+              fontSize: 14.sp,
               color: const Color(0xFF475569),
-              height: 1.5,
+              height: 1.6,
+              fontWeight: FontWeight.w500,
             ),
           ),
           if (contactList.isNotEmpty) ...[
-            const Divider(height: 24),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 2.h),
+              child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            ),
             ...contactList.map((contact) {
               final String name = contact['Name'] ?? 'N/A';
               final String phone = contact['Phone1'] ?? 'N/A';
 
               return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
+                padding: EdgeInsets.only(bottom: 1.8.h),
                 child: Row(
                   children: [
-                    const Icon(Icons.person_pin_rounded,
-                        size: 16, color: Color(0xFF64748B)),
-                    const SizedBox(width: 8),
+                    Icon(Icons.person_pin_rounded,
+                        size: 16.sp, color: const Color(0xFF64748B)),
+                    SizedBox(width: 2.5.w),
                     Expanded(
                       flex: 3,
                       child: Text(
                         name,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
+                        style: google_fonts.GoogleFonts.inter(
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF1E293B),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.phone_iphone_rounded,
-                        size: 16, color: Color(0xFF64748B)),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 4.w),
+                    Icon(Icons.phone_iphone_rounded,
+                        size: 16.sp, color: const Color(0xFF64748B)),
+                    SizedBox(width: 2.5.w),
                     Expanded(
                       flex: 2,
                       child: Text(
                         phone,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1E293B),
+                        style: google_fonts.GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.primary,
                         ),
                       ),
                     ),
@@ -618,8 +718,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       emptyMessage: "No time entries recorded.",
       icon: Icons.access_time_filled_rounded,
       titleKey: 'U_CK_Description',
-      subtitleKey: 'U_CK_Effort',
-      subtitlePrefix: 'Duration: ',
       customSubtitle: (item) {
         return "Time: ${item['U_CK_StartTime'] ?? 'N/A'} - ${item['U_CK_EndTime'] ?? 'N/A'} (${item['U_CK_Effort'] ?? '0h 0m'})";
       },
@@ -631,15 +729,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (files.isEmpty) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
           "No attachments recorded.",
-          style:
-              GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
+          style: google_fonts.GoogleFonts.inter(
+              fontSize: 13.5.sp, color: const Color(0xFF64748B)),
         ),
       );
     }
@@ -648,12 +746,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       children: [
         GridView.builder(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1,
+            crossAxisSpacing: 3.5.w,
+            mainAxisSpacing: 3.5.w,
+            childAspectRatio: 1.1,
           ),
           itemCount: files.length,
           itemBuilder: (context, index) {
@@ -664,18 +763,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
             return Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFF1F5F9)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(15),
                 child: ext == 'pdf'
                     ? InkWell(
                         onTap: () {
@@ -690,33 +790,31 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           );
                         },
                         child: Container(
-                          color: const Color(0xFFFEE2E2),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.picture_as_pdf_rounded,
-                                    color: Color(0xFFDC2626), size: 40),
-                                const SizedBox(height: 8),
-                                Text(
-                                  "Signature",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 1,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFFDC2626),
-                                  ),
+                          color: const Color(0xFFFFF1F2),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.picture_as_pdf_rounded,
+                                  color: const Color(0xFFE11D48), size: 24.sp),
+                              SizedBox(height: 1.h),
+                              Text(
+                                "Signature",
+                                style: google_fonts.GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFFE11D48),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       )
                     : Image.memory(
                         base64Decode(base64Data),
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Center(
-                                child: Icon(Icons.broken_image_rounded)),
+                        errorBuilder: (context, error, stackTrace) => Center(
+                            child: Icon(Icons.broken_image_rounded,
+                                size: 20.sp, color: Colors.grey)),
                       ),
               ),
             );
@@ -740,15 +838,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (items.isEmpty) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
         child: Text(
           emptyMessage,
-          style:
-              GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
+          style: google_fonts.GoogleFonts.inter(
+              fontSize: 13.5.sp, color: const Color(0xFF94A3B8)),
         ),
       );
     }
@@ -756,52 +855,62 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return Column(
       children: items.map((item) {
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
+          margin: EdgeInsets.only(bottom: 1.2.h),
+          padding: EdgeInsets.all(4.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFF1F5F9)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.015),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 12.w,
+                height: 12.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: svgIcon != null
                     ? Center(
                         child: SvgPicture.asset(
                           svgIcon,
-                          width: 22,
-                          height: 22,
+                          width: 18.sp,
+                          height: 18.sp,
                           color: const Color(0xFF64748B),
                         ),
                       )
-                    : Icon(icon, color: const Color(0xFF64748B), size: 22),
+                    : Icon(icon, color: const Color(0xFF64748B), size: 18.sp),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 4.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       item[titleKey]?.toString() ?? 'N/A',
-                      style: GoogleFonts.inter(
+                      style: google_fonts.GoogleFonts.inter(
                           fontWeight: FontWeight.w700,
-                          fontSize: 14,
+                          fontSize: 14.5.sp,
                           color: const Color(0xFF1E293B)),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 0.4.h),
                     Text(
                       customSubtitle != null
                           ? customSubtitle(item)
                           : "$subtitlePrefix${item[subtitleKey] ?? '0'}$subtitleSuffix",
-                      style: GoogleFonts.inter(
-                          fontSize: 12, color: const Color(0xFF64748B)),
+                      style: google_fonts.GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),

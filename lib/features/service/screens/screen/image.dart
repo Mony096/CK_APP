@@ -1,1018 +1,304 @@
 import 'dart:io';
-
 import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
-import 'package:crypto/crypto.dart';
+import 'package:bizd_tech_service/features/service/screens/component/status_stepper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ImageScreen extends StatefulWidget {
   const ImageScreen({super.key, required this.data});
   final Map<String, dynamic> data;
+
   @override
   _ImageScreenState createState() => _ImageScreenState();
 }
 
 class _ImageScreenState extends State<ImageScreen> {
-  Future<void> pickImage() async {
-    final picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
 
-    // Show dialog to choose source
-    final ImageSource? source = await showDialog<ImageSource>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        title: Row(
-          children: [
-            // SizedBox(width: 15),
-            // Icon(
-            //   Icons.add_box,
-            //   size: 25,
-            //   color: Color.fromARGB(255, 118, 121, 123),
-            // ),
-            // SizedBox(width: 15),
-            Text(
-              'Select Image Source',
-              style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.042,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(
-                Icons.camera_alt,
-                color: Colors.blue,
-                size: 25,
-              ),
-              title: Text(
-                "Take Photo",
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.038),
-              ),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.photo_library,
-                color: Colors.green,
-                size: 25,
-              ),
-              title: Text("Choose from Gallery",
-                  style: TextStyle(
-                      fontSize: MediaQuery.of(context).size.width * 0.038)),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (source == null) return; // User canceled
-
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      final newFile = File(pickedFile.path);
-      final newBytes = await newFile.readAsBytes();
-      final newHash = sha256.convert(newBytes).toString();
-
-      bool isDuplicate = false;
-      final provider = context.read<CompletedServiceProvider>();
-
-      for (final file in provider.imagesList) {
-        final existingBytes = await file.readAsBytes();
-        final existingHash = sha256.convert(existingBytes).toString();
-        if (existingHash == newHash) {
-          isDuplicate = true;
-          break;
-        }
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final XFile? image =
+          await _picker.pickImage(source: source, imageQuality: 50);
+      if (image != null) {
+        if (!mounted) return;
+        context.read<CompletedServiceProvider>().addImage(File(image.path));
       }
-
-      if (isDuplicate) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text(
-              "Duplicate Image",
-              style: TextStyle(fontSize: 21),
-            ),
-            content: const Text("This image has already been selected."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
-      Provider.of<CompletedServiceProvider>(context, listen: false)
-          .setImages([newFile]); // Pass as list
-
-      // setState(() {
-      //   _images.add(newFile);
-      // });
-      // print(provider.imagesList);
+    } catch (e) {
+      debugPrint("Error picking image: $e");
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 236, 238, 240),
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        // Leading menu icon on the left
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+  void _showImageOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(6.w),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        // Centered title
-        title: Center(
-          child: Text(
-            'Image',
-            style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.042,
-                color: Colors.white),
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Capture Evidence",
+                style: GoogleFonts.inter(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1E293B))),
+            SizedBox(height: 3.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildOptionItem(
+                    Icons.camera_alt_rounded, "Camera", Colors.blue, () {
+                  Navigator.pop(context);
+                  pickImage(ImageSource.camera);
+                }),
+                _buildOptionItem(
+                    Icons.photo_library_rounded, "Gallery", Colors.purple, () {
+                  Navigator.pop(context);
+                  pickImage(ImageSource.gallery);
+                }),
+              ],
+            ),
+            SizedBox(height: 2.h),
+          ],
         ),
-        // Right-aligned actions (scan barcode)
-        actions: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // refresh();
-                },
-                icon: const Icon(Icons.check, color: Colors.white),
-              ),
-              // SizedBox(width: 3),
-              // IconButton(
-              //   onPressed: () async {
-              //     MaterialDialog.loading(context);
-              //     await Provider.of<AuthProvider>(context, listen: false)
-              //         .logout();
-              //     Navigator.of(context).pop();
-              //     Navigator.of(context).pushAndRemoveUntil(
-              //       MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-              //       (route) => false,
-              //     );
-              //   },
-              //   icon: const Icon(Icons.logout, color: Colors.white),
-              // )
-            ],
+      ),
+    );
+  }
+
+  Widget _buildOptionItem(
+      IconData icon, String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(4.w),
+            decoration: BoxDecoration(
+                color: color.withOpacity(0.1), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 24.sp),
           ),
+          SizedBox(height: 1.h),
+          Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF475569))),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(4),
-        child: SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: Column(
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = widget.data["U_CK_Status"] ?? "Pending";
+    final docNum = widget.data["DocNum"] ?? "N/A";
+    final customerName = widget.data["CustomerName"] ?? "Unknown Customer";
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: Text("Image Upload",
+            style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF425364),
+        elevation: 0,
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop()),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.check_rounded, color: Colors.white),
+          ),
+          SizedBox(width: 2.w),
+        ],
+      ),
+      body: Column(
+        children: [
+          StatusStepper(status: status),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(vertical: 2.h),
               children: [
+                // JOB Summary Card
                 Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  height: 80,
-                  color: const Color.fromARGB(255, 66, 83, 100),
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(2.w),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle),
+                        child: Icon(Icons.business_center_rounded,
+                            color: const Color(0xFF425364), size: 18.sp),
+                      ),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(customerName,
+                                style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1E293B))),
+                            Text("JOB #$docNum",
+                                style: GoogleFonts.inter(
+                                    fontSize: 13.sp,
+                                    color: const Color(0xFF64748B),
+                                    fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 3.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                          width: 37,
-                          height: 37,
+                      Text("ATTACHED IMAGES",
+                          style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF94A3B8),
+                              letterSpacing: 1.0)),
+                      GestureDetector(
+                        onTap: _showImageOptions,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 3.w, vertical: 0.8.h),
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Accept" ||
-                                      widget.data["U_CK_Status"] == "Travel" ||
-                                      widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
+                              color: const Color(0xFFEC4899),
+                              borderRadius: BorderRadius.circular(8)),
+                          child: Row(
+                            children: [
+                              Icon(Icons.add_a_photo_rounded,
+                                  color: Colors.white, size: 14.sp),
+                              SizedBox(width: 2.w),
+                              Text("ADD NEW",
+                                  style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white)),
+                            ],
                           ),
-                          child: Center(
-                              child: Icon(
-                            Icons.check,
-                            size: 20,
-                            color: widget.data["U_CK_Status"] == "Accept" ||
-                                    widget.data["U_CK_Status"] == "Travel" ||
-                                    widget.data["U_CK_Status"] == "Service" ||
-                                    widget.data["U_CK_Status"] == "Entry"
-                                ? Colors.green
-                                : Colors.white,
-                          ))),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Travel" ||
-                                      widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(
-                            Icons.car_crash,
-                            color: widget.data["U_CK_Status"] == "Travel" ||
-                                    widget.data["U_CK_Status"] == "Service" ||
-                                    widget.data["U_CK_Status"] == "Entry"
-                                ? Colors.green
-                                : Colors.white,
-                          ))),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                            child: SvgPicture.asset('images/svg/key.svg',
-                                width: 23,
-                                height: 23,
-                                color: widget.data["U_CK_Status"] ==
-                                            "Service" ||
-                                        widget.data["U_CK_Status"] == "Entry"
-                                    ? Colors.green
-                                    : Colors.white),
-                          )),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(Icons.flag,
-                                  color: widget.data["U_CK_Status"] == "Entry"
-                                      ? Colors.green
-                                      : Colors.white))),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 5,
-                ),
-                Expanded(
-                    child: Container(
-                  decoration: BoxDecoration(
-                    // color: const Color.fromARGB(255, 255, 255, 255),
-
-                    borderRadius: BorderRadius.circular(5.0), // Rounded corners
-                  ),
-                  child: ListView(children: [
-                    Container(
-                      // margin: EdgeInsets.only(bottom: 1),
-                      padding: const EdgeInsets.only(bottom: 6),
-                      width: double.infinity,
-                      // height: 250,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        border: Border.all(
-                          color: Colors.green, // Border color
-                          width: 1.0, // Border width
-                        ),
-                        borderRadius:
-                            BorderRadius.circular(5.0), // Rounded corners
-                      ),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                    flex: 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            height: 45,
-                                            width:
-                                                45, // Ensure the width and height are equal for a perfect circle
-                                            decoration: BoxDecoration(
-                                              color: Colors.green,
-                                              shape: BoxShape
-                                                  .circle, // Makes the container circular
-                                              border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255,
-                                                    79,
-                                                    78,
-                                                    78), // Optional: Add a border if needed
-                                                width: 1.0, // Border width
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: SvgPicture.asset(
-                                                'images/svg/key.svg',
-                                                width: 30,
-                                                height: 30,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                                Expanded(
-                                    flex: 4,
-                                    child: Container(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            4, 10, 4, 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "${widget.data["CustomerName"] ?? "N/A"}",
-                                              style: TextStyle(
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.033),
-                                              textScaleFactor: 1.0,
-                                            ),
-                                            const SizedBox(
-                                              height: 6,
-                                            ),
-                                            Text(
-                                              ((widget.data["CustomerAddress"]
-                                                              as List?)
-                                                          ?.isNotEmpty ==
-                                                      true)
-                                                  ? (widget
-                                                          .data[
-                                                              "CustomerAddress"]
-                                                          .first["StreetNo"] ??
-                                                      "N/A")
-                                                  : "N/A",
-                                              style: TextStyle(
-                                                fontSize: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.032,
-                                                fontWeight: FontWeight.bold,
-                                                height: 2,
-                                              ),
-                                              textScaleFactor: 1.0,
-                                            ),
-                                          ],
-                                        ))),
-                                Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 10),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "No: ",
-                                                style: TextStyle(
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                textScaleFactor: 1.0,
-                                              ),
-                                              Text(
-                                                "${widget.data["DocNum"]}",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                textScaleFactor: 1.0,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ))
-                              ],
-                            ),
+                SizedBox(height: 2.h),
+                Consumer<CompletedServiceProvider>(
+                  builder: (context, provider, child) {
+                    final images = provider.images;
+                    if (images.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(8.w),
+                                decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F5F9),
+                                    shape: BoxShape.circle),
+                                child: Icon(Icons.image_not_supported_rounded,
+                                    size: 30.sp,
+                                    color: const Color(0xFFCBD5E1)),
+                              ),
+                              SizedBox(height: 2.h),
+                              Text("No images captured yet",
+                                  style: GoogleFonts.inter(
+                                      fontSize: 14.5.sp,
+                                      color: const Color(0xFF94A3B8),
+                                      fontWeight: FontWeight.w500)),
+                            ],
                           ),
-                          Container(
-                              // height: 150,
-                              padding: const EdgeInsets.fromLTRB(10, 15, 10, 8),
-                              color: const Color.fromARGB(255, 66, 83, 100),
-                              width: double.infinity,
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 6),
-                                          child: SvgPicture.asset(
-                                            color: const Color.fromARGB(
-                                                255, 255, 255, 255),
-                                            'images/svg/dolla.svg',
-                                            width: 30,
-                                            height: 30,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                          flex: 6,
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Service:",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white,
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Status:",
-                                                    textAlign: TextAlign.end,
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.033,
-                                                        color: Colors.white),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Expanded(
-                                                      child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: (widget.data[
-                                                                    "CK_JOB_SERVICESCollection"]
-                                                                as List)
-                                                            .isEmpty
-                                                        ? [
-                                                            Container(
-                                                              margin:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      bottom:
-                                                                          8),
-                                                              child: Text(
-                                                                "No Services Available",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.032),
-                                                              ),
-                                                            )
-                                                          ]
-                                                        : (widget.data["CK_JOB_SERVICESCollection"]
-                                                                        as List)
-                                                                    .length >
-                                                                2
-                                                            ? [
-                                                                ...(widget.data[
-                                                                            "CK_JOB_SERVICESCollection"]
-                                                                        as List)
-                                                                    .take(2)
-                                                                    .map((e) =>
-                                                                        Container(
-                                                                          margin: const EdgeInsets
-                                                                              .only(
-                                                                              bottom: 8),
-                                                                          child:
-                                                                              Text(
-                                                                            "${e["U_CK_ServiceName"]}",
-                                                                            style:
-                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
-                                                                            textScaleFactor:
-                                                                                1.0,
-                                                                          ),
-                                                                        )),
-                                                                Padding(
-                                                                  padding: EdgeInsets
-                                                                      .only(
-                                                                          bottom:
-                                                                              7),
-                                                                  child: Text(
-                                                                    "more...",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            MediaQuery.of(context).size.width *
-                                                                                0.031),
-                                                                    textScaleFactor:
-                                                                        1.0,
-                                                                  ),
-                                                                ),
-                                                              ]
-                                                            : (widget.data[
-                                                                        "CK_JOB_SERVICESCollection"]
-                                                                    as List)
-                                                                .map((e) =>
-                                                                    Container(
-                                                                      margin: const EdgeInsets
-                                                                          .only(
-                                                                          bottom:
-                                                                              8),
-                                                                      child:
-                                                                          Text(
-                                                                        "${e["U_CK_ServiceName"]}",
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.white,
-                                                                            fontSize: MediaQuery.of(context).size.width * 0.032),
-                                                                        textScaleFactor:
-                                                                            1.0,
-                                                                      ),
-                                                                    ))
-                                                                .toList(),
-                                                  )),
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Open",
-                                                    textAlign: TextAlign.end,
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          ))
-                                    ],
-                                  ),
-                                  ///////////////////////////
-                                  Row(
-                                    children: [
-                                      const Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                            padding: EdgeInsets.only(right: 6),
-                                            child: Icon(
-                                              Icons.build,
-                                              color: Colors.white,
-                                              size: 25,
-                                            )),
-                                      ),
-                                      Expanded(
-                                          flex: 6,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: Text(
-                                                    "Equipment:",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white,
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                    textScaleFactor: 1.0,
-                                                  )),
-                                                  Expanded(
-                                                      child: Text("",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: Colors
-                                                                  .white))),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
-                                                          as List)
-                                                      .isEmpty
-                                                  ? Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              bottom: 8),
-                                                      child: Text(
-                                                        "No Equipment Available",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.031),
-                                                      ),
-                                                    )
-                                                  : Container(),
-                                              ...(widget.data[
-                                                          "CK_JOB_EQUIPMENTCollection"]
-                                                      as List)
-                                                  .take(2)
-                                                  .map(
-                                                    (item) => Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              bottom: 10),
-                                                      child: Row(
-                                                        children: [
-                                                          Expanded(
-                                                              child: Text(
-                                                            "${item["U_CK_EquipName"]}",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.031),
-                                                            textScaleFactor:
-                                                                1.0,
-                                                          )),
-                                                          Expanded(
-                                                              child: Text(
-                                                            "SN: ${item["U_CK_SerialNum"]}",
-                                                            textAlign:
-                                                                TextAlign.end,
-                                                            style: TextStyle(
-                                                                fontSize: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.031,
-                                                                color: Colors
-                                                                    .white),
-                                                            textScaleFactor:
-                                                                1.0,
-                                                          )),
-                                                          const SizedBox(
-                                                            width: 5,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                              (widget.data["CK_JOB_EQUIPMENTCollection"]
-                                                              as List)
-                                                          .length >
-                                                      2
-                                                  ? Padding(
-                                                      padding: EdgeInsets.only(
-                                                          bottom: 7),
-                                                      child: Text(
-                                                        "more...",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.031),
-                                                        textScaleFactor: 1.0,
-                                                      ),
-                                                    )
-                                                  : Container(),
-                                            ],
-                                          ))
-                                    ],
-                                  ),
-                                  ///////////////////////////////////////////
-                                ],
-                              )),
-                        ],
-                      ),
-                    ),
-////bbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Menu(
-                      onTap: pickImage,
-                      title: 'Upload Image',
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: SvgPicture.asset(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          'images/svg/image.svg',
-                          width: 30,
-                          height: 30,
                         ),
+                      );
+                    }
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 3.w,
+                        mainAxisSpacing: 3.w,
+                        childAspectRatio: 1,
                       ),
-                    ),
-                    const SizedBox(
-                      height: 7,
-                    ),
-                    ImageShow(
-                        image: context
-                            .watch<CompletedServiceProvider>()
-                            .imagesList),
-                    //            const SizedBox(
-                    //   height: 7,
-                    // ),
-
-                    /////do somthing
-                  ]),
-                )),
-                // Align(
-                //   alignment: Alignment.topRight,
-                //   child: Container(
-                //     margin: const EdgeInsets.fromLTRB(0, 5, 5, 25),
-                //     width: 122,
-                //     padding: const EdgeInsets.all(5),
-                //     child: TextButton(
-                //       onPressed: () => Navigator.of(context).pop(),
-                //       style: TextButton.styleFrom(
-                //         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius: BorderRadius.circular(5.0),
-                //         ),
-                //       ),
-                //       child: const Text(
-                //         "Done",
-                //         style: TextStyle(
-                //           color: Color.fromARGB(255, 255, 255, 255),
-                //           fontSize: 13,
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // )
-              ],
-            )),
-      ),
-    );
-  }
-}
-
-class Menu extends StatefulWidget {
-  const Menu({super.key, this.icon, required this.title, this.onTap});
-  final dynamic icon;
-  final VoidCallback? onTap;
-  final String title;
-  @override
-  State<Menu> createState() => _MenuState();
-}
-
-class _MenuState extends State<Menu> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(13),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Expanded(flex: 1, child: widget.icon),
-          Expanded(
-              flex: 4,
-              child: Text(widget.title,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: MediaQuery.of(context).size.width * 0.032),
-                  textScaleFactor: 1.0)),
-          Expanded(
-            flex: 2,
-            child: TextButton(
-              onPressed: widget.onTap,
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
+                      itemCount: images.length,
+                      itemBuilder: (context, index) {
+                        return _buildImageCard(images[index], index);
+                      },
+                    );
+                  },
                 ),
-              ),
-              child: Text(
-                "Add Image",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    fontSize: MediaQuery.of(context).size.width * 0.031),
-              ),
+                SizedBox(height: 5.h),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class ImageShow extends StatefulWidget {
-  const ImageShow({
-    super.key,
-    required this.image,
-  });
-  final List<dynamic> image;
-  @override
-  State<ImageShow> createState() => _ImageShowState();
-}
-
-class _ImageShowState extends State<ImageShow> {
-  void _removeImage(int index) {
-    setState(() {
-      widget.image.removeAt(index);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildImageCard(File imageFile, int index) {
     return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(4),
-          boxShadow: [
-            BoxShadow(
-              color: const Color.fromARGB(255, 41, 84, 185).withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 2,
-              offset: const Offset(0, 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.file(imageFile, fit: BoxFit.cover),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () =>
+                    context.read<CompletedServiceProvider>().removeImage(index),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                      color: Colors.red, shape: BoxShape.circle),
+                  child: const Icon(Icons.close_rounded,
+                      color: Colors.white, size: 16),
+                ),
+              ),
             ),
           ],
         ),
-        margin: const EdgeInsets.all(4),
-        padding: const EdgeInsets.all(5),
-        height: 265,
-        child: widget.image.isEmpty
-            ? const Center(
-                child: Icon(
-                  Icons.image,
-                  size: 100,
-                  color: Color.fromARGB(115, 63, 65, 67),
-                ),
-              )
-            : GridView.count(
-                crossAxisCount: 3,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                children: List.generate(widget.image.length, (index) {
-                  final file = widget.image[index];
-                  return Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.grey.shade300),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(file,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity),
-                        ),
-                      ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () => _removeImage(index),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            child: const Icon(Icons.close,
-                                size: 16, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ));
+      ),
+    );
   }
 }

@@ -1,12 +1,12 @@
+import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/service/screens/service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/core/core.dart';
 import 'package:bizd_tech_service/features/dashboard/screens/dashboard_screen.dart';
-import 'package:bizd_tech_service/features/service/screens/service.dart';
 import 'package:bizd_tech_service/features/equipment/screens/equipment_list.dart';
 import 'package:bizd_tech_service/features/main/screens/sync_screen.dart';
 import 'package:bizd_tech_service/features/main/screens/account_screen.dart';
-import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
 
 class MainScreen extends StatefulWidget {

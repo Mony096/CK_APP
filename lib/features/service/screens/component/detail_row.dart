@@ -1,154 +1,7 @@
-// // import 'package:flutter/material.dart';
-// // import 'package:flutter_svg/flutter_svg.dart';
-
-// // class DetailRow extends StatefulWidget {
-// //   const DetailRow(
-// //       {super.key,
-// //       required this.title,
-// //       this.row1,
-// //       this.row2,
-// //       this.row3,
-// //       this.rowRight1,
-// //       this.rowRight2,
-// //       this.rowRight3,
-// //       required this.svg,
-// //       this.isRowRight1Icon, this.isRowRight2Icon, this.isRowRight3Icon});
-
-// //   final String title;
-// //   final String? row1;
-// //   final dynamic rowRight1;
-// //   final dynamic isRowRight1Icon;
-// //   final String? row2;
-// //   final dynamic isRowRight2Icon;
-
-// //   final dynamic rowRight2;
-// //   final String? row3;
-// //   final dynamic isRowRight3Icon;
-
-// //   final dynamic rowRight3;
-// //   final dynamic svg;
-
-// //   @override
-// //   _DetailRowState createState() => _DetailRowState();
-// // }
-
-// // class _DetailRowState extends State<DetailRow> {
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return Container(
-// //       padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-// //       child: Row(
-// //         crossAxisAlignment: CrossAxisAlignment.start,
-// //         children: [
-// //           Expanded(
-// //             flex: 1,
-// //             child: widget.svg,
-// //           ),
-// //           Expanded(
-// //             flex: 7,
-// //             child: Padding(
-// //               padding: EdgeInsets.only(left: 10),
-// //               child: Column(
-// //                 crossAxisAlignment: CrossAxisAlignment.start,
-// //                 children: [
-// //                   Text(
-// //                     widget.title,
-// //                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
-// //                     textScaleFactor: 1.0
-// //                   ),
-// //                   if (widget.row1 != null) SizedBox(height: 10),
-// //                   if (widget.row1 != null)
-// //                     Row(
-// //                       children: [
-// //                         Expanded(flex: 3, child: Text(widget.row1!, textScaleFactor: 1.0,style: TextStyle(fontSize: 12.5),)),
-// //                         Expanded(
-// //                           flex: 3,
-// //                           child: widget.rowRight1 != null
-// //                               ? Padding(
-// //                                   padding: const EdgeInsets.only(right: 5),
-// //                                   child: widget.isRowRight1Icon == true
-// //                                       ? Align(
-// //                                           alignment: Alignment
-// //                                               .centerRight, // Align the icon to the right
-// //                                           child: widget.rowRight1!,
-// //                                         )
-// //                                       : Text(
-// //                                         textScaleFactor: 1.0,
-// //                                         style: TextStyle(fontSize: 12.5),
-// //                                           widget.rowRight1!,
-// //                                           textAlign: TextAlign.right,
-// //                                         ),
-// //                                 )
-// //                               : Container(),
-// //                         ),
-// //                       ],
-// //                     ),
-// //                   if (widget.row2 != null) SizedBox(height: 10),
-// //                   if (widget.row2 != null)
-// //                     Row(
-// //                       children: [
-// //                         Expanded(flex: 3, child: Text(widget.row2!,style: TextStyle(fontSize: 12.5),
-// //                                 textScaleFactor: 1.0)),
-// //                         Expanded(
-// //                           flex: 3,
-// //                           child: widget.rowRight2 != null
-// //                               ? Padding(
-// //                                   padding: const EdgeInsets.only(right: 5),
-// //                                   child: widget.isRowRight2Icon == true
-// //                                       ? Align(
-// //                                           alignment: Alignment
-// //                                               .centerRight, // Align the icon to the right
-// //                                           child: widget.rowRight2!,
-// //                                         )
-// //                                       : Text(
-// //                                           widget.rowRight2!,
-// //                                           textAlign: TextAlign.right,
-// //                                           style: TextStyle(fontSize: 12.5),
-// //                                           textScaleFactor: 1.0
-// //                                         ),
-// //                                 )
-// //                               : Container(),
-// //                         ),
-// //                       ],
-// //                     ),
-// //                   if (widget.row3 != null) SizedBox(height: 10),
-// //                   if (widget.row3 != null)
-// //                     Row(
-// //                       children: [
-// //                         Expanded(flex: 3, child: Text(widget.row3!, textScaleFactor: 1.0,style: TextStyle(fontSize: 12.5),)),
-// //                         Expanded(
-// //                           flex: 3,
-// //                           child: widget.rowRight3 != null
-// //                               ? Padding(
-// //                                   padding: const EdgeInsets.only(right: 5),
-// //                                   child: widget.isRowRight3Icon == true
-// //                                       ? Align(
-// //                                           alignment: Alignment
-// //                                               .centerRight, // Align the icon to the right
-// //                                           child: widget.rowRight3!,
-// //                                         )
-// //                                       : Text(
-// //                                           widget.rowRight3!,
-// //                                           textAlign: TextAlign.right,
-// //                                           textScaleFactor: 1.0,
-// //                                           style: TextStyle(fontSize: 12.5),
-// //                                         ),
-// //                                 )
-// //                               : Container(),
-// //                         ),
-// //                       ],
-// //                     ),
-// //                 ],
-// //               ),
-// //             ),
-// //           ),
-// //         ],
-// //       ),
-// //     );
-// //   }
-// // }
 import 'package:bizd_tech_service/features/service/screens/component/row_item.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class DetailRow extends StatelessWidget {
   const DetailRow({
@@ -165,73 +18,92 @@ class DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SizedBox(
+              width: 6.w,
+              height: 6.w,
+              child: svg,
+            ),
+          ),
+          SizedBox(width: 4.w),
           Expanded(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: svg,
-              )),
-          Expanded(
-            flex: 7,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 13.5),
-                    textScaleFactor: 1.0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.5.sp,
+                    color: const Color(0xFF1E293B),
                   ),
-                  ...rows.map((row) => Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                row.left,
-                                textScaleFactor: 1.0,
-                                style: const TextStyle(
-                                  fontSize: 12.5,
-                                  height: 1.5, // Added line height
-                                ),
+                ),
+                SizedBox(height: 1.5.h),
+                ...rows.map((row) => Padding(
+                      padding: EdgeInsets.only(bottom: 1.2.h),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              row.left,
+                              style: GoogleFonts.inter(
+                                fontSize: 13.sp,
+                                color: const Color(0xFF475569),
+                                height: 1.4,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                          ),
+                          if (row.right != null)
                             Expanded(
-                              flex: 3,
-                              child: row.right != null
-                                  ? Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          25, 0, 5, 0),
-                                      child: row.isRightIcon
-                                          ? Align(
-                                              alignment: Alignment.centerRight,
-                                              child: row.right,
-                                            )
-                                          : Text(
-                                              row.right.toString(),
-                                              textAlign: TextAlign.right,
-                                              textScaleFactor: 1.0,
-                                              style: const TextStyle(
-                                                fontSize: 12.5,
-                                                height:
-                                                    1.5, // Added line height
-                                              ),
-                                            ),
-                                    )
-                                  : Container(),
+                              flex: 2,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 2.w),
+                                child: row.isRightIcon
+                                    ? Align(
+                                        alignment: Alignment.centerRight,
+                                        child: row.right,
+                                      )
+                                    : Text(
+                                        row.right.toString(),
+                                        textAlign: TextAlign.right,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13.sp,
+                                          color: const Color(0xFF1E293B),
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                              ),
                             ),
-                          ],
-                        ),
-                      ))
-                ],
-              ),
+                        ],
+                      ),
+                    )),
+              ],
             ),
           ),
         ],

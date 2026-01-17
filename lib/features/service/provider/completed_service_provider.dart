@@ -27,6 +27,10 @@ class CompletedServiceProvider extends ChangeNotifier {
   List<dynamic> get signatureList => _signatureList;
   List<dynamic> get timeEntry => _timeEntry;
   List<dynamic> get checkListLine => _checkListLine;
+
+  File? get signature =>
+      _signatureList.isNotEmpty ? _signatureList.first : null;
+  List<File> get images => _imagesList.cast<File>();
   final DioClient dio = DioClient(); // Custom Dio wrapper
 
   void addOrEditOpenIssue(dynamic item, {int editIndex = -1}) {
@@ -69,7 +73,7 @@ class CompletedServiceProvider extends ChangeNotifier {
       item['U_CK_BreakEndTime'].split(" ")[0],
     );
     if (editIndex == -1) {
-      _timeEntry = [item];
+      _timeEntry.add(item);
     } else {
       _timeEntry[editIndex] = item;
     }
@@ -120,6 +124,30 @@ class CompletedServiceProvider extends ChangeNotifier {
     _timeEntry = [timeEntry];
     // Correct for single file
     notifyListeners();
+  }
+
+  void addImage(File file) {
+    _imagesList.add(file);
+    notifyListeners();
+  }
+
+  void removeImage(int index) {
+    if (index >= 0 && index < _imagesList.length) {
+      _imagesList.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  void removeSignature() {
+    _signatureList.clear();
+    notifyListeners();
+  }
+
+  void removeTimeEntry(int index) {
+    if (index >= 0 && index < _timeEntry.length) {
+      _timeEntry.removeAt(index);
+      notifyListeners();
+    }
   }
 
   void setOpenIssues(List<dynamic> collection) {

@@ -21,11 +21,12 @@ import 'package:bizd_tech_service/features/main/screens/wrapper_screen.dart';
 import 'package:bizd_tech_service/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 void main() async {
   // Initialize all app dependencies
   await AppInitializer.init(environment: Environment.dev);
-  
+
   // Initialize Notification Service
   await NotificationService.initialize();
 
@@ -58,14 +59,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: NotificationService.navigatorKey,
-      debugShowCheckedModeBanner: false,
-      title: 'BizD Tech Service',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light, // Can be changed to ThemeMode.system
-      home: const WrapperScreen(),
+    return ResponsiveSizer(
+      builder: (context, orientation, screenType) {
+        return MaterialApp(
+          navigatorKey: NotificationService.navigatorKey,
+          debugShowCheckedModeBanner: false,
+          title: 'BizD Tech Service',
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.light, // Can be changed to ThemeMode.system
+          home: const WrapperScreen(),
+        );
+      },
     );
   }
 }

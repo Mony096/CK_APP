@@ -19,6 +19,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ServiceScreen extends StatefulWidget {
   const ServiceScreen({super.key});
@@ -305,186 +306,169 @@ class _ServiceScreenState extends State<ServiceScreen> {
             elevation: 0,
             centerTitle: true,
             title: Text(
-              "Service",
+              "Service Manager",
               style: GoogleFonts.inter(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
             ),
             actions: [
-              if (_isSyncing)
-                Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.greenAccent,
+              _isSyncing
+                  ? Padding(
+                      padding: EdgeInsets.only(right: 3.w),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 14.sp,
+                            height: 14.sp,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.greenAccent,
+                              ),
+                            ),
                           ),
-                        ),
+                          SizedBox(width: 2.w),
+                          Text(
+                            "Syncing...",
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "Syncing...",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    )
+                  : Container(),
             ],
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 5,
-                    child: DateForServiceList(
-                      controller: _dateController,
-                      star: true,
-                      detail: false, // set true if you want read-only mode
+              SizedBox(height: 1.5.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: DateForServiceList(
+                        controller: _dateController,
+                        star: true,
+                        detail: false,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      width: 50,
-                      height: 46,
+                    SizedBox(width: 2.w),
+                    Container(
+                      height: 5.5.h,
+                      width: 15.w,
                       decoration: BoxDecoration(
-                        color: context.colors.primary,
-                        borderRadius: BorderRadius.circular(5.0),
+                        color: const Color(0xFF425364),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF425364).withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: TextButton(
-                        // onPressed: () {
-                        //   final provider = context.read<ServiceListProvider>();
-
-                        //   if (_dateController.text.isNotEmpty) {
-                        //     print(_dateController.text);
-
-                        //     // Parse using the correct format
-                        //     final parsedDate = DateFormat("dd MMMM yyyy")
-                        //         .parse(_dateController.text);
-
-                        //     provider.setDate(parsedDate, context);
-                        //   }
-                        // },
                         onPressed: () {
                           final provider =
                               context.read<ServiceListProviderOffline>();
 
                           if (_dateController.text.isNotEmpty) {
-                            final parsedDate = DateFormat("dd MMMM yyyy")
-                                .parse(_dateController.text);
+                            try {
+                              final parsedDate = DateFormat("dd MMMM yyyy")
+                                  .parse(_dateController.text);
 
-                            provider.setDate(parsedDate);
-                            provider.loadDocuments(); // ✅ apply filter
+                              provider.setDate(parsedDate);
+                              provider.loadDocuments();
+                            } catch (e) {
+                              debugPrint("Error parsing date: $e");
+                            }
                           }
                         },
-
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
+                          padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: Text("GO",
-                            style: TextStyle(
-                                color: context.onPrimaryColor,
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.035),
-                            textScaleFactor: 1.0),
+                        child: Text(
+                          "GO",
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  )
-                ],
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 5),
-                  child:
-                      //  _isSyncing
-                      //     ?
-
-                      //     SizedBox(
-                      //         height: MediaQuery.of(context).size.height * 0.70,
-                      //         child: Center(
-                      //             child: Column(
-                      //           mainAxisAlignment: MainAxisAlignment.center,
-                      //           children: [
-                      //             SpinKitFadingCircle(
-                      //               color: Colors.green,
-                      //               size: 45.0,
-                      //             ),
-                      //             SizedBox(
-                      //               height: 20,
-                      //             ),
-                      //             Text(
-                      //               "Loading Service...",
-                      //               style: TextStyle(fontSize: 17),
-                      //             ),
-                      //           ],
-                      //         )),
-                      //       )
-                      // :
-                      documents.isEmpty
-                          ? SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.70,
-                              child: Center(
-                                child: Text(
-                                  "No Service Available",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: context.colors.onSurfaceVariant),
-                                ),
-                              ),
-                            )
-                          : Column(children: [
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              ...documents.map((travel) => BlockService(
-                                    data: travel as dynamic,
-                                    onTap: () async {
-                                      if (travel["U_CK_Status"] == "Service") {
-                                        goTo(
-                                                context,
-                                                ServiceEntryScreen(
-                                                    data: travel))
-                                            .then((e) {
-                                          if (e == true) {
-                                            _refreshData();
-                                          }
-
-                                          // Handle any actions after returning from ServiceEntryScreen
-                                        });
-                                        return;
-                                      }
-                                      onUpdateStatus(travel["DocEntry"],
-                                          travel["U_CK_Status"]);
-                                    },
-                                  )),
-                              const SizedBox(
-                                height: 45,
-                              ),
-                            ]),
+                  ],
                 ),
+              ),
+              SizedBox(height: 1.5.h),
+              Expanded(
+                child: documents.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.assignment_late_outlined,
+                              size: 40.sp,
+                              color: Colors.grey[400],
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              "No Services Scheduled",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                            SizedBox(height: 1.h),
+                            Text(
+                              "Scheduled services will appear here",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.symmetric(vertical: 1.h),
+                        itemCount: documents.length,
+                        itemBuilder: (context, index) {
+                          final travel = documents[index];
+                          return BlockService(
+                            data: travel as dynamic,
+                            onTap: () async {
+                              if (travel["U_CK_Status"] == "Service") {
+                                goTo(context, ServiceEntryScreen(data: travel))
+                                    .then((e) {
+                                  if (e == true) {
+                                    _refreshData();
+                                  }
+                                });
+                                return;
+                              }
+                              onUpdateStatus(
+                                travel["DocEntry"],
+                                travel["U_CK_Status"],
+                              );
+                            },
+                          );
+                        },
+                      ),
               ),
             ],
           ),

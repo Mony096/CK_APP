@@ -1,16 +1,10 @@
 import 'dart:async';
-import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
-import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/features/equipment/provider/equipment_list_provider.dart';
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/service/provider/service_provider.dart';
 import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/service/provider/update_status_provider.dart';
 import 'package:bizd_tech_service/features/equipment/screens/equipment_create.dart';
-import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
 
 import 'package:flutter/material.dart';
@@ -41,6 +35,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   String? userName;
 
   bool _isCreatingOrEditing = false;
+  bool _isCreate = false;
   Map<String, dynamic> _selectedEquipmentData = {};
 
   @override
@@ -83,17 +78,19 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
     Navigator.pop(context, bp);
   }
 
-  void _navigateToCreateOrEdit(Map<String, dynamic> data) {
+  void _navigateToCreateOrEdit(Map<String, dynamic> data,
+      {bool isCreate = false}) {
     setState(() {
       _selectedEquipmentData = data;
       _isCreatingOrEditing = true;
+      _isCreate = isCreate;
     });
   }
 
   void onDetail(dynamic data, int index) {
     if (index < 0) return;
 
-    _navigateToCreateOrEdit(Map<String, dynamic>.from(data));
+    _navigateToCreateOrEdit(Map<String, dynamic>.from(data), isCreate: false);
   }
 
   Future<void> clearOfflineDataWithLogout(BuildContext context) async {
@@ -167,9 +164,11 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               final index = provider.allFilteredEquipments.indexWhere(
                 (e) => e['Code'] == scannedCode,
               );
-              final equipment = index != -1 ? provider.allFilteredEquipments[index] : null;
+              final equipment =
+                  index != -1 ? provider.allFilteredEquipments[index] : null;
               if (equipment != null) {
-                _navigateToCreateOrEdit(Map<String, dynamic>.from(equipment));
+                _navigateToCreateOrEdit(Map<String, dynamic>.from(equipment),
+                    isCreate: false);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -216,6 +215,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
           return EquipmentCreateScreen(
             data: _selectedEquipmentData,
             isNested: true,
+            isCreate: _isCreate,
             onBack: () {
               setState(() {
                 _isCreatingOrEditing = false;
@@ -249,7 +249,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               ),
               IconButton(
                 onPressed: () {
-                  _navigateToCreateOrEdit(const {});
+                  _navigateToCreateOrEdit(const {}, isCreate: true);
                 },
                 icon: const Icon(Icons.add_rounded,
                     color: Colors.white, size: 26),

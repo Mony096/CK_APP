@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bizd_tech_service/core/core.dart';
 import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
@@ -16,6 +15,8 @@ import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:bizd_tech_service/features/service/screens/detail/service_detail_screen.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class SyncScreen extends StatefulWidget {
   const SyncScreen({super.key});
@@ -185,15 +186,15 @@ class _SyncScreenState extends State<SyncScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
-          "Data Sync",
+          "Data Sync Manager",
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w700,
-            fontSize: 18,
+            fontSize: 18.sp,
             color: Colors.white,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 66, 83, 100),
+        backgroundColor: const Color(0xFF425364),
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
@@ -204,57 +205,56 @@ class _SyncScreenState extends State<SyncScreen> {
           final totalPending = serviceCount + equipmentCount;
 
           return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: EdgeInsets.symmetric(vertical: 2.5.h),
             children: [
               _buildInfoCard(),
-              const SizedBox(height: 32),
-              _buildSectionHeader("Sync Actions"),
+              SizedBox(height: 3.h),
               _buildSyncItem(
-                icon: Icons.cloud_upload_outlined,
+                icon: Icons.cloud_upload_rounded,
                 title: "Sync to SAP",
                 subtitle: totalPending > 0
                     ? "Ready to sync service ($serviceCount) and Equipment ($equipmentCount)"
                     : "Upload your offline work to the server",
                 onTap: _handleSyncToSAP,
-                color: Colors.green,
+                color: const Color(0xFF22C55E),
                 trailingCount: totalPending > 0 ? totalPending : null,
               ),
               _buildSyncItem(
-                icon: Icons.download_outlined,
+                icon: Icons.download_rounded,
                 title: "Download Data",
                 subtitle: "Update your master data",
                 onTap: _handleDownload,
-                color: Colors.blue,
+                color: const Color(0xFF3B82F6),
                 enabled: _isDownloaded != "true",
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 3.h),
               if (serviceOffline.completedServices
                   .any((s) => s['sync_status'] != 'synced')) ...[
-                _buildSectionHeader("Completed Operations Service"),
+                _buildSectionHeader("Operations Pending Sync"),
                 ...serviceOffline.completedServices.reversed
                     .where((service) => service['sync_status'] != 'synced')
                     .map((service) {
                   return _buildServiceListItem(service, serviceOffline);
                 }),
-                const SizedBox(height: 24),
+                SizedBox(height: 2.h),
               ],
               if (equipmentOffline.equipments
                   .any((e) => e['sync_status'] == 'pending')) ...[
-                _buildSectionHeader("Pending Equipment Sync"),
+                _buildSectionHeader("Equipment Pending Sync"),
                 ...equipmentOffline.equipments.reversed
                     .where((e) => e['sync_status'] == 'pending')
                     .map((equipment) {
                   return _buildEquipmentListItem(equipment);
                 }),
-                const SizedBox(height: 24),
+                SizedBox(height: 2.h),
               ],
-              _buildSectionHeader("Danger Zone"),
+              _buildSectionHeader("Maintenance"),
               _buildSyncItem(
-                icon: Icons.delete_outline,
-                title: "Clear Offline Data",
-                subtitle: "Remove all downloaded data from this device",
+                icon: Icons.delete_sweep_rounded,
+                title: "Clear All Offline Data",
+                subtitle: "Completely reset local storage",
                 onTap: _handleClearData,
-                color: Colors.red,
+                color: const Color(0xFFEF4444),
                 // enabled: _isDownloaded == "true",
               ),
             ],
@@ -284,123 +284,133 @@ class _SyncScreenState extends State<SyncScreen> {
         ? doc['U_CK_Date'].toString().split('T')[0]
         : 'No Date';
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ServiceDetailScreen(
+              data: Map<String, dynamic>.from(doc.isNotEmpty ? doc : service),
+            ),
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.pending_actions_rounded,
-                    color: Colors.orange,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cardName,
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: const Color(0xFF1E293B),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "Ticket #$docNum",
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    "Ready to Sync",
-                    style: GoogleFonts.inter(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.orange,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1, thickness: 0.5),
-            ),
-            Row(
-              children: [
-                const Icon(Icons.location_on_rounded,
-                    size: 14, color: Color(0xFF64748B)),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    address,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: const Color(0xFF64748B),
-                      height: 1.4,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today_rounded,
-                    size: 14, color: Color(0xFF64748B)),
-                const SizedBox(width: 6),
-                Text(
-                  date,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ],
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(4.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(2.5.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.pending_actions_rounded,
+                      color: const Color(0xFFF59E0B),
+                      size: 20.sp,
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cardName,
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15.sp,
+                            color: const Color(0xFF1E293B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 0.2.h),
+                        Text(
+                          "Ticket #$docNum",
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.sp,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 2.5.w, vertical: 0.5.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF7ED),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFFFEDD5)),
+                    ),
+                    child: Text(
+                      "PENDING",
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFF59E0B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.location_on_rounded,
+                      size: 16.sp, color: const Color(0xFF94A3B8)),
+                  SizedBox(width: 2.w),
+                  Expanded(
+                    child: Text(
+                      address,
+                      style: GoogleFonts.inter(
+                        fontSize: 13.5.sp,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  Icon(Icons.event_rounded,
+                      size: 16.sp, color: const Color(0xFF94A3B8)),
+                  SizedBox(width: 2.w),
+                  Text(
+                    date,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF475569),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -413,38 +423,39 @@ class _SyncScreenState extends State<SyncScreen> {
     final customer = equipment['U_ck_CusName'] ?? "No Customer";
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: const Color(0xFFF1F5F9)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(4.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(2.5.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF22C55E).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF3B82F6).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.inventory_2_rounded,
-                    color: Color(0xFF22C55E),
-                    size: 20,
+                    color: const Color(0xFF3B82F6),
+                    size: 20.sp,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 3.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,18 +464,18 @@ class _SyncScreenState extends State<SyncScreen> {
                         name,
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.w700,
-                          fontSize: 14,
+                          fontSize: 15.sp,
                           color: const Color(0xFF1E293B),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 0.2.h),
                       Text(
                         "Code: $code",
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: 13.sp,
                           color: const Color(0xFF64748B),
                         ),
                       ),
@@ -473,36 +484,37 @@ class _SyncScreenState extends State<SyncScreen> {
                 ),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.5.h),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFDBEAFE)),
                   ),
                   child: Text(
                     "NEW",
                     style: GoogleFonts.inter(
-                      fontSize: 10,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
-                      color: Colors.blue,
+                      color: const Color(0xFF3B82F6),
                     ),
                   ),
                 ),
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1, thickness: 0.5),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 1.5.h),
+              child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
             ),
             Row(
               children: [
-                const Icon(Icons.person_pin_rounded,
-                    size: 14, color: Color(0xFF64748B)),
-                const SizedBox(width: 6),
+                Icon(Icons.person_pin_rounded,
+                    size: 16.sp, color: const Color(0xFF94A3B8)),
+                SizedBox(width: 2.w),
                 Expanded(
                   child: Text(
-                    "Customer: $customer",
+                    customer,
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: 13.5.sp,
                       color: const Color(0xFF64748B),
                       fontWeight: FontWeight.w500,
                     ),
@@ -510,12 +522,16 @@ class _SyncScreenState extends State<SyncScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                SizedBox(width: 4.w),
+                Icon(Icons.qr_code_rounded,
+                    size: 16.sp, color: const Color(0xFF94A3B8)),
+                SizedBox(width: 2.w),
                 Text(
-                  "S/N: $sn",
+                  sn,
                   style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: const Color(0xFF64748B),
+                    fontSize: 13.5.sp,
                     fontWeight: FontWeight.w600,
+                    color: const Color(0xFF475569),
                   ),
                 ),
               ],
@@ -529,44 +545,48 @@ class _SyncScreenState extends State<SyncScreen> {
   Widget _buildInfoCard() {
     final bool isReady = _isDownloaded == "true";
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
-        color: isReady ? Colors.green.shade50 : Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(16),
+        color: isReady ? const Color(0xFFF0FDF4) : const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isReady ? Colors.green.shade100 : Colors.blue.shade100,
+          color: isReady ? const Color(0xFFBBF7D0) : const Color(0xFFDBEAFE),
         ),
       ),
       child: Row(
         children: [
           Icon(
-            isReady ? Icons.check_circle : Icons.info_outline,
-            color: isReady ? Colors.green : Colors.blue,
-            size: 32,
+            isReady ? Icons.check_circle_rounded : Icons.info_rounded,
+            color: isReady ? const Color(0xFF22C55E) : const Color(0xFF3B82F6),
+            size: 28.sp,
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 4.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isReady ? "System Ready" : "Data Required",
+                  isReady ? "System Ready" : "Data Sync Required",
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color:
-                        isReady ? Colors.green.shade900 : Colors.blue.shade900,
+                    fontSize: 16.sp,
+                    color: isReady
+                        ? const Color(0xFF166534)
+                        : const Color(0xFF1E40AF),
                   ),
                 ),
+                SizedBox(height: 0.5.h),
                 Text(
                   isReady
-                      ? "All master data is downloaded and available for offline use."
-                      : "Please download master data to start working offline.",
+                      ? "All master data is synchronized and available for offline use."
+                      : "Please download master data to enable offline capabilities.",
                   style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color:
-                        isReady ? Colors.green.shade700 : Colors.blue.shade700,
+                    fontSize: 14.sp,
+                    color: isReady
+                        ? const Color(0xFF15803D)
+                        : const Color(0xFF1D4ED8),
+                    height: 1.3,
                   ),
                 ),
               ],
@@ -579,14 +599,14 @@ class _SyncScreenState extends State<SyncScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: EdgeInsets.fromLTRB(6.w, 1.h, 6.w, 1.h),
       child: Text(
         title.toUpperCase(),
         style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: Colors.grey.shade600,
-          letterSpacing: 1.2,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF94A3B8),
+          letterSpacing: 1.5,
         ),
       ),
     );
@@ -604,65 +624,75 @@ class _SyncScreenState extends State<SyncScreen> {
     return Opacity(
       opacity: enabled ? 1.0 : 0.5,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
         child: ListTile(
           onTap: enabled ? onTap : null,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
           leading: Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(3.w),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 22.sp),
           ),
           title: Text(
             title,
             style: GoogleFonts.inter(
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              fontSize: 15.5.sp,
+              color: const Color(0xFF1E293B),
             ),
           ),
           subtitle: Text(
             subtitle,
             style: GoogleFonts.inter(
-              fontSize: 12,
-              color: Colors.grey.shade500,
+              fontSize: 13.sp,
+              color: const Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
             ),
           ),
           trailing: trailingCount != null && trailingCount > 0
               ? Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade500,
+                    color: const Color(0xFFEF4444),
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFEF4444).withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Text(
                     trailingCount.toString(),
                     style: GoogleFonts.inter(
                       color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 )
               : Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.grey.shade300,
-                  size: 14,
+                  Icons.chevron_right_rounded,
+                  color: const Color(0xFFCBD5E1),
+                  size: 20.sp,
                 ),
         ),
       ),
@@ -931,7 +961,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
       backgroundColor: Colors.transparent,
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 340),
+        constraints: BoxConstraints(maxWidth: 85.w),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -948,7 +978,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(6.w),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -968,8 +998,8 @@ class _DownloadDialogState extends State<_DownloadDialog>
                     animation: _pulseController,
                     builder: (context, child) {
                       return Container(
-                        width: 70,
-                        height: 70,
+                        width: 15.w,
+                        height: 15.w,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           shape: BoxShape.circle,
@@ -989,37 +1019,37 @@ class _DownloadDialogState extends State<_DownloadDialog>
                               ? Icons.check_rounded
                               : Icons.cloud_download_rounded,
                           color: Colors.white,
-                          size: 36,
+                          size: 24.sp,
                         ),
                       );
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 1.5.h),
                   Text(
                     _isCompleted ? "Download Complete!" : "Downloading Data",
                     style: GoogleFonts.inter(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 0.5.h),
                   Text(
                     _isCompleted
                         ? "All data is now available offline"
                         : "$_completedCount of ${_steps.length} categories",
                     style: GoogleFonts.inter(
-                      fontSize: 13,
+                      fontSize: 14.sp,
                       color: Colors.white.withOpacity(0.9),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 2.h),
                   // Progress bar
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: _overallProgress,
-                      minHeight: 8,
+                      minHeight: 1.h,
                       backgroundColor: Colors.white.withOpacity(0.3),
                       valueColor:
                           const AlwaysStoppedAnimation<Color>(Colors.white),
@@ -1043,19 +1073,19 @@ class _DownloadDialogState extends State<_DownloadDialog>
 
             // Actions
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(4.w),
               child: Row(
                 children: [
                   if (!_isCompleted)
                     Expanded(
                       child: TextButton.icon(
                         onPressed: _cancelDownload,
-                        icon: const Icon(Icons.close_rounded,
-                            size: 18, color: Color(0xFFEF4444)),
+                        icon: Icon(Icons.close_rounded,
+                            size: 16.sp, color: const Color(0xFFEF4444)),
                         label: Text(
                           "Cancel Download",
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFFEF4444),
                           ),
@@ -1087,7 +1117,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                         child: Text(
                           "Close",
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1109,14 +1139,14 @@ class _DownloadDialogState extends State<_DownloadDialog>
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
       child: Row(
         children: [
           // Icon
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            width: 42,
-            height: 42,
+            width: 10.w,
+            height: 10.w,
             decoration: BoxDecoration(
               color: isCompleted
                   ? const Color(0xFF22C55E).withOpacity(0.1)
@@ -1146,10 +1176,10 @@ class _DownloadDialogState extends State<_DownloadDialog>
                         : isWaiting
                             ? Colors.grey[400]
                             : step.color,
-                    size: 22,
+                    size: 18.sp,
                   ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 3.5.w),
 
           // Text
           Expanded(
@@ -1159,18 +1189,18 @@ class _DownloadDialogState extends State<_DownloadDialog>
                 Text(
                   step.name,
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 14.5.sp,
                     fontWeight: FontWeight.w600,
                     color:
                         isWaiting ? Colors.grey[400] : const Color(0xFF1E293B),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 0.2.h),
                 if (isActive && step.total > 0)
                   Text(
                     "Fetching ${step.count} of ${step.total}...",
                     style: GoogleFonts.inter(
-                      fontSize: 11,
+                      fontSize: 12.sp,
                       color: step.color,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1179,7 +1209,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "${step.total} records",
                     style: GoogleFonts.inter(
-                      fontSize: 11,
+                      fontSize: 12.sp,
                       color: const Color(0xFF22C55E),
                       fontWeight: FontWeight.w500,
                     ),
@@ -1188,7 +1218,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "Downloading...",
                     style: GoogleFonts.inter(
-                      fontSize: 11,
+                      fontSize: 12.sp,
                       color: step.color,
                     ),
                   )
@@ -1196,7 +1226,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "Waiting...",
                     style: GoogleFonts.inter(
-                      fontSize: 11,
+                      fontSize: 12.sp,
                       color: Colors.grey[400],
                     ),
                   ),
@@ -1207,7 +1237,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
           // Status badge
           if (isCompleted)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.5.h),
               decoration: BoxDecoration(
                 color: const Color(0xFF22C55E).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
@@ -1215,16 +1245,16 @@ class _DownloadDialogState extends State<_DownloadDialog>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
-                    color: Color(0xFF22C55E),
-                    size: 14,
+                    color: const Color(0xFF22C55E),
+                    size: 14.sp,
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 1.w),
                   Text(
                     "Done",
                     style: GoogleFonts.inter(
-                      fontSize: 10,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF22C55E),
                     ),

@@ -1,10 +1,10 @@
+import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:flutter/material.dart';
 import 'package:bizd_tech_service/core/core.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
 import 'package:bizd_tech_service/features/auth/screens/settings_screen.dart';
 import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
-import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';

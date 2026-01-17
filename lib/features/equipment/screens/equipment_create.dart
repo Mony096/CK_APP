@@ -27,12 +27,14 @@ class EquipmentCreateScreen extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback? onBack;
   final bool isNested;
+  final bool isCreate;
 
   const EquipmentCreateScreen({
     super.key,
     required this.data,
     this.onBack,
     this.isNested = false,
+    this.isCreate = false,
   });
 
   @override
@@ -464,7 +466,11 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       onConfirm: () {
         Provider.of<EquipmentOfflineProvider>(context, listen: false)
             .clearCollection();
-        Navigator.of(context).pop();
+        if (widget.onBack != null) {
+          widget.onBack!();
+        } else {
+          Navigator.of(context).pop();
+        }
       },
 
       onCancel: () {},
@@ -501,14 +507,16 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             icon:
                 const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
             onPressed: () {
-              if (widget.onBack != null) {
-                widget.onBack!();
-              } else if (isEditing) {
+              if (widget.isCreate) {
+                onBackScreen();
+              } else {
                 Provider.of<EquipmentOfflineProvider>(context, listen: false)
                     .clearCollection();
-                Navigator.of(context).pop();
-              } else {
-                onBackScreen();
+                if (widget.onBack != null) {
+                  widget.onBack!();
+                } else {
+                  Navigator.of(context).pop();
+                }
               }
             },
           ),

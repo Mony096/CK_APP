@@ -1,1897 +1,503 @@
-import 'dart:developer';
-
-import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
-import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:bizd_tech_service/core/widgets/text_time_dialog.dart';
 import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/features/service/screens/component/status_stepper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class TimeScreen extends StatefulWidget {
   const TimeScreen({super.key, required this.data});
   final Map<String, dynamic> data;
+
   @override
   _TimeScreenState createState() => _TimeScreenState();
 }
 
 class _TimeScreenState extends State<TimeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _loadUserName();
-  }
-
-  String? userName;
-
-  int updateIndexTime = -1;
-  int isEditTime = -1;
-  int isAdded = 0;
   final travelTime = TextEditingController();
   final travelEndTime = TextEditingController();
   final serviceTime = TextEditingController();
   final serviceEndTime = TextEditingController();
   final breakTime = TextEditingController();
   final breakEndTime = TextEditingController();
-  final ValueNotifier<Map<String, dynamic>> travelTimeNotifier = ValueNotifier(
-      {"missing": false, "value": "Travel time required", "isAdded": 0});
+
+  final ValueNotifier<Map<String, dynamic>> travelTimeNotifier =
+      ValueNotifier({"missing": false, "value": "", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> travelEndTimeNotifier =
-      ValueNotifier({
-    "missing": false,
-    "value": "Travel end time required",
-    "isAdded": 0
-  });
-
-  final ValueNotifier<Map<String, dynamic>> serviceTimeNotifier = ValueNotifier(
-      {"missing": false, "value": "Service time required", "isAdded": 0});
-
+      ValueNotifier({"missing": false, "value": "", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> serviceTimeNotifier =
+      ValueNotifier({"missing": false, "value": "", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> serviceEndTimeNotifier =
-      ValueNotifier({
-    "missing": false,
-    "value": "Service end time required",
-    "isAdded": 0
-  });
-
-  final ValueNotifier<Map<String, dynamic>> breakTimeNotifier = ValueNotifier(
-      {"missing": false, "value": "Break time required", "isAdded": 0});
+      ValueNotifier({"missing": false, "value": "", "isAdded": 0});
+  final ValueNotifier<Map<String, dynamic>> breakTimeNotifier =
+      ValueNotifier({"missing": false, "value": "", "isAdded": 0});
   final ValueNotifier<Map<String, dynamic>> breakEndTimeNotifier =
-      ValueNotifier(
-          {"missing": false, "value": "Break end time required", "isAdded": 0});
-  void _showCreateTimeEntry() async {
-    await showDialog<String>(
-      barrierDismissible: false, // user must tap button!
+      ValueNotifier({"missing": false, "value": "", "isAdded": 0});
 
+  int isEditTime = -1;
+
+  void _showCreateTimeEntry() async {
+    await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(13.0), // Rounded corners
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Icon(Icons.more_time_rounded,
+                  color: const Color(0xFF425364), size: 20.sp),
+              SizedBox(width: 3.w),
+              Text("Log Time",
+                  style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w700, fontSize: 17.sp)),
+            ],
           ),
           content: Container(
-              padding: const EdgeInsets.only(top: 7),
-              width: double.maxFinite, // Use full width of the dialog
-              constraints: const BoxConstraints(
-                maxHeight: 427, // Limit the height to prevent overflow
-              ),
-              child: Container(
-                  child: ListView(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.timer,
-                            size: 21,
-                            color: Color.fromARGB(255, 89, 89, 91),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "Travel Time",
-                            style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.036, color: Colors.black),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "*",
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 255, 0, 0)),
-                          ),
-                        ],
-                      ),
-                      Icon(Icons.arrow_drop_down,
-                          size: 24, color: Color.fromARGB(255, 89, 89, 91))
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: travelTimeNotifier,
-                          controller: travelTime,
-                          label: 'Start Time',
-                          star: false,
-                          // focusNode: codeFocusNode,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 13,
-                      ),
-                      Expanded(
-                        child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: travelEndTimeNotifier,
-                          controller: travelEndTime,
-                          label: 'End Time',
-                          star: false,
-
-                          // focusNode: codeFocusNode,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.timer,
-                            size: 21,
-                            color: Color.fromARGB(255, 89, 89, 91),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "Service Time",
-                            style: TextStyle(fontSize: 15, color: Colors.black),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "*",
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 255, 0, 0)),
-                          ),
-                        ],
-                      ),
-                      Icon(Icons.arrow_drop_down,
-                          size: 24, color: Color.fromARGB(255, 89, 89, 91))
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: serviceTimeNotifier,
-                          controller: serviceTime,
-                          label: 'Start Time',
-                          star: false,
-
-                          // focusNode: codeFocusNode,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 13,
-                      ),
-                      Expanded(
-                        child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: serviceEndTimeNotifier,
-                          controller: serviceEndTime,
-                          label: 'End Time',
-                          star: false,
-
-                          // focusNode: codeFocusNode,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.timer,
-                            size: 21,
-                            color: Color.fromARGB(255, 89, 89, 91),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "Break Time",
-                            style: TextStyle(fontSize: 15, color: Colors.black),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            "*",
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 255, 0, 0)),
-                          ),
-                        ],
-                      ),
-                      Icon(Icons.arrow_drop_down,
-                          size: 24, color: Color.fromARGB(255, 89, 89, 91))
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: breakTimeNotifier,
-                          controller: breakTime,
-                          label: 'Start Time',
-                          star: false,
-
-                          // focusNode: codeFocusNode,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 13,
-                      ),
-                      Expanded(
-                        child: CustomTimeFieldDialog(
-                          isMissingFieldNotifier: breakEndTimeNotifier,
-                          controller: breakEndTime,
-                          label: 'End Time',
-                          star: false,
-
-                          // focusNode: codeFocusNode,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isEditTime = -1;
-                          });
-                          // clear();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          "Cancel",
-                          style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.036,
-                              color: Color.fromARGB(255, 66, 83, 100)),
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      SizedBox(
-                        height: 35,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // if (onConfirm != null) {
-                            //   onConfirm();
-                            // }
-                            if (travelTime.text.isEmpty ||
-                                travelEndTime.text.isEmpty ||
-                                serviceTime.text.isEmpty ||
-                                serviceEndTime.text.isEmpty ||
-                                breakTime.text.isEmpty ||
-                                breakEndTime.text.isEmpty) {
-                              travelTimeNotifier.value = {
-                                "missing": travelTime.text.isEmpty,
-                                "value": "Travel Time is required!",
-                                "isAdded": 1,
-                              };
-                              travelEndTimeNotifier.value = {
-                                "missing": travelEndTime.text.isEmpty,
-                                "value": "Travel End Time is required!",
-                                "isAdded": 1,
-                              };
-                              serviceTimeNotifier.value = {
-                                "missing": serviceTime.text.isEmpty,
-                                "value": "Service Time is required!",
-                                "isAdded": 1,
-                              };
-                              serviceEndTimeNotifier.value = {
-                                "missing": serviceEndTime.text.isEmpty,
-                                "value": "Service End Time is required!",
-                                "isAdded": 1,
-                              };
-                              breakTimeNotifier.value = {
-                                "missing": breakTime.text.isEmpty,
-                                "value": "Break Time is required!",
-                                "isAdded": 1,
-                              };
-                              breakEndTimeNotifier.value = {
-                                "missing": breakEndTime.text.isEmpty,
-                                "value": "Break End Time is required!",
-                                "isAdded": 1,
-                              };
-
-                              return;
-                            }
-
-                            isEditTime == -1
-                                ? _onAddTimeEntry(context)
-                                : onEditTimeEntry();
-                            Navigator.of(context).pop();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 66, 83, 100),
-                            foregroundColor: Colors.white,
-                            elevation: 3,
-                            // Adjust the padding to make the button smaller
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                            child: Text(
-                              // isEditComp >= 0 ? "Edit" : "Add",
-                              // final item = provider.timeEntry;
-                              context
-                                      .read<CompletedServiceProvider>()
-                                      .timeEntry
-                                      .isEmpty
-                                  ? "Add Time"
-                                  : "Edit Time",
-                              style: TextStyle(
-                                fontSize:  MediaQuery.of(context).size.width * 0.036,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
+                  _buildTimeSection("Travel Time", travelTime, travelEndTime,
+                      travelTimeNotifier, travelEndTimeNotifier),
+                  SizedBox(height: 3.h),
+                  _buildTimeSection("Service Time", serviceTime, serviceEndTime,
+                      serviceTimeNotifier, serviceEndTimeNotifier),
+                  SizedBox(height: 3.h),
+                  _buildTimeSection("Break Time", breakTime, breakEndTime,
+                      breakTimeNotifier, breakEndTimeNotifier),
                 ],
-              ))),
-          backgroundColor: Colors.white,
-          elevation: 4.0,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                isEditTime = -1;
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel",
+                  style: GoogleFonts.inter(
+                      color: Colors.grey, fontWeight: FontWeight.w600)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_validate()) {
+                  isEditTime == -1
+                      ? _onAddTimeEntry(context)
+                      : onEditTimeEntry();
+                  Navigator.of(context).pop();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF425364),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(isEditTime == -1 ? "Add Entry" : "Save Changes",
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+            ),
+          ],
         );
       },
     );
   }
 
-  void _onAddTimeEntry(BuildContext context, {bool force = false}) {
-    try {
-      // if (name.text.isEmpty) throw Exception('Name is missing.');
-      // if (brand.text.isEmpty) throw Exception('Brand is missing.');
-
-      final item = {
-        "U_CK_TraveledTime": travelTime.text,
-        "U_CK_TraveledEndTime": travelEndTime.text,
-        "U_CK_ServiceStartTime": serviceTime.text,
-        "U_CK_SerEndTime": serviceEndTime.text,
-        "U_CK_BreakTime": breakTime.text,
-        "U_CK_BreakEndTime": breakEndTime.text,
+  bool _validate() {
+    bool isValid = true;
+    if (travelTime.text.isEmpty) {
+      travelTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
       };
-
-      Provider.of<CompletedServiceProvider>(context, listen: false)
-          .addOrEditTimeEntry(item, editIndex: isEditTime);
-
-      // Reset edit mode
-      setState(() {
-        isEditTime = -1;
-      });
-      // clear();
-      clearValidation();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).unfocus();
-      });
-      final provider = context.read<CompletedServiceProvider>();
-
-      print(provider.timeEntry);
-    } catch (err) {
-      if (err is Exception) {
-        // Sh SnackBar
-        MaterialDialog.success(context, title: 'Warning', body: err.toString());
-      }
+      isValid = false;
     }
+    if (travelEndTime.text.isEmpty) {
+      travelEndTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (serviceTime.text.isEmpty) {
+      serviceTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (serviceEndTime.text.isEmpty) {
+      serviceEndTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (breakTime.text.isEmpty) {
+      breakTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (breakEndTime.text.isEmpty) {
+      breakEndTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    return isValid;
+  }
+
+  Widget _buildTimeSection(
+      String title,
+      TextEditingController start,
+      TextEditingController end,
+      ValueNotifier<Map<String, dynamic>> startN,
+      ValueNotifier<Map<String, dynamic>> endN) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF64748B))),
+        SizedBox(height: 1.h),
+        Row(
+          children: [
+            Expanded(
+                child: CustomTimeFieldDialog(
+                    isMissingFieldNotifier: startN,
+                    controller: start,
+                    label: 'Start',
+                    star: false)),
+            SizedBox(width: 3.w),
+            Expanded(
+                child: CustomTimeFieldDialog(
+                    isMissingFieldNotifier: endN,
+                    controller: end,
+                    label: 'End',
+                    star: false)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _onAddTimeEntry(BuildContext context) {
+    final item = {
+      "U_CK_TraveledTime": travelTime.text,
+      "U_CK_TraveledEndTime": travelEndTime.text,
+      "U_CK_ServiceStartTime": serviceTime.text,
+      "U_CK_SerEndTime": serviceEndTime.text,
+      "U_CK_BreakTime": breakTime.text,
+      "U_CK_BreakEndTime": breakEndTime.text,
+    };
+    Provider.of<CompletedServiceProvider>(context, listen: false)
+        .addOrEditTimeEntry(item, editIndex: isEditTime);
+    _clearInputs();
   }
 
   void onEditTimeEntry() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showCreateTimeEntry(); // Then open edit form dialog
-    });
-    final provider = context.read<CompletedServiceProvider>();
-    final item = provider.timeEntry[0];
-    travelTime.text = getDataFromDynamic(item["U_CK_TraveledTime"]);
-    travelEndTime.text = getDataFromDynamic(item["U_CK_TraveledEndTime"]);
-    serviceTime.text = getDataFromDynamic(item["U_CK_ServiceStartTime"]);
-    serviceEndTime.text = getDataFromDynamic(item["U_CK_SerEndTime"]);
-    breakTime.text = getDataFromDynamic(item["U_CK_BreakTime"]);
-    breakEndTime.text = getDataFromDynamic(item["U_CK_BreakEndTime"]);
-
-    // FocusScope.of(context).requestFocus(codeFocusNode);
-
-    // setState(() {
-    //   isEditTime = 0;
-    // });
+    // Handled by callback inside _showCreateTimeEntry or by the provider directly
   }
 
-  Future<void> _loadUserName() async {
-    final name = await getName();
-    setState(() {
-      userName = name;
-    });
-  }
-
-  Future<String?> getName() async {
-    return await LocalStorageManger.getString('FullName');
-  }
-// String calculateSpentTime(String start, String end) {
-//     final dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
-
-//     final startTime = dateFormat.parse("2025-09-01 $start:00");
-//     var endTime = dateFormat.parse("2025-09-01 $end:00");
-
-//     // Handle overnight time (end < start)
-//     if (endTime.isBefore(startTime)) {
-//       endTime = endTime.add(Duration(days: 1));
-//     }
-
-//     final duration = endTime.difference(startTime);
-//     final hours = duration.inHours;
-//     final minutes = duration.inMinutes.remainder(60);
-
-//     return "${hours}h ${minutes}m";
-//   }
-  void clearValidation() {
-    travelTimeNotifier.value = {
-      "missing": false,
-      "value": "Code is required!",
-      "isAdded": 1,
-    };
-    travelEndTimeNotifier.value = {
-      "missing": false,
-      "value": "Name is required!",
-      "isAdded": 1,
-    };
-    serviceTimeNotifier.value = {
-      "missing": false,
-      "value": "Part is required!",
-      "isAdded": 1,
-    };
-
-    serviceEndTimeNotifier.value = {
-      "missing": false,
-      "value": "Brand is required!",
-      "isAdded": 1,
-    };
-    breakTimeNotifier.value = {
-      "missing": false,
-      "value": "Model is required!",
-      "isAdded": 1,
-    };
-    breakEndTimeNotifier.value = {
-      "missing": false,
-      "value": "Model is required!",
-      "isAdded": 1,
-    };
+  void _clearInputs() {
+    travelTime.clear();
+    travelEndTime.clear();
+    serviceTime.clear();
+    serviceEndTime.clear();
+    breakTime.clear();
+    breakEndTime.clear();
+    isEditTime = -1;
   }
 
   @override
   Widget build(BuildContext context) {
+    final status = widget.data["U_CK_Status"] ?? "Pending";
+    final docNum = widget.data["DocNum"] ?? "N/A";
+    final customerName = widget.data["CustomerName"] ?? "Unknown Customer";
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 236, 238, 240),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-        // Leading menu icon on the left
+        title: Text("Time Entry",
+            style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF425364),
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        // Centered title
-        title: GestureDetector(
-          // onTap: () {
-          //      print(calculateSpentTime(
-          //     "2:00",
-          //     "5:30",
-          //   ));
-          // },
-          child: Center(
-            child: Text(
-              'Time Entry',
-              style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.042, color: Colors.white),
-              textScaleFactor: 1.0,
-            ),
-          ),
-        ),
-        // Right-aligned actions (scan barcode)
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop()),
         actions: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // refresh();
-                },
-                icon: const Icon(Icons.check, color: Colors.white),
-              ),
-              // SizedBox(width: 3),
-              // IconButton(
-              //   onPressed: () async {
-              //     MaterialDialog.loading(context);
-              //     await Provider.of<AuthProvider>(context, listen: false)
-              //         .logout();
-              //     Navigator.of(context).pop();
-              //     Navigator.of(context).pushAndRemoveUntil(
-              //       MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-              //       (route) => false,
-              //     );
-              //   },
-              //   icon: const Icon(Icons.logout, color: Colors.white),
-              // )
-            ],
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.check_rounded, color: Colors.white),
           ),
+          SizedBox(width: 2.w),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(4),
-        child: SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: Column(
+      body: Column(
+        children: [
+          StatusStepper(status: status),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(vertical: 2.h),
               children: [
+                // JOB Summary Card
                 Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  height: 80,
-                  color: const Color.fromARGB(255, 66, 83, 100),
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(2.w),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle),
+                        child: Icon(Icons.business_center_rounded,
+                            color: const Color(0xFF425364), size: 18.sp),
+                      ),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(customerName,
+                                style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1E293B))),
+                            Text("JOB #$docNum",
+                                style: GoogleFonts.inter(
+                                    fontSize: 13.sp,
+                                    color: const Color(0xFF64748B),
+                                    fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 3.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Accept" ||
-                                      widget.data["U_CK_Status"] == "Travel" ||
-                                      widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(
-                            Icons.check,
-                            size: 20,
-                            color: widget.data["U_CK_Status"] == "Accept" ||
-                                    widget.data["U_CK_Status"] == "Travel" ||
-                                    widget.data["U_CK_Status"] == "Service" ||
-                                    widget.data["U_CK_Status"] == "Entry"
-                                ? Colors.green
-                                : Colors.white,
-                          ))),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Travel" ||
-                                      widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(
-                            Icons.car_crash,
-                            color: widget.data["U_CK_Status"] == "Travel" ||
-                                    widget.data["U_CK_Status"] == "Service" ||
-                                    widget.data["U_CK_Status"] == "Entry"
-                                ? Colors.green
-                                : Colors.white,
-                          ))),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Service" ||
-                                      widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                            child: SvgPicture.asset('images/svg/key.svg',
-                                width: 23,
-                                height: 23,
-                                color: widget.data["U_CK_Status"] ==
-                                            "Service" ||
-                                        widget.data["U_CK_Status"] == "Entry"
-                                    ? Colors.green
-                                    : Colors.white),
-                          )),
-                      const Text("- - - - -",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13.5,
-                              color: Colors.white),
-                          textScaleFactor: 1.0),
-                      Container(
-                          width: 37,
-                          height: 37,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 66, 83, 100),
-                            shape:
-                                BoxShape.circle, // Makes the container circular
-                            border: Border.all(
-                              color: widget.data["U_CK_Status"] == "Entry"
-                                  ? Colors.green
-                                  : Colors
-                                      .white, // Optional: Add a border if needed
-                              width: 2.0, // Border width
-                            ),
-                          ),
-                          child: Center(
-                              child: Icon(Icons.flag,
-                                  color: widget.data["U_CK_Status"] == "Entry"
-                                      ? Colors.green
-                                      : Colors.white))),
+                      Text("TIME LOGS",
+                          style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF94A3B8),
+                              letterSpacing: 1.0)),
+                      ElevatedButton.icon(
+                        onPressed: _showCreateTimeEntry,
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text("LOG TIME"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF425364),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4.w, vertical: 0.8.h),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                          textStyle: GoogleFonts.inter(
+                              fontSize: 12.sp, fontWeight: FontWeight.w800),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 5,
-                ),
-                Expanded(
-                    child: Container(
-                  decoration: BoxDecoration(
-                    // color: const Color.fromARGB(255, 255, 255, 255),
-
-                    borderRadius: BorderRadius.circular(5.0), // Rounded corners
-                  ),
-                  child: ListView(children: [
-                   Container(
-                          // margin: EdgeInsets.only(bottom: 1),
-                          padding: const EdgeInsets.only(bottom: 6),
-                          width: double.infinity,
-                          // height: 250,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                            border: Border.all(
-                              color: Colors.green, // Border color
-                              width: 1.0, // Border width
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(5.0), // Rounded corners
-                          ),
+                SizedBox(height: 1.5.h),
+                Consumer<CompletedServiceProvider>(
+                  builder: (context, provider, child) {
+                    final timeEntries = provider.timeEntry;
+                    if (timeEntries.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
                           child: Column(
                             children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: Column(
-                                            children: [
-                                              Container(
-                                                height: 45,
-                                                width:
-                                                    45, // Ensure the width and height are equal for a perfect circle
-                                                decoration: BoxDecoration(
-                                                  color: Colors.green,
-                                                  shape: BoxShape
-                                                      .circle, // Makes the container circular
-                                                  border: Border.all(
-                                                    color: const Color.fromARGB(
-                                                        255,
-                                                        79,
-                                                        78,
-                                                        78), // Optional: Add a border if needed
-                                                    width: 1.0, // Border width
-                                                  ),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: SvgPicture.asset(
-                                                    'images/svg/key.svg',
-                                                    width: 30,
-                                                    height: 30,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        )),
-                                    Expanded(
-                                        flex: 4,
-                                        child: Container(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                4, 10, 4, 10),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "${widget.data["CustomerName"] ?? "N/A"}",
-                                                  style: TextStyle(
-                                                      fontSize:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.033),
-                                                  textScaleFactor: 1.0,
-                                                ),
-                                                const SizedBox(
-                                                  height: 6,
-                                                ),
-                                                Text(
-                                                  ((widget.data["CustomerAddress"]
-                                                                  as List?)
-                                                              ?.isNotEmpty ==
-                                                          true)
-                                                      ? (widget
-                                                              .data[
-                                                                  "CustomerAddress"]
-                                                              .first["StreetNo"] ??
-                                                          "N/A")
-                                                      : "N/A",
-                                                  style: TextStyle(
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.032,
-                                                    fontWeight: FontWeight.bold,
-                                                    height: 2,
-                                                  ),
-                                                  textScaleFactor: 1.0,
-                                                ),
-                                              ],
-                                            ))),
-                                    Expanded(
-                                        flex: 2,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 10),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                    "No: ",
-                                                    style: TextStyle(
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                    textScaleFactor: 1.0,
-                                                  ),
-                                                  Text(
-                                                    "${widget.data["DocNum"]}",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.033),
-                                                    textScaleFactor: 1.0,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ))
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                  // height: 150,
-                                  padding:
-                                      const EdgeInsets.fromLTRB(10, 15, 10, 8),
-                                  color: const Color.fromARGB(255, 66, 83, 100),
-                                  width: double.infinity,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 1,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 6),
-                                              child: SvgPicture.asset(
-                                                color: const Color.fromARGB(
-                                                    255, 255, 255, 255),
-                                                'images/svg/dolla.svg',
-                                                width: 30,
-                                                height: 30,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                              flex: 6,
-                                              child: Column(
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: Text(
-                                                        "Service:",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.white,
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.033),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      Expanded(
-                                                          child: Text(
-                                                        "Status:",
-                                                        textAlign:
-                                                            TextAlign.end,
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.033,
-                                                            color:
-                                                                Colors.white),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Expanded(
-                                                          child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: (widget.data[
-                                                                        "CK_JOB_SERVICESCollection"]
-                                                                    as List)
-                                                                .isEmpty
-                                                            ? [
-                                                                Container(
-                                                                  margin:
-                                                                      const EdgeInsets
-                                                                          .only(
-                                                                          bottom:
-                                                                              8),
-                                                                  child: Text(
-                                                                    "No Services Available",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            MediaQuery.of(context).size.width *
-                                                                                0.032),
-                                                                  ),
-                                                                )
-                                                              ]
-                                                            : (widget.data["CK_JOB_SERVICESCollection"]
-                                                                            as List)
-                                                                        .length >
-                                                                    2
-                                                                ? [
-                                                                    ...(widget.data["CK_JOB_SERVICESCollection"]
-                                                                            as List)
-                                                                        .take(2)
-                                                                        .map((e) =>
-                                                                            Container(
-                                                                              margin: const EdgeInsets.only(bottom: 8),
-                                                                              child: Text(
-                                                                                "${e["U_CK_ServiceName"]}",
-                                                                                style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.031),
-                                                                                textScaleFactor: 1.0,
-                                                                              ),
-                                                                            )),
-                                                                    Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          bottom:
-                                                                              7),
-                                                                      child:
-                                                                          Text(
-                                                                        "more...",
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.white,
-                                                                            fontSize: MediaQuery.of(context).size.width * 0.031),
-                                                                        textScaleFactor:
-                                                                            1.0,
-                                                                      ),
-                                                                    ),
-                                                                  ]
-                                                                : (widget.data[
-                                                                            "CK_JOB_SERVICESCollection"]
-                                                                        as List)
-                                                                    .map((e) =>
-                                                                        Container(
-                                                                          margin: const EdgeInsets
-                                                                              .only(
-                                                                              bottom: 8),
-                                                                          child:
-                                                                              Text(
-                                                                            "${e["U_CK_ServiceName"]}",
-                                                                            style:
-                                                                                TextStyle(color: Colors.white, fontSize: MediaQuery.of(context).size.width * 0.032),
-                                                                            textScaleFactor:
-                                                                                1.0,
-                                                                          ),
-                                                                        ))
-                                                                    .toList(),
-                                                      )),
-                                                      Expanded(
-                                                          child: Text(
-                                                        "Open",
-                                                        textAlign:
-                                                            TextAlign.end,
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.033),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      const SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              ))
-                                        ],
-                                      ),
-                                      ///////////////////////////
-                                      Row(
-                                        children: [
-                                          const Expanded(
-                                            flex: 1,
-                                            child: Padding(
-                                                padding:
-                                                    EdgeInsets.only(right: 6),
-                                                child: Icon(
-                                                  Icons.build,
-                                                  color: Colors.white,
-                                                  size: 25,
-                                                )),
-                                          ),
-                                          Expanded(
-                                              flex: 6,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: Text(
-                                                        "Equipment:",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.white,
-                                                            fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.033),
-                                                        textScaleFactor: 1.0,
-                                                      )),
-                                                      Expanded(
-                                                          child: Text("",
-                                                              textAlign:
-                                                                  TextAlign.end,
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .white))),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  (widget.data["CK_JOB_EQUIPMENTCollection"]
-                                                              as List)
-                                                          .isEmpty
-                                                      ? Container(
-                                                          margin:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  bottom: 8),
-                                                          child: Text(
-                                                            "No Equipment Available",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.031),
-                                                          ),
-                                                        )
-                                                      : Container(),
-                                                  ...(widget.data[
-                                                              "CK_JOB_EQUIPMENTCollection"]
-                                                          as List)
-                                                      .take(2)
-                                                      .map(
-                                                        (item) => Container(
-                                                          margin:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  bottom: 10),
-                                                          child: Row(
-                                                            children: [
-                                                              Expanded(
-                                                                  child: Text(
-                                                                "${item["U_CK_EquipName"]}",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.031),
-                                                                textScaleFactor:
-                                                                    1.0,
-                                                              )),
-                                                              Expanded(
-                                                                  child: Text(
-                                                                "SN: ${item["U_CK_SerialNum"]}",
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .end,
-                                                                style: TextStyle(
-                                                                    fontSize: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.031,
-                                                                    color: Colors
-                                                                        .white),
-                                                                textScaleFactor:
-                                                                    1.0,
-                                                              )),
-                                                              const SizedBox(
-                                                                width: 5,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                  (widget.data["CK_JOB_EQUIPMENTCollection"]
-                                                                  as List)
-                                                              .length >
-                                                          2
-                                                      ? Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  bottom: 7),
-                                                          child: Text(
-                                                            "more...",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.031),
-                                                            textScaleFactor:
-                                                                1.0,
-                                                          ),
-                                                        )
-                                                      : Container(),
-                                                ],
-                                              ))
-                                        ],
-                                      ),
-                                      ///////////////////////////////////////////
-                                    ],
-                                  )),
+                              Icon(Icons.more_time_rounded,
+                                  size: 30.sp, color: const Color(0xFFCBD5E1)),
+                              SizedBox(height: 1.h),
+                              Text("No time entries logged",
+                                  style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: const Color(0xFF94A3B8))),
                             ],
                           ),
                         ),
-                    ////endddddddddddddddddddddddddd
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Menu(
-                      title: userName ?? "...",
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 0),
-                        child: SvgPicture.asset(
-                          color: Colors.green,
-                          'images/svg/clock.svg',
-                          width: 30,
-                          height: 30,
-                        ),
-                      ),
-                      date: showDateOnService(
-                          widget.data["U_CK_Date"]?.split("T")[0] ?? ""),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    DetailTime(
-                      onTap: () {
-                        final provider =
-                            context.read<CompletedServiceProvider>();
-                        // final item = provider.timeEntry;
-                        provider.timeEntry.isEmpty
-                            ? _showCreateTimeEntry()
-                            : onEditTimeEntry();
-                      },
-                      isValidTime: context
-                          .read<CompletedServiceProvider>()
-                          .timeEntry
-                          .isNotEmpty,
-                      timeEntry: context
-                              .read<CompletedServiceProvider>()
-                              .timeEntry
-                              .isNotEmpty
-                          ? context
-                              .read<CompletedServiceProvider>()
-                              .timeEntry[0]
-                          : {},
-                    ),
-                    /////do somthing
-                  ]),
-                )),
-              ],
-            )),
-      ),
-    );
-  }
-}
-
-class Menu extends StatefulWidget {
-  const Menu({super.key, this.icon, required this.title, required this.date});
-  final dynamic icon;
-  final String title;
-  final String date;
-  @override
-  State<Menu> createState() => _MenuState();
-}
-
-class _MenuState extends State<Menu> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(13),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Expanded(flex: 1, child: widget.icon),
-          Expanded(
-              flex: 3,
-              child: Text(
-                textScaleFactor: 1.0,
-                widget.title,
-                style:
-                     TextStyle(fontWeight: FontWeight.bold, fontSize:  MediaQuery.of(context).size.width * 0.032),
-              )),
-          Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 30),
-                child: Text(
-                  textAlign: TextAlign.right,
-                  textScaleFactor: 1.0,
-                  widget.date,
-                  style:  TextStyle(
-                      fontWeight: FontWeight.bold, fontSize:  MediaQuery.of(context).size.width * 0.032),
+                      );
+                    }
+                    return Column(
+                      children: timeEntries
+                          .asMap()
+                          .entries
+                          .map((entry) => _buildLogCard(entry.value, entry.key))
+                          .toList(),
+                    );
+                  },
                 ),
-              )),
+                SizedBox(height: 5.h),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-}
 
-class DetailTime extends StatefulWidget {
-  const DetailTime({
-    super.key,
-    this.onTap,
-    required this.isValidTime,
-    required this.timeEntry,
-  });
-  final VoidCallback? onTap;
-  final bool isValidTime;
-  final Map<String, dynamic> timeEntry;
-  @override
-  State<DetailTime> createState() => _DetailTimeState();
-}
-
-class _DetailTimeState extends State<DetailTime> {
-  @override
-  void initState() {
-    super.initState();
-    print(widget.timeEntry);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildLogCard(Map<String, dynamic> item, int index) {
     return Container(
-        padding: const EdgeInsets.fromLTRB(13, 13, 13, 13),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
+      padding: EdgeInsets.all(5.w),
+      decoration: BoxDecoration(
         color: Colors.white,
-        child: Column(
-          children: [
-            widget.isValidTime
-                ? Column(
-                    children: [
-                      Row(
-                        children: [
-                           Expanded(
-                              flex: 3,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 20),
-                                child: Text(
-                                  textScaleFactor: 1.0,
-                                  "Travel Time:",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize:  MediaQuery.of(context).size.width * 0.032),
-                                ),
-                              )),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                   Text("Start Time:",
-                                      textScaleFactor: 1.0,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey, // Border color
-                                        width: 1.0, // Border width
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          3.0), // Optional: Rounded corners
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            widget
-                                                .timeEntry["U_CK_TraveledTime"],
-                                            style:
-                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                            textScaleFactor: 1.0,
-                                          ),
-                                        ),
-                                        SvgPicture.asset(
-                                          color: const Color.fromARGB(
-                                              255, 29, 30, 29),
-                                          'images/svg/schedule.svg',
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                   Text("End Time:",
-                                      textScaleFactor: 1.0,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey, // Border color
-                                        width: 1.0, // Border width
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          3.0), // Optional: Rounded corners
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            widget.timeEntry[
-                                                "U_CK_TraveledEndTime"],
-                                            style:
-                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                            textScaleFactor: 1.0,
-                                          ),
-                                        ),
-                                        SvgPicture.asset(
-                                          color: const Color.fromARGB(
-                                              255, 29, 30, 29),
-                                          'images/svg/schedule.svg',
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          // const SizedBox(
-                          //   width: 10,
-                          // ),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                children: [
-                                   Text(
-                                    textScaleFactor: 1.0,
-                                    "Eff.T",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                  ),
-                                  const SizedBox(
-                                    height: 6,
-                                  ),
-                                  // Row(
-                                  //   children: [
-                                  //     Text(
-                                  //         widget.timeEntry["total_travel_time"],
-                                  //         textScaleFactor: 1.0,
-                                  //         style: const TextStyle(
-                                  //             fontSize: 14,
-                                  //             color: Colors.green,
-                                  //             fontWeight: FontWeight.bold)),
-                                  //     const SizedBox(
-                                  //       width: 4,
-                                  //     ),
-                                  //     const Icon(Icons.timelapse,
-                                  //         size: 18, color: Colors.green),
-                                  //   ],
-                                  // ),
-                                  SizedBox(
-                                    width: 85,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                            widget
-                                                .timeEntry["total_travel_time"],
-                                            textScaleFactor: 1.0,
-                                            style:  TextStyle(
-                                              fontSize:  MediaQuery.of(context).size.width * 0.032,
-                                              color: Colors.green,
-                                            )),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                        const Icon(Icons.timelapse,
-                                            size: 17, color: Colors.green),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        children: [
-                           Expanded(
-                              flex: 3,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 20),
-                                child: Text(
-                                  textScaleFactor: 1.0,
-                                  "Service Time:",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize:  MediaQuery.of(context).size.width * 0.032),
-                                ),
-                              )),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                   Text("Start Time:",
-                                      textScaleFactor: 1.0,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey, // Border color
-                                        width: 1.0, // Border width
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          3.0), // Optional: Rounded corners
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            widget.timeEntry[
-                                                "U_CK_ServiceStartTime"],
-                                            style:
-                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                            textScaleFactor: 1.0,
-                                          ),
-                                        ),
-                                        SvgPicture.asset(
-                                          color: const Color.fromARGB(
-                                              255, 29, 30, 29),
-                                          'images/svg/schedule.svg',
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                   Text("End Time:",
-                                      textScaleFactor: 1.0,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey, // Border color
-                                        width: 1.0, // Border width
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          3.0), // Optional: Rounded corners
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            widget.timeEntry["U_CK_SerEndTime"],
-                                            style:
-                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                            textScaleFactor: 1.0,
-                                          ),
-                                        ),
-                                        SvgPicture.asset(
-                                          color: const Color.fromARGB(
-                                              255, 29, 30, 29),
-                                          'images/svg/schedule.svg',
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          // const SizedBox(
-                          //   width: 5,
-                          // ),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                children: [
-                                  const SizedBox(
-                                    height: 25,
-                                  ),
-                                  // Text(widget.timeEntry["total_service_time"],
-                                  //     textScaleFactor: 1.0,
-                                  //     style: const TextStyle(
-                                  //         fontSize: 14,
-                                  //         color: Colors.green,
-                                  //         fontWeight: FontWeight.bold)),
-                                  SizedBox(
-                                    width: 85,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                            widget.timeEntry[
-                                                "total_service_time"],
-                                            textScaleFactor: 1.0,
-                                            style: TextStyle(
-                                              fontSize:  MediaQuery.of(context).size.width * 0.032,
-                                              color: Colors.green,
-                                            )),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                        const Icon(Icons.timelapse,
-                                            size: 18, color: Colors.green),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        children: [
-                           Expanded(
-                              flex: 3,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 20),
-                                child: Text(
-                                  textScaleFactor: 1.0,
-                                  "Break Time:",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize:  MediaQuery.of(context).size.width * 0.032),
-                                ),
-                              )),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                   Text("Start Time:",
-                                      textScaleFactor: 1.0,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey, // Border color
-                                        width: 1.0, // Border width
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          3.0), // Optional: Rounded corners
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            widget.timeEntry["U_CK_BreakTime"],
-                                            style:
-                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                            textScaleFactor: 1.0,
-                                          ),
-                                        ),
-                                        SvgPicture.asset(
-                                          color: const Color.fromARGB(
-                                              255, 29, 30, 29),
-                                          'images/svg/schedule.svg',
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                   Text("End Time:",
-                                      textScaleFactor: 1.0,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize:  MediaQuery.of(context).size.width * 0.029)),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey, // Border color
-                                        width: 1.0, // Border width
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          3.0), // Optional: Rounded corners
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            widget
-                                                .timeEntry["U_CK_BreakEndTime"],
-                                            style:
-                                                 TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.030),
-                                            textScaleFactor: 1.0,
-                                          ),
-                                        ),
-                                        SvgPicture.asset(
-                                          color: const Color.fromARGB(
-                                              255, 29, 30, 29),
-                                          'images/svg/schedule.svg',
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          // const SizedBox(
-                          //   width: 10,
-                          // ),
-                          Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const SizedBox(
-                                    height: 25,
-                                  ),
-                                  SizedBox(
-                                    width: 85,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                            widget
-                                                .timeEntry["total_break_time"],
-                                            textScaleFactor: 1.0,
-                                            style: TextStyle(
-                                              fontSize:  MediaQuery.of(context).size.width * 0.032,
-                                              color: Colors.green,
-                                            )),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                        const Icon(Icons.timelapse,
-                                            size: 18, color: Colors.green),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                    ],
-                  )
-                : Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 30),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.alarm,
-                          size: 23,
-                          color: Color.fromARGB(221, 168, 168, 171),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "No Time Added",
-                          style: TextStyle(
-                              fontSize:  MediaQuery.of(context).size.width * 0.033,
-                              // fontWeight: FontWeight.w500,
-                              color: Color.fromARGB(221, 168, 168, 171)),
-                        ),
-                      ],
-                    ),
-                  ),
-            Container(
-              color: const Color.fromARGB(255, 255, 255, 255),
-              height: 70,
-              padding: const EdgeInsets.fromLTRB(12, 12, 0, 10),
-              child: Row(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Service Period #${index + 1}",
+                  style: GoogleFonts.inter(
+                      fontSize: 14.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E293B))),
+              Row(
                 children: [
-                  Expanded(flex: 2, child: Container()),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: widget.onTap,
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                      ),
-                      child: Text(
-                        !widget.isValidTime ? "Add Time" : "Edit Time",
-                        style: TextStyle(
-                            color: Color.fromARGB(255, 255, 255, 255),
-                            fontSize:  MediaQuery.of(context).size.width * 0.031),
-                      ),
-                    ),
+                  IconButton(
+                    onPressed: () {
+                      isEditTime = index;
+                      travelTime.text =
+                          getDataFromDynamic(item["U_CK_TraveledTime"]);
+                      travelEndTime.text =
+                          getDataFromDynamic(item["U_CK_TraveledEndTime"]);
+                      serviceTime.text =
+                          getDataFromDynamic(item["U_CK_ServiceStartTime"]);
+                      serviceEndTime.text =
+                          getDataFromDynamic(item["U_CK_SerEndTime"]);
+                      breakTime.text =
+                          getDataFromDynamic(item["U_CK_BreakTime"]);
+                      breakEndTime.text =
+                          getDataFromDynamic(item["U_CK_BreakEndTime"]);
+                      _showCreateTimeEntry();
+                    },
+                    icon: Icon(Icons.edit_note_rounded,
+                        color: Colors.blue, size: 20.sp),
                   ),
-                  const SizedBox(width: 12),
+                  IconButton(
+                    onPressed: () => context
+                        .read<CompletedServiceProvider>()
+                        .removeTimeEntry(index),
+                    icon: Icon(Icons.delete_outline_rounded,
+                        color: Colors.red, size: 20.sp),
+                  ),
                 ],
               ),
+            ],
+          ),
+          SizedBox(height: 1.h),
+          _buildTimeRow("Travel", item["U_CK_TraveledTime"],
+              item["U_CK_TraveledEndTime"], Colors.blue),
+          _buildTimeRow("Service", item["U_CK_ServiceStartTime"],
+              item["U_CK_SerEndTime"], Colors.green),
+          _buildTimeRow("Break", item["U_CK_BreakTime"],
+              item["U_CK_BreakEndTime"], Colors.orange),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeRow(String label, dynamic start, dynamic end, Color color) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 0.6.h),
+      child: Row(
+        children: [
+          Container(
+              width: 3,
+              height: 3.5.h,
+              decoration: BoxDecoration(
+                  color: color, borderRadius: BorderRadius.circular(2))),
+          SizedBox(width: 3.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: GoogleFonts.inter(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF94A3B8))),
+                Text(
+                    "${getDataFromDynamic(start)} - ${getDataFromDynamic(end)}",
+                    style: GoogleFonts.inter(
+                        fontSize: 13.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF475569))),
+              ],
             ),
-          ],
-        ));
+          ),
+          Text(
+              calculateSpentTime(
+                  getDataFromDynamic(start), getDataFromDynamic(end)),
+              style: GoogleFonts.inter(
+                  fontSize: 12.5.sp,
+                  fontWeight: FontWeight.w700,
+                  color: color)),
+        ],
+      ),
+    );
+  }
+
+  String calculateSpentTime(String start, String end) {
+    try {
+      if (start.isEmpty || end.isEmpty) return "0h 0m";
+      final format = DateFormat("HH:mm");
+      final startTime = format.parse(start);
+      var endTime = format.parse(end);
+      if (endTime.isBefore(startTime))
+        endTime = endTime.add(const Duration(days: 1));
+      final diff = endTime.difference(startTime);
+      return "${diff.inHours}h ${diff.inMinutes % 60}m";
+    } catch (e) {
+      return "0h 0m";
+    }
   }
 }
