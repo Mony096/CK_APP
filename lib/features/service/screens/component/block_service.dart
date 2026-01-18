@@ -24,7 +24,7 @@ class BlockService extends StatelessWidget {
     final endTime = data["U_CK_EndTime"] ?? "--:--";
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      margin: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,

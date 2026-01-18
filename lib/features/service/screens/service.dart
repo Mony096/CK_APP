@@ -348,10 +348,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 1.5.h),
+              SizedBox(height: 0.5.h),
               // Modern Filter Section
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                 child: Row(
                   children: [
                     Expanded(
@@ -441,7 +441,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                         ),
                       )
                     : ListView.builder(
-                        padding: EdgeInsets.symmetric(vertical: 1.h),
+                        // padding: EdgeInsets.symmetric(vertical: 1.h),
                         itemCount: documents.length,
                         itemBuilder: (context, index) {
                           final travel = documents[index];
