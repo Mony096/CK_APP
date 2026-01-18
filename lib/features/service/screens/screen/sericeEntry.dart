@@ -94,6 +94,10 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     final status = widget.data["U_CK_Status"] ?? "Entry";
     final docNum = widget.data["DocNum"] ?? "N/A";
     final customerName = widget.data["CustomerName"] ?? "Unknown Customer";
+    final jobType = widget.data["U_CK_JobType"] ?? "Service";
+    final dateStr = widget.data["U_CK_Date"]?.split("T")[0] ?? "";
+    final startTime = widget.data["U_CK_Time"] ?? "--:--";
+    final endTime = widget.data["U_CK_EndTime"] ?? "--:--";
 
     return PopScope(
       canPop: false,
@@ -107,9 +111,10 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           title: Text(
             "Service Entry",
             style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white),
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
           centerTitle: true,
           backgroundColor: const Color(0xFF425364),
@@ -143,42 +148,151 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               child: ListView(
                 padding: EdgeInsets.symmetric(vertical: 2.h),
                 children: [
-                  // JOB Summary Card
+                  // Enhanced JOB Summary Card
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    padding: EdgeInsets.all(4.w),
+                    padding: EdgeInsets.all(5.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(2.w),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              shape: BoxShape.circle),
-                          child: Icon(Icons.business_center_rounded,
-                              color: const Color(0xFF425364), size: 18.sp),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(customerName,
-                                  style: GoogleFonts.inter(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF1E293B))),
-                              Text("JOB #$docNum",
-                                  style: GoogleFonts.inter(
-                                      fontSize: 13.sp,
-                                      color: const Color(0xFF64748B),
-                                      fontWeight: FontWeight.w500)),
-                            ],
+                      ],
+                      border: Border.all(color: const Color(0xFFF1F5F9)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 3.w, vertical: 0.6.h),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "JOB #$docNum",
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.5.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF475569),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 2.w, vertical: 0.4.h),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF9C3),
+                                borderRadius: BorderRadius.circular(6),
+                                border:
+                                    Border.all(color: const Color(0xFFFDE047)),
+                              ),
+                              child: Text(
+                                jobType.toUpperCase(),
+                                style: GoogleFonts.inter(
+                                  fontSize: 10.5.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF854D0E),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          customerName,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1E293B),
                           ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Divider(height: 1, color: const Color(0xFFF1F5F9)),
+                        SizedBox(height: 2.h),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "DATE",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.5.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF94A3B8),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  SizedBox(height: 0.5.h),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calendar_today_rounded,
+                                          size: 14.sp,
+                                          color: const Color(0xFF64748B)),
+                                      SizedBox(width: 1.5.w),
+                                      Text(
+                                        showDateOnService(dateStr),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              height: 3.5.h,
+                              width: 1,
+                              color: const Color(0xFFF1F5F9),
+                              margin: EdgeInsets.symmetric(horizontal: 3.w),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "SCHEDULED",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.5.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF94A3B8),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  SizedBox(height: 0.5.h),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time_rounded,
+                                          size: 14.sp,
+                                          color: const Color(0xFF64748B)),
+                                      SizedBox(width: 1.5.w),
+                                      Text(
+                                        "$startTime - $endTime",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -238,7 +352,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           ],
         ),
         bottomSheet: Container(
-          padding: EdgeInsets.fromLTRB(6.w, 2.h, 6.w, 4.h),
+          padding: EdgeInsets.fromLTRB(6.w, 2.h, 6.w, 2.h),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -251,17 +365,18 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           child: ElevatedButton(
             onPressed: onCompletedService,
             style: ElevatedButton.styleFrom(
+              
               backgroundColor: const Color(0xFF22C55E),
               foregroundColor: Colors.white,
               elevation: 0,
-              minimumSize: Size(double.infinity, 6.h),
+              minimumSize: Size(double.infinity, 5.h),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(
               "COMPLETE SERVICE",
               style: GoogleFonts.inter(
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.0),
             ),
@@ -293,7 +408,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
+      margin: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.7.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
@@ -307,9 +422,9 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       ),
       child: ListTile(
         onTap: onTap,
-        contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
+        contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.h),
         leading: Container(
-          padding: EdgeInsets.all(3.w),
+          padding: EdgeInsets.all(2.w),
           decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12)),
@@ -319,11 +434,11 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
         title: Text(title,
             style: GoogleFonts.inter(
                 fontWeight: FontWeight.w700,
-                fontSize: 15.5.sp,
+                fontSize: 15.sp,
                 color: const Color(0xFF1E293B))),
         subtitle: Text(subtitle,
             style: GoogleFonts.inter(
-                fontSize: 13.sp,
+                fontSize: 12.5.sp,
                 color: const Color(0xFF64748B),
                 fontWeight: FontWeight.w500)),
         trailing: Icon(Icons.chevron_right_rounded,

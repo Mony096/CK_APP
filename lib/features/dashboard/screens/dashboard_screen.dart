@@ -17,6 +17,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key, this.fromNotification = false});
@@ -1051,7 +1053,7 @@ class _DashboardState extends State<Dashboard>
       top: false,
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Color.fromARGB(255, 66, 83, 100),
@@ -1305,21 +1307,19 @@ class _DashboardState extends State<Dashboard>
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: BorderRadius.circular(15),
                   border: Border.all(
-                    color: const Color.fromARGB(255, 233, 233, 235),
+                    color: const Color.fromARGB(255, 239, 239, 242),
                     width: 1,
                   ),
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     color: Theme.of(context)
-                  //         .colorScheme
-                  //         .onSurface
-                  //         .withOpacity(0.08),
-                  //     blurRadius: 4,
-                  //     offset: const Offset(0, 2),
-                  //   ),
-                  // ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue
+                          .withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Theme(
                   data: Theme.of(context)
@@ -1506,70 +1506,34 @@ class _DashboardState extends State<Dashboard>
   }
 
   Widget _cardTicket(dynamic data, int index) {
-    // Determine status color
-    Color statusColor;
-    Color statusBgColor;
-    String status = data["U_CK_Status"] ?? "N/A";
-
-    switch (status) {
-      case "Pending":
-      case "Open":
-        statusColor = const Color(0xFFE53935); // Red 600
-        statusBgColor = const Color(0xFFFFEBEE); // Red 50
-        break;
-      case "Accept":
-        statusColor = const Color(0xFF00897B); // Teal 600
-        statusBgColor = const Color(0xFFE0F2F1); // Teal 50
-        break;
-      case "Travel":
-        statusColor = const Color(0xFF1E88E5); // Blue 600
-        statusBgColor = const Color(0xFFE3F2FD); // Blue 50
-        break;
-      case "Service":
-        statusColor = const Color(0xFF8E24AA); // Purple 600
-        statusBgColor = const Color(0xFFF3E5F5); // Purple 50
-        break;
-      case "Entry":
-        statusColor = const Color(0xFF43A047); // Green 600
-        statusBgColor = const Color(0xFFE8F5E9); // Green 50
-        break;
-      default:
-        statusColor = Colors.blueGrey;
-        statusBgColor = Colors.blueGrey.withOpacity(0.1);
-    }
-
-    // Determine Job Type color (Corrective/Preventive)
-    Color jobTypeColor = const Color(0xFF1565C0); // Blue 800
-    Color jobTypeBgColor = const Color(0xFFE3F2FD); // Blue 50
-    if (data["U_CK_JobType"] == "Preventive") {
-      jobTypeColor = const Color(0xFFE65100); // Orange 900
-      jobTypeBgColor = const Color(0xFFFFF3E0); // Orange 50
-    }
+    final status = data["U_CK_Status"] ?? "N/A";
+    final docNum = data["DocNum"] ?? data["id"] ?? "N/A";
+    final customerName = data["CustomerName"] ?? "Unknown Customer";
+    final jobType = data["U_CK_JobType"] ?? "Service";
+    final dateStr = data["U_CK_Date"]?.split("T")[0] ?? "";
+    final startTime = data["U_CK_Time"] ?? "--:--";
+    final endTime = data["U_CK_EndTime"] ?? "--:--";
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 2.h),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 249, 250, 250),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.colors.outlineVariant.withOpacity(0.5),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
           onTap: () {
             if (status == "Entry") {
-              // Navigate to Detail Screen for completed services
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1579,7 +1543,6 @@ class _DashboardState extends State<Dashboard>
               ).then((value) => _fetchTicketCounts());
               return;
             }
-            // Navigate to Active Operation Screen
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -1588,239 +1551,228 @@ class _DashboardState extends State<Dashboard>
               ),
             ).then((value) => _fetchTicketCounts());
           },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Row: Ticket ID and Status
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row: Doc Num, Job Type, and Status
+              Padding(
+                padding: EdgeInsets.fromLTRB(4.w, 2.h, 4.w, 1.h),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: context.colors.surfaceContainerHighest,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.confirmation_number_outlined,
-                              size: 16, color: context.colors.onSurfaceVariant),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Ticket #${index + 1}",
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.onSurfaceVariant,
-                          ),
-                        ),
-                        if (status == "Entry") ...[
-                          const SizedBox(width: 8),
-                          Consumer<ServiceListProviderOffline>(
-                            builder: (context, offlineProvider, child) {
-                              final completed =
-                                  offlineProvider.completedServices;
-                              final richPayload = completed.firstWhere(
-                                (s) =>
-                                    s['DocEntry']?.toString() ==
-                                    data['DocEntry']?.toString(),
-                                orElse: () => {},
-                              );
-
-                              final isSynced =
-                                  richPayload['sync_status'] == 'synced';
-
-                              return Icon(
-                                isSynced
-                                    ? Icons.cloud_done_rounded
-                                    : Icons.cloud_off_rounded,
-                                size: 18,
-                                color: isSynced
-                                    ? const Color(0xFF43A047)
-                                    : const Color(0xFFEF6C00),
-                              );
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 2.5.w, vertical: 0.5.h),
                       decoration: BoxDecoration(
-                        color: statusBgColor,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: statusColor.withOpacity(0.25),
-                          width: 1.2,
-                        ),
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        status == "Entry" ? "COMPLETED" : status.toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: statusColor,
-                          letterSpacing: 0.8,
+                        "#$docNum",
+                        style: GoogleFonts.inter(
+                          fontSize: 12.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF475569),
                         ),
                       ),
+                    ),
+                    SizedBox(width: 2.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 2.w, vertical: 0.4.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF9C3),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFFDE047)),
+                      ),
+                      child: Text(
+                        jobType.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF854D0E),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    _buildStatusBadge(status),
+                  ],
+                ),
+              ),
+
+              // Customer Info Section
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customerName,
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_rounded,
+                            size: 14.sp, color: Colors.blueAccent),
+                        SizedBox(width: 1.5.w),
+                        Expanded(
+                          child: Text(
+                            ((data["CustomerAddress"] as List?)?.isNotEmpty ==
+                                    true)
+                                ? "${data["CustomerAddress"].first["StreetNo"] ?? "No Street Address"}"
+                                : "No Address Available",
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              color: const Color(0xFF64748B),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+              ),
 
-                // Customer Info
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // Divider
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ),
+
+              // Date & Time Footer
+              Padding(
+                padding: EdgeInsets.all(4.w),
+                child: Row(
                   children: [
-                    Icon(Icons.business_rounded,
-                        size: 20, color: context.colors.primary),
-                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            data["CustomerName"] ?? "Unknown Customer",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: context.onSurfaceColor,
-                            ),
+                          _buildInfoLabel("DATE"),
+                          SizedBox(height: 0.5.h),
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_today_rounded,
+                                  size: 14.sp, color: const Color(0xFF64748B)),
+                              SizedBox(width: 1.5.w),
+                              Text(
+                                showDateOnService(dateStr),
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "${data["U_CK_CardCode"] ?? "N/A"}",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      height: 3.5.h,
+                      width: 1,
+                      color: const Color(0xFFF1F5F9),
+                      margin: EdgeInsets.symmetric(horizontal: 3.w),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoLabel("SCHEDULED"),
+                          SizedBox(height: 0.5.h),
+                          Row(
+                            children: [
+                              Icon(Icons.access_time_rounded,
+                                  size: 14.sp, color: const Color(0xFF64748B)),
+                              SizedBox(width: 1.5.w),
+                              Text(
+                                "$startTime - $endTime",
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 12),
-
-                // Address
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 18, color: Colors.blue),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        ((data["CustomerAddress"] as List?)?.isNotEmpty == true)
-                            ? "${data["CustomerAddress"].first["StreetNo"] ?? "No Street Address"}"
-                            : "No Address Available",
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: context.colors.onSurfaceVariant,
-                          height: 1.3,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-                Divider(
-                    height: 1,
-                    color: context.colors.outlineVariant.withOpacity(0.5)),
-                const SizedBox(height: 12),
-
-                // Footer: Job Type, Service Type, Priority
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 8,
-                  children: [
-                    _buildTag(
-                      label: data["U_CK_JobType"] ?? "N/A",
-                      color: jobTypeColor,
-                      bgColor: jobTypeBgColor,
-                      icon: data["U_CK_JobType"] == "Preventive"
-                          ? Icons.event_repeat_rounded
-                          : Icons.build_circle_outlined,
-                    ),
-                    _buildTag(
-                      label: data["U_CK_ServiceType"] ?? "Service",
-                      color: context.colors.tertiary,
-                      bgColor:
-                          context.colors.tertiaryContainer.withOpacity(0.3),
-                      icon: Icons.settings_suggest_rounded,
-                    ),
-                    if (data["U_CK_Priority"] != null)
-                      _buildTag(
-                        label: "${data["U_CK_Priority"]}",
-                        color: data["U_CK_Priority"] == "High"
-                            ? context.colors.error
-                            : context.colors.secondary,
-                        bgColor: data["U_CK_Priority"] == "High"
-                            ? context.colors.errorContainer.withOpacity(0.8)
-                            : context.colors.secondaryContainer
-                                .withOpacity(0.8),
-                        icon: data["U_CK_Priority"] == "High"
-                            ? Icons.priority_high_rounded
-                            : Icons.low_priority_rounded,
-                      ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTag({
-    required String label,
-    required Color color,
-    required Color bgColor,
-    IconData? icon,
-  }) {
+  Widget _buildInfoLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 10.5.sp,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF94A3B8),
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color color;
+    Color bgColor;
+
+    switch (status) {
+      case "Pending":
+      case "Open":
+        color = const Color(0xFFEF4444);
+        bgColor = const Color(0xFFFEF2F2);
+        break;
+      case "Accept":
+        color = const Color(0xFF0D9488);
+        bgColor = const Color(0xFFF0FDFA);
+        break;
+      case "Travel":
+        color = const Color(0xFF2563EB);
+        bgColor = const Color(0xFFEFF6FF);
+        break;
+      case "Service":
+        color = const Color(0xFF9333EA);
+        bgColor = const Color(0xFFFAF5FF);
+        break;
+      case "Entry":
+        color = const Color(0xFF16A34A);
+        bgColor = const Color(0xFFF0FDF4);
+        break;
+      default:
+        color = const Color(0xFF64748B);
+        bgColor = const Color(0xFFF8FAFC);
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.6.h),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withOpacity(0.15),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 5),
-          ],
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: color,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
+      child: Text(
+        status == "Entry" ? "COMPLETED" : status.toUpperCase(),
+        style: GoogleFonts.inter(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w800,
+          color: color,
+        ),
       ),
     );
   }

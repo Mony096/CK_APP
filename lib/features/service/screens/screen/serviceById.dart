@@ -29,6 +29,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   void initState() {
     super.initState();
     _loadUserName();
+    print(widget.data["CK_JOB_EQUIPMENTCollection"]);
   }
 
   Future<void> _onReject() async {
@@ -204,7 +205,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       Text(
                         customerName,
                         style: GoogleFonts.inter(
-                          fontSize: 18.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF1E293B),
                         ),
@@ -282,17 +283,28 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           .toList(),
                 ),
                 DetailRow(
-                  title: "Service Items",
-                  svg: SvgPicture.asset('images/svg/dolla.svg',
-                      color: const Color(0xFF3B82F6)),
-                  rows:
-                      (widget.data["CK_JOB_SERVICESCollection"] as List).isEmpty
-                          ? [RowItem(left: "No Services Listed")]
-                          : (widget.data["CK_JOB_SERVICESCollection"] as List)
-                              .map((e) =>
-                                  RowItem(left: e["U_CK_ServiceName"] ?? "N/A"))
-                              .toList(),
-                ),
+                    title: "Service Items",
+                    svg: SvgPicture.asset('images/svg/dolla.svg',
+                        color: const Color(0xFF3B82F6)),
+                    rows: (widget.data["CK_JOB_SERVICESCollection"] as List)
+                            .isEmpty
+                        ? [RowItem(left: "No Services Listed")]
+                        : (widget.data["CK_JOB_SERVICESCollection"] as List)
+                            // .map((e) =>
+                            //     RowItem(left: e["U_CK_ServiceName"] ?? "N/A"))
+                            // .toList(),
+                            .expand<RowItem>((e) => [
+                                  RowItem(
+                                    left: e['U_CK_ServiceName'] ?? "N/A",
+                                    right: 'USD ${numberFormatCurrency.format(
+                                      double.tryParse(
+                                              e["U_CK_UnitPrice"].toString()) ??
+                                          0,
+                                    )} ',
+                                    isRightIcon: false,
+                                  ),
+                                ])
+                            .toList()),
                 DetailRow(
                   title: "Equipment Details",
                   svg: const Icon(Icons.build_rounded, color: Colors.orange),
@@ -301,12 +313,46 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                       ? [RowItem(left: "No Equipment Listed")]
                       : (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
                           .expand<RowItem>((e) => [
-                                RowItem(left: e["U_CK_EquipName"] ?? "N/A"),
+                                RowItem(
+                                  left: e["U_CK_EquipName"] ?? "N/A",
+                                ),
                                 RowItem(
                                     left:
-                                        "SN: ${e["U_CK_SerialNum"] ?? "N/A"}"),
+                                        "SN : ${e["U_CK_SerialNum"] == "" ? "N/A" : e["U_CK_SerialNum"]}"),
+                                // RowItem(
+                                //     left: "Model : ${e["U_CK_Model"] == "" ? "N/A" : e["U_CK_Model"]}"),
+                              ])
+                          .toList(),
+                ),
+                //  const SizedBox(
+                //       height: 15,
+                //     ),
+                DetailRow(
+                  title: "Activity:",
+                  svg: SvgPicture.asset(
+                    color: Colors.blue,
+                    'images/svg/activity.svg',
+                    width: 30,
+                    height: 30,
+                  ),
+                  rows: (widget.data["activityLine"] as List).isEmpty
+                      ? [
+                          RowItem(
+                            left: "No Activity Available",
+                            right: "",
+                          ),
+                        ]
+                      : (widget.data["activityLine"] as List)
+                          .expand<RowItem>((e) => [
                                 RowItem(
-                                    left: "Model: ${e["U_CK_Model"] ?? "N/A"}"),
+                                    left: "${e["Activity"] ?? "N/A"}",
+                                    right: SvgPicture.asset(
+                                      color: Colors.blue,
+                                      'images/svg/task_check.svg',
+                                      width: 25,
+                                      height: 25,
+                                    ),
+                                    isRightIcon: true),
                               ])
                           .toList(),
                 ),
@@ -319,8 +365,11 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           ? [RowItem(left: "No Materials Listed")]
                           : (widget.data["CK_JOB_MATERIALCollection"] as List)
                               .expand<RowItem>((e) => [
-                                    RowItem(left: e["U_CK_ItemName"] ?? "N/A"),
-                                    RowItem(left: "Qty: ${e["U_CK_Qty"] ?? 0}"),
+                                    RowItem(
+                                      left: e["U_CK_ItemName"] ?? "N/A",
+                                      right: '${e["U_CK_Qty"] ?? 0} ',
+                                    ),
+                                    // RowItem(left: "Qty: ${e["U_CK_Qty"] ?? 0}"),
                                   ])
                               .toList(),
                 ),
@@ -330,59 +379,80 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
           ),
         ],
       ),
-      bottomSheet: Container(
-        padding: EdgeInsets.fromLTRB(6.w, 2.h, 6.w, 3.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
+     bottomSheet: Container(
+  padding: EdgeInsets.fromLTRB(6.w, 1.2.h, 6.w, 1.h),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.05),
+        blurRadius: 20,
+        offset: const Offset(0, -5),
+      ),
+    ],
+  ),
+  child: Row(
+    children: [
+      if (status == "Pending") ...[
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _onReject,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Color(0xFFFCA5A5)),
+
+              // 👇 key lines
+              minimumSize: const Size(0, 45),
+              padding: EdgeInsets.symmetric(vertical: 0.8.h),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          ],
+            child: Text(
+              "REJECT",
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
-        child: Row(
-          children: [
-            if (status == "Pending") ...[
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _onReject,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Color(0xFFFCA5A5)),
-                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text("REJECT",
-                      style: GoogleFonts.inter(
-                          fontSize: 15.sp, fontWeight: FontWeight.w700)),
-                ),
-              ),
-              SizedBox(width: 4.w),
-            ],
-            Expanded(
-              flex: 2,
-              child: ElevatedButton(
-                onPressed: onUpdateStatus,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _getActionColor(status),
-                  foregroundColor:
-                      status == "Accept" ? Colors.black : Colors.white,
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(_getActionLabel(status),
-                    style: GoogleFonts.inter(
-                        fontSize: 15.sp, fontWeight: FontWeight.w800)),
-              ),
+        SizedBox(width: 4.w),
+      ],
+      Expanded(
+        flex: 2,
+        child: ElevatedButton(
+          onPressed: onUpdateStatus,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _getActionColor(status),
+            foregroundColor:
+                status == "Accept" ? Colors.black : Colors.white,
+            elevation: 0,
+
+            // 👇 key lines
+            minimumSize: const Size(0, 45),
+            padding: EdgeInsets.symmetric(vertical: 0.8.h),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
+          ),
+          child: Text(
+            _getActionLabel(status),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
       ),
+    ],
+  ),
+),
+
     );
   }
 
@@ -417,11 +487,11 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 13.sp, color: const Color(0xFF94A3B8)),
+              Icon(icon, size: 15.sp, color: const Color(0xFF94A3B8)),
               SizedBox(width: 1.5.w),
               Text(label,
                   style: GoogleFonts.inter(
-                      fontSize: 11.sp,
+                      fontSize: 11.5.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF94A3B8),
                       letterSpacing: 0.5)),
@@ -437,7 +507,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                   border: Border.all(color: const Color(0xFFFDE047))),
               child: Text(value,
                   style: GoogleFonts.inter(
-                      fontSize: 12.sp,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF854D0E))),
             )

@@ -15,6 +15,7 @@ class BlockService extends StatelessWidget {
     final status = data["U_CK_Status"] ?? "Pending";
     final docNum = data["DocNum"] ?? "N/A";
     final customerName = data["CustomerName"] ?? "Unknown Customer";
+    final dateStr = data["U_CK_Date"]?.split("T")[0] ?? "";
     final address = (data["CustomerAddress"] as List?)?.isNotEmpty == true
         ? data["CustomerAddress"].first["StreetNo"] ?? "No Address"
         : "No Address";
@@ -40,11 +41,10 @@ class BlockService extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header (Doc Num & Status Badge)
+          // 1. Header (Doc Num, Job Type & Status Badge)
           Padding(
             padding: EdgeInsets.fromLTRB(4.w, 2.h, 4.w, 1.h),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   padding:
@@ -56,12 +56,31 @@ class BlockService extends StatelessWidget {
                   child: Text(
                     "JOB #$docNum",
                     style: GoogleFonts.inter(
-                      fontSize: 13.sp,
+                      fontSize: 12.5.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF475569),
                     ),
                   ),
                 ),
+                SizedBox(width: 2.w),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.4.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF9C3),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFFDE047)),
+                  ),
+                  child: Text(
+                    jobType.toUpperCase(),
+                    style: GoogleFonts.inter(
+                      fontSize: 10.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF854D0E),
+                    ),
+                  ),
+                ),
+                const Spacer(),
                 _buildStatusBadge(status),
               ],
             ),
@@ -77,13 +96,13 @@ class BlockService extends StatelessWidget {
                   customerName,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: const Color(0xFF1E293B),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 0.5.h),
+                SizedBox(height: 0.4.h),
                 Row(
                   children: [
                     Icon(Icons.location_on_rounded,
@@ -107,62 +126,68 @@ class BlockService extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 2.h),
+          SizedBox(height: 1.5.h),
 
           // 3. Status Stepper
           StatusStepper(status: status),
 
-          // 4. Details Row (Time, Job Type)
+          // 4. Details Row (Date & Time)
           Padding(
             padding: EdgeInsets.all(4.w),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "SCHEDULED TIME",
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF94A3B8),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Row(
-                      children: [
-                        Icon(Icons.access_time_filled_rounded,
-                            size: 14.sp, color: const Color(0xFF425364)),
-                        SizedBox(width: 1.5.w),
-                        Text(
-                          "$startTime - $endTime",
-                          style: GoogleFonts.inter(
-                            fontSize: 13.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1E293B),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoLabel("DATE"),
+                      SizedBox(height: 0.5.h),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded,
+                              size: 14.sp, color: const Color(0xFF425364)),
+                          SizedBox(width: 1.5.w),
+                          Text(
+                            showDateOnService(dateStr),
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1E293B),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF9C3),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFFDE047)),
-                  ),
-                  child: Text(
-                    jobType,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF854D0E),
-                    ),
+                  height: 3.h,
+                  width: 1,
+                  margin: EdgeInsets.symmetric(horizontal: 3.w),
+                  color: const Color(0xFFF1F5F9),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoLabel("SCHEDULED TIME"),
+                      SizedBox(height: 0.5.h),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time_filled_rounded,
+                              size: 14.sp, color: const Color(0xFF425364)),
+                          SizedBox(width: 1.5.w),
+                          Text(
+                            "$startTime - $endTime",
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -173,7 +198,7 @@ class BlockService extends StatelessWidget {
 
           // 5. Footer Actions
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+            padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.8.h),
             child: Row(
               children: [
                 TextButton(
@@ -181,19 +206,19 @@ class BlockService extends StatelessWidget {
                     goTo(context, ServiceByIdScreen(data: data));
                   },
                   style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    padding: EdgeInsets.symmetric(horizontal: 3.w),
                   ),
                   child: Row(
                     children: [
                       Text(
                         "View Details",
                         style: GoogleFonts.inter(
-                          fontSize: 14.sp,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF334155),
                         ),
                       ),
-                      Icon(Icons.chevron_right_rounded, size: 18.sp),
+                      Icon(Icons.chevron_right_rounded, size: 17.sp),
                     ],
                   ),
                 ),
@@ -204,8 +229,9 @@ class BlockService extends StatelessWidget {
                     backgroundColor: _getActionColor(status),
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                    minimumSize: const Size(0, 40),
+                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -213,8 +239,8 @@ class BlockService extends StatelessWidget {
                   child: Text(
                     _getActionLabel(status),
                     style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -223,6 +249,18 @@ class BlockService extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 10.5.sp,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF94A3B8),
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -256,7 +294,7 @@ class BlockService extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.4.h),
+      padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.5.h),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),

@@ -54,7 +54,7 @@ class _TimeScreenState extends State<TimeScreen> {
               SizedBox(width: 3.w),
               Text("Log Time",
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w700, fontSize: 17.sp)),
+                      fontWeight: FontWeight.w700, fontSize: 15.5.sp)),
             ],
           ),
           content: Container(
@@ -89,20 +89,19 @@ class _TimeScreenState extends State<TimeScreen> {
             ElevatedButton(
               onPressed: () {
                 if (_validate()) {
-                  isEditTime == -1
-                      ? _onAddTimeEntry(context)
-                      : onEditTimeEntry();
+                  _onAddTimeEntry(context);
                   Navigator.of(context).pop();
                 }
               },
               style: ElevatedButton.styleFrom(
+                minimumSize: const Size(0, 40),
                 backgroundColor: const Color(0xFF425364),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
               child: Text(isEditTime == -1 ? "Add Entry" : "Save Changes",
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                  style: TextStyle(fontSize: 14.5.sp)),
             ),
           ],
         );
@@ -185,14 +184,14 @@ class _TimeScreenState extends State<TimeScreen> {
                     isMissingFieldNotifier: startN,
                     controller: start,
                     label: 'Start',
-                    star: false)),
+                    star: true)),
             SizedBox(width: 3.w),
             Expanded(
                 child: CustomTimeFieldDialog(
                     isMissingFieldNotifier: endN,
                     controller: end,
                     label: 'End',
-                    star: false)),
+                    star: true)),
           ],
         ),
       ],
@@ -238,7 +237,7 @@ class _TimeScreenState extends State<TimeScreen> {
       appBar: AppBar(
         title: Text("Time Entry",
             style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
         centerTitle: true,
@@ -305,35 +304,46 @@ class _TimeScreenState extends State<TimeScreen> {
                   ),
                 ),
                 SizedBox(height: 3.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("TIME LOGS",
-                          style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF94A3B8),
-                              letterSpacing: 1.0)),
-                      ElevatedButton.icon(
-                        onPressed: _showCreateTimeEntry,
-                        icon: const Icon(Icons.add_rounded, size: 16),
-                        label: const Text("LOG TIME"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF425364),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4.w, vertical: 0.8.h),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          textStyle: GoogleFonts.inter(
-                              fontSize: 12.sp, fontWeight: FontWeight.w800),
-                        ),
+                Consumer<CompletedServiceProvider>(
+                  builder: (context, provider, child) {
+                    final hasEntry = provider.timeEntry.isNotEmpty;
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("TIME LOGS",
+                              style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF94A3B8),
+                                  letterSpacing: 1.0)),
+                          if (!hasEntry)
+                            ElevatedButton.icon(
+                              onPressed: _showCreateTimeEntry,
+                              icon: const Icon(Icons.add_rounded, size: 16),
+                              label: Text(
+                                "LOG TIME",
+                                style: TextStyle(fontSize: 12.5.sp),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(0, 40),
+                                backgroundColor: const Color(0xFF425364),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 4.w, vertical: 0.8.h),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                textStyle: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 SizedBox(height: 1.5.h),
                 Consumer<CompletedServiceProvider>(
@@ -404,19 +414,21 @@ class _TimeScreenState extends State<TimeScreen> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      isEditTime = index;
-                      travelTime.text =
-                          getDataFromDynamic(item["U_CK_TraveledTime"]);
-                      travelEndTime.text =
-                          getDataFromDynamic(item["U_CK_TraveledEndTime"]);
-                      serviceTime.text =
-                          getDataFromDynamic(item["U_CK_ServiceStartTime"]);
-                      serviceEndTime.text =
-                          getDataFromDynamic(item["U_CK_SerEndTime"]);
-                      breakTime.text =
-                          getDataFromDynamic(item["U_CK_BreakTime"]);
-                      breakEndTime.text =
-                          getDataFromDynamic(item["U_CK_BreakEndTime"]);
+                      setState(() {
+                        isEditTime = index;
+                        travelTime.text =
+                            getDataFromDynamic(item["U_CK_TraveledTime"]);
+                        travelEndTime.text =
+                            getDataFromDynamic(item["U_CK_TraveledEndTime"]);
+                        serviceTime.text =
+                            getDataFromDynamic(item["U_CK_ServiceStartTime"]);
+                        serviceEndTime.text =
+                            getDataFromDynamic(item["U_CK_SerEndTime"]);
+                        breakTime.text =
+                            getDataFromDynamic(item["U_CK_BreakTime"]);
+                        breakEndTime.text =
+                            getDataFromDynamic(item["U_CK_BreakEndTime"]);
+                      });
                       _showCreateTimeEntry();
                     },
                     icon: Icon(Icons.edit_note_rounded,
@@ -452,7 +464,7 @@ class _TimeScreenState extends State<TimeScreen> {
         children: [
           Container(
               width: 3,
-              height: 3.5.h,
+              height: 4.h,
               decoration: BoxDecoration(
                   color: color, borderRadius: BorderRadius.circular(2))),
           SizedBox(width: 3.w),
@@ -462,13 +474,14 @@ class _TimeScreenState extends State<TimeScreen> {
               children: [
                 Text(label,
                     style: GoogleFonts.inter(
-                        fontSize: 11.5.sp,
+                        fontSize: 12.5.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF94A3B8))),
+                SizedBox(height: 1.5.h),
                 Text(
                     "${getDataFromDynamic(start)} - ${getDataFromDynamic(end)}",
                     style: GoogleFonts.inter(
-                        fontSize: 13.5.sp,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF475569))),
               ],
@@ -478,9 +491,7 @@ class _TimeScreenState extends State<TimeScreen> {
               calculateSpentTime(
                   getDataFromDynamic(start), getDataFromDynamic(end)),
               style: GoogleFonts.inter(
-                  fontSize: 12.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: color)),
+                  fontSize: 13.sp, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
     );

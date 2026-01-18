@@ -2,12 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as google_fonts;
 import 'package:intl/intl.dart';
-import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/signature/signature_preview_edit.dart';
-import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
@@ -69,7 +67,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   void _onScroll() {
-    // List of keys in order
     final keys = [
       _customerKey,
       _serviceKey,
@@ -90,7 +87,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       if (context != null) {
         final box = context.findRenderObject() as RenderBox;
         final position = box.localToGlobal(Offset.zero).dy;
-        // Check distance to the top of the viewport (app bar height is roughly 150 incl header)
         final distance = (position - 150).abs();
         if (distance < minDistance) {
           minDistance = distance;
@@ -140,8 +136,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Future<void> _enrichData() async {
     _displayData = Map<String, dynamic>.from(widget.data);
-    prettyPrint(widget.data);
-    // If it's a completed service (Entry) and we're missing rich data, look it up in offline storage
     if (_displayData['U_CK_Status'] == 'Entry' &&
         (_displayData['CK_JOB_TIMECollection'] == null ||
             (_displayData['CK_JOB_TIMECollection'] as List).isEmpty)) {
@@ -149,30 +143,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         final offlineProvider =
             Provider.of<ServiceListProviderOffline>(context, listen: false);
         final completedServices = offlineProvider.completedServices;
-
-        // Find the matching payload by DocEntry (robust comparison)
         final richPayload = completedServices.firstWhere(
           (s) =>
               s['DocEntry']?.toString() == _displayData['DocEntry']?.toString(),
           orElse: () => {},
         );
-        //  prettyPrint(richPayload);
         if (richPayload.isNotEmpty) {
-          print(richPayload);
-          debugPrint(
-              "✅ Found rich payload for DocEntry: ${_displayData['DocEntry']}");
-
           _displayData.addAll(Map<String, dynamic>.from(richPayload));
-        } else {
-          debugPrint(
-              "⚠️ No rich payload found in offline storage for DocEntry: ${_displayData['DocEntry']}");
-          debugPrint("Pending services count: ${completedServices.length}");
         }
       } catch (e) {
         debugPrint("❌ Error enriching detail data: $e");
       }
     }
-
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -184,19 +166,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(backgroundColor: const Color.fromARGB(255, 66, 83, 100)),
+        appBar: AppBar(backgroundColor: const Color(0xFF1E293B)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      backgroundColor: context.colors.surfaceContainerLow,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           "Service Details",
-          style: google_fonts.GoogleFonts.plusJakartaSans(
+          style: google_fonts.GoogleFonts.inter(
             fontWeight: FontWeight.w800,
-            fontSize: 18.sp,
+            fontSize: 17.5.sp,
             color: Colors.white,
             letterSpacing: 0.5,
           ),
@@ -223,41 +205,41 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   _buildStatusHeader(context),
                   SizedBox(height: 2.5.h),
                   _buildInfoCard(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "CUSTOMER INFORMATION",
                       key: _customerKey),
                   SizedBox(height: 1.5.h),
                   _buildCustomerDetails(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "SERVICES", key: _serviceKey),
                   SizedBox(height: 1.5.h),
                   _buildServiceSection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "EQUIPMENT", key: _equipmentKey),
                   SizedBox(height: 1.5.h),
                   _buildEquipmentSection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "ACTIVITIES", key: _activityKey),
                   SizedBox(height: 1.5.h),
                   _buildActivitySection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "MATERIAL RESERVE",
                       key: _materialKey),
                   SizedBox(height: 1.5.h),
                   _buildMaterialSection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "TIME ENTRY", key: _timeKey),
                   SizedBox(height: 1.5.h),
                   _buildTimeSection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "OPEN ISSUES", key: _issueKey),
                   SizedBox(height: 1.5.h),
                   _buildIssueSection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "CHECKLIST", key: _checklistKey),
                   SizedBox(height: 1.5.h),
                   _buildChecklistSection(context),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "ATTACHMENTS",
                       key: _attachmentKey),
                   SizedBox(height: 1.5.h),
@@ -274,31 +256,31 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildStatusHeader(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.5.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             padding: EdgeInsets.all(3.w),
             decoration: BoxDecoration(
-              color: const Color(0xFF22C55E).withOpacity(0.1),
+              color: const Color(0xFFF0FDF4),
               shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFDCFCE7)),
             ),
             child: Icon(
-              Icons.check_circle_rounded,
-              color: const Color(0xFF22C55E),
+              Icons.verified_rounded,
+              color: const Color(0xFF16A34A),
               size: 20.sp,
             ),
           ),
@@ -306,41 +288,33 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "COMPLETED SERVICE",
                   style: google_fonts.GoogleFonts.inter(
-                    fontSize: 12.sp,
+                    fontSize: 11.5.sp,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                    color: const Color(0xFF64748B),
+                    letterSpacing: 1,
+                    color: const Color(0xFF94A3B8),
                   ),
                 ),
                 SizedBox(height: 0.5.h),
                 Text(
                   "Ticket #${_displayData['DocNum'] ?? _displayData['id'] ?? 'N/A'}",
                   style: google_fonts.GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
+                    fontSize: 16.5.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1E293B),
                   ),
                 ),
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
+            padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 0.8.h),
             decoration: BoxDecoration(
-              color: const Color(0xFF22C55E),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF22C55E).withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+              color: const Color(0xFF16A34A),
+              borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
               "DONE",
@@ -362,11 +336,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 15,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -374,19 +349,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         children: [
           _buildInfoRow(context, Icons.calendar_today_rounded, "Service Date",
               _formatDate(_displayData['U_CK_Date'])),
-          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
-          _buildInfoRow(context, Icons.access_time_rounded, "Start Time",
-              "${_displayData['U_CK_Time'] ?? 'N/A'}"),
-          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
-          _buildInfoRow(context, Icons.access_time_rounded, "End Time",
-              "${_displayData['U_CK_EndTime'] ?? 'N/A'}"),
-          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
-          _buildInfoRow(context, Icons.category_rounded, "Job Type",
+          const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
+          _buildInfoRow(context, Icons.access_time_rounded, "Time Window",
+              "${_displayData['U_CK_Time'] ?? 'N/A'} - ${_displayData['U_CK_EndTime'] ?? 'N/A'}"),
+          const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
+          _buildInfoRow(context, Icons.work_outline_rounded, "Job Type",
               _displayData['U_CK_JobType'] ?? 'N/A'),
-          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
-          _buildInfoRow(context, Icons.category_rounded, "Service Type",
+          const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
+          _buildInfoRow(context, Icons.settings_suggest_rounded, "Service Type",
               "${_displayData['U_CK_ServiceType'] ?? 'N/A'}"),
-          const Divider(height: 32, thickness: 0.8, color: Color(0xFFF1F5F9)),
+          const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.priority_high_rounded, "Priority",
               _displayData['U_CK_Priority'] ?? 'Normal'),
         ],
@@ -399,14 +371,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(0.5.w),
+          padding: EdgeInsets.all(2.w),
           decoration: BoxDecoration(
             color: const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16.sp, color: const Color(0xFF64748B)),
         ),
-        SizedBox(width: 2.5.w),
+        SizedBox(width: 3.w),
         Text(
           label,
           style: google_fonts.GoogleFonts.inter(
@@ -431,7 +403,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _buildStickyNavigation(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 1.5.h),
+      padding: EdgeInsets.symmetric(vertical: 2.h),
       decoration: BoxDecoration(
         color: Colors.white,
         border: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
@@ -488,22 +460,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         onTap: () => _scrollToSection(sectionKey),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.1.h),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF22C55E) : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
+            color: isActive ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(100),
             border: Border.all(
-              color: isActive ? Colors.transparent : const Color(0xFFE2E8F0),
+              color:
+                  isActive ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
             ),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF22C55E).withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : [],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -511,7 +475,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               Icon(
                 icon,
                 size: 15.sp,
-                color: isActive ? Colors.white : const Color(0xFF64748B),
+                color: isActive ? Colors.white : const Color(0xFF94A3B8),
               ),
               SizedBox(width: 2.w),
               Text(
@@ -519,7 +483,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 style: google_fonts.GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                  color: isActive ? Colors.white : const Color(0xFF475569),
+                  color: isActive ? Colors.white : const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -532,22 +496,26 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _buildSectionHeader(BuildContext context, String title, {Key? key}) {
     return Container(
       key: key,
-      margin: EdgeInsets.only(left: 1.w, bottom: 0.5.h),
+      margin: EdgeInsets.only(left: 0.5.w, bottom: 0.5.h),
       child: Row(
         children: [
           Container(
-            width: 4,
-            height: 18.sp,
+            width: 5,
+            height: 19.sp,
             decoration: BoxDecoration(
-              color: const Color(0xFF22C55E),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF334155), Color(0xFF1E293B)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          SizedBox(width: 3.w),
+          SizedBox(width: 3.5.w),
           Text(
             title,
-            style: google_fonts.GoogleFonts.plusJakartaSans(
-              fontSize: 14.5.sp,
+            style: google_fonts.GoogleFonts.inter(
+              fontSize: 14.sp,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF1E293B),
               letterSpacing: 0.5,
@@ -566,11 +534,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -582,33 +551,37 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               Container(
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
-                  color: context.colors.primary.withOpacity(0.1),
+                  color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFDBEAFE)),
                 ),
                 child: Icon(Icons.business_rounded,
-                    size: 18.sp, color: context.colors.primary),
+                    size: 18.sp, color: const Color(0xFF2563EB)),
               ),
-              SizedBox(width: 3.w),
+              SizedBox(width: 3.5.w),
               Expanded(
                 child: Text(
                   _displayData['CustomerName'] ?? 'No Customer Name',
                   style: google_fonts.GoogleFonts.inter(
-                    fontSize: 15.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.primary,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1E293B),
                   ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 2.h),
-          Text(
-            _getCustomerAddress(),
-            style: google_fonts.GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: const Color(0xFF475569),
-              height: 1.6,
-              fontWeight: FontWeight.w500,
+          Padding(
+            padding: EdgeInsets.only(left: 1.w),
+            child: Text(
+              _getCustomerAddress(),
+              style: google_fonts.GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: const Color(0xFF64748B),
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           if (contactList.isNotEmpty) ...[
@@ -625,7 +598,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 child: Row(
                   children: [
                     Icon(Icons.person_pin_rounded,
-                        size: 16.sp, color: const Color(0xFF64748B)),
+                        size: 16.sp, color: const Color(0xFF94A3B8)),
                     SizedBox(width: 2.5.w),
                     Expanded(
                       flex: 3,
@@ -639,19 +612,29 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    SizedBox(width: 4.w),
-                    Icon(Icons.phone_iphone_rounded,
-                        size: 16.sp, color: const Color(0xFF64748B)),
-                    SizedBox(width: 2.5.w),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        phone,
-                        style: google_fonts.GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.primary,
-                        ),
+                    const Spacer(),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 3.w, vertical: 0.6.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.phone_rounded,
+                              size: 13.sp, color: const Color(0xFF16A34A)),
+                          SizedBox(width: 1.5.w),
+                          Text(
+                            phone,
+                            style: google_fonts.GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF16A34A),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -733,94 +716,91 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         child: Text(
           "No attachments recorded.",
           style: google_fonts.GoogleFonts.inter(
-              fontSize: 13.5.sp, color: const Color(0xFF64748B)),
+              fontSize: 13.5.sp, color: const Color(0xFF94A3B8)),
         ),
       );
     }
 
-    return Column(
-      children: [
-        GridView.builder(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 3.5.w,
-            mainAxisSpacing: 3.5.w,
-            childAspectRatio: 1.1,
-          ),
-          itemCount: files.length,
-          itemBuilder: (context, index) {
-            final file = files[index];
-            final String? base64Data = file['data'];
-            final String ext = (file['ext'] ?? 'png').toString().toLowerCase();
-            if (base64Data == null) return const SizedBox();
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 3.5.w,
+        mainAxisSpacing: 3.5.w,
+        childAspectRatio: 1.1,
+      ),
+      itemCount: files.length,
+      itemBuilder: (context, index) {
+        final file = files[index];
+        final String? base64Data = file['data'];
+        final String ext = (file['ext'] ?? 'png').toString().toLowerCase();
+        if (base64Data == null) return const SizedBox();
 
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFF1F5F9)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: ext == 'pdf'
-                    ? InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PDFViewerScreen(
-                                memoryData: base64Decode(base64Data),
-                                title: "Signature (PDF)",
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          color: const Color(0xFFFFF1F2),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.picture_as_pdf_rounded,
-                                  color: const Color(0xFFE11D48), size: 24.sp),
-                              SizedBox(height: 1.h),
-                              Text(
-                                "Signature",
-                                style: google_fonts.GoogleFonts.inter(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFE11D48),
-                                ),
-                              ),
-                            ],
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: ext == 'pdf'
+                ? InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PDFViewerScreen(
+                            memoryData: base64Decode(base64Data),
+                            title: "Signature (PDF)",
                           ),
                         ),
-                      )
-                    : Image.memory(
-                        base64Decode(base64Data),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Center(
-                            child: Icon(Icons.broken_image_rounded,
-                                size: 20.sp, color: Colors.grey)),
+                      );
+                    },
+                    child: Container(
+                      color: const Color(0xFFFFF1F2),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.picture_as_pdf_rounded,
+                              color: const Color(0xFFE11D48), size: 24.sp),
+                          SizedBox(height: 1.h),
+                          Text(
+                            "Signature",
+                            style: google_fonts.GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFE11D48),
+                            ),
+                          ),
+                        ],
                       ),
-              ),
-            );
-          },
-        ),
-      ],
+                    ),
+                  )
+                : Image.memory(
+                    base64Decode(base64Data),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Center(
+                        child: Icon(Icons.broken_image_rounded,
+                            size: 20.sp, color: Colors.grey)),
+                  ),
+          ),
+        );
+      },
     );
   }
 
@@ -834,6 +814,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     String subtitlePrefix = '',
     String subtitleSuffix = '',
     String Function(dynamic)? customSubtitle,
+    Widget? Function(dynamic)? trailing,
   }) {
     if (items.isEmpty) {
       return Container(
@@ -842,7 +823,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF1F5F9)),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         child: Text(
           emptyMessage,
@@ -855,17 +836,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return Column(
       children: items.map((item) {
         return Container(
-          margin: EdgeInsets.only(bottom: 1.2.h),
+          margin: EdgeInsets.only(bottom: 1.5.h),
           padding: EdgeInsets.all(4.w),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.015),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -875,7 +856,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 width: 12.w,
                 height: 12.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: svgIcon != null
@@ -884,10 +865,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           svgIcon,
                           width: 18.sp,
                           height: 18.sp,
-                          color: const Color(0xFF64748B),
+                          color: const Color(0xFF475569),
                         ),
                       )
-                    : Icon(icon, color: const Color(0xFF64748B), size: 18.sp),
+                    : Icon(icon, color: const Color(0xFF475569), size: 18.sp),
               ),
               SizedBox(width: 4.w),
               Expanded(
@@ -901,7 +882,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           fontSize: 14.5.sp,
                           color: const Color(0xFF1E293B)),
                     ),
-                    SizedBox(height: 0.4.h),
+                    SizedBox(height: 0.6.h),
                     Text(
                       customSubtitle != null
                           ? customSubtitle(item)
@@ -911,10 +892,16 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         color: const Color(0xFF64748B),
                         fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              if (trailing != null) ...[
+                SizedBox(width: 4.w),
+                trailing(item) ?? const SizedBox.shrink(),
+              ],
             ],
           ),
         );
@@ -948,9 +935,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       icon: Icons.assignment_turned_in_rounded,
       titleKey: 'U_CK_ChecklistTitle',
       customSubtitle: (item) {
-        final String status =
-            item['U_CK_TrueOutput'] == 'Yes' ? 'Passed' : 'Failed';
-        return "Status: $status";
+        return "Feedback: ${item['U_CK_Feedback'] ?? 'No feedback provided'}";
+      },
+      trailing: (item) {
+        final bool isFalse = item['U_CK_FalseOutput'] == 'Yes';
+        return Icon(
+          isFalse ? Icons.error_outline_rounded : Icons.check_circle_rounded,
+          color: isFalse ? const Color(0xFFEF4444) : const Color(0xFF16A34A),
+          size: 20.sp,
+        );
       },
     );
   }

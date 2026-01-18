@@ -49,7 +49,7 @@ class CustomTimeFieldDialog extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize:  MediaQuery.of(context).size.width * 0.033,
+                    fontSize:  MediaQuery.of(context).size.width * 0.032,
                     fontWeight: FontWeight.w400,
                     color: Color.fromARGB(221, 58, 58, 59),
                   ),
@@ -81,7 +81,7 @@ class CustomTimeFieldDialog extends StatelessWidget {
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 4,
-                    horizontal: 12,
+                    horizontal: 7,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(7),

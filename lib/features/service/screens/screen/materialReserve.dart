@@ -56,7 +56,7 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
                 _buildRow("Brand", data["U_CK_Brand"]),
                 _buildRow("Part", data["U_CK_Part"]),
                 _buildRow("Quantity", data["U_CK_Qty"]),
-                _buildRow("Warehouse", data["U_CK_WhsCode"]),
+                // _buildRow("Warehouse", data["U_CK_WhsCode"]),
                 SizedBox(height: 3.h),
                 SizedBox(
                   width: double.infinity,
@@ -120,7 +120,7 @@ class _MaterialReserveScreenState extends State<MaterialReserveScreen> {
       appBar: AppBar(
         title: Text("Material Reserve",
             style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
         centerTitle: true,

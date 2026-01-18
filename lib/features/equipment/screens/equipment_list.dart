@@ -11,9 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:google_fonts/google_fonts.dart' as google_fonts;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class EquipmentListScreen extends StatefulWidget {
   const EquipmentListScreen({super.key});
@@ -230,9 +231,9 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
           appBar: AppBar(
             title: Text(
               "Equipment",
-              style: GoogleFonts.inter(
+              style: google_fonts.GoogleFonts.inter(
                 fontWeight: FontWeight.w700,
-                fontSize: 18,
+                fontSize: 17.sp,
                 color: Colors.white,
               ),
             ),
@@ -269,43 +270,50 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
               children: [
                 // Search Bar Section
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.fromLTRB(4.w, 1.5.h, 4.w, 1.5.h),
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 2,
-                        offset: Offset(0, 1),
-                      ),
-                    ],
+                    border:
+                        Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Container(
-                          height: 48,
+                          height: 45,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(100),
+                            // border: Border.all(color: const Color(0xFFE2E8F0)),
+                            // boxShadow: [
+                            //   BoxShadow(
+                            //     color: Colors.black.withOpacity(0.03),
+                            //     blurRadius: 10,
+                            //     offset: const Offset(0, 4),
+                            //   ),
+                            // ],
                           ),
                           child: TextField(
                             controller: filter,
-                            style: GoogleFonts.inter(
-                                fontSize: 14, color: const Color(0xFF1E293B)),
+                            style: google_fonts.GoogleFonts.inter(
+                                fontSize: 14.5.sp,
+                                color: const Color(0xFF1E293B),
+                                fontWeight: FontWeight.w500),
                             textInputAction: TextInputAction.search,
                             decoration: InputDecoration(
-                              hintText: "Search by name or code...",
-                              hintStyle: GoogleFonts.inter(
-                                color: Colors.grey.shade500,
-                                fontSize: 13,
+                              hintText: "Search equipment...",
+                              hintStyle: google_fonts.GoogleFonts.inter(
+                                color: const Color(0xFF94A3B8),
+                                fontSize: 14.sp,
                               ),
-                              prefixIcon: Icon(Icons.search_rounded,
-                                  color: Colors.grey.shade400, size: 22),
+                              prefixIcon: Container(
+                                padding: EdgeInsets.all(12),
+                                child: Icon(Icons.search_rounded,
+                                    color: const Color(0xFF1E293B),
+                                    size: 19.sp),
+                              ),
                               contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
+                                  vertical: 14, horizontal: 20),
                               border: InputBorder.none,
                             ),
                             onSubmitted: (_) {
@@ -315,28 +323,34 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF425364),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF425364).withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
+                      SizedBox(width: 3.w),
+                      GestureDetector(
+                        onTap: () {
+                          provider.setFilter(filter.text);
+                          provider.loadEquipments();
+                          FocusScope.of(context).unfocus();
+                        },
+                        child: Container(
+                          height: 52,
+                          width: 52,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF334155), Color(0xFF1E293B)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          ],
-                        ),
-                        child: IconButton(
-                          onPressed: () {
-                            provider.setFilter(filter.text);
-                            provider.loadEquipments();
-                            FocusScope.of(context).unfocus();
-                          },
-                          icon: const Icon(Icons.tune_rounded,
-                              color: Colors.white, size: 20),
-                          tooltip: 'Apply Filter',
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    const Color(0xFF1E293B).withOpacity(0.25),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Icon(Icons.tune_rounded,
+                              color: Colors.white, size: 18.sp),
                         ),
                       ),
                     ],
@@ -350,8 +364,8 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                       children: [
                         Text(
                           "Showing ${deliveryProvider.currentCount} of ${deliveryProvider.totalRecords} items",
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
+                          style: google_fonts.GoogleFonts.inter(
+                            fontSize: 12.8.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey.shade500,
                           ),
@@ -359,7 +373,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                         if (deliveryProvider.isLoadingMore)
                           Text(
                             "Loading...",
-                            style: GoogleFonts.inter(
+                            style: google_fonts.GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF22C55E),
@@ -392,7 +406,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                       const SizedBox(height: 16),
                                       Text(
                                         "No Equipment Found",
-                                        style: GoogleFonts.inter(
+                                        style: google_fonts.GoogleFonts.inter(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.grey.shade400,
@@ -405,7 +419,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                             )
                           : ListView.builder(
                               controller: _scrollController,
-                              padding: const EdgeInsets.fromLTRB(5, 8, 5, 20),
+                              padding: const EdgeInsets.fromLTRB(5, 3, 5, 20),
                               itemCount: documents.length,
                               itemBuilder: (context, index) {
                                 final item = documents[index];
@@ -420,38 +434,31 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                 // Pagination Footer
                 if (documents.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 1.h, horizontal: 4.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
+                      border: const Border(
+                          top: BorderSide(color: Color(0xFFF1F5F9))),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withOpacity(0.04),
                           blurRadius: 10,
-                          offset: const Offset(0, -5),
+                          offset: const Offset(0, -4),
                         ),
                       ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        /// PAGE INFO TEXT (Responsive)
-                        Flexible(
-                          child: Text(
-                            MediaQuery.of(context).size.width < 380
-                                ? "Pg ${deliveryProvider.currentPage}/${deliveryProvider.totalPages} (${deliveryProvider.totalRecords})"
-                                : "Page ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages} (${deliveryProvider.totalRecords} total)",
-                            style: GoogleFonts.inter(
-                              fontSize: responsiveFontSize(context,
-                                  mobile: 11, tablet: 13),
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF64748B),
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          "Pg ${deliveryProvider.currentPage} of ${deliveryProvider.totalPages}",
+                          style: google_fonts.GoogleFonts.inter(
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF64748B),
                           ),
                         ),
-
-                        /// PAGINATION BUTTONS
                         Row(
                           children: [
                             _buildPageButton(
@@ -461,7 +468,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   : null,
                               isEnabled: deliveryProvider.canPrev,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 2.w),
                             _buildPageButton(
                               icon: Icons.chevron_left_rounded,
                               onTap: deliveryProvider.canPrev
@@ -469,7 +476,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   : null,
                               isEnabled: deliveryProvider.canPrev,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 2.w),
                             _buildPageButton(
                               icon: Icons.chevron_right_rounded,
                               onTap: deliveryProvider.canNext
@@ -477,7 +484,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                                   : null,
                               isEnabled: deliveryProvider.canNext,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 2.w),
                             _buildPageButton(
                               icon: Icons.last_page_rounded,
                               onTap: deliveryProvider.canNext
@@ -502,142 +509,128 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
     return GestureDetector(
       onTap: () => onDetail(item, index),
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 0),
-        padding: const EdgeInsets.all(12),
+        margin: EdgeInsets.symmetric(vertical: 0.4.h, horizontal: 2.w),
+        padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 1.5.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: Colors.grey.shade100),
         ),
-        child: Row(
+        child: Column(
           children: [
-            // Circular key icon - User's specifically requested aesthetic
-            Container(
-              height: 46,
-              width: 46,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF22C55E).withAlpha(15),
-                border: Border.all(
-                  color: const Color(0xFF22C55E),
-                  width: 1.5,
-                ),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  'images/svg/key.svg',
-                  width: 22,
-                  height: 22,
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF22C55E),
-                    BlendMode.srcIn,
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(2.5.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SvgPicture.asset(
+                    'images/svg/key.svg',
+                    width: 16.sp,
+                    height: 16.sp,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xFF1E293B),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(width: 3.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item["Name"] ?? "Unknown Equipment",
+                              style: google_fonts.GoogleFonts.inter(
+                                fontSize: 14.5.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1E293B),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            item["Code"] ?? "N/A",
+                            style: google_fonts.GoogleFonts.inter(
+                              fontSize: 12.7.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 0.4.h),
+                      Row(
+                        children: [
+                          Icon(Icons.inventory_2_outlined,
+                              size: 11.sp, color: const Color(0xFF94A3B8)),
+                          SizedBox(width: 1.w),
+                          Text(
+                            "S/N: ${item["U_ck_eqSerNum"] == "" ? "N/A" : item["U_ck_eqSerNum"]}",
+                            style: google_fonts.GoogleFonts.inter(
+                              fontSize: 12.5.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            // Info content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item["Name"] ?? "Unknown Equipment",
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1E293B),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.keyboard_arrow_right_rounded,
-                        size: 20,
-                        color: Color(0xFF94A3B8),
-                      ),
-                    ],
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 1.h),
+              child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            ),
+            Row(
+              children: [
+                Icon(
+                  Icons.person_pin_rounded,
+                  size: 13.sp,
+                  color: const Color(0xFF16A34A),
+                ),
+                SizedBox(width: 1.5.w),
+                Expanded(
+                  child: Text(
+                    item["U_ck_CusName"] ?? "Unassigned",
+                    style: google_fonts.GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF16A34A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        item["Code"] ?? "N/A",
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        height: 3,
-                        width: 3,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFCBD5E1),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          "S/N: ${item["U_ck_eqSerNum"] ?? "N/A"}",
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF64748B),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                ),
+                SizedBox(width: 2.w),
+                Text(
+                  "#${index + 1}",
+                  style: google_fonts.GoogleFonts.inter(
+                    fontSize: 12.5.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF94A3B8).withOpacity(0.5),
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.person_pin_rounded,
-                        size: 13,
-                        color: Color(0xFF22C55E),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          item["U_ck_CusName"] ?? "No Customer Assigned",
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF15803D),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        "#${index + 1}",
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF94A3B8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(width: 1.w),
+                Icon(Icons.arrow_forward_ios_rounded,
+                    size: 11.sp, color: const Color(0xFFCBD5E1)),
+              ],
             ),
           ],
         ),

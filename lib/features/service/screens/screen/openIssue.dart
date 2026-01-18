@@ -176,13 +176,15 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
+                                 minimumSize: const Size(0, 40),
+
                 backgroundColor: const Color(0xFF425364),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
               child: Text(isEditIndex == -1 ? "Report Issue" : "Update Issue",
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                  style: TextStyle(fontSize: 14.5.sp)),
             ),
           ],
         );
@@ -201,7 +203,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
       appBar: AppBar(
         title: Text("Open Issues",
             style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
         centerTitle: true,
@@ -281,8 +283,9 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                         onPressed: () => _showIssueDialog(),
                         icon: const Icon(Icons.add_circle_outline_rounded,
                             size: 16),
-                        label: const Text("LOG ISSUE"),
+                        label: Text("LOG ISSUE",style: TextStyle(fontSize: 12.7.sp),),
                         style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
                           backgroundColor: const Color(0xFFEF4444),
                           foregroundColor: Colors.white,
                           elevation: 0,
@@ -340,7 +343,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
   Widget _buildIssueCard(dynamic item) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.only(left: 4.w,right: 4.w,top: 1.w,bottom: 2.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
@@ -396,7 +399,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
           ),
           if (item["U_CK_IssueDesc"] != null &&
               item["U_CK_IssueDesc"].toString().isNotEmpty) ...[
-            SizedBox(height: 1.h),
+            SizedBox(height: 0.2.h),
             Text(item["U_CK_IssueDesc"],
                 style: GoogleFonts.inter(
                     fontSize: 13.5.sp,

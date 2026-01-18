@@ -62,43 +62,51 @@ class DetailRow extends StatelessWidget {
                 ),
                 SizedBox(height: 1.5.h),
                 ...rows.map((row) => Padding(
-                      padding: EdgeInsets.only(bottom: 1.2.h),
+                      padding: EdgeInsets.only(bottom: 1.5.h),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(
-                            flex: 3,
+                          Flexible(
                             child: Text(
                               row.left,
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
                                 color: const Color(0xFF475569),
-                                height: 1.4,
+                                height: 1.2,
                                 fontWeight: FontWeight.w500,
                               ),
+                              textScaler: const TextScaler.linear(1.0),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (row.right != null)
-                            Expanded(
-                              flex: 2,
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 2.w),
-                                child: row.isRightIcon
-                                    ? Align(
-                                        alignment: Alignment.centerRight,
-                                        child: row.right,
-                                      )
-                                    : Text(
+                            Padding(
+                              padding: EdgeInsets.only(left: 3.w, right: 3.w),
+                              child: row.isRightIcon
+                                  ? SizedBox(
+                                      height: 15
+                                          .sp, // Constrain height to text height range
+                                      child: (row.right is Widget
+                                          ? row.right
+                                          : Text(row.right.toString())),
+                                    )
+                                  : Flexible(
+                                      child: Text(
                                         row.right.toString(),
                                         textAlign: TextAlign.right,
                                         style: GoogleFonts.inter(
                                           fontSize: 13.sp,
-                                          color: const Color(0xFF1E293B),
+                                          color: const Color.fromARGB(
+                                              255, 91, 99, 113),
                                           fontWeight: FontWeight.w600,
-                                          height: 1.4,
+                                          height: 1.2,
                                         ),
+                                        textScaler:
+                                            const TextScaler.linear(1.0),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                              ),
+                                    ),
                             ),
                         ],
                       ),

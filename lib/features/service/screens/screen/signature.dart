@@ -53,7 +53,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
       appBar: AppBar(
         title: Text("Field Signature",
             style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
         centerTitle: true,
@@ -159,7 +159,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                           if (signature == null) {
                             return SizedBox(
                               width: double.infinity,
-                              height: 6.5.h,
+                              height: 6.h,
                               child: ElevatedButton.icon(
                                 onPressed: _goToSignature,
                                 icon: const Icon(Icons.edit_note_rounded),

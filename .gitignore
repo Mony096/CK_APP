@@ -50,5 +50,6 @@ app.*.map.json
 # DerivedData/
 # *.xcworkspace
 macos/Flutter/
+macos/
 windows/flutter/
 linux/flutter/

@@ -308,7 +308,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
             title: Text(
               "Service Manager",
               style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
@@ -349,34 +349,39 @@ class _ServiceScreenState extends State<ServiceScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 1.5.h),
+              // Modern Filter Section
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                 child: Row(
                   children: [
                     Expanded(
                       flex: 5,
                       child: DateForServiceList(
                         controller: _dateController,
-                        star: true,
+                        star: false,
                         detail: false,
                       ),
                     ),
-                    SizedBox(width: 2.w),
+                    SizedBox(width: 3.w),
                     Container(
-                      height: 5.5.h,
-                      width: 15.w,
+                      height: 52, // Match DateForServiceList height
+                      width: 14.w,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF425364),
-                        borderRadius: BorderRadius.circular(10),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF425364), Color(0xFF1E293B)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF425364).withOpacity(0.2),
+                            color: const Color(0xFF425364).withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: TextButton(
+                      child: IconButton(
                         onPressed: () {
                           final provider =
                               context.read<ServiceListProviderOffline>();
@@ -393,26 +398,17 @@ class _ServiceScreenState extends State<ServiceScreen> {
                             }
                           }
                         },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          "GO",
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        icon: Icon(
+                          Icons.search_rounded,
+                          color: Colors.white,
+                          size: 19.sp,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 1.5.h),
+              // SizedBox(height: 1.5.h),
               Expanded(
                 child: documents.isEmpty
                     ? Center(

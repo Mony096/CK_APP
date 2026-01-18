@@ -106,7 +106,7 @@ class _ImageScreenState extends State<ImageScreen> {
       appBar: AppBar(
         title: Text("Image Upload",
             style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
         centerTitle: true,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class DateForServiceList extends StatefulWidget {
   const DateForServiceList({
@@ -51,7 +52,6 @@ class _DateForServiceListState extends State<DateForServiceList> {
     }
   }
 
-  // ... keep _selectDate and _changeDate as before ...
   Future<void> _selectDate(BuildContext context) async {
     if (widget.detail) return;
 
@@ -81,22 +81,25 @@ class _DateForServiceListState extends State<DateForServiceList> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = widget.detail ? Colors.black : Colors.black87;
-
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 5.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: Colors.green, width: 1.0),
-        borderRadius: BorderRadius.circular(5.0),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      // width: double.infinity,
-      height: 48,
+      height: 52,
       child: Row(
         children: [
           IconButton(
-            icon:
-                const Icon(Icons.calendar_month, color: Color.fromARGB(255, 104, 101, 101), size: 28),
+            icon: const Icon(Icons.calendar_today_rounded,
+                color: Color(0xFF64748B), size: 18),
             onPressed: () => _selectDate(context),
           ),
           Expanded(
@@ -106,18 +109,30 @@ class _DateForServiceListState extends State<DateForServiceList> {
                 _selectedDate != null
                     ? DateFormat("dd MMMM yyyy").format(_selectedDate!)
                     : "Document Date",
-                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.035, color: textColor),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: _selectedDate != null
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFF94A3B8),
+                  fontWeight:
+                      _selectedDate != null ? FontWeight.w600 : FontWeight.w500,
+                ),
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.keyboard_arrow_left, color: Color.fromARGB(255, 130, 131, 130), size: 28),
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.chevron_left_rounded,
+                color: Color(0xFF94A3B8), size: 24),
             onPressed: () => _changeDate(-1),
           ),
           IconButton(
-            icon: const Icon(Icons.keyboard_arrow_right, color: Color.fromARGB(255, 130, 131, 130), size: 28),
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8), size: 24),
             onPressed: () => _changeDate(1),
           ),
+          const SizedBox(width: 4),
         ],
       ),
     );

@@ -189,7 +189,7 @@ class _SyncScreenState extends State<SyncScreen> {
           "Data Sync Manager",
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w700,
-            fontSize: 18.sp,
+            fontSize: 17.sp,
             color: Colors.white,
           ),
         ),
@@ -1085,7 +1085,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                         label: Text(
                           "Cancel Download",
                           style: GoogleFonts.inter(
-                            fontSize: 14.sp,
+                            fontSize: 14.5.sp,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFFEF4444),
                           ),
@@ -1200,7 +1200,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "Fetching ${step.count} of ${step.total}...",
                     style: GoogleFonts.inter(
-                      fontSize: 12.sp,
+                      fontSize: 12.5.sp,
                       color: step.color,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1209,7 +1209,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "${step.total} records",
                     style: GoogleFonts.inter(
-                      fontSize: 12.sp,
+                      fontSize: 12.5.sp,
                       color: const Color(0xFF22C55E),
                       fontWeight: FontWeight.w500,
                     ),
@@ -1218,7 +1218,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "Downloading...",
                     style: GoogleFonts.inter(
-                      fontSize: 12.sp,
+                      fontSize: 12.5.sp,
                       color: step.color,
                     ),
                   )
@@ -1226,7 +1226,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "Waiting...",
                     style: GoogleFonts.inter(
-                      fontSize: 12.sp,
+                      fontSize: 12.5.sp,
                       color: Colors.grey[400],
                     ),
                   ),
@@ -1254,7 +1254,7 @@ class _DownloadDialogState extends State<_DownloadDialog>
                   Text(
                     "Done",
                     style: GoogleFonts.inter(
-                      fontSize: 11.sp,
+                      fontSize: 11.5.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF22C55E),
                     ),
