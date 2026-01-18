@@ -178,7 +178,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           "Service Details",
           style: google_fonts.GoogleFonts.inter(
             fontWeight: FontWeight.w800,
-            fontSize: 17.5.sp,
+            fontSize: 17.sp,
             color: Colors.white,
             letterSpacing: 0.5,
           ),
@@ -302,7 +302,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 Text(
                   "Ticket #${_displayData['DocNum'] ?? _displayData['id'] ?? 'N/A'}",
                   style: google_fonts.GoogleFonts.inter(
-                    fontSize: 16.5.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF1E293B),
                   ),
