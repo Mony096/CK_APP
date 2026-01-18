@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
@@ -34,10 +35,6 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
   List<dynamic> warehouses = [];
   List<dynamic> customers = [];
   String? userName;
-
-  bool _isCreatingOrEditing = false;
-  bool _isCreate = false;
-  Map<String, dynamic> _selectedEquipmentData = {};
 
   @override
   void initState() {
@@ -81,11 +78,17 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
 
   void _navigateToCreateOrEdit(Map<String, dynamic> data,
       {bool isCreate = false}) {
-    setState(() {
-      _selectedEquipmentData = data;
-      _isCreatingOrEditing = true;
-      _isCreate = isCreate;
-    });
+    goTo(
+      context,
+      EquipmentCreateScreen(
+        data: data,
+        isCreate: isCreate,
+        onBack: () {
+          Navigator.pop(context);
+          _refreshData();
+        },
+      ),
+    );
   }
 
   void onDetail(dynamic data, int index) {
@@ -212,54 +215,46 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
         // final isLoadingMore = provider.isLoading && provider.hasMore;
         const loading = false;
 
-        if (_isCreatingOrEditing) {
-          return EquipmentCreateScreen(
-            data: _selectedEquipmentData,
-            isNested: true,
-            isCreate: _isCreate,
-            onBack: () {
-              setState(() {
-                _isCreatingOrEditing = false;
-              });
-              _refreshData();
-            },
-          );
-        }
-
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
-          appBar: AppBar(
-            title: Text(
-              "Equipment",
-              style: google_fonts.GoogleFonts.inter(
-                fontWeight: FontWeight.w700,
-                fontSize: 17.sp,
-                color: Colors.white,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: Color.fromARGB(255, 66, 83, 100),
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                onPressed: () => _scanQrCode(context),
-                icon: const Icon(Icons.qr_code_scanner,
-                    color: Colors.white, size: 22),
-                tooltip: 'Scan QR',
-              ),
-              IconButton(
-                onPressed: () {
-                  _navigateToCreateOrEdit(const {}, isCreate: true);
-                },
-                icon: const Icon(Icons.add_rounded,
-                    color: Colors.white, size: 26),
-                tooltip: 'Add Equipment',
-              ),
-              const SizedBox(width: 8),
-            ],
+          // appBar: AppBar(
+          //   title: Text(
+          //     "Equipment",
+          //     style: google_fonts.GoogleFonts.inter(
+          //       fontWeight: FontWeight.w700,
+          //       fontSize: 17.sp,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          //   centerTitle: true,
+          //   backgroundColor: Color.fromARGB(255, 66, 83, 100),
+          //   elevation: 0,
+          //   automaticallyImplyLeading: false,
+          //   actions: [
+          //     IconButton(
+          //       onPressed: () => _scanQrCode(context),
+          //       icon: const Icon(Icons.qr_code_scanner,
+          //           color: Colors.white, size: 22),
+          //       tooltip: 'Scan QR',
+          //     ),
+          //     IconButton(
+          //       onPressed: () {
+          //         _navigateToCreateOrEdit(const {}, isCreate: true);
+          //       },
+          //       icon: const Icon(Icons.add_rounded,
+          //           color: Colors.white, size: 26),
+          //       tooltip: 'Add Equipment',
+          //     ),
+          //     const SizedBox(width: 8),
+          //   ],
+          // ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: const Color(0xFF1E293B),
+            onPressed: () {
+              _navigateToCreateOrEdit(const {}, isCreate: true);
+            },
+            child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
           ),
-          floatingActionButton: null,
           body: RefreshIndicator(
             onRefresh: () async {
               await _refreshData();
@@ -321,6 +316,20 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               provider.loadEquipments();
                             },
                           ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => _scanQrCode(context),
+                        child: Container(
+                          height: 52,
+                          width: 52,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.qr_code_scanner_rounded,
+                              color: const Color(0xFF334155), size: 18.sp),
                         ),
                       ),
                       SizedBox(width: 3.w),

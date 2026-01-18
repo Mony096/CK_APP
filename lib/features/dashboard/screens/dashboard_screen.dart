@@ -104,8 +104,12 @@ class _DashboardState extends State<Dashboard>
   Future<void> _autoSyncServices() async {
     if (_isSyncing) return;
 
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
     try {
       setState(() => _isSyncing = true);
+      offlineProvider.setSyncing(true);
 
       // Check internet connectivity
       final hasInternet = await _checkInternetConnection();
@@ -119,8 +123,6 @@ class _DashboardState extends State<Dashboard>
       // Get providers
       final onlineProvider =
           Provider.of<ServiceListProvider>(context, listen: false);
-      final offlineProvider =
-          Provider.of<ServiceListProviderOffline>(context, listen: false);
 
       // Get existing DocEntries from offline storage
       final existingDocEntries = await offlineProvider.getExistingDocEntries();
@@ -147,6 +149,7 @@ class _DashboardState extends State<Dashboard>
     } finally {
       if (mounted) {
         setState(() => _isSyncing = false);
+        offlineProvider.setSyncing(false);
       }
     }
   }
@@ -1054,102 +1057,102 @@ class _DashboardState extends State<Dashboard>
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: const Color(0xFFF8FAFC),
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Color.fromARGB(255, 66, 83, 100),
-          elevation: 0,
-          centerTitle: true,
-          title: Text(
-            'Dashboard',
-            style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: context.colors.onPrimary),
-          ),
-          actions: [
-            if (_isSyncing)
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.greenAccent,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Syncing...",
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(55.0),
-            child: Container(
-              color: Colors.white,
-              child: Stack(
-                children: [
-                  // ✅ TabBar
-                  TabBar(
-                    controller: _tabController,
-                    indicator: const CustomTabIndicator(
-                      indicatorWidth: 70,
-                      indicatorHeight: 3,
-                      color: Colors.green,
-                    ),
-                    indicatorSize: TabBarIndicatorSize.label,
-                    tabs: [
-                      Tab(
-                        child: Text(
-                          "Tickets",
-                          style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.036,
-                            color: const Color.fromARGB(255, 62, 62, 67),
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          "KPI",
-                          style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.036,
-                            color: const Color.fromARGB(255, 62, 62, 67),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+        // appBar: AppBar(
+        //   automaticallyImplyLeading: false,
+        //   backgroundColor: Color.fromARGB(255, 66, 83, 100),
+        //   elevation: 0,
+        //   centerTitle: true,
+        //   title: Text(
+        //     'Dashboard',
+        //     style: GoogleFonts.inter(
+        //         fontSize: 18,
+        //         fontWeight: FontWeight.w700,
+        //         color: context.colors.onPrimary),
+        //   ),
+        //   actions: [
+        //     if (_isSyncing)
+        //       Padding(
+        //         padding: const EdgeInsets.only(right: 12),
+        //         child: Row(
+        //           mainAxisSize: MainAxisSize.min,
+        //           children: [
+        //             SizedBox(
+        //               width: 16,
+        //               height: 16,
+        //               child: CircularProgressIndicator(
+        //                 strokeWidth: 2,
+        //                 valueColor: AlwaysStoppedAnimation<Color>(
+        //                   Colors.greenAccent,
+        //                 ),
+        //               ),
+        //             ),
+        //             const SizedBox(width: 8),
+        //             Text(
+        //               "Syncing...",
+        //               style: GoogleFonts.inter(
+        //                 fontSize: 12,
+        //                 fontWeight: FontWeight.w500,
+        //                 color: Colors.white,
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //   ],
+        //   bottom: PreferredSize(
+        //     preferredSize: const Size.fromHeight(55.0),
+        //     child: Container(
+        //       color: Colors.white,
+        //       child: Stack(
+        //         children: [
+        //           // ✅ TabBar
+        //           TabBar(
+        //             controller: _tabController,
+        //             indicator: const CustomTabIndicator(
+        //               indicatorWidth: 70,
+        //               indicatorHeight: 3,
+        //               color: Colors.green,
+        //             ),
+        //             indicatorSize: TabBarIndicatorSize.label,
+        //             tabs: [
+        //               Tab(
+        //                 child: Text(
+        //                   "Tickets",
+        //                   style: TextStyle(
+        //                     fontSize: MediaQuery.of(context).size.width * 0.036,
+        //                     color: const Color.fromARGB(255, 62, 62, 67),
+        //                   ),
+        //                 ),
+        //               ),
+        //               Tab(
+        //                 child: Text(
+        //                   "KPI",
+        //                   style: TextStyle(
+        //                     fontSize: MediaQuery.of(context).size.width * 0.036,
+        //                     color: const Color.fromARGB(255, 62, 62, 67),
+        //                   ),
+        //                 ),
+        //               ),
+        //             ],
+        //           ),
 
-                  // ✅ Divider line in center
-                  Container(
-                    margin: const EdgeInsets.only(top: 7),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 1,
-                        height: 30,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        //           // ✅ Divider line in center
+        //           Container(
+        //             margin: const EdgeInsets.only(top: 7),
+        //             child: Align(
+        //               alignment: Alignment.center,
+        //               child: Container(
+        //                 width: 1,
+        //                 height: 30,
+        //                 color: Colors.grey.shade400,
+        //               ),
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ),
         body: TabBarView(
           controller: _tabController,
           children: [
@@ -1314,8 +1317,7 @@ class _DashboardState extends State<Dashboard>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue
-                          .withOpacity(0.1),
+                      color: Colors.blue.withOpacity(0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

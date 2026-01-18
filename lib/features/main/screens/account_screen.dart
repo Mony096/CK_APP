@@ -48,13 +48,18 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _logout(BuildContext context) async {
     MaterialDialog.loading(context);
-    
+
     // Clear data on logout logic
-    final offlineProviderService = Provider.of<ServiceListProviderOffline>(context, listen: false);
-    final offlineProviderServiceCustomer = Provider.of<CustomerListProviderOffline>(context, listen: false);
-    final offlineProviderServiceItem = Provider.of<ItemListProviderOffline>(context, listen: false);
-    final offlineProviderEquipment = Provider.of<EquipmentOfflineProvider>(context, listen: false);
-    final offlineProviderSite = Provider.of<SiteListProviderOffline>(context, listen: false);
+    final offlineProviderService =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+    final offlineProviderServiceCustomer =
+        Provider.of<CustomerListProviderOffline>(context, listen: false);
+    final offlineProviderServiceItem =
+        Provider.of<ItemListProviderOffline>(context, listen: false);
+    final offlineProviderEquipment =
+        Provider.of<EquipmentOfflineProvider>(context, listen: false);
+    final offlineProviderSite =
+        Provider.of<SiteListProviderOffline>(context, listen: false);
 
     try {
       await offlineProviderService.clearDocuments();
@@ -68,7 +73,7 @@ class _AccountScreenState extends State<AccountScreen> {
     }
 
     await Provider.of<AuthProvider>(context, listen: false).logout();
-    
+
     if (context.mounted) {
       Navigator.of(context).pop(); // Close loading
       Navigator.of(context).pushAndRemoveUntil(
@@ -82,20 +87,20 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          "Account",
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     "Account",
+      //     style: GoogleFonts.inter(
+      //       fontWeight: FontWeight.w700,
+      //       fontSize: 18,
+      //       color: Colors.black,
+      //     ),
+      //   ),
+      //   centerTitle: true,
+      //   backgroundColor: Colors.white,
+      //   elevation: 0,
+      //   automaticallyImplyLeading: false,
+      // ),
       body: ListView(
         padding: EdgeInsets.zero,
         children: [

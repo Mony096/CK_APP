@@ -184,20 +184,20 @@ class _SyncScreenState extends State<SyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          "Data Sync Manager",
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            fontSize: 17.sp,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF425364),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     "Data Sync Manager",
+      //     style: GoogleFonts.inter(
+      //       fontWeight: FontWeight.w700,
+      //       fontSize: 17.sp,
+      //       color: Colors.white,
+      //     ),
+      //   ),
+      //   centerTitle: true,
+      //   backgroundColor: const Color(0xFF425364),
+      //   elevation: 0,
+      //   automaticallyImplyLeading: false,
+      // ),
       body: Consumer2<ServiceListProviderOffline, EquipmentOfflineProvider>(
         builder: (context, serviceOffline, equipmentOffline, child) {
           final serviceCount = serviceOffline.pendingSyncCount;

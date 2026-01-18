@@ -166,7 +166,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(backgroundColor: const Color(0xFF1E293B)),
+        appBar: AppBar(
+          title: const Text("Loading..."),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -178,15 +180,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           "Service Details",
           style: google_fonts.GoogleFonts.inter(
             fontWeight: FontWeight.w800,
-            fontSize: 17.sp,
-            color: Colors.white,
+            fontSize: 18,
             letterSpacing: 0.5,
           ),
         ),
-        backgroundColor: const Color(0xFF1E293B),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.white, size: 18.sp),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,

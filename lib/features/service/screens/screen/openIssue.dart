@@ -176,8 +176,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
-                                 minimumSize: const Size(0, 40),
-
+                minimumSize: const Size(0, 40),
                 backgroundColor: const Color(0xFF425364),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
@@ -201,14 +200,8 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text("Open Issues",
-            style: GoogleFonts.inter(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white)),
+        title: const Text("Open Issues"),
         centerTitle: true,
-        backgroundColor: const Color(0xFF425364),
-        elevation: 0,
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () => Navigator.of(context).pop()),
@@ -283,7 +276,10 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
                         onPressed: () => _showIssueDialog(),
                         icon: const Icon(Icons.add_circle_outline_rounded,
                             size: 16),
-                        label: Text("LOG ISSUE",style: TextStyle(fontSize: 12.7.sp),),
+                        label: Text(
+                          "LOG ISSUE",
+                          style: TextStyle(fontSize: 12.7.sp),
+                        ),
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(0, 40),
                           backgroundColor: const Color(0xFFEF4444),
@@ -343,7 +339,7 @@ class _OpenIssueScreenState extends State<OpenIssueScreen> {
   Widget _buildIssueCard(dynamic item) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.8.h),
-      padding: EdgeInsets.only(left: 4.w,right: 4.w,top: 1.w,bottom: 2.w),
+      padding: EdgeInsets.only(left: 4.w, right: 4.w, top: 1.w, bottom: 2.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),

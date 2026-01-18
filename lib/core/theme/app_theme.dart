@@ -48,18 +48,18 @@ class AppTheme {
 
       // AppBar - Material 3 style with surface container
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.legacyAppBarBg,
+        foregroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 2,
         centerTitle: true,
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
+          color: Colors.white,
         ),
-        iconTheme: IconThemeData(
-          color: colorScheme.onSurface,
+        iconTheme: const IconThemeData(
+          color: Colors.white,
         ),
       ),
 

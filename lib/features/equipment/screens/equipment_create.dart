@@ -12,8 +12,8 @@ import 'package:bizd_tech_service/features/equipment/screens/component/component
 import 'package:bizd_tech_service/features/equipment/screens/component/part.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
-import 'package:bizd_tech_service/core/core.dart';
-import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
+// import 'package:bizd_tech_service/core/core.dart';
+// import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -494,14 +494,12 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
         appBar: AppBar(
           title: Text(
             isEditing ? "Equipment Detail" : "New Equipment",
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
-              color: Colors.white,
             ),
           ),
           centerTitle: true,
-          backgroundColor: Color.fromARGB(255, 66, 83, 100),
           elevation: 0,
           leading: IconButton(
             icon:
@@ -601,60 +599,60 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: widget.isNested
-            ? null
-            : Container(
-                child: Consumer2<ServiceListProviderOffline,
-                    EquipmentOfflineProvider>(
-                  builder: (context, serviceOffline, equipmentOffline, child) {
-                    final totalPending = serviceOffline.pendingSyncCount +
-                        equipmentOffline.pendingSyncCount;
+        // bottomNavigationBar: widget.isNested
+        //     ? null
+        //     : Container(
+        //         child: Consumer2<ServiceListProviderOffline,
+        //             EquipmentOfflineProvider>(
+        //           builder: (context, serviceOffline, equipmentOffline, child) {
+        //             final totalPending = serviceOffline.pendingSyncCount +
+        //                 equipmentOffline.pendingSyncCount;
 
-                    return AdaptiveBottomNavBar(
-                      selectedIndex: 2, // 👈 FIXED to Equipment
-                      onItemTapped: (index) {
-                        if (index != 2) {
-                          Provider.of<EquipmentOfflineProvider>(
-                            context,
-                            listen: false,
-                          ).clearCollection();
+        //             return AdaptiveBottomNavBar(
+        //               selectedIndex: 2, // 👈 FIXED to Equipment
+        //               onItemTapped: (index) {
+        //                 if (index != 2) {
+        //                   Provider.of<EquipmentOfflineProvider>(
+        //                     context,
+        //                     listen: false,
+        //                   ).clearCollection();
 
-                          Navigator.of(context)
-                              .pop(index); // return index to MainScreen
-                        }
-                      },
-                      items: [
-                        const AdaptiveNavItem(
-                          label: 'Dashboard',
-                          icon: Icons.dashboard_outlined,
-                          activeIcon: Icons.dashboard,
-                        ),
-                        const AdaptiveNavItem(
-                          label: 'Service',
-                          icon: Icons.miscellaneous_services_outlined,
-                          activeIcon: Icons.miscellaneous_services,
-                        ),
-                        const AdaptiveNavItem(
-                          label: 'Equipment',
-                          icon: Icons.build_outlined,
-                          activeIcon: Icons.build,
-                        ),
-                        AdaptiveNavItem(
-                          label: 'Sync',
-                          icon: Icons.sync_outlined,
-                          activeIcon: Icons.sync,
-                          badgeCount: totalPending,
-                        ),
-                        const AdaptiveNavItem(
-                          label: 'Account',
-                          icon: Icons.person_outline,
-                          activeIcon: Icons.person,
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+        //                   Navigator.of(context)
+        //                       .pop(index); // return index to MainScreen
+        //                 }
+        //               },
+        //               items: [
+        //                 const AdaptiveNavItem(
+        //                   label: 'Dashboard',
+        //                   icon: Icons.dashboard_outlined,
+        //                   activeIcon: Icons.dashboard,
+        //                 ),
+        //                 const AdaptiveNavItem(
+        //                   label: 'Service',
+        //                   icon: Icons.miscellaneous_services_outlined,
+        //                   activeIcon: Icons.miscellaneous_services,
+        //                 ),
+        //                 const AdaptiveNavItem(
+        //                   label: 'Equipment',
+        //                   icon: Icons.build_outlined,
+        //                   activeIcon: Icons.build,
+        //                 ),
+        //                 AdaptiveNavItem(
+        //                   label: 'Sync',
+        //                   icon: Icons.sync_outlined,
+        //                   activeIcon: Icons.sync,
+        //                   badgeCount: totalPending,
+        //                 ),
+        //                 const AdaptiveNavItem(
+        //                   label: 'Account',
+        //                   icon: Icons.person_outline,
+        //                   activeIcon: Icons.person,
+        //                 ),
+        //               ],
+        //             );
+        //           },
+        //         ),
+        //       ),
       ),
     );
   }

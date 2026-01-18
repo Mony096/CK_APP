@@ -51,14 +51,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text("Field Signature",
-            style: GoogleFonts.inter(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white)),
+        title: const Text("Field Signature"),
         centerTitle: true,
-        backgroundColor: const Color(0xFF425364),
-        elevation: 0,
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () => Navigator.of(context).pop()),

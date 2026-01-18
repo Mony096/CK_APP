@@ -17,7 +17,7 @@ class WrapperScreen extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
         debugPrint('Auth state: isLoggedIn=${auth.isLoggedIn}');
-        
+
         // STEP 1: Still checking session → show loading screen
         if (auth.isCheckSessionId) {
           return Scaffold(
@@ -43,12 +43,12 @@ class WrapperScreen extends StatelessWidget {
             ),
           );
         }
-        
+
         // STEP 2: Password change required
         if (auth.isChangePassword) {
           return const ChangePasswordScreen();
         }
-        
+
         // STEP 3: Not logged in → show new login screen
         if (!auth.isLoggedIn) {
           return const LoginScreenV2();

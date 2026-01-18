@@ -108,17 +108,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
-          title: Text(
-            "Service Entry",
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
+          title: const Text("Service Entry"),
           centerTitle: true,
-          backgroundColor: const Color(0xFF425364),
-          elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: onBackScreen,
@@ -365,7 +356,6 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
           child: ElevatedButton(
             onPressed: onCompletedService,
             style: ElevatedButton.styleFrom(
-              
               backgroundColor: const Color(0xFF22C55E),
               foregroundColor: Colors.white,
               elevation: 0,

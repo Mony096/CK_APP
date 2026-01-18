@@ -33,6 +33,14 @@ class EquipmentOfflineProvider with ChangeNotifier {
   bool _submit = false;
   bool get submit => _submit;
 
+  bool _isSyncing = false;
+  bool get isSyncing => _isSyncing;
+
+  void setSyncing(bool value) {
+    _isSyncing = value;
+    notifyListeners();
+  }
+
   List<dynamic> _equipments = [];
   List<dynamic> get equipments => _equipments;
 

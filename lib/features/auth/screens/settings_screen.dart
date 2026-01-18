@@ -125,30 +125,12 @@ class _SettingScreenState extends State<SettingScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-            ),
-            child: const Icon(Icons.arrow_back_ios_new,
-                color: Color(0xFF374151), size: 16),
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new,
+              color: Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          "System Settings",
-          style: GoogleFonts.inter(
-            color: const Color(0xFF111827),
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: const Text("System Settings"),
         centerTitle: true,
       ),
       body: SafeArea(

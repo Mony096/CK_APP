@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
+// import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ServiceScreen extends StatefulWidget {
@@ -51,8 +51,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
   Future<void> _autoSyncServices() async {
     if (_isSyncing) return;
 
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
     try {
       setState(() => _isSyncing = true);
+      offlineProvider.setSyncing(true);
 
       // Check internet connectivity
       final hasInternet = await _checkInternetConnection();
@@ -66,8 +70,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
       // Get providers
       final onlineProvider =
           Provider.of<ServiceListProvider>(context, listen: false);
-      final offlineProvider =
-          Provider.of<ServiceListProviderOffline>(context, listen: false);
 
       // Get existing DocEntries from offline storage
       final existingDocEntries = await offlineProvider.getExistingDocEntries();
@@ -94,6 +96,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
     } finally {
       if (mounted) {
         setState(() => _isSyncing = false);
+        offlineProvider.setSyncing(false);
       }
     }
   }
@@ -299,52 +302,52 @@ class _ServiceScreenState extends State<ServiceScreen> {
         }).toList();
         final isLoading = serviceProvider.isLoading;
         return Scaffold(
-          backgroundColor: context.colors.surfaceContainerHighest,
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: Color.fromARGB(255, 66, 83, 100),
-            elevation: 0,
-            centerTitle: true,
-            title: Text(
-              "Service Manager",
-              style: GoogleFonts.inter(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            actions: [
-              _isSyncing
-                  ? Padding(
-                      padding: EdgeInsets.only(right: 3.w),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 14.sp,
-                            height: 14.sp,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.greenAccent,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 2.w),
-                          Text(
-                            "Syncing...",
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Container(),
-            ],
-          ),
+          backgroundColor: const Color(0xFFF8FAFC),
+          // appBar: AppBar(
+          //   automaticallyImplyLeading: false,
+          //   backgroundColor: Color.fromARGB(255, 66, 83, 100),
+          //   elevation: 0,
+          //   centerTitle: true,
+          //   title: Text(
+          //     "Service Manager",
+          //     style: GoogleFonts.inter(
+          //       fontSize: 17.sp,
+          //       fontWeight: FontWeight.w700,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          //   actions: [
+          //     _isSyncing
+          //         ? Padding(
+          //             padding: EdgeInsets.only(right: 3.w),
+          //             child: Row(
+          //               mainAxisSize: MainAxisSize.min,
+          //               children: [
+          //                 SizedBox(
+          //                   width: 14.sp,
+          //                   height: 14.sp,
+          //                   child: CircularProgressIndicator(
+          //                     strokeWidth: 2,
+          //                     valueColor: AlwaysStoppedAnimation<Color>(
+          //                       Colors.greenAccent,
+          //                     ),
+          //                   ),
+          //                 ),
+          //                 SizedBox(width: 2.w),
+          //                 Text(
+          //                   "Syncing...",
+          //                   style: GoogleFonts.inter(
+          //                     fontSize: 13.sp,
+          //                     fontWeight: FontWeight.w500,
+          //                     color: Colors.white,
+          //                   ),
+          //                 ),
+          //               ],
+          //             ),
+          //           )
+          //         : Container(),
+          //   ],
+          // ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

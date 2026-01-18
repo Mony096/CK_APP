@@ -93,16 +93,16 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                     .addOrEditOpenCheckList(item, editIndex: index);
                 Navigator.of(context).pop();
               },
-              
               style: ElevatedButton.styleFrom(
-                 minimumSize: const Size(0, 40),
+                minimumSize: const Size(0, 40),
                 backgroundColor: const Color(0xFF425364),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
               child: Text("Save Feedback",
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700,fontSize: 14.sp)),
+                  style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w700, fontSize: 14.sp)),
             ),
           ],
         );
@@ -214,14 +214,8 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text("Service Checklist",
-            style: GoogleFonts.inter(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white)),
+        title: const Text("Service Checklist"),
         centerTitle: true,
-        backgroundColor: const Color(0xFF425364),
-        elevation: 0,
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () => Navigator.of(context).pop()),

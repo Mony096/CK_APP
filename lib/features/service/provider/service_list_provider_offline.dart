@@ -7,10 +7,18 @@ class ServiceListProviderOffline extends ChangeNotifier {
   List<dynamic> _completedServices = [];
   bool _isLoading = false;
   bool _isInitialized = false;
+  bool _isSyncing = false;
 
   List<dynamic> get documents => _documents;
   List<dynamic> get completedServices => _completedServices;
   bool get isLoading => _isLoading;
+  bool get isSyncing => _isSyncing;
+
+  void setSyncing(bool value) {
+    _isSyncing = value;
+    notifyListeners();
+  }
+
   DateTime? _currentDate;
   DateTime? get currentDate => _currentDate;
   Box? _box;
