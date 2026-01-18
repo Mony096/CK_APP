@@ -1609,7 +1609,7 @@ class _DashboardState extends State<Dashboard>
                     Text(
                       customerName,
                       style: GoogleFonts.inter(
-                        fontSize: 16.sp,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF1E293B),
                       ),
