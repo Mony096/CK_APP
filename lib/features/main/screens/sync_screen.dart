@@ -337,7 +337,7 @@ class _SyncScreenState extends State<SyncScreen> {
                           cardName,
                           style: GoogleFonts.inter(
                             fontWeight: FontWeight.w700,
-                            fontSize: 15.sp,
+                            fontSize: 14.sp,
                             color: const Color(0xFF1E293B),
                           ),
                           maxLines: 1,
@@ -402,7 +402,7 @@ class _SyncScreenState extends State<SyncScreen> {
                   Text(
                     date,
                     style: GoogleFonts.inter(
-                      fontSize: 13.5.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF475569),
                     ),
@@ -559,7 +559,7 @@ class _SyncScreenState extends State<SyncScreen> {
           Icon(
             isReady ? Icons.check_circle_rounded : Icons.info_rounded,
             color: isReady ? const Color(0xFF22C55E) : const Color(0xFF3B82F6),
-            size: 28.sp,
+            size: 25.sp,
           ),
           SizedBox(width: 4.w),
           Expanded(
@@ -570,7 +570,7 @@ class _SyncScreenState extends State<SyncScreen> {
                   isReady ? "System Ready" : "Data Sync Required",
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
                     color: isReady
                         ? const Color(0xFF166534)
                         : const Color(0xFF1E40AF),
@@ -582,7 +582,7 @@ class _SyncScreenState extends State<SyncScreen> {
                       ? "All master data is synchronized and available for offline use."
                       : "Please download master data to enable offline capabilities.",
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     color: isReady
                         ? const Color(0xFF15803D)
                         : const Color(0xFF1D4ED8),
@@ -653,14 +653,14 @@ class _SyncScreenState extends State<SyncScreen> {
             title,
             style: GoogleFonts.inter(
               fontWeight: FontWeight.w700,
-              fontSize: 15.5.sp,
+              fontSize: 15.sp,
               color: const Color(0xFF1E293B),
             ),
           ),
           subtitle: Text(
             subtitle,
             style: GoogleFonts.inter(
-              fontSize: 13.sp,
+              fontSize: 12.5.sp,
               color: const Color(0xFF64748B),
               fontWeight: FontWeight.w500,
             ),
