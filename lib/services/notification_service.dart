@@ -131,7 +131,7 @@
 //         title: message.notification?.title ?? '🛠️ Technicon Service Alert',
 //         body: message.notification?.body ?? 'A new Service has been assigned to you. Open now!',
 //         // category: NotificationCategory.Call, // Important for iOS Call style
-//         fullScreenIntent: true, // Android 
+//         fullScreenIntent: true, // Android
 //         autoDismissible: true, // Keep it true so it dismisses on action
 //         locked: true, // Prevent swiping away easily
 //         wakeUpScreen: true,
@@ -151,7 +151,7 @@
 //           label: 'Ignore',
 //           color: Colors.red,
 //           autoDismissible: true,
-//           actionType: ActionType.SilentAction, 
+//           actionType: ActionType.SilentAction,
 //         ),
 //       ],
 //     );
@@ -161,12 +161,12 @@
 //     if (await Vibration.hasVibrator()) {
 //       Vibration.vibrate(
 //         pattern: [500, 1000, 500, 1000, 500, 1000],
-//         repeat: 0, // No repeat, or use -1 for no repeat? 0 repeats from start. 
-//         // Logic in previous main.dart was repeat: 0. 
-//         // 0 means repeat indefinitely in some libs, or repeat from index 0. 
+//         repeat: 0, // No repeat, or use -1 for no repeat? 0 repeats from start.
+//         // Logic in previous main.dart was repeat: 0.
+//         // 0 means repeat indefinitely in some libs, or repeat from index 0.
 //         // Vibration package doc: "index of the pattern array from which to repeat, or -1 for no repeat".
 //         // If we want it to ring for a while, we can repeat.
-//         // But let's stick to what was there or make it safe. 
+//         // But let's stick to what was there or make it safe.
 //       );
 //     }
 //   }
@@ -210,6 +210,14 @@ class NotificationService {
           vibrationPattern: Int64List.fromList([0, 1000, 500, 1000, 500, 1000]),
           defaultRingtoneType: DefaultRingtoneType.Ringtone,
           criticalAlerts: true,
+        ),
+        NotificationChannel(
+          channelKey: 'basic_channel',
+          channelName: 'Download Progress',
+          channelDescription: 'Notifications for download progress',
+          importance: NotificationImportance.Low,
+          playSound: false,
+          enableVibration: false,
         ),
       ],
       debug: false,
@@ -303,7 +311,7 @@ class NotificationService {
       content: NotificationContent(
         id: notificationId,
         channelKey: 'service_channel',
-        title:'🛠️ Technicon Service Alert',
+        title: '🛠️ Technicon Service Alert',
         body: 'A new Service has been assigned to you. Open now!',
         notificationLayout: NotificationLayout.Default,
         category: NotificationCategory.Call, // Triggers Call behavior on iOS
