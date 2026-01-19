@@ -213,22 +213,49 @@ class HtmlServiceReportGenerator {
     Map<String, dynamic>? signatureFile;
     final List<dynamic> regularImages = [];
 
+    // First pass: look for explicit PNG/JPG signatures (prioritize these)
     for (var f in allImageFiles) {
       final desc = f['U_CK_Description']?.toString().toLowerCase() ?? '';
       final ext = f['ext']?.toString().toLowerCase() ?? '';
 
-      final isSignature = desc.contains('signature') ||
-                         desc.contains('sign') ||
-                         desc.contains('ហត្ថលេខា') || // Khmer word for signature
-                         desc.contains('ហត្ថ') || // Khmer word for hand
-                         ext == 'pdf'; // PDF signatures
+      final isPngJpgSignature = (ext == 'png' || ext == 'jpg' || ext == 'jpeg') &&
+                               (desc.contains('signature') ||
+                                desc.contains('sign') ||
+                                desc.contains('ហត្ថលេខា') ||
+                                desc.contains('ហត្ថ'));
 
-      if (isSignature) {
+      if (isPngJpgSignature) {
         signatureFile = Map<String, dynamic>.from(f);
-        debugPrint('  → Found signature by description: ext=$ext, desc="$desc"');
-      } else {
-        regularImages.add(f);
+        debugPrint('  → Found PNG/JPG signature by description: ext=$ext, desc="$desc"');
+        break; // Use the first PNG/JPG signature found
       }
+    }
+
+    // Second pass: if no PNG/JPG signature found, look for PDF signatures or any signature
+    if (signatureFile == null) {
+      for (var f in allImageFiles) {
+        final desc = f['U_CK_Description']?.toString().toLowerCase() ?? '';
+        final ext = f['ext']?.toString().toLowerCase() ?? '';
+
+        final isAnySignature = desc.contains('signature') ||
+                              desc.contains('sign') ||
+                              desc.contains('ហត្ថលេខា') ||
+                              desc.contains('ហត្ថ') ||
+                              ext == 'pdf'; // PDF signatures as fallback
+
+        if (isAnySignature) {
+          signatureFile = Map<String, dynamic>.from(f);
+          debugPrint('  → Found signature (PDF or other): ext=$ext, desc="$desc"');
+          break;
+        }
+      }
+    }
+
+    // Remove signature from regular images list
+    if (signatureFile != null) {
+      regularImages.removeWhere((f) => f == signatureFile);
+    } else {
+      regularImages.addAll(allImageFiles); // If no signature found, all files are regular images
     }
 
     // Method 2: If no signature found by description, use the last PNG/JPG as signature
@@ -252,6 +279,9 @@ class HtmlServiceReportGenerator {
     debugPrint('📸 Report images: ${images.length}, Signature found: ${signatureFile != null}');
     if (signatureFile != null) {
       debugPrint('  Signature details: ext=${signatureFile['ext']}, desc="${signatureFile['U_CK_Description']}"');
+      debugPrint('  💡 Note: PNG signatures can be embedded directly. PDF signatures show as placeholder.');
+    } else {
+      debugPrint('  💡 No signature found. For new signatures, ensure they are saved as PNG format.');
     }
 
     // Build signature image data URL
@@ -702,10 +732,10 @@ class HtmlServiceReportGenerator {
                         <span class="khmer">អតិថិជន: ឈ្មោះ, តួនាទី, កាលបរិច្ឆេទ, ហត្ថលេខា និង មតិយោបល់</span> / Customer: Name, Position, Date, Signature & Comments
                     </div>
                     <div class="signature-area">
-                        ${signatureImage != null 
-                          ? '<img src="$signatureImage" class="signature-image" />' 
-                          : signatureFile != null && signatureFile['ext']?.toString().toLowerCase() == 'pdf'
-                            ? '<div style="text-align: center; color: #6b7280; font-size: 8px;"><div style="font-size: 20px;">📝</div><div>Signature attached as PDF</div></div>'
+                        ${signatureImage != null
+                          ? '<img src="$signatureImage" class="signature-image" />'
+                          : signatureFile != null
+                            ? '<div style="text-align: center; color: #6b7280; font-size: 8px;"><div style="font-size: 20px;">📝</div><div>Digital Signature</div><div style="font-size: 6px; margin-top: 2px; color: #9ca3af;">${signatureFile['ext']?.toString().toUpperCase() ?? 'FILE'}</div></div>'
                             : '<div style="text-align: center; color: #d1d5db; font-size: 8px;">No signature</div>'}
                     </div>
                 </div>
