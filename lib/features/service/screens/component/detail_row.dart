@@ -81,33 +81,36 @@ class DetailRow extends StatelessWidget {
                             ),
                           ),
                           if (row.right != null)
-                            Padding(
-                              padding: EdgeInsets.only(left: 3.w, right: 3.w),
-                              child: row.isRightIcon
-                                  ? SizedBox(
-                                      height: 15
-                                          .sp, // Constrain height to text height range
-                                      child: (row.right is Widget
-                                          ? row.right
-                                          : Text(row.right.toString())),
-                                    )
-                                  : Flexible(
-                                      child: Text(
-                                        row.right.toString(),
-                                        textAlign: TextAlign.right,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 13.sp,
-                                          color: const Color.fromARGB(
-                                              255, 91, 99, 113),
-                                          fontWeight: FontWeight.w600,
-                                          height: 1.2,
-                                        ),
-                                        textScaler:
-                                            const TextScaler.linear(1.0),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                            if (row.isRightIcon)
+                              Padding(
+                                padding: EdgeInsets.only(left: 3.w, right: 3.w),
+                                child: SizedBox(
+                                  height: 15.sp,
+                                  child: (row.right is Widget
+                                      ? row.right
+                                      : Text(row.right.toString())),
+                                ),
+                              )
+                            else
+                              Flexible(
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.only(left: 3.w, right: 3.w),
+                                  child: Text(
+                                    row.right.toString(),
+                                    textAlign: TextAlign.right,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      color: const Color.fromARGB(
+                                          255, 91, 99, 113),
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.2,
                                     ),
-                            ),
+                                    textScaler: const TextScaler.linear(1.0),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
                         ],
                       ),
                     )),

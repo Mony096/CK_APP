@@ -1,5 +1,5 @@
+import 'dart:io';
 import 'package:bizd_tech_service/core/theme/app_colors.dart';
-import 'package:bizd_tech_service/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:bizd_tech_service/core/extensions/theme_extensions.dart';
@@ -1133,5 +1133,46 @@ class MaterialDialog {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  static void showImagePreview(BuildContext context, File imageFile) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                color: Colors.black.withOpacity(0.9),
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+            InteractiveViewer(
+              panEnabled: true,
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image.file(
+                imageFile,
+                fit: BoxFit.contain,
+              ),
+            ),
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                icon: const Icon(Icons.close_rounded,
+                    color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

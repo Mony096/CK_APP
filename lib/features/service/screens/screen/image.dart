@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
 import 'package:bizd_tech_service/features/service/screens/component/status_stepper.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +21,22 @@ class _ImageScreenState extends State<ImageScreen> {
 
   Future<void> pickImage(ImageSource source) async {
     try {
-      final XFile? image =
-          await _picker.pickImage(source: source, imageQuality: 50);
-      if (image != null) {
-        if (!mounted) return;
-        context.read<CompletedServiceProvider>().addImage(File(image.path));
+      if (source == ImageSource.gallery) {
+        final List<XFile> images =
+            await _picker.pickMultiImage(imageQuality: 50);
+        if (images.isNotEmpty) {
+          if (!mounted) return;
+          for (var image in images) {
+            context.read<CompletedServiceProvider>().addImage(File(image.path));
+          }
+        }
+      } else {
+        final XFile? image =
+            await _picker.pickImage(source: source, imageQuality: 50);
+        if (image != null) {
+          if (!mounted) return;
+          context.read<CompletedServiceProvider>().addImage(File(image.path));
+        }
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
@@ -280,7 +292,10 @@ class _ImageScreenState extends State<ImageScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.file(imageFile, fit: BoxFit.cover),
+            GestureDetector(
+              onTap: () => MaterialDialog.showImagePreview(context, imageFile),
+              child: Image.file(imageFile, fit: BoxFit.cover),
+            ),
             Positioned(
               top: 8,
               right: 8,

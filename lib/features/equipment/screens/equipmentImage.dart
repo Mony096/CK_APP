@@ -146,7 +146,7 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
             Text(
               'Select Image Source',
               style: TextStyle(
-                fontSize:  MediaQuery.of(context).size.width * 0.042,
+                fontSize: MediaQuery.of(context).size.width * 0.042,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -163,7 +163,8 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
               ),
               title: Text(
                 "Take Photo",
-                style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.038),
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.038),
               ),
               onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
@@ -174,7 +175,8 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
                 size: 25,
               ),
               title: Text("Choose from Gallery",
-                  style: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.038)),
+                  style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.038)),
               onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
             ),
           ],
@@ -184,34 +186,56 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
 
     if (source == null) return; // User canceled
 
-    final pickedFile = await picker.pickImage(source: source);
+    List<XFile> pickedFiles = [];
+    if (source == ImageSource.gallery) {
+      pickedFiles = await picker.pickMultiImage(imageQuality: 50);
+    } else {
+      final XFile? photo =
+          await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
+      if (photo != null) pickedFiles.add(photo);
+    }
 
-    if (pickedFile != null) {
-      final newFile = File(pickedFile.path);
-      final newBytes = await newFile.readAsBytes();
-      final newHash = sha256.convert(newBytes).toString();
-
-      bool isDuplicate = false;
+    if (pickedFiles.isNotEmpty) {
       final provider = context.read<EquipmentOfflineProvider>();
+      List<File> newImagesToAdd = [];
+      List<String> duplicateNames = [];
 
-      for (final file in provider.imagesList) {
-        final existingBytes = await file.readAsBytes();
-        final existingHash = sha256.convert(existingBytes).toString();
-        if (existingHash == newHash) {
-          isDuplicate = true;
-          break;
+      for (var pickedFile in pickedFiles) {
+        final newFile = File(pickedFile.path);
+        final newBytes = await newFile.readAsBytes();
+        final newHash = sha256.convert(newBytes).toString();
+
+        bool isDuplicate = false;
+        for (final file in provider.imagesList) {
+          final existingBytes = await file.readAsBytes();
+          final existingHash = sha256.convert(existingBytes).toString();
+          if (existingHash == newHash) {
+            isDuplicate = true;
+            break;
+          }
+        }
+
+        if (isDuplicate) {
+          duplicateNames.add(pickedFile.name);
+        } else {
+          newImagesToAdd.add(newFile);
         }
       }
 
-      if (isDuplicate) {
+      if (newImagesToAdd.isNotEmpty) {
+        provider.addImages(newImagesToAdd);
+      }
+
+      if (duplicateNames.isNotEmpty) {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text(
-              "Duplicate Image",
+              "Duplicate Images",
               style: TextStyle(fontSize: 21),
             ),
-            content: const Text("This image has already been selected."),
+            content: Text(
+                "The following images were already selected and skipped:\n${duplicateNames.join(', ')}"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
@@ -220,15 +244,7 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
             ],
           ),
         );
-        return;
       }
-      Provider.of<EquipmentOfflineProvider>(context, listen: false)
-          .addImages([newFile]); // Pass as list
-
-      // setState(() {
-      //   _images.add(newFile);
-      // });
-      // print(provider.imagesList);
     }
   }
 
@@ -258,7 +274,7 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
             children: [
               IconButton(
                 onPressed: () {
-                 Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
                 icon: const Icon(Icons.check, color: Colors.white),
               ),
@@ -374,7 +390,7 @@ class _MenuState extends State<Menu> {
                   ),
                   Text(
                     widget.title,
-                    style:  TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: MediaQuery.of(context).size.width * 0.032,
                     ),
@@ -488,11 +504,15 @@ class _ImageShowState extends State<ImageShow> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          file,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 300,
+                        child: GestureDetector(
+                          onTap: () =>
+                              MaterialDialog.showImagePreview(context, file),
+                          child: Image.file(
+                            file,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 300,
+                          ),
                         ),
                       ),
                     ),

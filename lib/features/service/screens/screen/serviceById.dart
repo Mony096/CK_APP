@@ -261,55 +261,53 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                   title: "Contact Information",
                   svg: SvgPicture.asset('images/svg/contact.svg',
                       color: const Color(0xFF22C55E)),
-                  rows: (widget.data["CustomerContact"] as List).isEmpty
-                      ? [RowItem(left: "No Contact Available")]
-                      : (widget.data["CustomerContact"] as List)
-                          .expand<RowItem>((e) => [
-                                RowItem(left: e["Name"] ?? "N/A"),
-                                RowItem(
-                                  left: e['Phone1'] ?? "N/A",
-                                  right: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    onPressed: () => makePhoneCall(
-                                        context, e["Phone1"] ?? ""),
-                                    icon: Icon(Icons.phone_rounded,
-                                        size: 18.sp,
-                                        color: const Color(0xFF22C55E)),
-                                  ),
-                                  isRightIcon: true,
-                                ),
-                              ])
-                          .toList(),
+                  rows:
+                      (widget.data["CustomerContact"] as List?)?.isEmpty ?? true
+                          ? [RowItem(left: "No Contact Available")]
+                          : (widget.data["CustomerContact"] as List)
+                              .expand<RowItem>((e) => [
+                                    RowItem(left: e["Name"] ?? "N/A"),
+                                    RowItem(
+                                      left: e['Phone1'] ?? "N/A",
+                                      right: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        onPressed: () => makePhoneCall(
+                                            context, e["Phone1"] ?? ""),
+                                        icon: Icon(Icons.phone_rounded,
+                                            size: 18.sp,
+                                            color: const Color(0xFF22C55E)),
+                                      ),
+                                      isRightIcon: true,
+                                    ),
+                                  ])
+                              .toList(),
                 ),
                 DetailRow(
                     title: "Service Items",
                     svg: SvgPicture.asset('images/svg/dolla.svg',
                         color: const Color(0xFF3B82F6)),
-                    rows: (widget.data["CK_JOB_SERVICESCollection"] as List)
-                            .isEmpty
+                    rows: (widget.data["CK_JOB_SERVICESCollection"] as List?)
+                                ?.isEmpty ??
+                            true
                         ? [RowItem(left: "No Services Listed")]
                         : (widget.data["CK_JOB_SERVICESCollection"] as List)
-                            // .map((e) =>
-                            //     RowItem(left: e["U_CK_ServiceName"] ?? "N/A"))
-                            // .toList(),
-                            .expand<RowItem>((e) => [
-                                  RowItem(
-                                    left: e['U_CK_ServiceName'] ?? "N/A",
-                                    right: 'USD ${numberFormatCurrency.format(
-                                      double.tryParse(
-                                              e["U_CK_UnitPrice"].toString()) ??
-                                          0,
-                                    )} ',
-                                    isRightIcon: false,
-                                  ),
-                                ])
+                            .map((e) => RowItem(
+                                  left: e['U_CK_ServiceName'] ?? "N/A",
+                                  right: 'USD ${numberFormatCurrency.format(
+                                    double.tryParse(
+                                            e["U_CK_UnitPrice"].toString()) ??
+                                        0,
+                                  )} ',
+                                  isRightIcon: false,
+                                ))
                             .toList()),
                 DetailRow(
                   title: "Equipment Details",
                   svg: const Icon(Icons.build_rounded, color: Colors.orange),
-                  rows: (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
-                          .isEmpty
+                  rows: (widget.data["CK_JOB_EQUIPMENTCollection"] as List?)
+                              ?.isEmpty ??
+                          true
                       ? [RowItem(left: "No Equipment Listed")]
                       : (widget.data["CK_JOB_EQUIPMENTCollection"] as List)
                           .expand<RowItem>((e) => [
@@ -318,9 +316,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                                 ),
                                 RowItem(
                                     left:
-                                        "SN : ${e["U_CK_SerialNum"] == "" ? "N/A" : e["U_CK_SerialNum"]}"),
-                                // RowItem(
-                                //     left: "Model : ${e["U_CK_Model"] == "" ? "N/A" : e["U_CK_Model"]}"),
+                                        "SN : ${e["U_CK_SerialNum"] == "" || e["U_CK_SerialNum"] == null ? "N/A" : e["U_CK_SerialNum"]}"),
                               ])
                           .toList(),
                 ),
@@ -330,12 +326,13 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                 DetailRow(
                   title: "Activity:",
                   svg: SvgPicture.asset(
-                    color: Colors.blue,
                     'images/svg/activity.svg',
+                    colorFilter:
+                        const ColorFilter.mode(Colors.blue, BlendMode.srcIn),
                     width: 30,
                     height: 30,
                   ),
-                  rows: (widget.data["activityLine"] as List).isEmpty
+                  rows: (widget.data["activityLine"] as List?)?.isEmpty ?? true
                       ? [
                           RowItem(
                             left: "No Activity Available",
@@ -343,35 +340,32 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                           ),
                         ]
                       : (widget.data["activityLine"] as List)
-                          .expand<RowItem>((e) => [
-                                RowItem(
-                                    left: "${e["Activity"] ?? "N/A"}",
-                                    right: SvgPicture.asset(
-                                      color: Colors.blue,
-                                      'images/svg/task_check.svg',
-                                      width: 25,
-                                      height: 25,
-                                    ),
-                                    isRightIcon: true),
-                              ])
+                          .map<RowItem>((e) => RowItem(
+                              left: "${e["Activity"] ?? "N/A"}",
+                              right: SvgPicture.asset(
+                                'images/svg/task_check.svg',
+                                colorFilter: const ColorFilter.mode(
+                                    Colors.blue, BlendMode.srcIn),
+                                width: 25,
+                                height: 25,
+                              ),
+                              isRightIcon: true))
                           .toList(),
                 ),
                 DetailRow(
                   title: "Materials",
                   svg: const Icon(Icons.inventory_2_rounded,
                       color: Colors.purple),
-                  rows:
-                      (widget.data["CK_JOB_MATERIALCollection"] as List).isEmpty
-                          ? [RowItem(left: "No Materials Listed")]
-                          : (widget.data["CK_JOB_MATERIALCollection"] as List)
-                              .expand<RowItem>((e) => [
-                                    RowItem(
-                                      left: e["U_CK_ItemName"] ?? "N/A",
-                                      right: '${e["U_CK_Qty"] ?? 0} ',
-                                    ),
-                                    // RowItem(left: "Qty: ${e["U_CK_Qty"] ?? 0}"),
-                                  ])
-                              .toList(),
+                  rows: (widget.data["CK_JOB_MATERIALCollection"] as List?)
+                              ?.isEmpty ??
+                          true
+                      ? [RowItem(left: "No Materials Listed")]
+                      : (widget.data["CK_JOB_MATERIALCollection"] as List)
+                          .map((e) => RowItem(
+                                left: e["U_CK_ItemName"] ?? "N/A",
+                                right: '${e["U_CK_Qty"] ?? 0} ',
+                              ))
+                          .toList(),
                 ),
                 SizedBox(height: 12.h),
               ],
