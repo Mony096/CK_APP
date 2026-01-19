@@ -195,41 +195,64 @@ class HtmlServiceReportGenerator {
     }
     
     // Separate images from signature
-    // Images are PNG/JPG files used for picture report
-    // Signature can be PNG/JPG with 'signature' in description, or PDF file
-    final List<dynamic> imageFiles = [];
-    Map<String, dynamic>? signatureFile;
+    // Strategy: Collect all image files first, then identify signature by multiple methods
+    final List<dynamic> allImageFiles = [];
 
     for (var f in files) {
       if (f is Map && f['data'] != null) {
         final ext = f['ext']?.toString().toLowerCase() ?? '';
-        final desc = f['U_CK_Description']?.toString().toLowerCase() ?? '';
-
-        // Check if this is a signature file
-        // Signatures are typically: images with 'signature' in description, or PDF files
-        final isSignature = desc.contains('signature') ||
-                           desc.contains('ហត្ថលេខា') || // Khmer word for signature
-                           ext == 'pdf'; // Fallback for PDF signatures
-
-        if (isSignature) {
-          signatureFile = Map<String, dynamic>.from(f);
-          debugPrint('  → Found signature file: ext=$ext, desc=$desc');
-        } else if (ext == 'jpg' || ext == 'jpeg' || ext == 'png') {
-          imageFiles.add(f);
+        if (ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'pdf') {
+          allImageFiles.add(f);
         }
       }
     }
-    
-    // If no explicit signature found, use the last image as signature (common pattern)
-    if (signatureFile == null && imageFiles.isNotEmpty) {
-      signatureFile = Map<String, dynamic>.from(imageFiles.last);
-      imageFiles.removeLast();
-      debugPrint('  → Using last image as signature');
+
+    debugPrint('  Found ${allImageFiles.length} total image/PDF files');
+
+    // Method 1: Check for explicit signature descriptions
+    Map<String, dynamic>? signatureFile;
+    final List<dynamic> regularImages = [];
+
+    for (var f in allImageFiles) {
+      final desc = f['U_CK_Description']?.toString().toLowerCase() ?? '';
+      final ext = f['ext']?.toString().toLowerCase() ?? '';
+
+      final isSignature = desc.contains('signature') ||
+                         desc.contains('sign') ||
+                         desc.contains('ហត្ថលេខា') || // Khmer word for signature
+                         desc.contains('ហត្ថ') || // Khmer word for hand
+                         ext == 'pdf'; // PDF signatures
+
+      if (isSignature) {
+        signatureFile = Map<String, dynamic>.from(f);
+        debugPrint('  → Found signature by description: ext=$ext, desc="$desc"');
+      } else {
+        regularImages.add(f);
+      }
+    }
+
+    // Method 2: If no signature found by description, use the last PNG/JPG as signature
+    // This is the most reliable method since signatures are typically added last
+    if (signatureFile == null && regularImages.isNotEmpty) {
+      // Find PNG/JPG files (exclude PDFs for signature)
+      final pngJpgFiles = regularImages.where((f) {
+        final ext = f['ext']?.toString().toLowerCase() ?? '';
+        return ext == 'png' || ext == 'jpg' || ext == 'jpeg';
+      }).toList();
+
+      if (pngJpgFiles.isNotEmpty) {
+        signatureFile = Map<String, dynamic>.from(pngJpgFiles.last);
+        regularImages.remove(signatureFile);
+        debugPrint('  → Using last PNG/JPG as signature (most reliable method)');
+      }
     }
     
     // Use remaining images for picture report (max 4)
-    final images = imageFiles.take(4).toList();
+    final images = regularImages.take(4).toList();
     debugPrint('📸 Report images: ${images.length}, Signature found: ${signatureFile != null}');
+    if (signatureFile != null) {
+      debugPrint('  Signature details: ext=${signatureFile['ext']}, desc="${signatureFile['U_CK_Description']}"');
+    }
 
     // Build signature image data URL
     // PNG/JPG signatures can be embedded directly in HTML img tags
