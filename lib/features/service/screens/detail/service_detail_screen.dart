@@ -180,7 +180,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           "Service Details",
           style: google_fonts.GoogleFonts.inter(
             fontWeight: FontWeight.w800,
-            fontSize: 18,
+            fontSize: 17,
             letterSpacing: 0.5,
           ),
         ),

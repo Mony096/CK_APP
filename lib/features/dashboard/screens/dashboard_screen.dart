@@ -37,7 +37,7 @@ class _DashboardState extends State<Dashboard>
   // final DioClient _dio = DioClient(); // Your custom Dio client
   bool load = false;
   String _selectedJob = "All"; // All, Open, Closed
-  String _selectedService = "All"; // All, Open, Closed
+  String _jobClass = "All"; // All, Open, Closed
   String _selectedPriority = "All"; // All, High, Medium, Low
   List<dynamic> documentOffline = [];
   List<dynamic> completedService = [];
@@ -192,8 +192,8 @@ class _DashboardState extends State<Dashboard>
   //       filter += " and U_CK_JobType eq '$_selectedJob'";
   //     }
 
-  //     if (_selectedService != "All") {
-  //       filter += " and U_CK_ServiceType eq '$_selectedService'";
+  //     if (_jobClass != "All") {
+  //       filter += " and U_CK_ServiceType eq '$_jobClass'";
   //     }
   //     if (_selectedPriority != "All") {
   //       filter += " and U_CK_Priority eq '$_selectedPriority'";
@@ -244,8 +244,8 @@ class _DashboardState extends State<Dashboard>
         if (_selectedJob != "All") {
           match = match && doc["U_CK_JobType"] == _selectedJob;
         }
-        if (_selectedService != "All") {
-          match = match && doc["U_CK_ServiceType"] == _selectedService;
+        if (_jobClass != "All") {
+          match = match && doc["U_CK_JobClass"] == _jobClass;
         }
         if (_selectedPriority != "All") {
           match = match && doc["U_CK_Priority"] == _selectedPriority;
@@ -333,7 +333,7 @@ class _DashboardState extends State<Dashboard>
                     spacing: 8,
                     runSpacing: 8,
                     children:
-                        ["All", "Corrective", "Preventative"].map((jType) {
+                        ["All", "Installation", "Maintenance","Others"].map((jType) {
                       final isSelected = _selectedJob == jType;
                       return _buildFilterSelectionChip(
                         label: jType,
@@ -348,7 +348,7 @@ class _DashboardState extends State<Dashboard>
                   ),
                   const SizedBox(height: 24),
 
-                  _buildFilterHeader("Service Type"),
+                  _buildFilterHeader("Job Class"),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -357,17 +357,18 @@ class _DashboardState extends State<Dashboard>
                       "All",
                       "Breakdown",
                       "Emergency",
-                      "Installation",
                       "Overhaul",
-                      "Maintenance"
-                    ].map((serice) {
-                      final isSelected = _selectedService == serice;
+                      "Corrective",
+                      "Preventive",
+                      "Ad-Hoc"
+                    ].map((jobClass) {
+                      final isSelected = _jobClass == jobClass;
                       return _buildFilterSelectionChip(
-                        label: serice,
+                        label: jobClass,
                         isSelected: isSelected,
                         onSelected: () {
                           setModalState(() {
-                            _selectedService = serice;
+                            _jobClass = jobClass;
                           });
                         },
                       );
@@ -403,7 +404,7 @@ class _DashboardState extends State<Dashboard>
                           onPressed: () {
                             setState(() {
                               _selectedJob = "All";
-                              _selectedService = "All";
+                              _jobClass = "All";
                               _selectedPriority = "All";
                             });
                             _fetchTicketCounts();
@@ -524,8 +525,8 @@ class _DashboardState extends State<Dashboard>
   //       filter += " and U_CK_JobType eq '$_selectedJob'";
   //     }
 
-  //     if (_selectedService != "All") {
-  //       filter += " and U_CK_ServiceType eq '$_selectedService'";
+  //     if (_jobClass != "All") {
+  //       filter += " and U_CK_ServiceType eq '$_jobClass'";
   //     }
   //     if (_selectedPriority != "All") {
   //       filter += " and U_CK_Priority eq '$_selectedPriority'";
@@ -566,8 +567,8 @@ class _DashboardState extends State<Dashboard>
         if (_selectedJob != "All") {
           match = match && doc["U_CK_JobType"] == _selectedJob;
         }
-        if (_selectedService != "All") {
-          match = match && doc["U_CK_ServiceType"] == _selectedService;
+        if (_jobClass != "All") {
+          match = match && doc["U_CK_ServiceType"] == _jobClass;
         }
         if (_selectedPriority != "All") {
           match = match && doc["U_CK_Priority"] == _selectedPriority;
@@ -1236,7 +1237,7 @@ class _DashboardState extends State<Dashboard>
                   child: Row(
                     children: [
                       if (_selectedJob == "All" &&
-                          _selectedService == "All" &&
+                          _jobClass == "All" &&
                           _selectedPriority == "All")
                         Text(
                           "All Tickets Shown",
@@ -1255,10 +1256,10 @@ class _DashboardState extends State<Dashboard>
                         }),
                         const SizedBox(width: 8),
                       ],
-                      if (_selectedService != "All") ...[
-                        _buildFilterChip("Svc: $_selectedService", () {
+                      if (_jobClass != "All") ...[
+                        _buildFilterChip("Svc: $_jobClass", () {
                           setState(() {
-                            _selectedService = "All";
+                            _jobClass = "All";
                           });
                           _fetchTicketCounts();
                         }),
