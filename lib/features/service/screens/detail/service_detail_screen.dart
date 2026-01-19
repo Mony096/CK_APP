@@ -6,6 +6,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/signature/signature_preview_edit.dart';
+import 'package:bizd_tech_service/core/utils/html_pdf_generator.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
@@ -151,6 +154,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         if (richPayload.isNotEmpty) {
           _displayData.addAll(Map<String, dynamic>.from(richPayload));
         }
+        print(_displayData);
       } catch (e) {
         debugPrint("❌ Error enriching detail data: $e");
       }
@@ -278,7 +282,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             children: [
               // Status badge
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.6.h),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.6.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFECFDF5),
                   borderRadius: BorderRadius.circular(8),
@@ -327,13 +332,39 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 ),
                 color: Colors.white,
                 elevation: 6,
-                onSelected: (value) {
+                onSelected: (value) async {
                   if (value == 'export_pdf') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Export to PDF coming soon...'),
-                      ),
-                    );
+                    try {
+                      // Show loading
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Generating PDF Report...')),
+                      );
+
+                      final file =
+                          await HtmlServiceReportGenerator.generateServiceReport(
+                              _displayData);
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PDFViewerScreen(
+                              filePath: file.path,
+                              title: "Service Report",
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      debugPrint("Error generating PDF: $e");
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to generate PDF: $e')),
+                        );
+                      }
+                    }
                   }
                 },
                 itemBuilder: (BuildContext context) => [
@@ -447,8 +478,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           _buildInfoRow(context, Icons.work_outline_rounded, "Job Type",
               _displayData['U_CK_JobType'] ?? 'N/A'),
           const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
-          _buildInfoRow(context, Icons.settings_suggest_rounded, "Service Type",
-              "${_displayData['U_CK_ServiceType'] ?? 'N/A'}"),
+          _buildInfoRow(context, Icons.settings_suggest_rounded, "Job Class",
+              "${_displayData['U_CK_JobClass'] ?? 'N/A'}"),
           const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.priority_high_rounded, "Priority",
               _displayData['U_CK_Priority'] ?? 'Normal'),
@@ -470,7 +501,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           child: Icon(icon, size: 16.sp, color: const Color(0xFF64748B)),
         ),
         SizedBox(width: 3.w),
-        Text(                                 
+        Text(
           label,
           style: google_fonts.GoogleFonts.inter(
             fontSize: 14.sp,

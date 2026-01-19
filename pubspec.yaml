@@ -52,6 +52,8 @@ dependencies:
   path_provider: ^2.1.5
   # permission_handler: ^12.0.1
   pdf: ^3.8.4
+  printing: ^5.13.3
+  flutter_native_html_to_pdf: ^1.1.6
   url_launcher: ^6.3.1
   # google_maps_flutter: ^2.12.3
   crypto: ^3.0.6
@@ -126,6 +128,8 @@ flutter:
     - images/svg/check-cycle.svg
     - images/svg/document-barcode.svg
     - images/svg/detail-view.svg
+    - assets/fonts/NotoSansKhmer-Regular.ttf
+    - assets/fonts/Khmer OS Siemreap Regular.ttf
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -142,22 +146,6 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
