@@ -1,6 +1,4 @@
-import 'dart:typed_data';
 import 'package:bizd_tech_service/features/service/screens/signature/signature_preview_edit.dart';
-import 'package:bizd_tech_service/main.dart';
 import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
 import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
@@ -9,16 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
-
-Future<bool> _requestPermission() async {
-  if (await Permission.storage.request().isGranted) {
-    return true;
-  }
-  return false;
-}
 
 class SignatureCaptureScreen extends StatefulWidget {
   final File? existingSignature;
@@ -40,37 +30,27 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
 
   bool _isLandscape = false;
 
-  Future<void> _exportAsPDF() async {
+  Future<void> _exportAsPNG() async {
     try {
       final Uint8List? imageBytes = await _controller.toPngBytes();
       if (imageBytes == null) return;
 
-      final pdf = pw.Document();
-      final image = pw.MemoryImage(imageBytes);
-
-      pdf.addPage(
-        pw.Page(
-          build: (pw.Context context) {
-            return pw.Center(child: pw.Image(image));
-          },
-        ),
-      );
-
+      // Save directly as PNG (no PDF wrapper)
       final outputDir = Platform.isIOS
           ? await getApplicationDocumentsDirectory()
           : Directory('/storage/emulated/0/Download');
 
       final file = File(
-        '${outputDir.path}/signature_${DateTime.now().millisecondsSinceEpoch}.pdf',
+        '${outputDir.path}/signature_${DateTime.now().millisecondsSinceEpoch}.png',
       );
 
-      await file.writeAsBytes(await pdf.save());
+      await file.writeAsBytes(imageBytes); // Save PNG bytes directly
 
-      Navigator.pop(context, file); // 👈 Return the file to the previous screen
+      Navigator.pop(context, file); // 👈 Return the PNG file to the previous screen
     } catch (e) {
-      print('PDF generation error: $e');
+      print('PNG export error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Failed to export PDF")),
+        const SnackBar(content: Text("❌ Failed to export PNG")),
       );
     }
   }
@@ -189,7 +169,7 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _exportAsPDF,
+                  onPressed: _exportAsPNG,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 78, 178, 24),
                     shape: RoundedRectangleBorder(

@@ -175,6 +175,8 @@ class _SignatureScreenState extends State<SignatureScreen> {
                           // If signature exists, show preview concept
                           final isPDF =
                               signature.path.toLowerCase().endsWith('.pdf');
+                          final isPNG =
+                              signature.path.toLowerCase().endsWith('.png');
 
                           return Column(
                             children: [
@@ -217,6 +219,26 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                                     color: Colors.blue,
                                                     fontWeight:
                                                         FontWeight.w700)),
+                                          ],
+                                        )
+                                      else if (isPNG)
+                                        Column(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              child: Image.file(signature,
+                                                  fit: BoxFit.contain,
+                                                  height: 120.sp,
+                                                  width: double.infinity),
+                                            ),
+                                            SizedBox(height: 1.h),
+                                            Text("digital_signature.png",
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 12.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: const Color(
+                                                        0xFF475569))),
                                           ],
                                         )
                                       else

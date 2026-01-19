@@ -194,23 +194,23 @@ class HtmlServiceReportGenerator {
       }
     }
     
-    // Separate images from PDF signature
+    // Separate images from signature
     // Images are PNG/JPG files used for picture report
-    // Signature can be either PNG/JPG (last image) or PDF file
+    // Signature can be PNG/JPG with 'signature' in description, or PDF file
     final List<dynamic> imageFiles = [];
     Map<String, dynamic>? signatureFile;
-    
+
     for (var f in files) {
       if (f is Map && f['data'] != null) {
         final ext = f['ext']?.toString().toLowerCase() ?? '';
         final desc = f['U_CK_Description']?.toString().toLowerCase() ?? '';
-        
+
         // Check if this is a signature file
-        // Signatures are typically: PDF files, or images with 'signature' in description
-        final isSignature = ext == 'pdf' || 
-                           desc.contains('signature') || 
-                           desc.contains('ហត្ថលេខា'); // Khmer word for signature
-        
+        // Signatures are typically: images with 'signature' in description, or PDF files
+        final isSignature = desc.contains('signature') ||
+                           desc.contains('ហត្ថលេខា') || // Khmer word for signature
+                           ext == 'pdf'; // Fallback for PDF signatures
+
         if (isSignature) {
           signatureFile = Map<String, dynamic>.from(f);
           debugPrint('  → Found signature file: ext=$ext, desc=$desc');
@@ -232,14 +232,13 @@ class HtmlServiceReportGenerator {
     debugPrint('📸 Report images: ${images.length}, Signature found: ${signatureFile != null}');
 
     // Build signature image data URL
-    // Note: PDF signatures cannot be embedded directly in HTML img tags
-    // We only support PNG/JPG signatures for display
+    // PNG/JPG signatures can be embedded directly in HTML img tags
     String? signatureImage;
     if (signatureFile != null) {
       final ext = signatureFile['ext']?.toString().toLowerCase() ?? '';
       if (ext == 'png' || ext == 'jpg' || ext == 'jpeg') {
         signatureImage = 'data:image/${ext == 'jpg' ? 'jpeg' : ext};base64,${signatureFile['data']}';
-        debugPrint('✅ Signature image ready for display');
+        debugPrint('✅ Signature PNG/JPG image ready for display');
       } else if (ext == 'pdf') {
         // PDF signature - we can't embed directly, show placeholder
         debugPrint('⚠️ Signature is PDF format - cannot embed in HTML image tag');
