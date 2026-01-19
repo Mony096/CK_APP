@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
@@ -32,6 +34,7 @@ class ServiceEntryScreen extends StatefulWidget {
 
 class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   void onCompletedService() async {
+    // 1. Save locally first (onCompletedServiceOffline handles its own loading dialog)
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onCompletedServiceOffline(
@@ -43,8 +46,41 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       customerName: widget.data["U_CK_Cardname"],
       date: widget.data["U_CK_Date"] ?? "",
     );
+
     if (res) {
-      Navigator.of(context).pop(true);
+      // 2. If online, try to sync immediately
+      final hasInternet = await _checkInternetConnection();
+      if (hasInternet) {
+        if (mounted) MaterialDialog.loading(context);
+        try {
+          debugPrint("📡 Internet available - triggering immediate sync...");
+          await Provider.of<CompletedServiceProvider>(context, listen: false)
+              .syncAllOfflineServicesToSAP(context);
+        } catch (e) {
+          debugPrint(
+              "❌ Immediate sync failed (will still reflect as offline): $e");
+          // We don't show an error here because the data is safe offline
+          // and will be shown as "Pending Sync" on the dashboard.
+        } finally {
+          if (mounted) MaterialDialog.close(context);
+        }
+      }
+
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    }
+  }
+
+  /// Check if device has internet connection
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -171,7 +207,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               child: Text(
                                 "JOB #$docNum",
                                 style: GoogleFonts.inter(
-                                  fontSize: 12.5.sp,
+                                  fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFF475569),
                                 ),
@@ -189,7 +225,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                               child: Text(
                                 jobType.toUpperCase(),
                                 style: GoogleFonts.inter(
-                                  fontSize: 10.5.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w800,
                                   color: const Color(0xFF854D0E),
                                 ),
@@ -218,7 +254,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                   Text(
                                     "DATE",
                                     style: GoogleFonts.inter(
-                                      fontSize: 10.5.sp,
+                                      fontSize: 11.5.sp,
                                       fontWeight: FontWeight.w700,
                                       color: const Color(0xFF94A3B8),
                                       letterSpacing: 0.5,
@@ -234,7 +270,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                       Text(
                                         showDateOnService(dateStr),
                                         style: GoogleFonts.inter(
-                                          fontSize: 13.sp,
+                                          fontSize: 13.5.sp,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF1E293B),
                                         ),
@@ -257,7 +293,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                   Text(
                                     "SCHEDULED",
                                     style: GoogleFonts.inter(
-                                      fontSize: 10.5.sp,
+                                      fontSize: 11.5.sp,
                                       fontWeight: FontWeight.w700,
                                       color: const Color(0xFF94A3B8),
                                       letterSpacing: 0.5,
@@ -273,7 +309,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                       Text(
                                         "$startTime - $endTime",
                                         style: GoogleFonts.inter(
-                                          fontSize: 13.sp,
+                                          fontSize: 13.5 .sp,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF1E293B),
                                         ),

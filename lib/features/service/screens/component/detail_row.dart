@@ -56,7 +56,7 @@ class DetailRow extends StatelessWidget {
                   title,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
-                    fontSize: 14.5.sp,
+                    fontSize: 15.sp,
                     color: const Color(0xFF1E293B),
                   ),
                 ),
@@ -71,7 +71,7 @@ class DetailRow extends StatelessWidget {
                             child: Text(
                               row.left,
                               style: GoogleFonts.inter(
-                                fontSize: 13.sp,
+                                fontSize: 13.5.sp,
                                 color: const Color(0xFF475569),
                                 height: 1.2,
                                 fontWeight: FontWeight.w500,

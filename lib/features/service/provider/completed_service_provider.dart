@@ -237,6 +237,10 @@ class CompletedServiceProvider extends ChangeNotifier {
       //   data: formData,
       //   options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       // );
+      debugPrint("📎 SAP Attachment Response for DocEntry:");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
       if ([200, 201].contains(response.statusCode)) {
         final absEntry =
             response.data['AbsEntry'] ?? response.data['AbsoluteEntry'];
@@ -248,7 +252,7 @@ class CompletedServiceProvider extends ChangeNotifier {
       }
 
       debugPrint(
-          "Upload failed: ${response.statusCode} ${response.statusMessage}");
+          "❌ Upload failed: ${response.statusCode} ${response.statusMessage}. Body: ${response.data}");
     } catch (e, stack) {
       debugPrint("Upload failed: $e");
       debugPrint(stack.toString());
@@ -514,93 +518,101 @@ class CompletedServiceProvider extends ChangeNotifier {
       final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
       final List<dynamic> fileDataList = servicePayload['files'] ?? [];
 
-      List<File> filesToUpload = [];
+      int retryCount = 0;
+      const int maxRetries = 3;
+      bool success = false;
+      dynamic lastError;
 
-      try {
-        // 🔑 Decode {ext, data} into temp files only if files exist
-        if (fileDataList.isNotEmpty) {
-          final tempDir = await getTemporaryDirectory();
-          int i = 0;
-          for (var f in fileDataList) {
-            if (f is Map && f.containsKey('data')) {
-              final bytes = base64Decode(f['data']);
-              final ext = f['ext'] ?? "bin";
-              final fileName =
-                  "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-              final file = File("${tempDir.path}/$fileName");
-              await file.writeAsBytes(bytes);
-              filesToUpload.add(file);
-              i++;
+      while (retryCount < maxRetries && !success) {
+        List<File> filesToUpload = [];
+        try {
+          if (retryCount > 0) {
+            debugPrint(
+                "🔄 Retrying sync for DocEntry $docEntry (Try ${retryCount + 1}/$maxRetries)...");
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+
+          // 🔑 Decode {ext, data} into temp files only if files exist
+          if (fileDataList.isNotEmpty) {
+            final tempDir = await getTemporaryDirectory();
+            int i = 0;
+            for (var f in fileDataList) {
+              if (f is Map && f.containsKey('data')) {
+                final bytes = base64Decode(f['data']);
+                final ext = f['ext'] ?? "bin";
+                final fileName =
+                    "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+                final file = File("${tempDir.path}/$fileName");
+                await file.writeAsBytes(bytes);
+                filesToUpload.add(file);
+                i++;
+              }
             }
           }
-        }
-        // if (fileDataList.isNotEmpty) {
-        //   final tempDir = await getTemporaryDirectory();
-        //   int i = 0;
-        //   for (var f in fileDataList) {
-        //     if (f is Map<String, dynamic> && f['data'] is String) {
-        //       try {
-        //         final bytes = base64Decode(f['data'] as String);
-        //         final ext = (f['ext'] as String?) ?? "bin";
-        //         final fileName =
-        //             "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-        //         final file = File("${tempDir.path}/$fileName");
-        //         await file.writeAsBytes(bytes);
-        //         filesToUpload.add(file);
-        //         i++;
-        //       } catch (err) {
-        //         debugPrint("❌ Error decoding base64 for file $i: $err");
-        //       }
-        //     } else {
-        //       debugPrint("⚠️ Skipped invalid entry in fileDataList: $f");
-        //     }
-        //   }
-        // }
 
-        int? attachmentEntry;
+          int? attachmentEntry;
 
-        // 1. Upload attachments only if there are files
-        if (filesToUpload.isNotEmpty) {
-          attachmentEntry = await uploadAttachmentsToSAP(
-            filesToUpload,
-            attachmentEntryExisting,
+          // 1. Upload attachments only if there are files
+          if (filesToUpload.isNotEmpty) {
+            attachmentEntry = await uploadAttachmentsToSAP(
+              filesToUpload,
+              attachmentEntryExisting,
+            );
+
+            if (attachmentEntry == null) {
+              throw Exception(
+                  "Failed to upload attachments for DocEntry: $docEntry");
+            }
+          }
+
+          // 2. Prepare SAP payload (remove offline-only keys)
+          final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+          if (attachmentEntry != null) {
+            sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
+          }
+          sapPayload.remove('files');
+          sapPayload.remove('sync_status');
+ 
+          // 3. Send payload to SAP
+          final response = await dio.patch(
+            "/script/test/CK_CompleteStatus($docEntry)",
+            false,
+            false,
+            data: sapPayload,
           );
 
-          if (attachmentEntry == null) {
-            debugPrint("⚠️ Failed to sync attachments for DocEntry: $docEntry");
-            continue; // skip this service but move on
+          debugPrint("📡 SAP Response for DocEntry $docEntry:");
+          debugPrint("Status Code Completed: ${response.statusCode}");
+          debugPrint("Response Body: ${response.data}");
+          debugPrint("📡 SAP Response for DocEntry $docEntry:");
+
+          if (response.statusCode == 200 || response.statusCode == 204 || response.statusCode == 201) {
+            await offlineProvider.markServiceSynced(docEntry);
+            debugPrint("✅ Synced DocEntry: $sapPayload");
+            success = true;
+          } else {
+            throw Exception(
+                "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}. Body: ${response.data}");
           }
+        } catch (e) {
+          lastError = e;
+          retryCount++;
+          debugPrint("❌ Attempt $retryCount failed for DocEntry $docEntry: $e");
+          if (retryCount >= maxRetries) {
+            debugPrint(
+                "⚠️ Final failure after $maxRetries tries for DocEntry $docEntry");
+            // Optionally notify user or log somewhere more permanent
+          }
+        } finally {
+          // Always clean up temp files after each attempt
+          deleteTempFiles(filesToUpload);
         }
+      }
 
-        // 2. Prepare SAP payload (remove offline-only keys)
-        final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
-        // print(sapPayload["U_CK_Time"]);
-        // return;
-        if (attachmentEntry != null) {
-          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
-        }
-        sapPayload.remove('files');
-        sapPayload.remove('sync_status');
-
-        // 3. Send payload to SAP
-        final response = await dio.patch(
-          "/script/test/CK_CompleteStatus($docEntry)",
-          false,
-          false,
-          data: sapPayload,
-        );
-        if (response.statusCode == 200 || response.statusCode == 204) {
-          await offlineProvider.markServiceSynced(docEntry);
-          debugPrint("✅ Synced DocEntry: $docEntry");
-        } else {
-          throw Exception(
-              "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}");
-        }
-      } catch (e) {
-        throw Exception("Your Service Failed: ${e.toString()}");
-      } finally {
-        // Always clean up temp files
-        deleteTempFiles(filesToUpload);
+      if (!success) {
+        // If a service fails after all retries, we throw so the caller knows the process wasn't fully successful
+        throw Exception(
+            "Sync failed for DocEntry $docEntry after $maxRetries attempts: $lastError");
       }
     }
     return true;

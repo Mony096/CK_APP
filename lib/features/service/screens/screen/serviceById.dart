@@ -379,80 +379,79 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
           ),
         ],
       ),
-     bottomSheet: Container(
-  padding: EdgeInsets.fromLTRB(6.w, 1.2.h, 6.w, 1.h),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.05),
-        blurRadius: 20,
-        offset: const Offset(0, -5),
-      ),
-    ],
-  ),
-  child: Row(
-    children: [
-      if (status == "Pending") ...[
-        Expanded(
-          child: OutlinedButton(
-            onPressed: _onReject,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Color(0xFFFCA5A5)),
+      bottomSheet: Container(
+        padding: EdgeInsets.fromLTRB(6.w, 1.2.h, 6.w, 1.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            if (status == "Pending") ...[
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _onReject,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Color(0xFFFCA5A5)),
 
-              // 👇 key lines
-              minimumSize: const Size(0, 45),
-              padding: EdgeInsets.symmetric(vertical: 0.8.h),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    // 👇 key lines
+                    minimumSize: const Size(0, 45),
+                    padding: EdgeInsets.symmetric(vertical: 0.8.h),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
 
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "REJECT",
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 4.w),
+            ],
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: onUpdateStatus,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _getActionColor(status),
+                  foregroundColor:
+                      status == "Accept" ? Colors.black : Colors.white,
+                  elevation: 0,
+
+                  // 👇 key lines
+                  minimumSize: const Size(0, 45),
+                  padding: EdgeInsets.symmetric(vertical: 0.8.h),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  _getActionLabel(status),
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ),
-            child: Text(
-              "REJECT",
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 4.w),
-      ],
-      Expanded(
-        flex: 2,
-        child: ElevatedButton(
-          onPressed: onUpdateStatus,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _getActionColor(status),
-            foregroundColor:
-                status == "Accept" ? Colors.black : Colors.white,
-            elevation: 0,
-
-            // 👇 key lines
-            minimumSize: const Size(0, 45),
-            padding: EdgeInsets.symmetric(vertical: 0.8.h),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            _getActionLabel(status),
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+          ],
         ),
       ),
-    ],
-  ),
-),
-
     );
   }
 
@@ -491,7 +490,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
               SizedBox(width: 1.5.w),
               Text(label,
                   style: GoogleFonts.inter(
-                      fontSize: 11.5.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF94A3B8),
                       letterSpacing: 0.5)),

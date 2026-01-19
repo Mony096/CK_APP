@@ -139,26 +139,29 @@ class EquipmentOfflineProvider with ChangeNotifier {
   //   }
   // }
   Future<void> loadEquipments() async {
+    if (!Hive.isBoxOpen(_boxName)) {
+      await Hive.openBox(_boxName);
+    }
     final box = Hive.box(_boxName);
     try {
       final raw = box.get(_keyEquipments, defaultValue: []);
-      var allDocs = (raw as List)
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      if (raw == null || (raw as List).isEmpty) {
+        _equipments = [];
+        _allFilteredEquipments = [];
+        _hasMore = false;
+        notifyListeners();
+        return;
+      }
+
+      var allDocs = List<dynamic>.from(raw);
 
       // Apply filter if provided
       if (_filter != null && _filter!.isNotEmpty) {
+        final query = _filter!.toLowerCase();
         allDocs = allDocs.where((equip) {
-          final code = equip["Code"] ?? "";
-          final name = equip["Name"] ?? "";
-          try {
-            final query = _filter!.toLowerCase();
-            return code.toString().toLowerCase().contains(query) ||
-                name.toString().toLowerCase().contains(query);
-          } catch (e) {
-            return false;
-          }
+          final code = equip["Code"]?.toString().toLowerCase() ?? "";
+          final name = equip["Name"]?.toString().toLowerCase() ?? "";
+          return code.contains(query) || name.contains(query);
         }).toList();
       }
 
@@ -191,7 +194,7 @@ class EquipmentOfflineProvider with ChangeNotifier {
       _equipments = _allFilteredEquipments.sublist(0, endIndex);
       _hasMore = _equipments.length < _allFilteredEquipments.length;
     } catch (e) {
-      debugPrint("Error loading offline equipments: $e");
+      debugPrint("❌ Error loading offline equipments: $e");
       _equipments = [];
       _allFilteredEquipments = [];
       _hasMore = false;

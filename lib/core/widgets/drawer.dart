@@ -89,7 +89,7 @@ class ModernDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                      color: primaryColor.withOpacity(0.12), width: 1.5),
+                      color: Color(0xFF10B981).withOpacity(0.12), width: 1.5),
                 ),
                 child: CircleAvatar(
                   radius: 24.sp,
@@ -97,7 +97,7 @@ class ModernDrawer extends StatelessWidget {
                   child: Icon(
                     Icons.person_rounded,
                     size: 26.sp,
-                    color: primaryColor,
+                    color: Color(0xFF10B981),
                   ),
                 ),
               ),
@@ -186,14 +186,14 @@ Widget _buildMenu(BuildContext context) {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: isSelected
-                  ? primaryColor.withOpacity(0.08)
+                  ? Color(0xFF10B981).withOpacity(0.08)
                   : Colors.transparent,
 
               // LEFT ACTIVE ACCENT + SHADOW
               // boxShadow: isSelected
               //     ? [
               //         BoxShadow(
-              //           color: primaryColor.withOpacity(0.50),
+              //           color: Color(0xFF10B981).withOpacity(0.50),
               //           blurRadius: 12,
               //           offset: const Offset(0, 5),
               //         ),
@@ -202,7 +202,7 @@ Widget _buildMenu(BuildContext context) {
               border: isSelected
                   ? Border(
                       left: BorderSide(
-                        color: primaryColor,
+                        color: Color(0xFF10B981),
                         width: 4,
                       ),
                     )
@@ -213,7 +213,7 @@ Widget _buildMenu(BuildContext context) {
                 Icon(
                   isSelected ? item.activeIcon : item.icon,
                   size: 20.sp,
-                  color: isSelected ? primaryColor : subTextColor,
+                  color: isSelected ? Color(0xFF10B981) : subTextColor,
                 ),
                 SizedBox(width: 16.sp),
                 Expanded(
@@ -224,7 +224,7 @@ Widget _buildMenu(BuildContext context) {
                       fontWeight:
                           isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected
-                          ? primaryColor
+                          ? Color(0xFF10B981)
                           : textColor.withOpacity(0.8),
                     ),
                   ),
@@ -233,7 +233,7 @@ Widget _buildMenu(BuildContext context) {
                   Icon(
                     Icons.chevron_right_rounded,
                     size: 18.sp,
-                    color: primaryColor.withOpacity(0.4),
+                    color: Color(0xFF10B981).withOpacity(0.4),
                   )
                 else if (item.badgeCount != null &&
                     item.badgeCount! > 0)

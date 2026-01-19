@@ -128,7 +128,7 @@ class _MainScreenState extends State<MainScreen> {
                     serviceOffline.isSyncing || equipmentOffline.isSyncing;
 
                 if (!isSyncing) return const SizedBox.shrink();
-
+                if (_selectedIndex > 1) return const SizedBox.shrink();
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: Row(

@@ -256,34 +256,46 @@ class ServiceListProviderOffline extends ChangeNotifier {
   /// Add new completed payload and store it in Hive
   Future<void> addCompletedService(Map<dynamic, dynamic> payload) async {
     if (_completedBox == null) await _initBox();
-    // Add a status to the payload for sync tracking
+
     final Map<dynamic, dynamic> payloadWithStatus =
         Map<dynamic, dynamic>.from(payload);
     payloadWithStatus['sync_status'] = 'pending';
 
+    // Remove old entry if same DocEntry exists to avoid duplicates
+    _completedServices.removeWhere(
+        (s) => s['DocEntry'].toString() == payload['DocEntry'].toString());
+
     _completedServices.add(payloadWithStatus);
     await _completedBox!.put('completed', _completedServices);
     notifyListeners();
+    debugPrint("📂 Added DocEntry ${payload['DocEntry']} to pending sync list");
   }
 
   /// Mark a service as completed in offline docs
-  Future<void> markServiceCompleted(int docEntry) async {
+  Future<void> markServiceCompleted(dynamic docEntry) async {
     if (_box == null) await _initBox();
     List<dynamic> docs =
         List<dynamic>.from(_box!.get('documents', defaultValue: []));
 
     final now = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
+    bool found = false;
 
     for (var doc in docs) {
-      if (doc['DocEntry'] == docEntry) {
+      if (doc['DocEntry'].toString() == docEntry.toString()) {
         doc['U_CK_Status'] = 'Entry';
         doc['U_CK_EndTime'] = now.split("T")[1];
+        found = true;
       }
     }
 
-    await _box!.put('documents', docs);
-    _documents = docs;
-    notifyListeners();
+    if (found) {
+      await _box!.put('documents', docs);
+      _documents = docs;
+      notifyListeners();
+      debugPrint("✅ Marked DocEntry $docEntry as 'Entry' offline");
+    } else {
+      debugPrint("⚠️ Could not find DocEntry $docEntry to mark as completed");
+    }
   }
 
   // 👇 New functions for sync management
@@ -383,8 +395,8 @@ class ServiceListProviderOffline extends ChangeNotifier {
     if (_completedBox == null) await _initBox();
     final List<dynamic> services =
         List<dynamic>.from(_completedBox!.get('completed', defaultValue: []));
-    final index =
-        services.indexWhere((service) => service['DocEntry'] == docEntry);
+    final index = services.indexWhere(
+        (service) => service['DocEntry'].toString() == docEntry.toString());
 
     if (index != -1) {
       // Update status to synced
@@ -399,5 +411,23 @@ class ServiceListProviderOffline extends ChangeNotifier {
       // Update listeners
       notifyListeners();
     }
+  }
+
+  /// Get sync status for a specific service
+  String getSyncStatus(dynamic docEntry) {
+    if (docEntry == null) return 'synced';
+
+    final entry = _completedServices.firstWhere(
+      (s) => s['DocEntry'].toString() == docEntry.toString(),
+      orElse: () => null,
+    );
+
+    if (entry != null) {
+      return entry['sync_status'];
+    }
+
+    // If we have completed services but this one isn't there, it might be an older one already synced.
+    // However, we should be careful about returning 'synced' too easily.
+    return 'synced';
   }
 }

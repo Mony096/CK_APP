@@ -13,6 +13,7 @@ import 'package:bizd_tech_service/features/site/provider/site_list_provider.dart
 import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
+import 'package:bizd_tech_service/features/main/provider/download_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bizd_tech_service/features/service/screens/detail/service_detail_screen.dart';
@@ -117,6 +118,7 @@ class _SyncScreenState extends State<SyncScreen> {
           onlineProviderEquipment: onlineProviderEquipment,
           offlineProviderEquipment: offlineProviderEquipment,
           onComplete: () {
+            if (!mounted) return;
             _checkDownloadStatus();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -136,6 +138,7 @@ class _SyncScreenState extends State<SyncScreen> {
             );
           },
           onError: (error) {
+            if (!mounted) return;
             MaterialDialog.warning(context, title: "Error", body: error);
           },
         );
@@ -184,22 +187,10 @@ class _SyncScreenState extends State<SyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      // appBar: AppBar(
-      //   title: Text(
-      //     "Data Sync Manager",
-      //     style: GoogleFonts.inter(
-      //       fontWeight: FontWeight.w700,
-      //       fontSize: 17.sp,
-      //       color: Colors.white,
-      //     ),
-      //   ),
-      //   centerTitle: true,
-      //   backgroundColor: const Color(0xFF425364),
-      //   elevation: 0,
-      //   automaticallyImplyLeading: false,
-      // ),
-      body: Consumer2<ServiceListProviderOffline, EquipmentOfflineProvider>(
-        builder: (context, serviceOffline, equipmentOffline, child) {
+      body: Consumer3<ServiceListProviderOffline, EquipmentOfflineProvider,
+          DownloadProvider>(
+        builder: (context, serviceOffline, equipmentOffline, downloadProvider,
+            child) {
           final serviceCount = serviceOffline.pendingSyncCount;
           final equipmentCount = equipmentOffline.pendingSyncCount;
           final totalPending = serviceCount + equipmentCount;
@@ -207,6 +198,8 @@ class _SyncScreenState extends State<SyncScreen> {
           return ListView(
             padding: EdgeInsets.symmetric(vertical: 2.5.h),
             children: [
+              if (downloadProvider.isStarted && !downloadProvider.isCompleted)
+                _buildActiveDownloadCard(downloadProvider),
               _buildInfoCard(),
               SizedBox(height: 3.h),
               _buildSyncItem(
@@ -221,13 +214,22 @@ class _SyncScreenState extends State<SyncScreen> {
               ),
               _buildSyncItem(
                 icon: Icons.download_rounded,
-                title: "Download Data",
-                subtitle: "Update your master data",
+                title:
+                    downloadProvider.isStarted && !downloadProvider.isCompleted
+                        ? "Download in Progress..."
+                        : "Download Data",
+                subtitle:
+                    downloadProvider.isStarted && !downloadProvider.isCompleted
+                        ? "Click to view progress"
+                        : "Update your master data",
                 onTap: _handleDownload,
                 color: const Color(0xFF3B82F6),
-                enabled: _isDownloaded != "true",
+                enabled: _isDownloaded != "true" ||
+                    (downloadProvider.isStarted &&
+                        !downloadProvider.isCompleted),
               ),
               SizedBox(height: 3.h),
+              // ... rest of the list ...
               if (serviceOffline.completedServices
                   .any((s) => s['sync_status'] != 'synced')) ...[
                 _buildSectionHeader("Operations Pending Sync"),
@@ -260,6 +262,70 @@ class _SyncScreenState extends State<SyncScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildActiveDownloadCard(DownloadProvider provider) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(4.w, 0, 4.w, 2.h),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3B82F6).withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Color(0xFF3B82F6)),
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Text(
+                  "Background Download Running",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.sp,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+              Text(
+                "${(provider.overallProgress * 100).toInt()}%",
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14.sp,
+                  color: const Color(0xFF3B82F6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 1.5.h),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: provider.overallProgress,
+              minHeight: 8,
+              backgroundColor: const Color(0xFF3B82F6).withOpacity(0.1),
+              valueColor: const AlwaysStoppedAnimation(Color(0xFF3B82F6)),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -704,23 +770,6 @@ class _SyncScreenState extends State<SyncScreen> {
 // Premium Download Dialog Widget
 // ============================================================================
 
-enum _DownloadStepStatus { waiting, downloading, completed }
-
-class _DownloadStep {
-  final String name;
-  final IconData icon;
-  final Color color;
-  _DownloadStepStatus status = _DownloadStepStatus.waiting;
-  int count = 0;
-  int total = 0;
-
-  _DownloadStep({
-    required this.name,
-    required this.icon,
-    required this.color,
-  });
-}
-
 class _DownloadDialog extends StatefulWidget {
   final CustomerListProvider onlineProviderCustomer;
   final CustomerListProviderOffline offlineProviderCustomer;
@@ -753,31 +802,6 @@ class _DownloadDialog extends StatefulWidget {
 class _DownloadDialogState extends State<_DownloadDialog>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
-  bool _isStarted = false;
-  bool _isCompleted = false;
-
-  final List<_DownloadStep> _steps = [
-    _DownloadStep(
-      name: "Customers",
-      icon: Icons.people_alt_rounded,
-      color: const Color(0xFF3B82F6),
-    ),
-    _DownloadStep(
-      name: "Items",
-      icon: Icons.inventory_2_rounded,
-      color: const Color(0xFFF59E0B),
-    ),
-    _DownloadStep(
-      name: "Sites",
-      icon: Icons.location_city_rounded,
-      color: const Color(0xFF10B981),
-    ),
-    _DownloadStep(
-      name: "Equipment",
-      icon: Icons.build_circle_rounded,
-      color: const Color(0xFFEC4899),
-    ),
-  ];
 
   @override
   void initState() {
@@ -788,7 +812,22 @@ class _DownloadDialogState extends State<_DownloadDialog>
     )..repeat(reverse: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startDownload();
+      final provider = Provider.of<DownloadProvider>(context, listen: false);
+      if (!provider.isStarted || provider.isError) {
+        provider.startDownload(
+          context: context,
+          onlineProviderCustomer: widget.onlineProviderCustomer,
+          offlineProviderCustomer: widget.offlineProviderCustomer,
+          onlineProviderItem: widget.onlineProviderItem,
+          offlineProviderItem: widget.offlineProviderItem,
+          onlineProviderSite: widget.onlineProviderSite,
+          offlineProviderSite: widget.offlineProviderSite,
+          onlineProviderEquipment: widget.onlineProviderEquipment,
+          offlineProviderEquipment: widget.offlineProviderEquipment,
+          onComplete: widget.onComplete,
+          onError: widget.onError,
+        );
+      }
     });
   }
 
@@ -798,344 +837,216 @@ class _DownloadDialogState extends State<_DownloadDialog>
     super.dispose();
   }
 
-  int get _completedCount =>
-      _steps.where((s) => s.status == _DownloadStepStatus.completed).length;
-
-  double get _overallProgress =>
-      _steps.isEmpty ? 0 : _completedCount / _steps.length;
-
-  Future<void> _startDownload() async {
-    if (_isStarted) return;
-    _isStarted = true;
-
-    try {
-      // Step 1: Customers (with progress tracking)
-      await _downloadWithProgress(0, widget.onlineProviderCustomer, () async {
-        await widget.onlineProviderCustomer.fetchDocumentOffline(
-          loadMore: false,
-          isSetFilter: false,
-          context: context,
-        );
-        await widget.offlineProviderCustomer
-            .saveDocuments(widget.onlineProviderCustomer.documentOffline);
-        return widget.onlineProviderCustomer.documentOffline.length;
-      });
-
-      // Step 2: Items (with progress tracking)
-      await _downloadWithProgress(1, widget.onlineProviderItem, () async {
-        await widget.onlineProviderItem.fetchDocumentOffline(
-          loadMore: false,
-          isSetFilter: false,
-          context: context,
-        );
-        await widget.offlineProviderItem
-            .saveDocuments(widget.onlineProviderItem.documentOffline);
-        return widget.onlineProviderItem.documentOffline.length;
-      });
-
-      // Step 3: Sites (with progress tracking)
-      await _downloadWithProgress(2, widget.onlineProviderSite, () async {
-        await widget.onlineProviderSite.fetchOfflineDocuments(
-          loadMore: false,
-          isSetFilter: false,
-        );
-        await widget.offlineProviderSite
-            .saveDocuments(widget.onlineProviderSite.documentOffline);
-        return widget.onlineProviderSite.documentOffline.length;
-      });
-
-      // Step 4: Equipment (with progress tracking)
-      await _downloadWithProgress(3, widget.onlineProviderEquipment, () async {
-        await widget.onlineProviderEquipment.fetchOfflineDocuments(
-          loadMore: false,
-          isSetFilter: false,
-        );
-        await widget.offlineProviderEquipment
-            .saveDocuments(widget.onlineProviderEquipment.documentOffline);
-        return widget.onlineProviderEquipment.documentOffline.length;
-      });
-
-      // All done!
-      await LocalStorageManger.setString('isDownloaded', 'true');
-
-      setState(() => _isCompleted = true);
-
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (mounted) {
-        Navigator.of(context).pop();
-        widget.onComplete();
-      }
-    } catch (e) {
-      if (e.toString().contains("cancelled")) {
-        debugPrint("Download truly cancelled. Cleaning up UI...");
-        return;
-      }
-      if (mounted) {
-        Navigator.of(context).pop();
-        widget.onError(e.toString());
-      }
-    }
-  }
-
-  Future<void> _cancelDownload() async {
-    // 1. Tell all providers to stop
-    widget.onlineProviderCustomer.cancelDownload();
-    widget.onlineProviderItem.cancelDownload();
-    widget.onlineProviderSite.cancelDownload();
-    widget.onlineProviderEquipment.cancelDownload();
-
-    // 2. Clear already saved data to avoid partial sync
-    await widget.offlineProviderCustomer.clearDocuments();
-    await widget.offlineProviderItem.clearDocuments();
-    await widget.offlineProviderSite.clearDocuments();
-    await widget.offlineProviderEquipment.clearEquipments();
-
-    if (mounted) {
-      Navigator.of(context).pop();
-      // Optional: show a message that it was cancelled
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Download cancelled and data removed"),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  /// Generic download method with progress tracking
-  /// Works with any provider that has fetchedCount and totalCount getters
-  Future<void> _downloadWithProgress(
-    int index,
-    ChangeNotifier provider,
-    Future<int> Function() download,
-  ) async {
-    setState(() {
-      _steps[index].status = _DownloadStepStatus.downloading;
-    });
-
-    void onProgress() {
-      if (mounted) {
-        // Use reflection-like approach to get fetchedCount/totalCount
-        int fetched = 0;
-        int total = 0;
-
-        if (provider is CustomerListProvider) {
-          fetched = provider.fetchedCount;
-          total = provider.totalCount;
-        } else if (provider is ItemListProvider) {
-          fetched = provider.fetchedCount;
-          total = provider.totalCount;
-        } else if (provider is SiteListProvider) {
-          fetched = provider.fetchedCount;
-          total = provider.totalCount;
-        } else if (provider is EquipmentListProvider) {
-          fetched = provider.fetchedCount;
-          total = provider.totalCount;
-        }
-
-        setState(() {
-          _steps[index].count = fetched;
-          _steps[index].total = total;
-        });
-      }
-    }
-
-    provider.addListener(onProgress);
-
-    try {
-      final count = await download();
-
-      setState(() {
-        _steps[index].status = _DownloadStepStatus.completed;
-        _steps[index].count = count;
-        _steps[index].total = count;
-      });
-    } finally {
-      provider.removeListener(onProgress);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(maxWidth: 85.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
+    return Consumer<DownloadProvider>(
+      builder: (context, provider, child) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: double.infinity,
+            constraints: BoxConstraints(maxWidth: 85.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Container(
-              padding: EdgeInsets.all(6.w),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: _isCompleted
-                      ? [const Color(0xFF22C55E), const Color(0xFF16A34A)]
-                      : [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Column(
-                children: [
-                  AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, child) {
-                      return Container(
-                        width: 15.w,
-                        height: 15.w,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                          boxShadow: _isCompleted
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: Colors.white.withOpacity(
-                                        0.3 * _pulseController.value),
-                                    blurRadius: 20,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                        ),
-                        child: Icon(
-                          _isCompleted
-                              ? Icons.check_rounded
-                              : Icons.cloud_download_rounded,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: provider.isCompleted
+                          ? [const Color(0xFF22C55E), const Color(0xFF16A34A)]
+                          : [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          return Container(
+                            width: 15.w,
+                            height: 15.w,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                              boxShadow: provider.isCompleted
+                                  ? null
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(
+                                            0.3 * _pulseController.value),
+                                        blurRadius: 20,
+                                        spreadRadius: 5,
+                                      ),
+                                    ],
+                            ),
+                            child: Icon(
+                              provider.isCompleted
+                                  ? Icons.check_rounded
+                                  : Icons.cloud_download_rounded,
+                              color: Colors.white,
+                              size: 24.sp,
+                            ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: 1.5.h),
+                      Text(
+                        provider.isCompleted
+                            ? "Download Complete!"
+                            : "Downloading Data",
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
-                          size: 24.sp,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 1.5.h),
-                  Text(
-                    _isCompleted ? "Download Complete!" : "Downloading Data",
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 0.5.h),
-                  Text(
-                    _isCompleted
-                        ? "All data is now available offline"
-                        : "$_completedCount of ${_steps.length} categories",
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  // Progress bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: _overallProgress,
-                      minHeight: 1.h,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Steps List
-            Container(
-              constraints: const BoxConstraints(maxHeight: 300),
-              child: ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                itemCount: _steps.length,
-                itemBuilder: (context, index) => _buildStepItem(_steps[index]),
-              ),
-            ),
-            const Divider(height: 1),
-
-            // Actions
-            Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Row(
-                children: [
-                  if (!_isCompleted)
-                    Expanded(
-                      child: TextButton.icon(
-                        onPressed: _cancelDownload,
-                        icon: Icon(Icons.close_rounded,
-                            size: 16.sp, color: const Color(0xFFEF4444)),
-                        label: Text(
-                          "Cancel Download",
-                          style: GoogleFonts.inter(
-                            fontSize: 14.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFEF4444),
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(
-                                color:
-                                    const Color(0xFFEF4444).withOpacity(0.2)),
-                          ),
                         ),
                       ),
-                    )
-                  else
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF22C55E),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          "Close",
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      SizedBox(height: 0.5.h),
+                      Text(
+                        provider.isCompleted
+                            ? "All data is now available offline"
+                            : "${provider.completedCount} of ${provider.steps.length} categories",
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: Colors.white.withOpacity(0.9),
                         ),
                       ),
-                    ),
-                ],
-              ),
+                      SizedBox(height: 2.h),
+                      // Progress bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: provider.overallProgress,
+                          minHeight: 1.h,
+                          backgroundColor: Colors.white.withOpacity(0.3),
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Steps List
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    itemCount: provider.steps.length,
+                    itemBuilder: (context, index) =>
+                        _buildStepItem(provider.steps[index]),
+                  ),
+                ),
+                const Divider(height: 1),
+
+                // Actions
+                Padding(
+                  padding: EdgeInsets.all(4.w),
+                  child: Row(
+                    children: [
+                      if (!provider.isCompleted) ...[
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              provider.cancelDownload(
+                                widget.onlineProviderCustomer,
+                                widget.onlineProviderItem,
+                                widget.onlineProviderSite,
+                                widget.onlineProviderEquipment,
+                              );
+                              Navigator.of(context).pop();
+                            },
+                            icon: Icon(Icons.close_rounded,
+                                size: 16.sp, color: const Color(0xFFEF4444)),
+                            label: Text(
+                              "Stop",
+                              style: GoogleFonts.inter(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 2.w),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: Icon(Icons.minimize_rounded, size: 16.sp),
+                            label: Text(
+                              "Minimize",
+                              style: GoogleFonts.inter(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(40),
+                              backgroundColor: const Color(0xFF3B82F6),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF22C55E),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              "Close",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStepItem(_DownloadStep step) {
-    final isActive = step.status == _DownloadStepStatus.downloading;
-    final isCompleted = step.status == _DownloadStepStatus.completed;
-    final isWaiting = step.status == _DownloadStepStatus.waiting;
+  Widget _buildStepItem(DownloadStep step) {
+    final isActive = step.status == DownloadStepStatus.downloading;
+    final isCompleted = step.status == DownloadStepStatus.completed;
+    final isWaiting = step.status == DownloadStepStatus.waiting;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),

@@ -111,6 +111,7 @@ class AuthProvider with ChangeNotifier {
               alert: true, badge: true, sound: true);
           final token = await messaging.getToken();
           if (token != null) {
+            print("FCM Token: $token");
             await updateToken(token);
             await LocalStorageManger.setString('frmToken', token);
             debugPrint('✅ FCM token saved!');

@@ -248,13 +248,21 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
           //     const SizedBox(width: 8),
           //   ],
           // ),
-          floatingActionButton: FloatingActionButton(
-            backgroundColor: const Color(0xFF1E293B),
-            onPressed: () {
-              _navigateToCreateOrEdit(const {}, isCreate: true);
-            },
-            child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 50),
+            child: FloatingActionButton(
+              backgroundColor: const Color(0xFF1E293B),
+              onPressed: () {
+                _navigateToCreateOrEdit(const {}, isCreate: true);
+              },
+              child: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
           ),
+
           body: RefreshIndicator(
             onRefresh: () async {
               await _refreshData();

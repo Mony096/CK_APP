@@ -1,4 +1,3 @@
-import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
 import 'package:flutter/material.dart';
 
@@ -201,11 +200,6 @@ class ItemListProvider extends ChangeNotifier {
         throw Exception("cancelled");
       }
       debugPrint("❌ Error fetching items: $e");
-      await MaterialDialog.warning(
-        context,
-        title: "Error",
-        body: e.toString(),
-      );
       throw Exception(e.toString());
     } finally {
       if (isSetFilter) _isLoadingSetFilter = false;

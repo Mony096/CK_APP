@@ -33,10 +33,10 @@ class BlockService extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 5),
           ),
         ],
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: const Color.fromARGB(255, 229, 236, 242)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +56,7 @@ class BlockService extends StatelessWidget {
                   child: Text(
                     "JOB #$docNum",
                     style: GoogleFonts.inter(
-                      fontSize: 12.5.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF475569),
                     ),
@@ -74,7 +74,7 @@ class BlockService extends StatelessWidget {
                   child: Text(
                     jobType.toUpperCase(),
                     style: GoogleFonts.inter(
-                      fontSize: 10.5.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF854D0E),
                     ),
@@ -150,7 +150,7 @@ class BlockService extends StatelessWidget {
                           Text(
                             showDateOnService(dateStr),
                             style: GoogleFonts.inter(
-                              fontSize: 13.sp,
+                              fontSize: 13.5.sp,
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1E293B),
                             ),
@@ -180,7 +180,7 @@ class BlockService extends StatelessWidget {
                           Text(
                             "$startTime - $endTime",
                             style: GoogleFonts.inter(
-                              fontSize: 13.sp,
+                              fontSize: 13.5.sp,
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1E293B),
                             ),
@@ -213,7 +213,7 @@ class BlockService extends StatelessWidget {
                       Text(
                         "View Details",
                         style: GoogleFonts.inter(
-                          fontSize: 13.sp,
+                          fontSize: 13.5.sp,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF334155),
                         ),
@@ -257,7 +257,7 @@ class BlockService extends StatelessWidget {
     return Text(
       label,
       style: GoogleFonts.inter(
-        fontSize: 10.5.sp,
+        fontSize: 11.5.sp,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF94A3B8),
         letterSpacing: 0.5,
@@ -312,7 +312,7 @@ class BlockService extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: GoogleFonts.inter(
-              fontSize: 11.sp,
+              fontSize: 11.5.sp,
               fontWeight: FontWeight.w800,
               color: color,
               letterSpacing: 0.5,

@@ -254,75 +254,164 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildStatusHeader(BuildContext context) {
+    final ticketNumber = _displayData['DocNum'] ?? _displayData['id'] ?? 'N/A';
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.5.h),
+      padding: EdgeInsets.all(3.5.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(3.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFDCFCE7)),
-            ),
-            child: Icon(
-              Icons.verified_rounded,
-              color: const Color(0xFF16A34A),
-              size: 20.sp,
-            ),
-          ),
-          SizedBox(width: 4.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "COMPLETED SERVICE",
-                  style: google_fonts.GoogleFonts.inter(
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1,
-                    color: const Color(0xFF94A3B8),
-                  ),
+          // Top row with status badge and menu
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Status badge
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.6.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                SizedBox(height: 0.5.h),
-                Text(
-                  "Ticket #${_displayData['DocNum'] ?? _displayData['id'] ?? 'N/A'}",
-                  style: google_fonts.GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1E293B),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 2.w),
+                    Text(
+                      "Completed",
+                      style: google_fonts.GoogleFonts.inter(
+                        fontSize: 12.8.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF059669),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 0.8.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFF16A34A),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              "DONE",
-              style: google_fonts.GoogleFonts.inter(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
               ),
-            ),
+              // Menu button
+              PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                icon: Container(
+                  padding: EdgeInsets.all(2.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Icon(
+                    Icons.more_horiz_rounded,
+                    color: const Color(0xFF64748B),
+                    size: 18.sp,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                color: Colors.white,
+                elevation: 6,
+                onSelected: (value) {
+                  if (value == 'export_pdf') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Export to PDF coming soon...'),
+                      ),
+                    );
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem<String>(
+                    value: 'export_pdf',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.picture_as_pdf_rounded,
+                          color: const Color(0xFFEF4444),
+                          size: 18.sp,
+                        ),
+                        SizedBox(width: 3.w),
+                        Text(
+                          'Export to PDF',
+                          style: google_fonts.GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF374151),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 1.h),
+          // Divider
+          Container(
+            height: 1,
+            color: const Color(0xFFF1F5F9),
+          ),
+          SizedBox(height: 2.h),
+          // Ticket info row
+          Row(
+            children: [
+              // Icon
+              Container(
+                padding: EdgeInsets.all(3.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.confirmation_number_outlined,
+                  color: const Color(0xFF475569),
+                  size: 19.sp,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              // Text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Service Ticket",
+                      style: google_fonts.GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                    ),
+                    SizedBox(height: 0.3.h),
+                    Text(
+                      "#$ticketNumber",
+                      style: google_fonts.GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -349,8 +438,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           _buildInfoRow(context, Icons.calendar_today_rounded, "Service Date",
               _formatDate(_displayData['U_CK_Date'])),
           const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
-          _buildInfoRow(context, Icons.access_time_rounded, "Time Window",
-              "${_displayData['U_CK_Time'] ?? 'N/A'} - ${_displayData['U_CK_EndTime'] ?? 'N/A'}"),
+          _buildInfoRow(context, Icons.access_time_rounded, "Start Time",
+              "${_displayData['U_CK_Time'] ?? 'N/A'}"),
+          const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
+          _buildInfoRow(context, Icons.access_time_rounded, "End Time",
+              "${_displayData['U_CK_EndTime'] ?? 'N/A'}"),
           const Divider(height: 32, thickness: 1, color: Color(0xFFF1F5F9)),
           _buildInfoRow(context, Icons.work_outline_rounded, "Job Type",
               _displayData['U_CK_JobType'] ?? 'N/A'),
@@ -370,7 +462,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(2.w),
+          padding: EdgeInsets.all(0.6.w),
           decoration: BoxDecoration(
             color: const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(8),
@@ -378,7 +470,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           child: Icon(icon, size: 16.sp, color: const Color(0xFF64748B)),
         ),
         SizedBox(width: 3.w),
-        Text(
+        Text(                                 
           label,
           style: google_fonts.GoogleFonts.inter(
             fontSize: 14.sp,

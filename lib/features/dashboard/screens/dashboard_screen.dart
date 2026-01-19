@@ -557,7 +557,8 @@ class _DashboardState extends State<Dashboard>
 
       // Make sure documents are loaded
       await offlineProvider.loadDocuments();
-      print(offlineProvider.documents);
+      await offlineProvider.loadCompletedServices();
+
       // Filter offline documents
       final filteredDocs = offlineProvider.documents.where((doc) {
         bool match = doc["U_CK_Date"] == '${date}T00:00:00Z';
@@ -575,9 +576,15 @@ class _DashboardState extends State<Dashboard>
         return match;
       }).toList();
 
-      // Map to the same format as your API
+      // Map to the same format as your API and include sync status
       return filteredDocs.map<Map<String, dynamic>>((item) {
-        return Map<String, dynamic>.from(item);
+        final doc = Map<String, dynamic>.from(item);
+
+        // If ticket is completed (Entry), find its sync status
+        if (doc['U_CK_Status'] == 'Entry') {
+          doc['sync_status'] = offlineProvider.getSyncStatus(doc['DocEntry']);
+        }
+        return doc;
       }).toList();
     } catch (e) {
       debugPrint("Error fetching tickets from offline for $date: $e");
@@ -1300,7 +1307,7 @@ class _DashboardState extends State<Dashboard>
         Expanded(
           // <<< Fix: constrain ListView inside Column
           child: ListView.builder(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(7),
             itemCount: ticketGroups.length,
             itemBuilder: (context, index) {
               final group = ticketGroups[index];
@@ -1517,7 +1524,7 @@ class _DashboardState extends State<Dashboard>
     final endTime = data["U_CK_EndTime"] ?? "--:--";
 
     return Container(
-      margin: EdgeInsets.only(bottom: 2.h),
+      margin: EdgeInsets.only(bottom: 1.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1572,7 +1579,7 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         "#$docNum",
                         style: GoogleFonts.inter(
-                          fontSize: 12.5.sp,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF475569),
                         ),
@@ -1590,12 +1597,20 @@ class _DashboardState extends State<Dashboard>
                       child: Text(
                         jobType.toUpperCase(),
                         style: GoogleFonts.inter(
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF854D0E),
                         ),
                       ),
                     ),
+                    SizedBox(width: 2.w),
+                    if (status == "Entry") ...[
+                      _buildSyncIcon(data["sync_status"] ??
+                          context
+                              .read<ServiceListProviderOffline>()
+                              .getSyncStatus(data['DocEntry'])),
+                      SizedBox(width: 2.w),
+                    ],
                     const Spacer(),
                     _buildStatusBadge(status),
                   ],
@@ -1668,7 +1683,7 @@ class _DashboardState extends State<Dashboard>
                               Text(
                                 showDateOnService(dateStr),
                                 style: GoogleFonts.inter(
-                                  fontSize: 13.sp,
+                                  fontSize: 13.5.sp,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1E293B),
                                 ),
@@ -1698,7 +1713,7 @@ class _DashboardState extends State<Dashboard>
                               Text(
                                 "$startTime - $endTime",
                                 style: GoogleFonts.inter(
-                                  fontSize: 13.sp,
+                                  fontSize: 13.5.sp,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1E293B),
                                 ),
@@ -1718,11 +1733,27 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
+  Widget _buildSyncIcon(String? syncStatus) {
+    final bool isSynced = syncStatus == 'synced';
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          isSynced ? Icons.cloud_done_rounded : Icons.cloud_upload_rounded,
+          size: 17.sp,
+          color: isSynced
+              ? const Color(0xFF166534)
+              : const Color.fromARGB(255, 242, 26, 26),
+        ),
+      ],
+    );
+  }
+
   Widget _buildInfoLabel(String label) {
     return Text(
       label,
       style: GoogleFonts.inter(
-        fontSize: 10.5.sp,
+        fontSize: 11.5.sp,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF94A3B8),
         letterSpacing: 0.5,
@@ -1771,7 +1802,7 @@ class _DashboardState extends State<Dashboard>
       child: Text(
         status == "Entry" ? "COMPLETED" : status.toUpperCase(),
         style: GoogleFonts.inter(
-          fontSize: 11.sp,
+          fontSize: 11.5.sp,
           fontWeight: FontWeight.w800,
           color: color,
         ),

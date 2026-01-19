@@ -106,25 +106,54 @@ class ServiceListProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    try {
-      final response = await dio.patch(
-          "/CK_JOBORDER(${updatePayload['DocEntry']})", false, false,
-          data: updatePayload);
+    int retryCount = 0;
+    const int maxRetries = 3;
+    bool success = false;
+    dynamic lastError;
 
-      if (response.statusCode == 204) {
-       print("status updated to SAP");
+    while (retryCount < maxRetries && !success) {
+      try {
+        if (retryCount > 0) {
+          debugPrint(
+              "🔄 Retrying SAP status update (Try ${retryCount + 1}/$maxRetries)...");
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+
+        final response = await dio.patch(
+          "/CK_JOBORDER(${updatePayload['DocEntry']})",
+          false,
+          false,
+          data: updatePayload,
+        );
+
+        if (response.statusCode == 204) {
+          debugPrint("✅ Status updated to SAP successfully");
+          success = true;
+        } else {
+          throw Exception(
+              "SAP responded with status code ${response.statusCode}");
+        }
+      } catch (e) {
+        lastError = e;
+        retryCount++;
+        debugPrint("❌ Try $retryCount failed: $e");
       }
-    } catch (e) {
-      await MaterialDialog.warning(
-        context,
-        title: "Error",
-        body: "Failed to update status to SAP",
-      );
-      print("Error updating status: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
+
+    if (!success) {
+      if (context.mounted) {
+        await MaterialDialog.warning(
+          context,
+          title: "Update Failed",
+          body:
+              "We couldn't update the status to SAP after $maxRetries attempts. Please check your connection and try again.",
+        );
+      }
+      print("Error updating status after $maxRetries attempts: $lastError");
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> fetchDocumentTicket({

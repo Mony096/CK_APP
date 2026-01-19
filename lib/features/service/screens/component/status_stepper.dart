@@ -37,8 +37,8 @@ class StatusStepper extends StatelessWidget {
   Widget _buildStep(IconData icon, bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: 8.w,
-      height: 8.w,
+      width:9.w,
+      height: 9.w,
       decoration: BoxDecoration(
         color: isActive ? const Color(0xFF22C55E) : Colors.white,
         shape: BoxShape.circle,
