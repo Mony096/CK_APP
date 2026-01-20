@@ -332,7 +332,7 @@ class HtmlServiceReportGenerator {
     <style>
         @page { 
             size: A4 portrait; 
-            margin: 0; 
+            margin: 10mm; 
         }
         * { 
             margin: 0; 
@@ -346,9 +346,9 @@ class HtmlServiceReportGenerator {
             break-before: avoid !important;
         }
         html, body {
-            width: 210mm;
-            height: 285mm; /* Safety buffer: intentionally shorter than 297mm */
-            overflow: hidden; /* Hard clip */
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -356,6 +356,12 @@ class HtmlServiceReportGenerator {
             color: #000;
             line-height: 1.15;
             background: #fff;
+        }
+        .page-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .khmer { font-family: 'Siemreap', cursive; font-size: 8px; }
         .container {
