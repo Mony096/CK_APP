@@ -297,6 +297,49 @@ class ServiceListProviderOffline extends ChangeNotifier {
       debugPrint("⚠️ Could not find DocEntry $docEntry to mark as completed");
     }
   }
+  /// Add new completed payload and store it in Hive
+  Future<void> addCompletedReject(Map<dynamic, dynamic> payload) async {
+    if (_completedBox == null) await _initBox();
+
+    final Map<dynamic, dynamic> payloadWithStatus =
+        Map<dynamic, dynamic>.from(payload);
+    payloadWithStatus['sync_status'] = 'pending';
+
+    // Remove old entry if same DocEntry exists to avoid duplicates
+    _completedServices.removeWhere(
+        (s) => s['DocEntry'].toString() == payload['DocEntry'].toString());
+
+    _completedServices.add(payloadWithStatus);
+    await _completedBox!.put('completed', _completedServices);
+    notifyListeners();
+    debugPrint("📂 Added DocEntry ${payload['DocEntry']} to pending sync list");
+  }
+
+  /// Mark a service as completed in offline docs
+  Future<void> markServiceCompletedReject(dynamic docEntry) async {
+    if (_box == null) await _initBox();
+    List<dynamic> docs =
+        List<dynamic>.from(_box!.get('documents', defaultValue: []));
+
+    // final now = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
+    bool found = false;
+
+    for (var doc in docs) {
+      if (doc['DocEntry'].toString() == docEntry.toString()) {
+        doc['U_CK_Status'] = 'Rejected';
+        found = true;
+      }
+    }
+
+    if (found) {
+      await _box!.put('documents', docs);
+      _documents = docs;
+      notifyListeners();
+      debugPrint("✅ Marked DocEntry $docEntry as 'Rejected' offline");
+    } else {
+      debugPrint("⚠️ Could not find DocEntry $docEntry to mark as rejecte");
+    }
+  }
 
   // 👇 New functions for sync management
   /// Get list of services that are pending sync
@@ -335,16 +378,47 @@ class ServiceListProviderOffline extends ChangeNotifier {
       final timeStamp = time ?? DateFormat("HH:mm:ss").format(now);
 
       bool found = false;
+      // for (var doc in docs) {
+      //   if (doc['DocEntry'] == docEntry) {
+      //     doc['U_CK_Status'] = status;
+
+      //     // Update time fields based on status
+      //     if (status == "Accept") {
+      //       doc["U_CK_Time"] = timeStamp;
+      //     } else {
+      //       doc["U_CK_EndTime"] = timeStamp;
+      //     }
+      //     found = true;
+      //     break;
+      //   }
+      // }
       for (var doc in docs) {
         if (doc['DocEntry'] == docEntry) {
           doc['U_CK_Status'] = status;
 
-          // Update time fields based on status
+          // Main time fields
           if (status == "Accept") {
             doc["U_CK_Time"] = timeStamp;
           } else {
             doc["U_CK_EndTime"] = timeStamp;
           }
+          print(doc['U_CK_Status']);
+          // Status-specific tracking time
+          switch (status) {
+            case "Accept":
+              doc["AcceptTime"] = timeStamp;
+              break;
+            case "Travel":
+              doc["TravelTime"] = timeStamp;
+              break;
+            case "Service":
+              doc["ServiceTime"] = timeStamp;
+              break;
+            case "Rejected":
+              doc["RejectedTime"] = timeStamp;
+              break;
+          }
+
           found = true;
           break;
         }

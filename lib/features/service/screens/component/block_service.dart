@@ -331,7 +331,7 @@ class BlockService extends StatelessWidget {
 
   Color _getActionColor(String status) {
     switch (status) {
-      case "Pending":
+      case "Pending" || "Open":
         return const Color(0xFF22C55E);
       case "Accept":
         return const Color(0xFFF59E0B);
@@ -346,7 +346,7 @@ class BlockService extends StatelessWidget {
 
   String _getActionLabel(String status) {
     switch (status) {
-      case "Pending":
+      case "Pending" || "Open":
         return "ACCEPT";
       case "Accept":
         return "START TRAVEL";

@@ -14,8 +14,10 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> data;
+  final bool isCompleted;
 
-  const ServiceDetailScreen({super.key, required this.data});
+  const ServiceDetailScreen(
+      {super.key, required this.data, this.isCompleted = false});
 
   @override
   State<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
@@ -286,7 +288,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 padding:
                     EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.6.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
+                  color: widget.isCompleted
+                      ? const Color(0xFFECFDF5)
+                      : const Color(0xFFFEF2F2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -295,164 +299,171 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     Container(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
+                      decoration: BoxDecoration(
+                        color: widget.isCompleted
+                            ? Color(0xFF10B981)
+                            : Color(0xFFEF4444),
                         shape: BoxShape.circle,
                       ),
                     ),
                     SizedBox(width: 2.w),
                     Text(
-                      "Completed",
+                      widget.isCompleted ? "Completed" : "Rejected",
                       style: google_fonts.GoogleFonts.inter(
                         fontSize: 12.8.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF059669),
+                        color: widget.isCompleted
+                            ? const Color(0xFF059669)
+                            : const Color(0xFFEF4444),
                       ),
                     ),
                   ],
                 ),
               ),
               // Menu button
-              PopupMenuButton<String>(
-                padding: EdgeInsets.zero,
-                icon: Container(
-                  padding: EdgeInsets.all(2.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
-                  child: Icon(
-                    Icons.more_horiz_rounded,
-                    color: const Color(0xFF64748B),
-                    size: 18.sp,
-                  ),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                color: Colors.white,
-                elevation: 6,
-                onSelected: (value) async {
-                  if (value == 'export_pdf') {
-                    try {
-                      // Show premium loading indicator
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10.w, vertical: 4.h),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.9),
-                                borderRadius: BorderRadius.circular(24),
-                                border:
-                                    Border.all(color: Colors.white, width: 2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 20,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const CircularProgressIndicator(
-                                    strokeWidth: 3,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Color(0xFF10B981)),
-                                  ),
-                                  SizedBox(height: 3.h),
-                                  Text(
-                                    'Preparing Report...',
-                                    style: google_fonts.GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF1F2937),
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                  SizedBox(height: 1.h),
-                                  Text(
-                                    'This may take a moment',
-                                    style: google_fonts.GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: const Color(0xFF6B7280),
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+              widget.isCompleted
+                  ? PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      icon: Container(
+                        padding: EdgeInsets.all(2.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                      );
-
-                      final file = await HtmlServiceReportGenerator
-                          .generateServiceReport(_displayData);
-
-                      if (mounted) {
-                        Navigator.pop(context); // Close loading
-
-                        // Navigate to Preview Screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PDFPreviewScreen(
-                              pdfFile: file,
-                              title:
-                                  'Service Report #${_displayData['DocNum'] ?? _displayData['id'] ?? ''}',
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      debugPrint("Error generating PDF: $e");
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to generate PDF: $e'),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
-                        );
-                      }
-                    }
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'export_pdf',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.picture_as_pdf_rounded,
-                          color: const Color(0xFFEF4444),
+                        child: Icon(
+                          Icons.more_horiz_rounded,
+                          color: const Color(0xFF64748B),
                           size: 18.sp,
                         ),
-                        SizedBox(width: 3.w),
-                        Text(
-                          'Export to PDF',
-                          style: google_fonts.GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF374151),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      color: Colors.white,
+                      elevation: 6,
+                      onSelected: (value) async {
+                        if (value == 'export_pdf') {
+                          try {
+                            // Show premium loading indicator
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => Center(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10.w, vertical: 4.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 20,
+                                          spreadRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const CircularProgressIndicator(
+                                          strokeWidth: 3,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Color(0xFF10B981)),
+                                        ),
+                                        SizedBox(height: 3.h),
+                                        Text(
+                                          'Preparing Report...',
+                                          style: google_fonts.GoogleFonts.inter(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: const Color(0xFF1F2937),
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        SizedBox(height: 1.h),
+                                        Text(
+                                          'This may take a moment',
+                                          style: google_fonts.GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: const Color(0xFF6B7280),
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+
+                            final file = await HtmlServiceReportGenerator
+                                .generateServiceReport(_displayData);
+
+                            if (mounted) {
+                              Navigator.pop(context); // Close loading
+
+                              // Navigate to Preview Screen
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PDFPreviewScreen(
+                                    pdfFile: file,
+                                    title:
+                                        'Service Report #${_displayData['DocNum'] ?? _displayData['id'] ?? ''}',
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint("Error generating PDF: $e");
+                            if (mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to generate PDF: $e'),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                ),
+                              );
+                            }
+                          }
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem<String>(
+                          value: 'export_pdf',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.picture_as_pdf_rounded,
+                                color: const Color(0xFFEF4444),
+                                size: 18.sp,
+                              ),
+                              SizedBox(width: 3.w),
+                              Text(
+                                'Export to PDF',
+                                style: google_fonts.GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF374151),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
+                    )
+                  : SizedBox(),
             ],
           ),
           SizedBox(height: 1.h),
@@ -1118,16 +1129,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildChecklistSection(BuildContext context) {
     final checklist = _displayData['checklistLine'] as List? ?? [];
+    print(checklist);
     return _buildItemList(
       items: checklist,
       emptyMessage: "No checklist data recorded.",
       icon: Icons.assignment_turned_in_rounded,
       titleKey: 'U_CK_ChecklistTitle',
       customSubtitle: (item) {
-        return "Feedback: ${item['U_CK_Feedback'] ?? 'No feedback provided'}";
+        return "Feedback: ${item['U_CK_Answer'] ?? 'No feedback provided'}";
       },
       trailing: (item) {
-        final bool isFalse = item['U_CK_FalseOutput'] == 'Yes';
+        final bool isFalse = item['U_CK_Checked'] == 'N';
         return Icon(
           isFalse ? Icons.error_outline_rounded : Icons.check_circle_rounded,
           color: isFalse ? const Color(0xFFEF4444) : const Color(0xFF16A34A),

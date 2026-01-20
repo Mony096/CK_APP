@@ -1543,12 +1543,12 @@ class _DashboardState extends State<Dashboard>
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
-            if (status == "Entry") {
+            if (status == "Entry" || status == "Rejected") {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      ServiceDetailScreen(data: data as Map<String, dynamic>),
+                      ServiceDetailScreen(data: data as Map<String, dynamic>, isCompleted: status == "Rejected" ? false : true),
                 ),
               ).then((value) => _fetchTicketCounts());
               return;

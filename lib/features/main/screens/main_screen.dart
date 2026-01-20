@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:bizd_tech_service/core/widgets/drawer.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/service.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   dynamic _userName;
   dynamic _userEmail;
+  bool _isSyncingFromMain = false;
 
   @override
   void initState() {
@@ -51,6 +55,70 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  /// Auto-sync services when screen loads (if online)
+  Future<void> _autoSyncServices() async {
+    if (_isSyncingFromMain) return;
+
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    try {
+      setState(() => _isSyncingFromMain = true);
+      offlineProvider.setSyncing(true);
+
+      // Check internet connectivity
+      final hasInternet = await _checkInternetConnection();
+      if (!hasInternet) {
+        debugPrint("📴 No internet connection - skipping sync");
+        return;
+      }
+
+      debugPrint("📡 Internet available - starting auto-sync...");
+
+      // Get providers
+      final onlineProvider =
+          Provider.of<ServiceListProvider>(context, listen: false);
+
+      // Get existing DocEntries from offline storage
+      final existingDocEntries = await offlineProvider.getExistingDocEntries();
+      debugPrint(
+          "📦 Found ${existingDocEntries.length} existing offline records");
+
+      // Fetch only NEW services from API
+      final newServices = await onlineProvider.fetchNewServicesForSync(
+        existingDocEntries: existingDocEntries,
+      );
+
+      if (newServices.isNotEmpty) {
+        // Merge new services with existing offline data
+        await offlineProvider.mergeNewDocuments(newServices);
+        debugPrint(
+            "✅ Auto-sync complete: ${newServices.length} new services added");
+      } else {
+        debugPrint("✅ Auto-sync complete: No new services to add");
+        // Still load documents to refresh the view
+        await offlineProvider.loadDocuments();
+      }
+    } catch (e) {
+      debugPrint("❌ Auto-sync error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isSyncingFromMain = false);
+        offlineProvider.setSyncing(false);
+      }
+    }
+  }
+
+  /// Check if device has internet connection
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
@@ -135,8 +203,8 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(
-                        width: 14,
-                        height: 14,
+                        width: 17,
+                        height: 17,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -144,20 +212,22 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "Syncing...",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
+                      // const SizedBox(width: 8),
+                      // Text(
+                      //   "Syncing...",
+                      //   style: GoogleFonts.inter(
+                      //     fontSize: 12,
+                      //     fontWeight: FontWeight.w500,
+                      //     color: Colors.white,
+                      //   ),
+                      // ),
                     ],
                   ),
                 );
               },
             ),
+            _selectedIndex == 0 || _selectedIndex == 1 ?
+             IconButton(onPressed: _autoSyncServices, icon: const Icon(Icons.sync_rounded)) : const SizedBox.shrink(),
           ],
           leading: Builder(
             builder: (context) => IconButton(

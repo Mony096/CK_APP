@@ -202,7 +202,9 @@ class ServiceListProvider extends ChangeNotifier {
 
     String filter =
         // "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' and U_CK_Date ge '$dateNow'";
-        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
+        // "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
+        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Entry'";
+
     // Add text filter
     if (_currentFilter.isNotEmpty) {
       filter += " and contains(Code,'$_currentFilter')";
@@ -280,10 +282,12 @@ class ServiceListProvider extends ChangeNotifier {
       //     "U_CK_TechnicianId eq $userId and U_CK_Status eq 'Pending'";
       String today = DateTime.now().toIso8601String().split('T')[0];
 
+      // String filter = "U_CK_TechnicianId eq $userId "
+      //     "and (U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service') "
+      //     "and U_CK_Date ge '$today'";
       String filter = "U_CK_TechnicianId eq $userId "
-          "and (U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service') "
+          "and (U_CK_Status eq 'Open' or U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service') "
           "and U_CK_Date ge '$today'";
-
       // Add DocEntry exclusion filter if there are existing entries
       if (existingDocEntries.isNotEmpty) {
         // Build filter like: DocEntry ne 1 and DocEntry ne 2 and DocEntry ne 3

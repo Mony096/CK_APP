@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
+import 'package:bizd_tech_service/features/service/provider/completed_service_provider.dart';
+import 'package:bizd_tech_service/features/service/provider/service_list_provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/component/detail_row.dart';
 import 'package:bizd_tech_service/features/service/screens/component/row_item.dart';
@@ -32,28 +36,224 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
     print(widget.data["CK_JOB_EQUIPMENTCollection"]);
   }
 
-  Future<void> _onReject() async {
-    try {
-      MaterialDialog.loading(context);
-      await Future.delayed(const Duration(seconds: 1));
+  void _onRejected() async {
+    // 1. Check internet connection first
+    final hasInternet = await _checkInternetConnection();
 
-      await Provider.of<ServiceListProviderOffline>(context, listen: false)
-          .updateDocumentAndStatusOffline(
-        docEntry: widget.data["DocEntry"],
-        status: "Open",
-        context: context,
-      );
-      final provider = context.read<ServiceListProviderOffline>();
-      provider.refreshDocuments();
-      MaterialDialog.close(context);
-      MaterialDialog.close(context);
-    } catch (e) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e')),
-      );
+    if (hasInternet) {
+      // Show dialog asking user to choose between save offline or save to SAP
+      if (!mounted) return;
+      _showInternetAvailableDialog();
+    } else {
+      // No internet - save offline only
+      await _saveOfflineOnly();
     }
   }
+
+  /// Show dialog when internet is available
+  void _showInternetAvailableDialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          backgroundColor: Colors.white,
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.wifi,
+                  color: Color(0xFF22C55E),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Internet Available',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(height: 24),
+              Text(
+                'Your internet connection is available. How would you like to save this service?',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF64748B),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await _saveOfflineOnly();
+                    },
+                    icon: const Icon(Icons.save_outlined, size: 18),
+                    label: Text(
+                      'Save Offline',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF64748B),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await _saveAndSyncToSAP();
+                    },
+                    icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                    label: Text(
+                      'Save to SAP',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF22C55E),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Save offline only without syncing to SAP
+  Future<void> _saveOfflineOnly() async {
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now);
+    final res =
+        await Provider.of<CompletedServiceProvider>(context, listen: false)
+            .onReject(
+      context: context,
+      docEntry: widget.data["DocEntry"],
+      customerName: widget.data["U_CK_Cardname"],
+      date: widget.data["U_CK_Date"] ?? "",
+    );
+    if (res && mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  /// Save offline and sync to SAP
+  Future<void> _saveAndSyncToSAP() async {
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now);
+    final res =
+        await Provider.of<CompletedServiceProvider>(context, listen: false)
+            .onReject(
+      context: context,
+      docEntry: widget.data["DocEntry"],
+      customerName: widget.data["U_CK_Cardname"],
+      date: widget.data["U_CK_Date"] ?? "",
+    );
+
+    if (res) {
+      if (mounted) MaterialDialog.loading(context);
+      try {
+        debugPrint("📡 Internet available - triggering immediate sync...");
+        // await Provider.of<CompletedServiceProvider>(context, listen: false)
+        //     .syncAllOfflineServicesToSAP(context);
+        print("Synce to SAP progress ....");
+      } catch (e) {
+        debugPrint(
+            "❌ Immediate sync failed (will still reflect as offline): $e");
+        // We don't show an error here because the data is safe offline
+        // and will be shown as "Pending Sync" on the dashboard.
+      } finally {
+        if (mounted) MaterialDialog.close(context);
+      }
+
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    }
+  }
+
+  /// Check if device has internet connection
+  Future<bool> _checkInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+  // Future<void> _onReject() async {
+  //   try {
+  //     MaterialDialog.loading(context);
+  //     await Future.delayed(const Duration(seconds: 1));
+
+  //     await Provider.of<ServiceListProviderOffline>(context, listen: false)
+  //         .updateDocumentAndStatusOffline(
+  //       docEntry: widget.data["DocEntry"],
+  //       status: "Rejected",
+  //       context: context,
+  //     );
+  //     final provider = context.read<ServiceListProviderOffline>();
+  //     provider.refreshDocuments();
+  //     MaterialDialog.close(context);
+  //     MaterialDialog.close(context);
+  //   } catch (e) {
+  //     Navigator.of(context).pop();
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('❌ Error: $e')),
+  //     );
+  //   }
+  // }
 
   void makePhoneCall(BuildContext context, String phoneNumber) {
     _showConfirmationDialog(
@@ -89,30 +289,103 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
     }
 
     try {
-      MaterialDialog.loading(context);
-      await Future.delayed(const Duration(seconds: 1));
+      // ⏳ Small delay for better UX
+      await Future.delayed(const Duration(milliseconds: 300));
 
-      await Provider.of<ServiceListProviderOffline>(context, listen: false)
-          .updateDocumentAndStatusOffline(
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+      final onlineProvider =
+          Provider.of<ServiceListProvider>(context, listen: false);
+
+      final cachedDoc =
+          await offlineProvider.getDocumentByDocEntry(widget.data["DocEntry"]);
+      if (cachedDoc == null) {
+        throw "Document not found";
+      }
+
+      final now = DateTime.now();
+      final timeStamp = DateFormat("HH:mm:ss").format(now);
+      // Determine next status
+      String nextStatus;
+      switch (widget.data["U_CK_Status"]) {
+        case "Pending" || "Open":
+          nextStatus = "Accept";
+          break;
+        case "Accept":
+          nextStatus = "Travel";
+          break;
+        case "Travel":
+          nextStatus = "Service";
+          break;
+        default:
+          nextStatus = "Entry";
+      }
+
+      // Prepare payload
+      final updatePayload = {
+        // ...cachedDoc,
+        "U_CK_TravelTime":
+            widget.data["U_CK_Status"] == "Accept" ? timeStamp : null,
+        "U_CK_Time": cachedDoc["U_CK_Time"] ?? "",
+        "U_CK_EndTime": cachedDoc["U_CK_EndTime"] ?? "",
+        'DocEntry': widget.data["DocEntry"],
+        'U_CK_Status': nextStatus,
+      };
+
+      if (widget.data["U_CK_Status"] == "Pending" ||
+          widget.data["U_CK_Status"] == "Open") {
+        updatePayload["U_CK_Time"] = timeStamp;
+      } else {
+        updatePayload["U_CK_EndTime"] = timeStamp;
+      }
+
+      if (widget.data["U_CK_Status"] == "Open" ||
+          widget.data["U_CK_Status"] == "Pending") {
+        updatePayload["U_CK_AcceptTime"] = timeStamp;
+      }
+      if (widget.data["U_CK_Status"] == "Accept") {
+        updatePayload["U_CK_TravelTime"] = timeStamp;
+      }
+
+      debugPrint(
+          "📤 Updating status to $nextStatus for DocEntry: ${widget.data["DocEntry"]}");
+
+      // 1. Update Online if internet is available
+      final hasInternet = await _checkInternetConnection();
+      if (hasInternet) {
+        await onlineProvider.updateStatusDirectToSAP(
+          updatePayload: updatePayload,
+          context: context,
+        );
+      } else {
+        debugPrint("📡 Offline mode: Skipping SAP update, will sync later.");
+      }
+
+      // 2. Update Offline storage
+      await offlineProvider.updateDocumentAndStatusOffline(
         docEntry: widget.data["DocEntry"],
-        status: widget.data["U_CK_Status"] == "Pending"
-            ? "Accept"
-            : widget.data["U_CK_Status"] == "Accept"
-                ? "Travel"
-                : widget.data["U_CK_Status"] == "Travel"
-                    ? "Service"
-                    : "Entry",
+        status: nextStatus,
+        time: timeStamp,
         context: context,
       );
-      final provider = context.read<ServiceListProviderOffline>();
-      provider.refreshDocuments();
-      MaterialDialog.close(context);
-      MaterialDialog.close(context);
+
+      // 3. Refresh and Close
+      offlineProvider.refreshDocuments();
+
+      if (mounted) {
+        MaterialDialog.close(context);
+      }
     } catch (e) {
-      if (mounted) Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e')),
-      );
+      debugPrint("❌ Error in onUpdateStatus: $e");
+      if (mounted) {
+        MaterialDialog.close(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -390,10 +663,10 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
         ),
         child: Row(
           children: [
-            if (status == "Pending") ...[
+            if (status == "Pending" || status == "Open") ...[
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _onReject,
+                  onPressed: _onRejected,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     side: const BorderSide(color: Color(0xFFFCA5A5)),

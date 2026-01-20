@@ -180,7 +180,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
       // Determine next status
       String nextStatus;
       switch (currentStatus) {
-        case "Pending":
+        case "Pending" || "Open":
           nextStatus = "Accept";
           break;
         case "Accept":
@@ -196,18 +196,24 @@ class _ServiceScreenState extends State<ServiceScreen> {
       // Prepare payload
       final updatePayload = {
         // ...cachedDoc,
+        // "U_CK_TravelTime": currentStatus == "Accept" ? timeStamp : undefined,
         "U_CK_Time": cachedDoc["U_CK_Time"] ?? "",
         "U_CK_EndTime": cachedDoc["U_CK_EndTime"] ?? "",
         'DocEntry': entry,
         'U_CK_Status': nextStatus,
       };
 
-      if (currentStatus == "Pending") {
+      if (currentStatus == "Pending" || currentStatus == "Open") {
         updatePayload["U_CK_Time"] = timeStamp;
       } else {
         updatePayload["U_CK_EndTime"] = timeStamp;
       }
-
+      if (currentStatus == "Open" || currentStatus == "Pending") {
+        updatePayload["U_CK_AcceptTime"] = timeStamp;
+      }
+      if (currentStatus == "Accept") {
+        updatePayload["U_CK_TravelTime"] = timeStamp;
+      }
       debugPrint("📤 Updating status to $nextStatus for DocEntry: $entry");
 
       // 1. Update Online if internet is available
@@ -295,8 +301,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
           final date = doc['U_CK_Date']?.toString() ?? '';
           final dateNow = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-          return status != 'Open' &&
-              status != 'Entry' &&
+          // return status != 'Open' &&
+          //     status != 'Entry' &&
+          //     date.compareTo(dateNow) >= 0;
+          return status != 'Entry' &&
+              status != "Rejected" &&
               date.compareTo(dateNow) >= 0;
           // works if date is in yyyy-MM-dd or ISO format
         }).toList();

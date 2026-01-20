@@ -20,6 +20,7 @@ import 'package:bizd_tech_service/features/site/provider/site_list_provider_offl
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -176,17 +177,26 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
 
   /// Save offline only without syncing to SAP
   Future<void> _saveOfflineOnly() async {
+    print(widget.data);
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now);
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onCompletedServiceOffline(
-      context: context,
-      attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-      docEntry: widget.data["DocEntry"],
-      startTime: widget.data["U_CK_Time"],
-      endTime: widget.data["U_CK_EndTime"],
-      customerName: widget.data["U_CK_Cardname"],
-      date: widget.data["U_CK_Date"] ?? "",
-    );
+                context: context,
+                attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+                docEntry: widget.data["DocEntry"],
+                startTime: widget.data["U_CK_Time"],
+                endTime: widget.data["U_CK_EndTime"],
+                customerName: widget.data["U_CK_Cardname"],
+                date: widget.data["U_CK_Date"] ?? "",
+                timeAction: {
+          "AcceptTime": widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+          "TravelTime":
+              widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+          "ServiceTime": widget.data["ServiceTime"],
+          "CompleteTime": timeStamp
+        });
 
     if (res && mounted) {
       Navigator.of(context).pop(true);
@@ -195,17 +205,25 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
 
   /// Save offline and sync to SAP
   Future<void> _saveAndSyncToSAP() async {
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now);
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onCompletedServiceOffline(
-      context: context,
-      attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-      docEntry: widget.data["DocEntry"],
-      startTime: widget.data["U_CK_Time"],
-      endTime: widget.data["U_CK_EndTime"],
-      customerName: widget.data["U_CK_Cardname"],
-      date: widget.data["U_CK_Date"] ?? "",
-    );
+                context: context,
+                attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+                docEntry: widget.data["DocEntry"],
+                startTime: widget.data["U_CK_Time"],
+                endTime: widget.data["U_CK_EndTime"],
+                customerName: widget.data["U_CK_Cardname"],
+                date: widget.data["U_CK_Date"] ?? "",
+                timeAction: {
+          "AcceptTime": widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+          "TravelTime":
+              widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+          "ServiceTime": widget.data["ServiceTime"],
+          "CompleteTime": timeStamp
+        });
 
     if (res) {
       if (mounted) MaterialDialog.loading(context);

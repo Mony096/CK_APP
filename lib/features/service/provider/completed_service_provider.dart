@@ -262,242 +262,6 @@ class CompletedServiceProvider extends ChangeNotifier {
     return null;
   }
 
-  // Future<bool> onCompletedServiceSyncToSAP({
-  //   required BuildContext context, // ✅ Add BuildContext for UI
-  //   required int? attachmentEntryExisting,
-  //   required dynamic docEntry,
-  // }) async {
-  //   if (_timeEntry.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-  //         behavior: SnackBarBehavior.floating,
-  //         elevation: 10,
-  //         margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(9),
-  //         ),
-  //         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-  //         content: const Row(
-  //           children: [
-  //             Icon(Icons.remove_circle, color: Colors.white, size: 28),
-  //             SizedBox(width: 16),
-  //             Expanded(
-  //               child: Column(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   Text(
-  //                     "Please provide a Time Entry",
-  //                     style: TextStyle(
-  //                       fontSize: 14,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //         duration: const Duration(seconds: 4),
-  //       ),
-  //     );
-  //     return false;
-  //   }
-  //   if (_signatureList.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-  //         behavior: SnackBarBehavior.floating,
-  //         elevation: 10,
-  //         margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(9),
-  //         ),
-  //         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-  //         content: const Row(
-  //           children: [
-  //             Icon(Icons.remove_circle, color: Colors.white, size: 28),
-  //             SizedBox(width: 16),
-  //             Expanded(
-  //               child: Column(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   Text(
-  //                     "Please provide a signature",
-  //                     style: TextStyle(
-  //                       fontSize: 14,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //         duration: const Duration(seconds: 4),
-  //       ),
-  //     );
-  //     return false;
-  //   }
-
-  //   _submit = true;
-  //   notifyListeners();
-  //   MaterialDialog.loading(context); // Show loading dialog
-
-  //   try {
-  //     List<File> allFiles = [..._imagesList, ..._signatureList];
-
-  //     final int? attachmentEntry =
-  //         await uploadAttachmentsToSAP(allFiles, attachmentEntryExisting);
-  //     if (attachmentEntry == null) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-  //           behavior: SnackBarBehavior.floating,
-  //           elevation: 10,
-  //           margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(9),
-  //           ),
-  //           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-  //           content: const Row(
-  //             children: [
-  //               Icon(Icons.remove_circle, color: Colors.white, size: 28),
-  //               SizedBox(width: 16),
-  //               Expanded(
-  //                 child: Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Text(
-  //                       "Failed to upload attachments",
-  //                       style: TextStyle(
-  //                         fontSize: 14,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //           duration: const Duration(seconds: 4),
-  //         ),
-  //       );
-  //       return false;
-  //     }
-  //     final payload = {
-  //       "DocEntry": docEntry,
-  //       "U_CK_Status": "Entry",
-  //       "U_CK_AttachmentEntry": attachmentEntry,
-  //       "CK_JOB_TIMECollection": [
-  //         {
-  //           "U_CK_Description": "Travel Time",
-  //           "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
-  //           "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
-  //           "U_CK_Effort": _timeEntry[0]["total_travel_time"],
-  //         },
-  //         {
-  //           "U_CK_Description": "Service Time",
-  //           "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
-  //           "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
-  //           "U_CK_Effort": _timeEntry[0]["total_service_time"],
-  //         },
-  //         {
-  //           "U_CK_Description": "Break Time",
-  //           "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
-  //           "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
-  //           "U_CK_Effort": _timeEntry[0]["total_break_time"],
-  //         }
-  //       ],
-  //       "CK_JOB_ISSUECollection": _openIssues,
-  //       "feedbackChecklistLine": _checkListLine
-  //     };
-
-  //     // print(payload);
-  //     // return true;
-  //     final completed = await dio.patch(
-  //       "/script/test/CK_CompleteStatus($docEntry)",
-  //       false,
-  //       false,
-  //       data: payload,
-  //     );
-
-  //     if (completed.statusCode == 204) {
-  //       clearData();
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-  //           behavior: SnackBarBehavior.floating,
-  //           elevation: 10,
-  //           margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(9),
-  //           ),
-  //           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-  //           content: const Row(
-  //             children: [
-  //               Icon(Icons.remove_circle, color: Colors.white, size: 28),
-  //               SizedBox(width: 16),
-  //               Expanded(
-  //                 child: Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Text(
-  //                       "Service Completed!",
-  //                       style: TextStyle(
-  //                         fontSize: 14,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //           duration: const Duration(seconds: 4),
-  //         ),
-  //       );
-  //     }
-  //     clearData();
-  //     return true;
-  //   } catch (e) {
-  //     await MaterialDialog.warning(
-  //       context,
-  //       title: "Error",
-  //       body: e.toString(),
-  //     );
-  //     return false;
-  //   } finally {
-  //     _submit = false;
-  //     _openIssues = [];
-  //     MaterialDialog.close(context); // Show loading dialog
-  //   }
-  // }
-
-// // Helper function to decode Base64 strings back to temporary files
-//   Future<List<File>> decodeBase64Files(List<String> base64List) async {
-//     List<File> files = [];
-//     try {
-//       final tempDir = await getTemporaryDirectory();
-//       for (String base64String in base64List) {
-//         final bytes = base64Decode(base64String);
-//         // Use a unique filename to avoid conflicts
-//         final fileName =
-//             'temp_file_${DateTime.now().millisecondsSinceEpoch}.png';
-//         final file = File('${tempDir.path}/$fileName');
-//         await file.writeAsBytes(bytes);
-//         files.add(file);
-//       }
-//     } catch (e) {
-//       debugPrint("Error decoding Base64 file: $e");
-//     }
-//     return files;
-//   }
-
   void deleteTempFiles(List<File> files) {
     for (File file in files) {
       if (file.existsSync()) {
@@ -640,6 +404,40 @@ class CompletedServiceProvider extends ChangeNotifier {
     return {"ext": ext, "data": base64Data};
   }
 
+  String calculateSpentTimeHM({
+    required String travelTime,
+    required String completeTime,
+  }) {
+    final now = DateTime.now();
+
+    DateTime parseTime(String time) {
+      final parts = time.split(":");
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
+    }
+
+    DateTime travel = parseTime(travelTime);
+    DateTime complete = parseTime(completeTime);
+
+    // Handle cross-midnight case
+    if (complete.isBefore(travel)) {
+      complete = complete.add(const Duration(days: 1));
+    }
+
+    final duration = complete.difference(travel);
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+
+    return "${hours}h ${minutes}m";
+  }
+
   Future<bool> onCompletedServiceOffline({
     required BuildContext context,
     required int? attachmentEntryExisting,
@@ -648,6 +446,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     required dynamic endTime,
     required String customerName,
     required String date,
+    required dynamic timeAction,
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
@@ -735,6 +534,17 @@ class CompletedServiceProvider extends ChangeNotifier {
     for (File signatureFile in signatureList) {
       fileDataList.add(await fileToBase64WithExt(signatureFile));
     }
+    String formatSpentTime(Duration duration) {
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes.remainder(60);
+
+      return "${hours}h ${minutes}m";
+    }
+
+    final spentTime = calculateSpentTimeHM(
+      travelTime: timeAction["TravelTime"],
+      completeTime: timeAction["CompleteTime"],
+    );
 
     // 2. Build the payload
     final payload = {
@@ -745,25 +555,38 @@ class CompletedServiceProvider extends ChangeNotifier {
       "U_CK_AttachmentEntry": attachmentEntryExisting,
       "U_CK_Time": startTime,
       "U_CK_EndTime": endTime,
+      "U_CK_TravelTime": timeAction["TravelTime"],
+      "U_CK_AcceptTime": timeAction["AcceptTime"],
       "CK_JOB_TIMECollection": [
         {
-          "U_CK_Description": "Travel Time",
-          "U_CK_StartTime": _timeEntry[0]["U_CK_TraveledTime"],
-          "U_CK_EndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
-          "U_CK_Effort": _timeEntry[0]["total_travel_time"],
+          "U_CK_Date": date,
+          "U_CK_StartTime": startTime,
+          "U_CK_EndTime": endTime,
+          "U_CK_Effort": spentTime,
+          "U_CK_AcceptedTime": timeAction["AcceptTime"],
+          "U_CK_RejectedTime": timeAction["RejectTime"],
+          "U_CK_TraveledTime": _timeEntry[0]["U_CK_TraveledTime"],
+          "U_CK_TraveledEndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
+          "U_CK_TraveledEffortTime": _timeEntry[0]["total_travel_time"],
+          "U_CK_ServiceStartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
+          "U_CK_SerEndTime": _timeEntry[0]["U_CK_SerEndTime"],
+          "U_CK_ServiceEffortTime": _timeEntry[0]["total_service_time"],
+          "U_CK_BreakTime": _timeEntry[0]["U_CK_BreakTime"],
+          "U_CK_BreakEndTime": _timeEntry[0]["U_CK_BreakEndTime"],
+          "U_CK_BreakEffortTime": _timeEntry[0]["total_break_time"],
         },
-        {
-          "U_CK_Description": "Service Time",
-          "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
-          "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
-          "U_CK_Effort": _timeEntry[0]["total_service_time"],
-        },
-        {
-          "U_CK_Description": "Break Time",
-          "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
-          "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
-          "U_CK_Effort": _timeEntry[0]["total_break_time"],
-        }
+        // {
+        //   "U_CK_Description": "Service Time",
+        //   "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
+        //   "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
+        //   "U_CK_Effort": _timeEntry[0]["total_service_time"],
+        // },
+        // {
+        //   "U_CK_Description": "Break Time",
+        //   "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
+        //   "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
+        //   "U_CK_Effort": _timeEntry[0]["total_break_time"],
+        // }
       ],
       "CK_JOB_ISSUECollection": _openIssues,
       "CK_JOB_TASKCollection": _checkListLine.map((item) {
@@ -776,7 +599,7 @@ class CompletedServiceProvider extends ChangeNotifier {
       "files": fileDataList, // ✅ Each file has {ext, data}
     };
 
-    // print(payload["feedbackChecklistLine"]);
+    // print(payload["CK_JOB_TIMECollection"]);
     // return false;
     // 3. Offline saving
     _submit = true;
@@ -811,6 +634,89 @@ class CompletedServiceProvider extends ChangeNotifier {
                   children: [
                     Text(
                       "✅ Service successfully completed in offline mode.",
+                      style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.031,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      clearData();
+      return true;
+    } catch (e) {
+      await MaterialDialog.warning(context, title: "Error", body: e.toString());
+      return false;
+    } finally {
+      _submit = false;
+      _openIssues = [];
+      MaterialDialog.close(context);
+    }
+  }
+
+  Future<bool> onReject({
+    required BuildContext context,
+    required dynamic docEntry,
+    required String customerName,
+    required String date,
+    bool offline = false,
+  }) async {
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now);
+    // 2. Build the payload
+    final payload = {
+      "DocEntry": docEntry,
+      "U_CK_Cardname": customerName,
+      "U_CK_Date": date,
+      "U_CK_Status": "Rejected",
+      "CK_JOB_TIMECollection": [
+        {
+          "U_CK_Date": date,
+          "U_CK_RejectedTime": timeStamp,
+        },
+      ],
+    };
+
+    // print(timeAction);
+    // return false;
+    // 3. Offline saving
+    _submit = true;
+    notifyListeners();
+    MaterialDialog.loading(context);
+
+    try {
+      final offlineProvider =
+          Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+      await offlineProvider.addCompletedReject(payload);
+      await offlineProvider.markServiceCompletedReject(docEntry);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: Row(
+            children: [
+              // Icon(Icons.remove_circle,
+              //     color: Colors.white, size: 28),
+              // SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "✅ Service Rejected in offline mode.",
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.031,
                         color: Colors.white,
