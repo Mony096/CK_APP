@@ -428,13 +428,15 @@ class HtmlServiceReportGenerator {
         <div class="container">
             <!-- Info Section -->
             <div class="grid grid-12 border-b">
-                <div class="span-4 border-r p-1 min-h-1 flex items-center">
-                    <span class="khmer">កាលបរិច្ឆេទ</span>/ Date: <span class="text-blue italic bold" style="margin-left: 6px;">${data['reportDate'] ?? 'N/A'}</span>
+                <div class="span-3 border-r p-1 min-h-1 flex items-center justify-between">
+                    <div><span class="khmer">កាលបរិច្ឆេទ</span>/ Date:</div>
+                    <div class="text-blue italic bold">${data['reportDate'] ?? 'N/A'}</div>
                 </div>
-                <div class="span-4 border-r p-1 min-h-1 flex items-center">
-                    WOD: <span class="text-blue italic bold" style="margin-left: 6px;">${data['wod'] ?? ''}</span>
+                <div class="span-6 border-r p-1 min-h-1 flex items-center justify-between">
+                    <div>WOD:</div>
+                    <div class="text-blue italic bold">${data['wod'] ?? ''}</div>
                 </div>
-                <div class="span-4 p-1 min-h-1 flex items-center justify-between">
+                <div class="span-3 p-1 min-h-1 flex items-center justify-between">
                     <div>Contract:</div>
                     <div class="text-blue italic bold">${data['contract'] ?? 'Yes'}</div>
                 </div>
