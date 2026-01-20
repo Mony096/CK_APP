@@ -52,6 +52,23 @@ class HtmlServiceReportGenerator {
       }
     }
 
+    // Build diagnosis from issues collection
+    String diagnosis = data['U_CK_Diagnosis']?.toString() ?? '';
+    final List<dynamic> issues = data['CK_JOB_ISSUECollection'] as List? ?? [];
+    if (issues.isNotEmpty) {
+      final issueText = issues.map((i) {
+        final type = i['U_CK_IssueType']?.toString() ?? '';
+        final desc = i['U_CK_IssueDesc']?.toString() ?? '';
+        return '${type.isNotEmpty ? "_ $type: " : "_ "}$desc';
+      }).join('\n');
+
+      if (diagnosis.isEmpty) {
+        diagnosis = issueText;
+      } else {
+        diagnosis += '\n$issueText';
+      }
+    }
+
     // Build comprehensive report data map
     final Map<String, dynamic> reportData = {
       ...data,
@@ -71,7 +88,7 @@ class HtmlServiceReportGenerator {
       'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
           data['U_CK_JobType']?.toString() ??
           '',
-      'diagnosis': data['U_CK_Diagnosis']?.toString() ?? '',
+      'diagnosis': diagnosis,
       'measurements': data['U_CK_Measurements']?.toString() ?? '',
       'recommendation': data['U_CK_Recommendation']?.toString() ?? '',
       'problemFixed': data['U_CK_ProblemFixed']?.toString() ?? 'Yes',
