@@ -265,7 +265,7 @@ class HtmlServiceReportGenerator {
       signatureHtml = '''
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:0.2;">
           <div style="font-size:20px;">✍️</div>
-          <div style="font-size:7.2px;">REQUIRED SIGNATURE</div>
+          <div style="font-size:8px;">REQUIRED SIGNATURE</div>
         </div>
       ''';
     }
@@ -274,11 +274,11 @@ class HtmlServiceReportGenerator {
     String partsHtml = '';
     for (var p in parts) {
       partsHtml +=
-          '<div style="color:#1e3a8a;font-style:italic;font-weight:700;font-size:7.2px;padding:1px 0;">• ${p['U_CK_ItemName'] ?? ''} (Qty: ${p['U_CK_Qty'] ?? ''})</div>';
+          '<div style="color:#1e3a8a;font-style:italic;font-weight:700;font-size:8px;padding:1px 0;">• ${p['U_CK_ItemName'] ?? ''} (Qty: ${p['U_CK_Qty'] ?? ''})</div>';
     }
     if (partsHtml.isEmpty) {
       partsHtml =
-          '<div style="color:#9ca3af;font-size:7.2px;font-style:italic;">...</div>';
+          '<div style="color:#9ca3af;font-size:8px;font-style:italic;">...</div>';
     }
 
     // Build images HTML
@@ -294,7 +294,7 @@ class HtmlServiceReportGenerator {
             <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff;padding:2px;">
               <img src="$imageData" style="width:100%;height:100px;object-fit:cover;" />
             </div>
-            <div style="padding:4px;font-size:7.2px;font-style:italic;color:#1e3a8a;font-weight:400;text-align:left;">$description</div>
+            <div style="padding:4px;font-size:8px;font-style:italic;color:#1e3a8a;font-weight:400;text-align:left;">$description</div>
           </div>
         ''';
       } else {
@@ -302,7 +302,7 @@ class HtmlServiceReportGenerator {
           <div style="border-right:$borderRight;flex:1;display:flex;flex-direction:column;overflow:hidden;background:#fff;">
             <div style="flex:1;display:flex;align-items:center;justify-content:center;">
             </div>
-            <div style="padding:4px;font-size:7.2px;font-style:italic;color:#e5e7eb;text-align:left;">NO PHOTO</div>
+            <div style="padding:4px;font-size:8px;font-style:italic;color:#e5e7eb;text-align:left;">NO PHOTO</div>
           </div>
         ''';
       }
@@ -316,7 +316,7 @@ class HtmlServiceReportGenerator {
       signatureHtml = '''
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:0.2;">
           <div style="font-size:20px;">✍️</div>
-          <div style="font-size:7.2px;">REQUIRED SIGNATURE</div>
+          <div style="font-size:8px;">REQUIRED SIGNATURE</div>
         </div>
       ''';
     }
@@ -352,21 +352,12 @@ class HtmlServiceReportGenerator {
         }
         body {
             font-family: 'Inter', sans-serif;
-            font-size: 7.2px;
+            font-size: 8px;
             color: #000;
             line-height: 1.15;
             background: #fff;
         }
-        .page-wrapper {
-            width: 210mm;
-            height: 285mm; /* Match body height */
-            padding: 10mm 6mm 4mm 6mm; /* increased top padding */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-        .khmer { font-family: 'Siemreap', cursive; font-size: 7.2px; }
+        .khmer { font-family: 'Siemreap', cursive; font-size: 8px; }
         .container {
             width: 100%;
             border: 1px solid #000;
@@ -409,14 +400,14 @@ class HtmlServiceReportGenerator {
                 <div style="display: flex; align-items: center; gap: 8px;">
                     ${logoBase64 != null ? '<img src="data:image/png;base64,$logoBase64" style="height:40px;width:auto;" />' : '<span style="font-size:12px;font-weight:900;">CominKhmere</span>'}
                 </div>
-                <div class="bold" style="font-size: 8px; margin-top: 1px;">
+                <div class="bold" style="font-size: 10px; margin-top: 1px;">
                     <span class="khmer">របាយការណ៍សេវាកម្ម</span>/Service Report
                 </div>
             </div>
             <div style="grid-column: span 4; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
-                 <div class="bold" style="font-size: 7px;">No: ${data['reportNo'] ?? 'N/A'}</div>
+                 <div class="bold" style="font-size: 9px;">No: ${data['reportNo'] ?? 'N/A'}</div>
             </div>
-            <div style="grid-column: span 4; text-align: right; font-size: 5px;">
+            <div style="grid-column: span 4; text-align: right; font-size: 6.5px;">
                 <div class="italic">Hotline:</div>
                 <div class="bold italic">PP: 012 816 800/SHV: 092 777 224</div>
                 <div class="bold italic">SR: 012 222 723/PPIA: 092 777 143</div>
@@ -504,7 +495,7 @@ class HtmlServiceReportGenerator {
             <div class="bg-green p-1 bold border-b">
                 <span class="khmer">ការវិនិច្ឆ័យកំហូច ឬការថែទាំជូន សេវាកម្មដែលបានផ្ដល់ជូន</span>/Diagnosis Defect Found Service Rendered
             </div>
-            <div class="p-1 min-h-diag border-b text-blue italic bold" style="white-space: pre-wrap; font-size: 7.2px;">${data['diagnosis'] ?? ''}</div>
+            <div class="p-1 min-h-diag border-b text-blue italic bold" style="white-space: pre-wrap; font-size: 8px;">${data['diagnosis'] ?? ''}</div>
 
             <div class="grid grid-12 border-b">
                 <div class="span-6 border-r flex flex-col">
@@ -542,7 +533,7 @@ class HtmlServiceReportGenerator {
                     </div>
                 </div>
                 <div class="span-6 p-1 min-h-2 flex flex-col italic bold">
-                    <div class="khmer" style="font-size: 5.5px;">បញ្ជាក់ពីមូលហេតុដែលមិនត្រូវបានជួសជុល និងដំណោះស្រាយ if not, mention why:</div>
+                    <div class="khmer" style="font-size: 6.5px;">បញ្ជាក់ពីមូលហេតុដែលមិនត្រូវបានជួសជុល និងដំណោះស្រាយ if not, mention why:</div>
                     <div class="text-blue" style="margin-top: 2px;">${data['reasonIfNotFixed'] ?? ''}</div>
                 </div>
             </div>
@@ -602,7 +593,7 @@ class HtmlServiceReportGenerator {
 
         <!-- Footer Metadata -->
         <div class="flex justify-between items-end" style="margin-top: 4px;">
-            <div style="font-size: 6px; color: #000; font-weight: 500;">
+            <div style="font-size: 7px; color: #000; font-weight: 500;">
                 <div>Form Number: CK-SDD-F-0042</div>
                 <div>Revision: 2</div>
                 <div>Date: ${DateFormat('dd-MMM-yyyy').format(DateTime.now())}</div>
