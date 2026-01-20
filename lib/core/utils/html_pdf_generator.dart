@@ -441,10 +441,10 @@ class HtmlServiceReportGenerator {
                     <span class="khmer">របាយការណ៍សេវាកម្ម</span>/Service Report
                 </div>
             </div>
-            <div style="grid-column: span 4; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
+            <div style="grid-column: span 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
                  <div class="bold" style="font-size: 9px;">No: ${data['reportNo'] ?? 'N/A'}</div>
             </div>
-            <div style="grid-column: span 4; text-align: right; font-size: 6.5px;">
+            <div style="grid-column: span 5; text-align: right; font-size: 6.5px; padding-right: 4px;">
                 <div class="italic">Hotline:</div>
                 <div class="bold italic">PP: 012 816 800/SHV: 092 777 224</div>
                 <div class="bold italic">SR: 012 222 723/PPIA: 092 777 143</div>
