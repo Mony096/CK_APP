@@ -408,7 +408,7 @@ class HtmlServiceReportGenerator {
         <div class="grid grid-12" style="margin-bottom: 2px; border: none;">
             <div style="grid-column: span 4;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    ${logoBase64 != null ? '<img src="data:image/png;base64,$logoBase64" style="height:25px;width:auto;" />' : '<span style="font-size:12px;font-weight:900;">CominKhmere</span>'}
+                    ${logoBase64 != null ? '<img src="data:image/png;base64,$logoBase64" style="height:40px;width:auto;" />' : '<span style="font-size:12px;font-weight:900;">CominKhmere</span>'}
                 </div>
                 <div class="bold" style="font-size: 8px; margin-top: 1px;">
                     <span class="khmer">របាយការណ៍សេវាកម្ម</span>/Service Report
@@ -441,22 +441,20 @@ class HtmlServiceReportGenerator {
             </div>
 
             <div class="grid grid-12 border-b">
-                <div class="span-4 border-r flex flex-col">
-                    <div class="p-1 min-h-1 border-b">
-                        <span class="khmer">ឈ្មោះអតិថិជន</span> / Customer particular
-                    </div>
-                    <div class="p-1 min-h-1 text-blue italic bold">
-                        ${data['customer'] ?? ''}
-                    </div>
+                <div class="span-4 border-r p-1 flex items-center">
+                    <div><span class="khmer">ឈ្មោះអតិថិជន</span> /<br>Customer particular</div>
                 </div>
-                <div class="span-8 flex flex-col">
-                    <div class="flex border-b">
-                        <div class="w-50 border-r p-1 min-h-1"><span class="khmer">លេខសម្គាល់</span> / CK no</div>
-                        <div class="w-50 p-1 min-h-1 text-blue italic bold">${data['ckNo'] ?? ''}</div>
+                <div class="span-4 border-r p-1 flex items-center text-blue italic bold">
+                    ${data['customer'] ?? ''}
+                </div>
+                <div class="span-4 flex flex-col">
+                    <div class="flex border-b" style="flex: 1;">
+                        <div class="w-50 border-r p-1 flex items-center"><span class="khmer">លេខសម្គាល់</span>/ CK no</div>
+                        <div class="w-50 p-1 text-blue italic bold flex items-center">${data['ckNo'] ?? ''}</div>
                     </div>
-                    <div class="flex">
-                        <div class="w-50 border-r p-1 min-h-1"><span class="khmer">ម៉ាក</span> / Brand</div>
-                        <div class="w-50 p-1 min-h-1 text-blue italic bold">${data['brand'] ?? ''}</div>
+                    <div class="flex" style="flex: 1;">
+                        <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក</span> / Brand</div>
+                        <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''}</div>
                     </div>
                 </div>
             </div>
