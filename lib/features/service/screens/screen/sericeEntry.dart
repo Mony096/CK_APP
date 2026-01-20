@@ -33,8 +33,168 @@ class ServiceEntryScreen extends StatefulWidget {
 }
 
 class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CompletedServiceProvider>().clearData();
+    });
+  }
+
   void onCompletedService() async {
-    // 1. Save locally first (onCompletedServiceOffline handles its own loading dialog)
+    // 1. Check internet connection first
+    final hasInternet = await _checkInternetConnection();
+
+    if (hasInternet) {
+      // Show dialog asking user to choose between save offline or save to SAP
+      if (!mounted) return;
+      _showInternetAvailableDialog();
+    } else {
+      // No internet - save offline only
+      await _saveOfflineOnly();
+    }
+  }
+
+  /// Show dialog when internet is available
+  void _showInternetAvailableDialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          backgroundColor: Colors.white,
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.wifi,
+                  color: Color(0xFF22C55E),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Internet Available',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(height: 24),
+              Text(
+                'Your internet connection is available. How would you like to save this service?',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF64748B),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await _saveOfflineOnly();
+                    },
+                    icon: const Icon(Icons.save_outlined, size: 18),
+                    label: Text(
+                      'Save Offline',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF64748B),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await _saveAndSyncToSAP();
+                    },
+                    icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                    label: Text(
+                      'Save to SAP',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF22C55E),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Save offline only without syncing to SAP
+  Future<void> _saveOfflineOnly() async {
+    final res =
+        await Provider.of<CompletedServiceProvider>(context, listen: false)
+            .onCompletedServiceOffline(
+      context: context,
+      attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+      docEntry: widget.data["DocEntry"],
+      startTime: widget.data["U_CK_Time"],
+      endTime: widget.data["U_CK_EndTime"],
+      customerName: widget.data["U_CK_Cardname"],
+      date: widget.data["U_CK_Date"] ?? "",
+    );
+
+    if (res && mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  /// Save offline and sync to SAP
+  Future<void> _saveAndSyncToSAP() async {
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onCompletedServiceOffline(
@@ -48,22 +208,18 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     );
 
     if (res) {
-      // 2. If online, try to sync immediately
-      final hasInternet = await _checkInternetConnection();
-      if (hasInternet) {
-        if (mounted) MaterialDialog.loading(context);
-        try {
-          debugPrint("📡 Internet available - triggering immediate sync...");
-          await Provider.of<CompletedServiceProvider>(context, listen: false)
-              .syncAllOfflineServicesToSAP(context);
-        } catch (e) {
-          debugPrint(
-              "❌ Immediate sync failed (will still reflect as offline): $e");
-          // We don't show an error here because the data is safe offline
-          // and will be shown as "Pending Sync" on the dashboard.
-        } finally {
-          if (mounted) MaterialDialog.close(context);
-        }
+      if (mounted) MaterialDialog.loading(context);
+      try {
+        debugPrint("📡 Internet available - triggering immediate sync...");
+        await Provider.of<CompletedServiceProvider>(context, listen: false)
+            .syncAllOfflineServicesToSAP(context);
+      } catch (e) {
+        debugPrint(
+            "❌ Immediate sync failed (will still reflect as offline): $e");
+        // We don't show an error here because the data is safe offline
+        // and will be shown as "Pending Sync" on the dashboard.
+      } finally {
+        if (mounted) MaterialDialog.close(context);
       }
 
       if (mounted) {
@@ -309,7 +465,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                                       Text(
                                         "$startTime - $endTime",
                                         style: GoogleFonts.inter(
-                                          fontSize: 13.5 .sp,
+                                          fontSize: 13.5.sp,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF1E293B),
                                         ),

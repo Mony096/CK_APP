@@ -4,6 +4,7 @@ import 'package:bizd_tech_service/features/service/provider/completed_service_pr
 import 'package:bizd_tech_service/features/service/screens/component/status_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -17,94 +18,219 @@ class ServiceCheckListScreen extends StatefulWidget {
 
 class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
   final remark = TextEditingController();
-  int isEditComp = -1;
+  List<dynamic> _localTasks = [];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<CompletedServiceProvider>();
-      if (provider.checkListLine.isEmpty) {
-        final checklist = widget.data["checklistLine"] as List? ?? [];
-        provider
-            .setCheckList(List<Map<String, dynamic>>.from(checklist.map((e) {
-          final map = Map<String, dynamic>.from(e);
-          // Map backend status to boolean for Checkbox
-          if (map['U_CK_TrueOutput'] == 'Yes') {
-            map['U_CK_Checked'] = true;
-          } else if (map['U_CK_FalseOutput'] == 'Yes') {
-            map['U_CK_Checked'] = false;
-          }
-          return map;
-        })));
-      }
-    });
+    final provider = context.read<CompletedServiceProvider>();
+
+    // If provider already has data (e.g., user is returning to edit), use that.
+    // Otherwise, initialize from widget data.
+    if (provider.checkListLine.isNotEmpty) {
+      _localTasks = List<dynamic>.from(
+          provider.checkListLine.map((e) => Map<String, dynamic>.from(e)));
+    } else {
+      final checklist = widget.data["CK_JOB_TASKCollection"] as List? ?? [];
+      _localTasks = List<dynamic>.from(checklist.map((e) {
+        final map = Map<String, dynamic>.from(e);
+        // Handle potential initial status from SAP ("Y"/"N") or default to false
+        if (map['U_CK_Checked'] is String) {
+          map['U_CK_Checked'] =
+              (map['U_CK_Checked'] == 'Y' || map['U_CK_Checked'] == 'Yes');
+        }
+        return map;
+      }));
+    }
   }
 
   void _showEditFeedback(dynamic item, int index) {
-    remark.text = item["U_CK_Feedback"] ?? "";
+    remark.text = item["U_CK_Answer"] ?? "";
+    final type = item["U_CK_ChecklistType"] ?? "Text";
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              Icon(Icons.feedback_rounded,
-                  color: const Color(0xFFF59E0B), size: 20.sp),
-              SizedBox(width: 3.w),
-              Text("Task Feedback",
-                  style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w700, fontSize: 17.sp)),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                item["U_CK_ChecklistTitle"] ?? "Checklist Item",
-                style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B)),
-              ),
-              SizedBox(height: 2.h),
-              CustomTextRemarkDialog(
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            Widget feedbackInput;
+
+            if (type == "Time") {
+              feedbackInput = InkWell(
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: const ColorScheme.light(
+                            primary: Color(0xFF425364),
+                            onPrimary: Colors.white,
+                            onSurface: Color(0xFF1E293B),
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (time != null) {
+                    final now = DateTime.now();
+                    final dateTime = DateTime(
+                        now.year, now.month, now.day, time.hour, time.minute);
+                    final formatted =
+                        DateFormat("MMM dd, yyyy, hh:mm a").format(dateTime);
+                    setDialogState(() {
+                      remark.text = formatted;
+                    });
+                  }
+                },
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    controller: remark,
+                    decoration: InputDecoration(
+                      labelText: "Select Time",
+                      hintText: "Click to pick time",
+                      prefixIcon: const Icon(Icons.access_time_rounded,
+                          color: Color(0xFF425364)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            } else if (type == "Number") {
+              feedbackInput = TextFormField(
+                controller: remark,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "Value (Number)",
+                  prefixIcon: const Icon(Icons.numbers_rounded,
+                      color: Color(0xFF425364)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                ),
+              );
+            } else if (type == "True/False") {
+              // Set default if empty
+              if (remark.text != "true" && remark.text != "false") {
+                remark.text = "false";
+              }
+              bool isTrue = remark.text == "true";
+
+              feedbackInput = Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: CheckboxListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
+                  title: Text(
+                    isTrue ? "true" : "false",
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  value: isTrue,
+                  activeColor: const Color(0xFF425364),
+                  onChanged: (val) {
+                    setDialogState(() {
+                      remark.text = val! ? "true" : "false";
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+              );
+            } else {
+              feedbackInput = CustomTextRemarkDialog(
                 controller: remark,
                 label: 'Comments / Observation',
                 star: false,
                 detail: false,
+              );
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  Icon(Icons.feedback_rounded,
+                      color: const Color(0xFFF59E0B), size: 19.sp),
+                  SizedBox(width: 3.w),
+                  Text("Task Feedback",
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w800, fontSize: 17.sp)),
+                ],
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel",
-                  style: GoogleFonts.inter(
-                      color: Colors.grey, fontWeight: FontWeight.w600)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                item["U_CK_Feedback"] = remark.text;
-                context
-                    .read<CompletedServiceProvider>()
-                    .addOrEditOpenCheckList(item, editIndex: index);
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                backgroundColor: const Color(0xFF425364),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item["U_CK_ChecklistTitle"] ?? "Checklist Item",
+                      style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF1E293B)),
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      "Type: $type",
+                      style: GoogleFonts.inter(
+                          fontSize: 12.5.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF94A3B8)),
+                    ),
+                    SizedBox(height: 2.5.h),
+                    feedbackInput,
+                  ],
+                ),
               ),
-              child: Text("Save Feedback",
-                  style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w700, fontSize: 14.sp)),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("Cancel",
+                      style: GoogleFonts.inter(
+                          color: const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w600)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _localTasks[index]["U_CK_Answer"] = remark.text;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(100, 42),
+                    backgroundColor: const Color(0xFF425364),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text("Save",
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700, fontSize: 14.5.sp)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -221,7 +347,12 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
             onPressed: () => Navigator.of(context).pop()),
         actions: [
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              context
+                  .read<CompletedServiceProvider>()
+                  .setCheckList(_localTasks);
+              Navigator.of(context).pop();
+            },
             icon: const Icon(Icons.check_rounded, color: Colors.white),
           ),
           SizedBox(width: 2.w),
@@ -285,37 +416,31 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                           letterSpacing: 1.0)),
                 ),
                 SizedBox(height: 1.5.h),
-                Consumer<CompletedServiceProvider>(
-                  builder: (context, provider, child) {
-                    final items = provider.checkListLine;
-                    print(provider);
-                    if (items.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5.h),
-                          child: Column(
-                            children: [
-                              Icon(Icons.assignment_late_rounded,
-                                  size: 30.sp, color: const Color(0xFFCBD5E1)),
-                              SizedBox(height: 1.h),
-                              Text("No tasks available",
-                                  style: GoogleFonts.inter(
-                                      fontSize: 14.sp,
-                                      color: const Color(0xFF94A3B8))),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                    return Column(
-                      children: items.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final item = entry.value;
-                        return _buildTaskCard(item, index);
-                      }).toList(),
-                    );
-                  },
-                ),
+                if (_localTasks.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5.h),
+                      child: Column(
+                        children: [
+                          Icon(Icons.assignment_late_rounded,
+                              size: 30.sp, color: const Color(0xFFCBD5E1)),
+                          SizedBox(height: 1.h),
+                          Text("No tasks available",
+                              style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFF94A3B8))),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children: _localTasks.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final item = entry.value;
+                      return _buildTaskCard(item, index);
+                    }).toList(),
+                  ),
                 SizedBox(height: 5.h),
               ],
             ),
@@ -355,8 +480,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4)),
                   onChanged: (val) {
+                    setState(() {
+                      isChecked = val!;
+                      _localTasks[index]["U_CK_Checked"] = val;
+                    });
                     setLocalState(() => isChecked = val!);
-                    item["U_CK_Checked"] = val;
                   },
                 ),
                 title: Text(item["U_CK_ChecklistTitle"] ?? "N/A",
@@ -384,8 +512,8 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                 ),
                 onTap: () => _showEditFeedback(item, index),
               ),
-              if (item["U_CK_Feedback"] != null &&
-                  item["U_CK_Feedback"].toString().isNotEmpty)
+              if (item["U_CK_Answer"] != null &&
+                  item["U_CK_Answer"].toString().isNotEmpty)
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.fromLTRB(14.w, 0, 4.w, 2.h),
@@ -396,7 +524,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                       SizedBox(width: 2.w),
                       Expanded(
                         child: Text(
-                          item["U_CK_Feedback"],
+                          item["U_CK_Answer"],
                           style: GoogleFonts.inter(
                               fontSize: 12.5.sp,
                               color: const Color(0xFFB45309),

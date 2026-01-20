@@ -450,6 +450,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                           final travel = documents[index];
                           return BlockService(
                             data: travel as dynamic,
+                            onRefresh: _refreshData,
                             onTap: () async {
                               if (travel["U_CK_Status"] == "Service") {
                                 goTo(context, ServiceEntryScreen(data: travel))

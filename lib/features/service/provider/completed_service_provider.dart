@@ -181,6 +181,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     _imagesList = [];
     _signatureList = [];
     _timeEntry = [];
+    _checkListLine = [];
     notifyListeners();
   }
 
@@ -512,7 +513,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     List<Map<dynamic, dynamic>> completedServices =
         await offlineProvider.getCompletedServicesToSync();
     if (completedServices.isEmpty) return false;
-
+    print(completedServices);
     for (var servicePayload in completedServices) {
       final docEntry = servicePayload['DocEntry'];
       final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
@@ -572,7 +573,7 @@ class CompletedServiceProvider extends ChangeNotifier {
           }
           sapPayload.remove('files');
           sapPayload.remove('sync_status');
- 
+
           // 3. Send payload to SAP
           final response = await dio.patch(
             "/script/test/CK_CompleteStatus($docEntry)",
@@ -586,7 +587,9 @@ class CompletedServiceProvider extends ChangeNotifier {
           debugPrint("Response Body: ${response.data}");
           debugPrint("📡 SAP Response for DocEntry $docEntry:");
 
-          if (response.statusCode == 200 || response.statusCode == 204 || response.statusCode == 201) {
+          if (response.statusCode == 200 ||
+              response.statusCode == 204 ||
+              response.statusCode == 201) {
             await offlineProvider.markServiceSynced(docEntry);
             debugPrint("✅ Synced DocEntry: $sapPayload");
             success = true;
@@ -763,25 +766,17 @@ class CompletedServiceProvider extends ChangeNotifier {
         }
       ],
       "CK_JOB_ISSUECollection": _openIssues,
-      "feedbackChecklistLine": _checkListLine.map((item) {
-        final newItem = Map<String, dynamic>.from(item); // clone the map
-
-        if (newItem['U_CK_Checked'] == true) {
-          newItem['U_CK_TrueOutput'] = 'Yes';
-          newItem['U_CK_FalseOutput'] = 'No';
-        } else {
-          newItem['U_CK_TrueOutput'] = 'No';
-          newItem['U_CK_FalseOutput'] = 'Yes';
-        }
-
-        newItem.remove('U_CK_Checked'); // remove the original field
-        return newItem;
+      "CK_JOB_TASKCollection": _checkListLine.map((item) {
+        return {
+          ...item,
+          'U_CK_Checked': item['U_CK_Checked'] == true ? 'Y' : 'N',
+        };
       }).toList(),
 
       "files": fileDataList, // ✅ Each file has {ext, data}
     };
 
-    // print(payload["CK_JOB_ISSUECollection"]);
+    // print(payload["feedbackChecklistLine"]);
     // return false;
     // 3. Offline saving
     _submit = true;

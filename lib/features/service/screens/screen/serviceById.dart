@@ -81,7 +81,10 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
 
   Future<void> onUpdateStatus() async {
     if (widget.data["U_CK_Status"] == "Service") {
-      goTo(context, ServiceEntryScreen(data: widget.data));
+      final res = await goTo(context, ServiceEntryScreen(data: widget.data));
+      if (res == true && mounted) {
+        Navigator.of(context).pop(true);
+      }
       return;
     }
 

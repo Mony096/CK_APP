@@ -6,8 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class BlockService extends StatelessWidget {
-  const BlockService({super.key, this.onTap, required this.data});
+  const BlockService(
+      {super.key, this.onTap, this.onRefresh, required this.data});
   final VoidCallback? onTap;
+  final VoidCallback? onRefresh;
   final Map<String, dynamic> data;
 
   @override
@@ -202,8 +204,12 @@ class BlockService extends StatelessWidget {
             child: Row(
               children: [
                 TextButton(
-                  onPressed: () {
-                    goTo(context, ServiceByIdScreen(data: data));
+                  onPressed: () async {
+                    final res =
+                        await goTo(context, ServiceByIdScreen(data: data));
+                    if (res == true && onRefresh != null) {
+                      onRefresh!();
+                    }
                   },
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 3.w),

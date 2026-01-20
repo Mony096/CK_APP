@@ -120,7 +120,6 @@ class AuthProvider with ChangeNotifier {
           debugPrint('⚠️ FCM Token not available (simulator?): $e');
           // Continue login even if FCM fails - this is expected on iOS simulator
         }
-        
         debugPrint('🔄 Checking session...');
         checkSession();
         _isLoggedIn = true;

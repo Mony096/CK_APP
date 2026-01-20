@@ -1248,7 +1248,7 @@ class _DashboardState extends State<Dashboard>
                           ),
                         ),
                       if (_selectedJob != "All") ...[
-                        _buildFilterChip("Job: $_selectedJob", () {
+                        _buildFilterChip("JobType: $_selectedJob", () {
                           setState(() {
                             _selectedJob = "All";
                           });
@@ -1257,7 +1257,7 @@ class _DashboardState extends State<Dashboard>
                         const SizedBox(width: 8),
                       ],
                       if (_jobClass != "All") ...[
-                        _buildFilterChip("Svc: $_jobClass", () {
+                        _buildFilterChip("JobClass: $_jobClass", () {
                           setState(() {
                             _jobClass = "All";
                           });
@@ -1266,7 +1266,7 @@ class _DashboardState extends State<Dashboard>
                         const SizedBox(width: 8),
                       ],
                       if (_selectedPriority != "All") ...[
-                        _buildFilterChip("Pri: $_selectedPriority", () {
+                        _buildFilterChip("Priority: $_selectedPriority", () {
                           setState(() {
                             _selectedPriority = "All";
                           });

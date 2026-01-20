@@ -341,9 +341,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             content: Text('Generating PDF Report...')),
                       );
 
-                      final file =
-                          await HtmlServiceReportGenerator.generateServiceReport(
-                              _displayData);
+                      final file = await HtmlServiceReportGenerator
+                          .generateServiceReport(_displayData);
 
                       if (mounted) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -913,12 +912,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       ),
                     ),
                   )
-                : Image.memory(
-                    base64Decode(base64Data),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Center(
-                        child: Icon(Icons.broken_image_rounded,
-                            size: 20.sp, color: Colors.grey)),
+                : InkWell(
+                    onTap: () {
+                      _showImagePreview(context, base64Data);
+                    },
+                    child: Image.memory(
+                      base64Decode(base64Data),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(Icons.broken_image_rounded,
+                              size: 20.sp, color: Colors.grey)),
+                    ),
                   ),
           ),
         );
@@ -1079,6 +1083,50 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       titleKey: 'U_CK_IssueType',
       subtitleKey: 'U_CK_IssueDesc',
       subtitlePrefix: 'Desc: ',
+    );
+  }
+
+  void _showImagePreview(BuildContext context, String base64Data) {
+    showDialog(
+      context: context,
+      useSafeArea: false,
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black.withOpacity(0.5),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.download_rounded, color: Colors.white),
+              onPressed: () {
+                // Future implementation for downloading/saving
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Saving to gallery...')),
+                );
+              },
+            ),
+          ],
+        ),
+        extendBodyBehindAppBar: true,
+        body: Center(
+          child: InteractiveViewer(
+            panEnabled: true,
+            boundaryMargin: const EdgeInsets.all(20),
+            minScale: 0.5,
+            maxScale: 4,
+            child: Image.memory(
+              base64Decode(base64Data),
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

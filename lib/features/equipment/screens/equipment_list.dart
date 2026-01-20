@@ -580,13 +580,27 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Text(
-                            item["Code"] ?? "N/A",
-                            style: google_fonts.GoogleFonts.inter(
-                              fontSize: 12.7.sp,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF94A3B8),
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                item["Code"] ?? "N/A",
+                                style: google_fonts.GoogleFonts.inter(
+                                  fontSize: 12.7.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF94A3B8),
+                                ),
+                              ),
+                              SizedBox(width: 1.5.w),
+                              Icon(
+                                item['sync_status'] == 'pending'
+                                    ? Icons.cloud_off_rounded
+                                    : Icons.cloud_done_rounded,
+                                size: 15.sp,
+                                color: item['sync_status'] == 'pending'
+                                    ? Colors.red
+                                    : const Color(0xFF22C55E),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -597,7 +611,7 @@ class _EquipmentListScreenState extends State<EquipmentListScreen> {
                               size: 11.sp, color: const Color(0xFF94A3B8)),
                           SizedBox(width: 1.w),
                           Text(
-                            "S/N: ${item["U_ck_eqSerNum"] == "" ? "N/A" : item["U_ck_eqSerNum"]}",
+                            "S/N: ${item["U_ck_eqSerNum"] == "" || item["U_ck_eqSerNum"] == null ? "N/A" : item["U_ck_eqSerNum"]}",
                             style: google_fonts.GoogleFonts.inter(
                               fontSize: 12.5.sp,
                               fontWeight: FontWeight.w500,
