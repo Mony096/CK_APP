@@ -594,21 +594,19 @@ class HtmlServiceReportGenerator {
                 </div>
             </div>
 
-            <div class="grid grid-12 bg-grey bg-green" style="background-color: #f3f4f6 !important; height: 12px; border-top: 1px solid #000;">
-                <div class="span-4 border-r p-1 flex items-center">CK use:</div>
-                <div class="span-4 border-r p-1 flex items-center">Check by:</div>
-                <div class="span-4 p-1 flex items-center">Checked on:</div>
+            <div class="grid grid-12" style="height: 14px; border-top: 1px solid #000;">
+                <div class="span-4 p-1 flex items-center justify-center">CK use:</div>
+                <div class="span-4 p-1 flex items-center justify-center italic">Check by:</div>
+                <div class="span-4 p-1 flex items-center justify-center">Checked on:</div>
             </div>
         </div>
 
-        <div style="flex-grow: 1;"></div>
-
         <!-- Footer Metadata -->
-        <div class="flex justify-between items-end" style="margin-top: 2px;">
-            <div style="font-size: 5px; color: #6b7280;">
+        <div class="flex justify-between items-end" style="margin-top: 4px;">
+            <div style="font-size: 6px; color: #000; font-weight: 500;">
                 <div>Form Number: CK-SDD-F-0042</div>
                 <div>Revision: 2</div>
-                <div>Date: 12-Aug-2025</div>
+                <div>Date: ${DateFormat('dd-MMM-yyyy').format(DateTime.now())}</div>
             </div>
             <div style="font-size: 6px; font-weight: 700; color: #10b981; font-style: italic; opacity: 0.6;">
                 PRECISION DIGITAL TWIN
