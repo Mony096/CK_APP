@@ -6,8 +6,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/service/screens/signature/signature_preview_edit.dart';
+import 'package:bizd_tech_service/features/service/screens/pdf/pdf_preview_screen.dart';
 import 'package:bizd_tech_service/core/utils/html_pdf_generator.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -335,24 +336,78 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 onSelected: (value) async {
                   if (value == 'export_pdf') {
                     try {
-                      // Show loading
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Generating PDF Report...')),
+                      // Show premium loading indicator
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w, vertical: 4.h),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(24),
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF10B981)),
+                                  ),
+                                  SizedBox(height: 3.h),
+                                  Text(
+                                    'Preparing Report...',
+                                    style: google_fonts.GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1F2937),
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                  SizedBox(height: 1.h),
+                                  Text(
+                                    'This may take a moment',
+                                    style: google_fonts.GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF6B7280),
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       );
 
-                      final file =
-                          await HtmlServiceReportGenerator.generateServiceReport(
-                              _displayData);
+                      final file = await HtmlServiceReportGenerator
+                          .generateServiceReport(_displayData);
 
                       if (mounted) {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        Navigator.pop(context); // Close loading
+
+                        // Navigate to Preview Screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PDFViewerScreen(
-                              filePath: file.path,
-                              title: "Service Report",
+                            builder: (context) => PDFPreviewScreen(
+                              pdfFile: file,
+                              title:
+                                  'Service Report #${_displayData['DocNum'] ?? _displayData['id'] ?? ''}',
                             ),
                           ),
                         );
@@ -360,8 +415,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     } catch (e) {
                       debugPrint("Error generating PDF: $e");
                       if (mounted) {
+                        Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to generate PDF: $e')),
+                          SnackBar(
+                            content: Text('Failed to generate PDF: $e'),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
                         );
                       }
                     }
