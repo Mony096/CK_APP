@@ -301,7 +301,6 @@ class HtmlServiceReportGenerator {
         imagesHtml += '''
           <div style="border-right:$borderRight;flex:1;display:flex;flex-direction:column;overflow:hidden;background:#fff;">
             <div style="flex:1;display:flex;align-items:center;justify-content:center;">
-              <div style="color:#e5e7eb;font-size:24px;">📷</div>
             </div>
             <div style="padding:4px;font-size:7.2px;font-style:italic;color:#e5e7eb;text-align:left;">NO PHOTO</div>
           </div>
@@ -397,9 +396,9 @@ class HtmlServiceReportGenerator {
         .span-8 { grid-column: span 8; }
         .span-3 { grid-column: span 3; }
         .span-5 { grid-column: span 5; }
-        .min-h-1 { min-height: 18px; }
-        .min-h-2 { min-height: 32px; }
-        .min-h-diag { min-height: 40px; }
+        .min-h-1 { min-height: 22px; }
+        .min-h-2 { min-height: 36px; }
+        .min-h-diag { min-height: 50px; }
     </style>
 </head>
 <body>
@@ -512,7 +511,7 @@ class HtmlServiceReportGenerator {
                     <div class="bg-green p-1 bold border-b">
                         <span class="khmer">គ្រឿងបន្លាស់</span>/Part Supply
                     </div>
-                    <div class="p-1" style="flex-grow: 1; min-height: 100px;">
+                    <div class="p-1" style="flex-grow: 1; min-height: 120px;">
                         $partsHtml
                     </div>
                 </div>
@@ -555,7 +554,7 @@ class HtmlServiceReportGenerator {
             <div class="bg-green p-1 bold border-b">
                 <span class="khmer">រូបភាពរបាយការណ៍</span>/ Picture Report
             </div>
-            <div class="p-1 border-b" style="height: 120px; overflow: hidden; display: flex;">
+            <div class="p-1 border-b" style="height: 130px; overflow: hidden; display: flex;">
                 $imagesHtml
             </div>
 
@@ -594,7 +593,7 @@ class HtmlServiceReportGenerator {
                 </div>
             </div>
 
-            <div class="grid grid-12" style="height: 14px; border-top: 1px solid #000;">
+            <div class="grid grid-12" style="height: 24px; border-top: 1px solid #000;">
                 <div class="span-4 p-1 flex items-center justify-center">CK use:</div>
                 <div class="span-4 p-1 flex items-center justify-center italic">Check by:</div>
                 <div class="span-4 p-1 flex items-center justify-center">Checked on:</div>
