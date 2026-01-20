@@ -400,7 +400,7 @@ class HtmlServiceReportGenerator {
         .span-5 { grid-column: span 5; }
         .min-h-1 { min-height: 18px; }
         .min-h-2 { min-height: 32px; }
-        .min-h-diag { flex-grow: 1; min-height: 60px; }
+        .min-h-diag { min-height: 40px; }
     </style>
 </head>
 <body>
@@ -506,7 +506,7 @@ class HtmlServiceReportGenerator {
             <div class="bg-green p-1 bold border-b">
                 <span class="khmer">ការវិនិច្ឆ័យកំហូច ឬការថែទាំជូន សេវាកម្មដែលបានផ្ដល់ជូន</span>/Diagnosis Defect Found Service Rendered
             </div>
-            <div class="p-1 min-h-diag border-b text-blue italic bold" style="white-space: pre-wrap; font-size: 7.2px; flex-grow: 1;">${data['diagnosis'] ?? ''}</div>
+            <div class="p-1 min-h-diag border-b text-blue italic bold" style="white-space: pre-wrap; font-size: 7.2px;">${data['diagnosis'] ?? ''}</div>
 
             <div class="grid grid-12 border-b">
                 <div class="span-6 border-r flex flex-col">
