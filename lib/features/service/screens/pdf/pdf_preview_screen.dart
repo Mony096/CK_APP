@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 class PDFPreviewScreen extends StatefulWidget {
   final File pdfFile;
@@ -39,11 +40,19 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
 
   Future<void> _sharePdf() async {
     try {
+      // Copy to temp file to avoid locking issues and ensure shareability
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+          '${tempDir.path}/Service_Report_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await widget.pdfFile.copy(tempFile.path);
+
+      if (!mounted) return;
+
       final box = context.findRenderObject() as RenderBox?;
       final offset = box?.localToGlobal(Offset.zero) ?? Offset.zero;
 
       await Share.shareXFiles(
-        [XFile(widget.pdfFile.path)],
+        [XFile(tempFile.path)],
         text: 'Service Report PDF',
         sharePositionOrigin: Rect.fromLTWH(
           offset.dx,
@@ -56,6 +65,51 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error sharing PDF: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadPdf() async {
+    try {
+      final downloadsDir = await getApplicationDocumentsDirectory();
+      final fileName =
+          'ServiceReport_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final newPath = '${downloadsDir.path}/$fileName';
+
+      await widget.pdfFile.copy(newPath);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'PDF saved: $fileName',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'OPEN',
+              textColor: Colors.white,
+              onPressed: _sharePdf,
+            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving PDF: $e')),
         );
       }
     }
@@ -163,25 +217,47 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
           ],
         ),
         child: SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _sharePdf,
-              icon: const Icon(Icons.share_rounded),
-              label: Text(
-                'Export / Save PDF',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 1.8.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _sharePdf,
+                  icon: const Icon(Icons.share_rounded),
+                  label: Text(
+                    'Share',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF1E293B),
+                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
-                elevation: 0,
               ),
-            ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _downloadPdf,
+                  icon: const Icon(Icons.download_rounded),
+                  label: Text(
+                    'Download',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1E293B),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
