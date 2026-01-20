@@ -87,7 +87,9 @@ class HtmlServiceReportGenerator {
       'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
       'lastPM': data['U_CK_LastPM'],
       'location': data['U_CK_Location']?.toString() ?? '',
-      'serviceType': data['U_CK_ServiceType']?.toString() ?? '',
+      'serviceType': data['U_CK_JobClass']?.toString() ??
+          data['U_CK_ServiceType']?.toString() ??
+          '',
       'hourMeter': data['U_CK_HourMeter']?.toString() ?? 'N/A',
       'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
           data['U_CK_JobType']?.toString() ??
@@ -199,7 +201,9 @@ class HtmlServiceReportGenerator {
       'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
       'lastPM': data['U_CK_LastPM'],
       'location': data['U_CK_Location']?.toString() ?? '',
-      'serviceType': data['U_CK_ServiceType']?.toString() ?? '',
+      'serviceType': data['U_CK_JobClass']?.toString() ??
+          data['U_CK_ServiceType']?.toString() ??
+          '',
       'hourMeter': data['U_CK_HourMeter']?.toString() ?? 'N/A',
       'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
           data['U_CK_JobType']?.toString() ??
