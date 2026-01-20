@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 class ServiceReportGenerator {
   static const PdfColor primaryGreen = PdfColor.fromInt(0xffBCE6B4);
-  static const double borderWidth = 0.5;
+  static const double borderWidth = 1.0; // Increased for crisper lines
 
   /// Unicode-supporting font for PDF text rendering
   static pw.Font? _pdfFont;
