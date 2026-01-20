@@ -608,9 +608,6 @@ class HtmlServiceReportGenerator {
                 <div>Revision: 2</div>
                 <div>Date: ${DateFormat('dd-MMM-yyyy').format(DateTime.now())}</div>
             </div>
-            <div style="font-size: 6px; font-weight: 700; color: #10b981; font-style: italic; opacity: 0.6;">
-                PRECISION DIGITAL TWIN
-            </div>
         </div>
     </div>
 </body>
