@@ -371,7 +371,6 @@ class HtmlServiceReportGenerator {
         .container {
             width: 100%;
             border: 1px solid #000;
-            flex-grow: 1; /* Stretch to fill space */
             display: flex;
             flex-direction: column;
         }
@@ -601,6 +600,8 @@ class HtmlServiceReportGenerator {
                 <div class="span-4 p-1 flex items-center">Checked on:</div>
             </div>
         </div>
+
+        <div style="flex-grow: 1;"></div>
 
         <!-- Footer Metadata -->
         <div class="flex justify-between items-end" style="margin-top: 2px;">
