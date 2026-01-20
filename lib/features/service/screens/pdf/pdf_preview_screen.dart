@@ -66,20 +66,18 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        title: const Text(
-          'PDF Preview',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontWeight: FontWeight.bold,
+        title: Text(
+          widget.title,
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w800,
             fontSize: 18,
+            letterSpacing: 0.5,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF1E293B)),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
