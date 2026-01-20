@@ -397,6 +397,7 @@ class HtmlServiceReportGenerator {
         .span-4 { grid-column: span 4; }
         .span-8 { grid-column: span 8; }
         .span-3 { grid-column: span 3; }
+        .span-5 { grid-column: span 5; }
         .min-h-1 { min-height: 18px; }
         .min-h-2 { min-height: 32px; }
         .min-h-diag { flex-grow: 1; min-height: 60px; }
@@ -432,11 +433,11 @@ class HtmlServiceReportGenerator {
                     <div><span class="khmer">កាលបរិច្ឆេទ</span>/ Date:</div>
                     <div class="text-blue italic bold">${data['reportDate'] ?? 'N/A'}</div>
                 </div>
-                <div class="span-6 border-r p-1 min-h-1 flex items-center justify-between">
+                <div class="span-5 border-r p-1 min-h-1 flex items-center justify-between">
                     <div>WOD:</div>
                     <div class="text-blue italic bold">${data['wod'] ?? ''}</div>
                 </div>
-                <div class="span-3 p-1 min-h-1 flex items-center justify-between">
+                <div class="span-4 p-1 min-h-1 flex items-center justify-between">
                     <div>Contract:</div>
                     <div class="text-blue italic bold">${data['contract'] ?? 'Yes'}</div>
                 </div>
