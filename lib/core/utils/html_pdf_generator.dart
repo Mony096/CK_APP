@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter_native_html_to_pdf/flutter_native_html_to_pdf.dart';
+import 'package:hive/hive.dart';
+
 
 import 'package:flutter_native_html_to_pdf/pdf_page_size.dart';
 
@@ -32,7 +34,30 @@ class HtmlServiceReportGenerator {
     // Parse time entries for technician section
     final List<dynamic> timeEntries =
         data['CK_JOB_TIMECollection'] as List? ?? [];
+
+    // Fetch extra equipment details from offline storage if available
+    String serialNo = '';
+    String model = '';
+    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
+    if (eqId.isNotEmpty) {
+      try {
+        final box = Hive.box('equipment_box');
+        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
+        final equip = allEquips.firstWhere(
+          (e) => e['Code'] == eqId,
+          orElse: () => {},
+        );
+        if (equip.isNotEmpty) {
+          serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
+          model = equip['U_ck_eqModel']?.toString() ?? '';
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
+      }
+    }
+
     String dateArrived = '';
+
     String timeArrived = '';
     String dateCompleted = '';
     String timeCompleted = '';
@@ -109,7 +134,10 @@ class HtmlServiceReportGenerator {
       'dateCompleted': dateCompleted,
       'timeCompleted': timeCompleted,
       'totalHours': totalHours,
+      'serialNo': serialNo,
+      'model': model,
     };
+
 
     // Load logo as base64
     String? logoBase64;
@@ -164,7 +192,30 @@ class HtmlServiceReportGenerator {
     // Parse time entries
     final List<dynamic> timeEntries =
         data['CK_JOB_TIMECollection'] as List? ?? [];
+
+    // Fetch extra equipment details
+    String serialNo = '';
+    String model = '';
+    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
+    if (eqId.isNotEmpty) {
+      try {
+        final box = Hive.box('equipment_box');
+        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
+        final equip = allEquips.firstWhere(
+          (e) => e['Code'] == eqId,
+          orElse: () => {},
+        );
+        if (equip.isNotEmpty) {
+          serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
+          model = equip['U_ck_eqModel']?.toString() ?? '';
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
+      }
+    }
+
     String dateArrived = '';
+
     String timeArrived = '';
     String dateCompleted = '';
     String timeCompleted = '';
@@ -223,6 +274,8 @@ class HtmlServiceReportGenerator {
       'dateCompleted': dateCompleted,
       'timeCompleted': timeCompleted,
       'totalHours': totalHours,
+      'serialNo': serialNo,
+      'model': model,
     };
 
     // Load logo
@@ -482,8 +535,8 @@ class HtmlServiceReportGenerator {
                         <div class="w-50 p-1 text-blue italic bold flex items-center">${data['ckNo'] ?? ''}</div>
                     </div>
                     <div class="flex" style="flex: 1;">
-                        <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក</span> / Brand</div>
-                        <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''}</div>
+                    <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក/ម៉ូដែល</span> / Brand/Model</div>
+                    <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''} ${data['model'] != '' ? '/ ${data['model']}' : ''}</div>
                     </div>
                 </div>
             </div>
@@ -494,8 +547,8 @@ class HtmlServiceReportGenerator {
                 </div>
                 <div class="span-8 grid grid-12">
                     <div class="span-6 border-r p-1 min-h-1 text-blue italic bold">${data['equipmentType'] ?? ''}</div>
-                    <div class="span-3 border-r p-1 min-h-1"><span class="khmer">បរិក្ខារ</span>/Equipment</div>
-                    <div class="span-3 p-1 min-h-1 text-blue italic bold">${data['equipmentId'] ?? ''}</div>
+                    <div class="span-3 border-r p-1 min-h-1"><span class="khmer">បរិក្ខារ</span>/Equipment (SN)</div>
+                    <div class="span-3 p-1 min-h-1 text-blue italic bold">${data['equipmentId'] ?? ''} ${data['serialNo'] != '' ? '(${data['serialNo']})' : ''}</div>
                 </div>
             </div>
 
