@@ -549,7 +549,7 @@ class HtmlServiceReportGenerator {
                 </div>
             </div>
 
-            <div class="p-1 border-b italic bold" style="min-height: 14px;">
+            <div class="p-1 border-b italic bold" style="min-height: 40px;">
                 Technician Recommendation: <span class="text-blue">${data['recommendation'] ?? ''}</span>
             </div>
 
