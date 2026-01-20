@@ -131,70 +131,125 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
             const SizedBox(width: 12),
           ],
         ),
-        body: Column(
-          children: [
-            Expanded(
-              flex: isLandscape ? 1 : 3,
-              child: Signature(
-                controller: _controller,
-                backgroundColor: Colors.grey[200]!,
+        body: Container(
+          color: const Color(0xFFF1F5F9), // Light grey background
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isLandscape ? 40 : 24,
+                      vertical: isLandscape ? 20 : 40,
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: isLandscape ? 16 / 9 : 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF425364),
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(13),
+                          child: Signature(
+                            controller: _controller,
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            // SizedBox(height: 10),
-            isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _controller.clear(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Row(
+              Container(
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  vertical: isLandscape ? 12 : 16,
+                  horizontal: 20,
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Icon(Icons.edit, size: 18, color: Colors.white),
-                      SizedBox(width: 10),
-                      Text(
-                        "Clear",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => _controller.clear(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isLandscape ? 12 : 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.clear_rounded, size: 20, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                "Clear",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _exportAsPNG,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 78, 178, 24),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isLandscape ? 12 : 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_rounded, size: 20, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                "Save Signature",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: _exportAsPNG,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 78, 178, 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.edit, size: 18, color: Colors.white),
-                      SizedBox(width: 10),
-                      Text(
-                        "Save Signature",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            isLandscape ? const SizedBox(height: 5) : const SizedBox(height: 20),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

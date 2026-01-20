@@ -114,44 +114,83 @@ class _SignatureScreenState extends State<SignatureScreen> {
                 SizedBox(height: 5.h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFFF1F5F9)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black.withOpacity(0.01),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5))
-                            ]),
-                        child: Icon(Icons.gesture_rounded,
-                            size: 40.sp, color: const Color(0xFF425364)),
-                      ),
-                      SizedBox(height: 3.h),
-                      Text("Client Acknowledgement",
-                          style: GoogleFonts.inter(
-                              fontSize: 17.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1E293B))),
-                      SizedBox(height: 1.h),
-                      Text(
-                          "Please obtain the customer's signature to confirm service completion and satisfaction.",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: const Color(0xFF64748B),
-                              fontWeight: FontWeight.w500,
-                              height: 1.4)),
-                      SizedBox(height: 6.h),
-                      Consumer<CompletedServiceProvider>(
-                        builder: (context, provider, child) {
-                          final signature = provider.signature;
-                          if (signature == null) {
-                            return SizedBox(
+                  child: Consumer<CompletedServiceProvider>(
+                    builder: (context, provider, child) {
+                      final signature = provider.signature;
+                      
+                      // When no signature - show placeholder
+                      if (signature == null) {
+                        return Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      const Color(0xFFF8FAFC),
+                                      const Color(0xFFFFFFFF),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: const Color(0xFF425364).withOpacity(0.2),
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: const Color(0xFF425364).withOpacity(0.08),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                        spreadRadius: 0),
+                                    BoxShadow(
+                                        color: Colors.white.withOpacity(0.9),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, -2),
+                                        spreadRadius: 0)
+                                  ]),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(4.w),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF425364).withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(Icons.gesture_rounded,
+                                        size: 45.sp, color: const Color(0xFF425364)),
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    "Tap below to sign",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      color: const Color(0xFF64748B),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 3.h),
+                            Text("Client Acknowledgement",
+                                style: GoogleFonts.inter(
+                                    fontSize: 17.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1E293B))),
+                            SizedBox(height: 1.h),
+                            Text(
+                                "Please obtain the customer's signature to confirm service completion and satisfaction.",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter(
+                                    fontSize: 14.sp,
+                                    color: const Color(0xFF64748B),
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.4)),
+                            SizedBox(height: 6.h),
+                            SizedBox(
                               width: double.infinity,
                               height: 6.h,
                               child: ElevatedButton.icon(
@@ -169,139 +208,132 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                   elevation: 0,
                                 ),
                               ),
-                            );
-                          }
+                            ),
+                          ],
+                        );
+                      }
 
-                          // If signature exists, show preview concept
-                          final isPDF =
-                              signature.path.toLowerCase().endsWith('.pdf');
-                          final isPNG =
-                              signature.path.toLowerCase().endsWith('.png');
+                      // When signature exists - show signature preview only
+                      final isPDF = signature.path.toLowerCase().endsWith('.pdf');
+                      final isPNG = signature.path.toLowerCase().endsWith('.png');
 
-                          return Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () => _viewSignature(signature),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.all(6.w),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: const Color(0xFFE2E8F0)),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4))
-                                    ],
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      if (isPDF)
-                                        Column(
-                                          children: [
-                                            Icon(Icons.picture_as_pdf_rounded,
-                                                size: 35.sp,
-                                                color: Colors.redAccent),
-                                            SizedBox(height: 2.h),
-                                            Text("digital_signature.pdf",
-                                                style: GoogleFonts.inter(
-                                                    fontSize: 14.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: const Color(
-                                                        0xFF475569))),
-                                            SizedBox(height: 1.h),
-                                            Text("Tap to View Full Preview",
-                                                style: GoogleFonts.inter(
-                                                    fontSize: 12.sp,
-                                                    color: Colors.blue,
-                                                    fontWeight:
-                                                        FontWeight.w700)),
-                                          ],
-                                        )
-                                      else if (isPNG)
-                                        Column(
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              child: Image.file(signature,
-                                                  fit: BoxFit.contain,
-                                                  height: 120.sp,
-                                                  width: double.infinity),
-                                            ),
-                                            SizedBox(height: 1.h),
-                                            Text("digital_signature.png",
-                                                style: GoogleFonts.inter(
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: const Color(
-                                                        0xFF475569))),
-                                          ],
-                                        )
-                                      else
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: Image.file(signature,
-                                              fit: BoxFit.contain),
+                      return Column(
+                        children: [
+                          Text("Client Signature",
+                              style: GoogleFonts.inter(
+                                  fontSize: 17.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1E293B))),
+                          SizedBox(height: 1.h),
+                          Text("Signature captured successfully",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFF22C55E),
+                                  fontWeight: FontWeight.w500)),
+                          SizedBox(height: 3.h),
+                          GestureDetector(
+                            onTap: () => _viewSignature(signature),
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(4.w),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: const Color(0xFF425364),
+                                    width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 6))
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  if (isPDF)
+                                    Column(
+                                      children: [
+                                        Icon(Icons.picture_as_pdf_rounded,
+                                            size: 35.sp,
+                                            color: Colors.redAccent),
+                                        SizedBox(height: 2.h),
+                                        Text("digital_signature.pdf",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF475569))),
+                                        SizedBox(height: 1.h),
+                                        Text("Tap to View Full Preview",
+                                            style: GoogleFonts.inter(
+                                                fontSize: 12.sp,
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.w700)),
+                                      ],
+                                    )
+                                  else if (isPNG)
+                                    AspectRatio(
+                                      aspectRatio: 1,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          signature,
+                                          fit: BoxFit.contain,
                                         ),
-                                    ],
+                                      ),
+                                    )
+                                  else
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(signature,
+                                          fit: BoxFit.contain),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 3.h),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => provider.removeSignature(),
+                                  icon: const Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: Colors.red),
+                                  label: Text("Clear",
+                                      style: GoogleFonts.inter(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w600)),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                                    side: const BorderSide(color: Colors.red),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12)),
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 3.h),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: () =>
-                                          provider.removeSignature(),
-                                      icon: const Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Colors.red),
-                                      label: Text("Clear",
-                                          style: GoogleFonts.inter(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.w600)),
-                                      style: OutlinedButton.styleFrom(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 1.5.h),
-                                        side:
-                                            const BorderSide(color: Colors.red),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
-                                      ),
-                                    ),
+                              SizedBox(width: 4.w),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _goToSignature,
+                                  icon: const Icon(Icons.edit_rounded),
+                                  label: const Text("Resign"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF425364),
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12)),
                                   ),
-                                  SizedBox(width: 4.w),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: _goToSignature,
-                                      icon: const Icon(Icons.edit_rounded),
-                                      label: const Text("Resign"),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFF425364),
-                                        foregroundColor: Colors.white,
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 1.5.h),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ],
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],
