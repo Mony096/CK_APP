@@ -555,7 +555,7 @@ class HtmlServiceReportGenerator {
             <div class="bg-green p-1 bold border-b">
                 <span class="khmer">រូបភាពរបាយការណ៍</span>/ Picture Report
             </div>
-            <div class="p-1 border-b" style="height: 120px; overflow: hidden;">
+            <div class="p-1 border-b" style="height: 120px; overflow: hidden; display: flex;">
                 $imagesHtml
             </div>
 
