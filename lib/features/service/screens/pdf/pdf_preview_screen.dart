@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 
 class PDFPreviewScreen extends StatefulWidget {
   final File pdfFile;
@@ -62,48 +61,6 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
     }
   }
 
-  Future<void> _downloadPdf() async {
-    try {
-      // Get downloads directory
-      final downloadsDir = await getApplicationDocumentsDirectory();
-      final fileName =
-          'ServiceReport_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      final newPath = '${downloadsDir.path}/$fileName';
-
-      // Copy file
-      await widget.pdfFile.copy(newPath);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'PDF saved to: $fileName',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving PDF: $e')),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,13 +77,6 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF1E293B),
-        actions: [
-          IconButton(
-            onPressed: _sharePdf,
-            icon: const Icon(Icons.share_rounded),
-            tooltip: 'Share',
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -209,48 +159,25 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
           ],
         ),
         child: SafeArea(
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _sharePdf,
-                  icon: const Icon(Icons.share_rounded),
-                  label: Text(
-                    'Share',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF475569),
-                    side: const BorderSide(color: Color(0xFFE2E8F0)),
-                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _sharePdf,
+              icon: const Icon(Icons.share_rounded),
+              label: Text(
+                'Export / Save PDF',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w700),
               ),
-              SizedBox(width: 3.w),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton.icon(
-                  onPressed: _downloadPdf,
-                  icon: const Icon(Icons.download_rounded),
-                  label: Text(
-                    'Save PDF',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 1.8.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
-            ],
+            ),
           ),
         ),
       ),
