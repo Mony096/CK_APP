@@ -646,9 +646,9 @@ class HtmlServiceReportGenerator {
 
             <div class="grid grid-12">
                 <div class="span-6 border-r flex flex-col">
-                    <div class="flex border-b">
+                    <div class="flex border-b" style="min-height: 72px;">
                         <div style="width: 30%;" class="p-1 border-r bold"><span class="khmer">ឈ្មោះ</span> Names</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold">${data['technician'] ?? ''}</div>
+                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex items-center">${data['technician'] ?? ''}</div>
                     </div>
                     <div class="flex border-b">
                         <div style="width: 30%;" class="p-1 border-r bold">Date & Time Arrived</div>
