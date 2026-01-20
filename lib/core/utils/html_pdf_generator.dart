@@ -646,27 +646,23 @@ class HtmlServiceReportGenerator {
 
             <div class="grid grid-12">
                 <div class="span-6 border-r flex flex-col">
-                    <div class="flex border-b">
+                    <div class="flex border-b" style="flex: 3; min-height: 42px;">
                         <div style="width: 30%;" class="p-1 border-r bold"><span class="khmer">ឈ្មោះ</span> Names</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold">${data['technician'] ?? ''}</div>
+                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex items-center">${data['technician'] ?? ''}</div>
                     </div>
-                    <div class="flex border-b">
-                        <div style="width: 30%;" class="p-1 border-r bold">Date & Time Arrived</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex justify-between">
-                            <span>${_formatDate(data['reportDate'])}</span>
-                            <span>${data['timeArrived'] ?? ''}</span>
+                    <div class="flex" style="flex: 1; min-height: 24px;">
+                        <div class="flex border-r" style="width: 33.33%;">
+                            <div class="p-1 border-r bold" style="font-size: 6.5px; width: 45%;">Arr.</div>
+                            <div class="p-1 text-blue italic bold" style="font-size: 7px; flex-grow: 1;">${data['timeArrived'] ?? ''}</div>
                         </div>
-                    </div>
-                    <div class="flex border-b">
-                        <div style="width: 30%;" class="p-1 border-r bold">Date & Time Completed</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex justify-between">
-                            <span>${_formatDate(data['reportDate'])}</span>
-                            <span>${data['timeCompleted'] ?? ''}</span>
+                        <div class="flex border-r" style="width: 33.33%;">
+                            <div class="p-1 border-r bold" style="font-size: 6.5px; width: 45%;">Comp.</div>
+                            <div class="p-1 text-blue italic bold" style="font-size: 7px; flex-grow: 1;">${data['timeCompleted'] ?? ''}</div>
                         </div>
-                    </div>
-                    <div class="flex">
-                        <div style="width: 30%;" class="p-1 border-r bold">Total Hour</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold">${data['totalHours'] ?? ''}</div>
+                        <div class="flex" style="width: 33.34%;">
+                            <div class="p-1 border-r bold" style="font-size: 6.5px; width: 45%;">Total</div>
+                            <div class="p-1 text-blue italic bold" style="font-size: 7px; flex-grow: 1;">${data['totalHours'] ?? ''}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="span-6 p-1 flex items-center justify-center">
