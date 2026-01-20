@@ -117,6 +117,7 @@ flutter:
     - images/svg/database.svg
     - images/svg/desc.svg
     - images/logo.png
+    - images/logo-pdf.png
     - images/bg.png
     - images/svg/tol_vis_2.svg
     - images/svg/key.svg
