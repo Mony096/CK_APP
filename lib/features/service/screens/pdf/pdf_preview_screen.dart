@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 class PDFPreviewScreen extends StatefulWidget {
   final File pdfFile;
@@ -39,11 +40,19 @@ class _PDFPreviewScreenState extends State<PDFPreviewScreen> {
 
   Future<void> _sharePdf() async {
     try {
+      // Copy to temp file to avoid locking issues and ensure shareability
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+          '${tempDir.path}/Service_Report_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await widget.pdfFile.copy(tempFile.path);
+
+      if (!mounted) return;
+
       final box = context.findRenderObject() as RenderBox?;
       final offset = box?.localToGlobal(Offset.zero) ?? Offset.zero;
 
       await Share.shareXFiles(
-        [XFile(widget.pdfFile.path)],
+        [XFile(tempFile.path)],
         text: 'Service Report PDF',
         sharePositionOrigin: Rect.fromLTWH(
           offset.dx,
