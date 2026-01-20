@@ -360,7 +360,7 @@ class HtmlServiceReportGenerator {
         .page-wrapper {
             width: 210mm;
             height: 285mm; /* Match body height */
-            padding: 4mm 6mm; /* slightly less top/bottom padding */
+            padding: 10mm 6mm 4mm 6mm; /* increased top padding */
             display: flex;
             flex-direction: column;
             overflow: hidden;
