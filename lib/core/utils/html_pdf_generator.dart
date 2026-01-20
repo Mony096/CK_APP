@@ -9,12 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter_native_html_to_pdf/flutter_native_html_to_pdf.dart';
+
 import 'package:flutter_native_html_to_pdf/pdf_page_size.dart';
 
 class HtmlServiceReportGenerator {
   /// Generate service report PDF using HTML rendering (better Khmer font support)
   static Future<File> generateServiceReport(Map<String, dynamic> data) async {
+    final String currentUserName = await LocalStorageManger.getString('FullName');
+
     // Extract ticket number
     final String ticketNum =
         data['DocNum']?.toString() ?? data['id']?.toString() ?? 'N/A';
@@ -95,7 +99,9 @@ class HtmlServiceReportGenerator {
       'attachedReport': data['U_CK_AttachedReport']?.toString() ?? 'No',
       'nop': data['U_CK_NOP']?.toString() ?? '',
       'reasonIfNotFixed': data['U_CK_ReasonIfNotFixed']?.toString() ?? '',
-      'technician': data['U_CK_Technician']?.toString() ?? '',
+      'technician': currentUserName.isNotEmpty
+          ? currentUserName
+          : (data['U_CK_Technician']?.toString() ?? ''),
       'dateArrived': dateArrived,
       'timeArrived': timeArrived,
       'dateCompleted': dateCompleted,
@@ -141,6 +147,8 @@ class HtmlServiceReportGenerator {
 
   /// Get HTML content for preview (without creating PDF)
   static Future<String> getHtmlPreview(Map<String, dynamic> data) async {
+    final String currentUserName = await LocalStorageManger.getString('FullName');
+
     // Extract ticket number
     final String ticketNum =
         data['DocNum']?.toString() ?? data['id']?.toString() ?? 'N/A';
@@ -203,7 +211,9 @@ class HtmlServiceReportGenerator {
       'attachedReport': data['U_CK_AttachedReport']?.toString() ?? 'No',
       'nop': data['U_CK_NOP']?.toString() ?? '',
       'reasonIfNotFixed': data['U_CK_ReasonIfNotFixed']?.toString() ?? '',
-      'technician': data['U_CK_Technician']?.toString() ?? '',
+      'technician': currentUserName.isNotEmpty
+          ? currentUserName
+          : (data['U_CK_Technician']?.toString() ?? ''),
       'dateArrived': dateArrived,
       'timeArrived': timeArrived,
       'dateCompleted': dateCompleted,
