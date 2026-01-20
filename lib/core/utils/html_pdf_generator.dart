@@ -9,12 +9,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter_native_html_to_pdf/flutter_native_html_to_pdf.dart';
+import 'package:hive/hive.dart';
+
+
 import 'package:flutter_native_html_to_pdf/pdf_page_size.dart';
 
 class HtmlServiceReportGenerator {
   /// Generate service report PDF using HTML rendering (better Khmer font support)
   static Future<File> generateServiceReport(Map<String, dynamic> data) async {
+    final String currentUserName = await LocalStorageManger.getString('FullName');
+
     // Extract ticket number
     final String ticketNum =
         data['DocNum']?.toString() ?? data['id']?.toString() ?? 'N/A';
@@ -28,7 +34,30 @@ class HtmlServiceReportGenerator {
     // Parse time entries for technician section
     final List<dynamic> timeEntries =
         data['CK_JOB_TIMECollection'] as List? ?? [];
+
+    // Fetch extra equipment details from offline storage if available
+    String serialNo = '';
+    String model = '';
+    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
+    if (eqId.isNotEmpty) {
+      try {
+        final box = Hive.box('equipment_box');
+        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
+        final equip = allEquips.firstWhere(
+          (e) => e['Code'] == eqId,
+          orElse: () => {},
+        );
+        if (equip.isNotEmpty) {
+          serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
+          model = equip['U_ck_eqModel']?.toString() ?? '';
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
+      }
+    }
+
     String dateArrived = '';
+
     String timeArrived = '';
     String dateCompleted = '';
     String timeCompleted = '';
@@ -83,7 +112,9 @@ class HtmlServiceReportGenerator {
       'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
       'lastPM': data['U_CK_LastPM'],
       'location': data['U_CK_Location']?.toString() ?? '',
-      'serviceType': data['U_CK_ServiceType']?.toString() ?? '',
+      'serviceType': data['U_CK_JobClass']?.toString() ??
+          data['U_CK_ServiceType']?.toString() ??
+          '',
       'hourMeter': data['U_CK_HourMeter']?.toString() ?? 'N/A',
       'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
           data['U_CK_JobType']?.toString() ??
@@ -95,13 +126,18 @@ class HtmlServiceReportGenerator {
       'attachedReport': data['U_CK_AttachedReport']?.toString() ?? 'No',
       'nop': data['U_CK_NOP']?.toString() ?? '',
       'reasonIfNotFixed': data['U_CK_ReasonIfNotFixed']?.toString() ?? '',
-      'technician': data['U_CK_Technician']?.toString() ?? '',
+      'technician': currentUserName.isNotEmpty
+          ? currentUserName
+          : (data['U_CK_Technician']?.toString() ?? ''),
       'dateArrived': dateArrived,
       'timeArrived': timeArrived,
       'dateCompleted': dateCompleted,
       'timeCompleted': timeCompleted,
       'totalHours': totalHours,
+      'serialNo': serialNo,
+      'model': model,
     };
+
 
     // Load logo as base64
     String? logoBase64;
@@ -141,6 +177,8 @@ class HtmlServiceReportGenerator {
 
   /// Get HTML content for preview (without creating PDF)
   static Future<String> getHtmlPreview(Map<String, dynamic> data) async {
+    final String currentUserName = await LocalStorageManger.getString('FullName');
+
     // Extract ticket number
     final String ticketNum =
         data['DocNum']?.toString() ?? data['id']?.toString() ?? 'N/A';
@@ -154,7 +192,30 @@ class HtmlServiceReportGenerator {
     // Parse time entries
     final List<dynamic> timeEntries =
         data['CK_JOB_TIMECollection'] as List? ?? [];
+
+    // Fetch extra equipment details
+    String serialNo = '';
+    String model = '';
+    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
+    if (eqId.isNotEmpty) {
+      try {
+        final box = Hive.box('equipment_box');
+        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
+        final equip = allEquips.firstWhere(
+          (e) => e['Code'] == eqId,
+          orElse: () => {},
+        );
+        if (equip.isNotEmpty) {
+          serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
+          model = equip['U_ck_eqModel']?.toString() ?? '';
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
+      }
+    }
+
     String dateArrived = '';
+
     String timeArrived = '';
     String dateCompleted = '';
     String timeCompleted = '';
@@ -191,7 +252,9 @@ class HtmlServiceReportGenerator {
       'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
       'lastPM': data['U_CK_LastPM'],
       'location': data['U_CK_Location']?.toString() ?? '',
-      'serviceType': data['U_CK_ServiceType']?.toString() ?? '',
+      'serviceType': data['U_CK_JobClass']?.toString() ??
+          data['U_CK_ServiceType']?.toString() ??
+          '',
       'hourMeter': data['U_CK_HourMeter']?.toString() ?? 'N/A',
       'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
           data['U_CK_JobType']?.toString() ??
@@ -203,12 +266,16 @@ class HtmlServiceReportGenerator {
       'attachedReport': data['U_CK_AttachedReport']?.toString() ?? 'No',
       'nop': data['U_CK_NOP']?.toString() ?? '',
       'reasonIfNotFixed': data['U_CK_ReasonIfNotFixed']?.toString() ?? '',
-      'technician': data['U_CK_Technician']?.toString() ?? '',
+      'technician': currentUserName.isNotEmpty
+          ? currentUserName
+          : (data['U_CK_Technician']?.toString() ?? ''),
       'dateArrived': dateArrived,
       'timeArrived': timeArrived,
       'dateCompleted': dateCompleted,
       'timeCompleted': timeCompleted,
       'totalHours': totalHours,
+      'serialNo': serialNo,
+      'model': model,
     };
 
     // Load logo
@@ -427,10 +494,10 @@ class HtmlServiceReportGenerator {
                     <span class="khmer">របាយការណ៍សេវាកម្ម</span>/Service Report
                 </div>
             </div>
-            <div style="grid-column: span 4; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
+            <div style="grid-column: span 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
                  <div class="bold" style="font-size: 9px;">No: ${data['reportNo'] ?? 'N/A'}</div>
             </div>
-            <div style="grid-column: span 4; text-align: right; font-size: 6.5px;">
+            <div style="grid-column: span 5; text-align: right; font-size: 6.5px; padding-right: 4px;">
                 <div class="italic">Hotline:</div>
                 <div class="bold italic">PP: 012 816 800/SHV: 092 777 224</div>
                 <div class="bold italic">SR: 012 222 723/PPIA: 092 777 143</div>
@@ -468,8 +535,8 @@ class HtmlServiceReportGenerator {
                         <div class="w-50 p-1 text-blue italic bold flex items-center">${data['ckNo'] ?? ''}</div>
                     </div>
                     <div class="flex" style="flex: 1;">
-                        <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក</span> / Brand</div>
-                        <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''}</div>
+                    <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក/ម៉ូដែល</span> / Brand/Model</div>
+                    <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''} ${data['model'] != '' ? '/ ${data['model']}' : ''}</div>
                     </div>
                 </div>
             </div>
@@ -480,8 +547,8 @@ class HtmlServiceReportGenerator {
                 </div>
                 <div class="span-8 grid grid-12">
                     <div class="span-6 border-r p-1 min-h-1 text-blue italic bold">${data['equipmentType'] ?? ''}</div>
-                    <div class="span-3 border-r p-1 min-h-1"><span class="khmer">បរិក្ខារ</span>/Equipment</div>
-                    <div class="span-3 p-1 min-h-1 text-blue italic bold">${data['equipmentId'] ?? ''}</div>
+                    <div class="span-3 border-r p-1 min-h-1"><span class="khmer">បរិក្ខារ</span>/Equipment (SN)</div>
+                    <div class="span-3 p-1 min-h-1 text-blue italic bold">${data['equipmentId'] ?? ''} ${data['serialNo'] != '' ? '(${data['serialNo']})' : ''}</div>
                 </div>
             </div>
 
@@ -579,21 +646,21 @@ class HtmlServiceReportGenerator {
 
             <div class="grid grid-12">
                 <div class="span-6 border-r flex flex-col">
-                    <div class="flex border-b">
+                    <div class="flex border-b" style="min-height: 72px;">
                         <div style="width: 30%;" class="p-1 border-r bold"><span class="khmer">ឈ្មោះ</span> Names</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold">${data['technician'] ?? ''}</div>
+                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex items-center">${data['technician'] ?? ''}</div>
                     </div>
                     <div class="flex border-b">
                         <div style="width: 30%;" class="p-1 border-r bold">Date & Time Arrived</div>
                         <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex justify-between">
-                            <span>${_formatDate(data['reportDate'])}</span>
+                            <span>${_formatDate(data['reportDate'] ?? data['U_CK_Date'])}</span>
                             <span>${data['timeArrived'] ?? ''}</span>
                         </div>
                     </div>
                     <div class="flex border-b">
                         <div style="width: 30%;" class="p-1 border-r bold">Date & Time Completed</div>
                         <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex justify-between">
-                            <span>${_formatDate(data['reportDate'])}</span>
+                            <span>${_formatDate(data['reportDate'] ?? data['U_CK_Date'])}</span>
                             <span>${data['timeCompleted'] ?? ''}</span>
                         </div>
                     </div>
