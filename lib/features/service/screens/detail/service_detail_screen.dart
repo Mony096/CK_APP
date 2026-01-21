@@ -141,7 +141,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Future<void> _enrichData() async {
-    print(widget.data["CK_JOB_TASKCollection"][2]);
     _displayData = Map<String, dynamic>.from(widget.data);
     if (_displayData['U_CK_Status'] == 'Entry' &&
         (_displayData['CK_JOB_TIMECollection'] == null ||
