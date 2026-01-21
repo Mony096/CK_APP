@@ -7,6 +7,9 @@ abstract class Failure extends Equatable {
   String getErrorMessage() {
     return message;
   }
+
+  @override
+  String toString() => message;
 }
 
 class ConnectionRefuse extends Failure {

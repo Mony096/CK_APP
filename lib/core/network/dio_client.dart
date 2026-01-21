@@ -5,6 +5,55 @@ import 'package:bizd_tech_service/core/error/failure.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:dio/dio.dart';
 
+/// Safely extracts error message from API response
+/// Handles various error response formats from SAP and other APIs
+String _extractErrorMessage(Response? response) {
+  try {
+    if (response?.data == null) {
+      return "An unexpected error occurred.";
+    }
+
+    final data = response!.data;
+
+    // Handle Map response
+    if (data is Map) {
+      // Try SAP B1 format: { error: { message: { value: "..." } } }
+      if (data['error'] is Map) {
+        final error = data['error'] as Map;
+        if (error['message'] is Map) {
+          final message = error['message']['value'];
+          if (message != null && message.toString().isNotEmpty) {
+            return message.toString();
+          }
+        }
+        // Fallback: { error: { message: "..." } }
+        if (error['message'] is String &&
+            error['message'].toString().isNotEmpty) {
+          return error['message'].toString();
+        }
+      }
+
+      // Try common formats: { message: "..." } or { error: "..." }
+      if (data['message'] is String && data['message'].toString().isNotEmpty) {
+        return data['message'].toString();
+      }
+      if (data['error'] is String && data['error'].toString().isNotEmpty) {
+        return data['error'].toString();
+      }
+    }
+
+    // Handle String response
+    if (data is String && data.isNotEmpty) {
+      return data;
+    }
+
+    return "An unexpected error occurred.";
+  } catch (e) {
+    log('Error extracting error message: $e');
+    return "An unexpected error occurred.";
+  }
+}
+
 class DioClient {
   Dio _dio = Dio();
 
@@ -67,8 +116,7 @@ class DioClient {
       }
 
       throw ServerFailure(
-        message: e.response?.data['error']['message']['value'] ??
-            "An unexpected error occurred.",
+        message: _extractErrorMessage(e.response),
       );
     } catch (e) {
       rethrow;
@@ -122,8 +170,7 @@ class DioClient {
       }
 
       throw ServerFailure(
-        message: e.response?.data['error']['message']['value'] ??
-            "An unexpected error occurred.",
+        message: _extractErrorMessage(e.response),
       );
     } catch (e) {
       rethrow;
@@ -192,8 +239,7 @@ class DioClient {
       }
 
       throw ServerFailure(
-        message: e.response?.data['error']['message']['value'] ??
-            "An unexpected error occurred.",
+        message: _extractErrorMessage(e.response),
       );
     } catch (e) {
       rethrow;
@@ -286,7 +332,7 @@ class DioClient {
     } on DioException catch (e) {
       log(e.requestOptions.method);
       log(e.requestOptions.uri.toString());
-       if (e.requestOptions.data is FormData) {
+      if (e.requestOptions.data is FormData) {
         log('[FormData] - skipped logging raw content.');
       } else {
         log(jsonEncode(e.requestOptions.data));
@@ -313,8 +359,7 @@ class DioClient {
       }
 
       throw ServerFailure(
-        message: e.response?.data['error']['message']['value'] ??
-            "An unexpected error occurred.",
+        message: _extractErrorMessage(e.response),
       );
     } catch (e) {
       rethrow;
@@ -373,8 +418,7 @@ class DioClient {
       }
 
       throw ServerFailure(
-        message: e.response?.data['error']['message']['value'] ??
-            "An unexpected error occurred.",
+        message: _extractErrorMessage(e.response),
       );
     } catch (e) {
       rethrow;

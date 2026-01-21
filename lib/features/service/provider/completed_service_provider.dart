@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'dart:io';
-
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
+import 'package:bizd_tech_service/core/error/failure.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
@@ -351,7 +350,14 @@ class CompletedServiceProvider extends ChangeNotifier {
               "Status: ${response.statusCode}. Body: ${response.data}");
         }
       } catch (e) {
-        errors.add("Service Ticket #$docNum: $e");
+        // Extract error message properly from Failure objects
+        String errorMsg;
+        if (e is Failure) {
+          errorMsg = e.message;
+        } else {
+          errorMsg = e.toString();
+        }
+        errors.add("Service Ticket #$docNum: $errorMsg");
       } finally {
         deleteTempFiles(filesToUpload);
       }

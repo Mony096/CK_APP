@@ -48,6 +48,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
       // No internet - save offline only
       await _saveOfflineOnly();
     }
+    // Navigator.of(context).pop();
   }
 
   /// Show dialog when internet is available
@@ -396,6 +397,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
       offlineProvider.refreshDocuments();
 
       if (mounted) {
+        MaterialDialog.close(context);
         MaterialDialog.close(context);
       }
     } catch (e) {
