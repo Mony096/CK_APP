@@ -198,7 +198,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               "ServiceTime": widget.data["ServiceTime"],
               "CompleteTime": timeStamp
             },
-            activityType: widget.data["U_CK_JobType"]);
+            activityType: widget.data["U_CK_JobType"],
+            docNum: widget.data["DocNum"]);
 
     if (res && mounted) {
       Navigator.of(context).pop(true);
@@ -227,7 +228,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               "ServiceTime": widget.data["ServiceTime"],
               "CompleteTime": timeStamp
             },
-            activityType: widget.data["U_CK_JobType"]);
+            activityType: widget.data["U_CK_JobType"],
+            docNum: widget.data["DocNum"]);
 
     if (res) {
       if (mounted) MaterialDialog.loading(context);

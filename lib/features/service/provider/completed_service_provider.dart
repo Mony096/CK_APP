@@ -454,6 +454,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     required String date,
     required dynamic timeAction,
     required String activityType,
+    required dynamic docNum,
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
@@ -582,18 +583,6 @@ class CompletedServiceProvider extends ChangeNotifier {
           "U_CK_BreakEndTime": _timeEntry[0]["U_CK_BreakEndTime"],
           "U_CK_BreakEffortTime": _timeEntry[0]["total_break_time"],
         },
-        // {
-        //   "U_CK_Description": "Service Time",
-        //   "U_CK_StartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
-        //   "U_CK_EndTime": _timeEntry[0]["U_CK_SerEndTime"],
-        //   "U_CK_Effort": _timeEntry[0]["total_service_time"],
-        // },
-        // {
-        //   "U_CK_Description": "Break Time",
-        //   "U_CK_StartTime": _timeEntry[0]["U_CK_BreakTime"],
-        //   "U_CK_EndTime": _timeEntry[0]["U_CK_BreakEndTime"],
-        //   "U_CK_Effort": _timeEntry[0]["total_break_time"],
-        // }
       ],
       "CK_JOB_ISSUECollection": _openIssues,
       "CK_JOB_TASKCollection": _checkListLine.map((item) {
@@ -621,7 +610,6 @@ class CompletedServiceProvider extends ChangeNotifier {
       "UserID": userId,
       "LastName": lastName,
       "FirstName": firstName,
-      // "Department": "-2",
       "DateFrom": date,
       "DateTo": date,
       "SAPPassport": null,
@@ -633,7 +621,8 @@ class CompletedServiceProvider extends ChangeNotifier {
           "StartTime": startTime,
           "EndTime": endTime,
           "Break": breakTime,
-          "ActivityType": activityType,
+          "U_CK_JobType": activityType,
+          "U_CK_JobOrder": docNum,
           "NonBillableTime": "00:00"
         }
       ]

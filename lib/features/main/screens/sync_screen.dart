@@ -173,40 +173,187 @@ class _SyncScreenState extends State<SyncScreen> {
     );
   }
 
-  Future<void> _handleClearData() async {
-    MaterialDialog.warningClearDataDialog(
-      context,
-      title: 'Clear Data',
-      cancelLabel: "Yes",
-      onCancel: () async {
-        MaterialDialog.loading(context);
-        try {
-          await Provider.of<ServiceListProviderOffline>(context, listen: false)
-              .clearDocuments();
-          await Provider.of<CustomerListProviderOffline>(context, listen: false)
-              .clearDocuments();
-          await Provider.of<ItemListProviderOffline>(context, listen: false)
-              .clearDocuments();
-          await Provider.of<EquipmentOfflineProvider>(context, listen: false)
-              .clearEquipments();
-          await Provider.of<SiteListProviderOffline>(context, listen: false)
-              .clearDocuments();
-          await LocalStorageManger.setString('isDownloaded', 'false');
+  Future<void> _clearMasterData() async {
+    MaterialDialog.loading(context);
+    try {
+      await Provider.of<CustomerListProviderOffline>(context, listen: false)
+          .clearDocuments();
+      await Provider.of<ItemListProviderOffline>(context, listen: false)
+          .clearDocuments();
+      await Provider.of<EquipmentOfflineProvider>(context, listen: false)
+          .clearEquipments();
+      await Provider.of<SiteListProviderOffline>(context, listen: false)
+          .clearDocuments();
+      await LocalStorageManger.setString('isDownloaded', 'false');
 
-          if (mounted) {
-            _checkDownloadStatus();
-            Navigator.of(context).pop(); // Close loading
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("Offline data cleared successfully!")));
-          }
-        } catch (e) {
-          if (mounted) {
-            Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Failed to clear data: $e")));
-          }
-        }
-      },
+      if (mounted) {
+        _checkDownloadStatus();
+        Navigator.of(context).pop(); // Close loading
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Master data cleared successfully!")));
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to clear master data: $e")));
+      }
+    }
+  }
+
+  Future<void> _clearServiceData() async {
+    MaterialDialog.loading(context);
+    try {
+      await Provider.of<ServiceListProviderOffline>(context, listen: false)
+          .clearDocuments();
+      // Also clear equipment creation pending if any
+      Provider.of<EquipmentCreateProvider>(context, listen: false)
+          .clearCollection();
+
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Service data cleared successfully!")));
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to clear service data: $e")));
+      }
+    }
+  }
+
+  void _handleClearData() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Clear Local Data",
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1E293B),
+              ),
+            ),
+            SizedBox(height: 1.h),
+            Text(
+              "Choose which data you want to remove from your device.",
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+            SizedBox(height: 3.h),
+            _buildClearOption(
+              icon: Icons.storage_rounded,
+              title: "Clear All Master",
+              subtitle: "Customers, Items, Sites, and Equipment Lists",
+              onTap: () {
+                Navigator.pop(context);
+                _clearMasterData();
+              },
+              color: const Color(0xFF3B82F6),
+            ),
+            SizedBox(height: 1.5.h),
+            _buildClearOption(
+              icon: Icons.assignment_turned_in_rounded,
+              title: "Clear All Service",
+              subtitle: "Completed service reports and pending equipment",
+              onTap: () {
+                Navigator.pop(context);
+                _clearServiceData();
+              },
+              color: const Color(0xFFEF4444),
+            ),
+            SizedBox(height: 3.h),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClearOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(2.w),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 20.sp),
+            ),
+            SizedBox(width: 4.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                color: const Color(0xFF94A3B8), size: 20.sp),
+          ],
+        ),
+      ),
     );
   }
 
