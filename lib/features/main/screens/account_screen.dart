@@ -1,17 +1,7 @@
-import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:flutter/material.dart';
-import 'package:bizd_tech_service/core/core.dart';
 import 'package:bizd_tech_service/core/utils/helper_utils.dart';
-import 'package:bizd_tech_service/features/auth/screens/login_screen.dart';
 import 'package:bizd_tech_service/features/auth/screens/settings_screen.dart';
-import 'package:bizd_tech_service/features/auth/provider/auth_provider.dart';
-import 'package:bizd_tech_service/features/customer/provider/customer_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
-import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
-import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
-import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -46,41 +36,9 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Future<void> _logout(BuildContext context) async {
-    MaterialDialog.loading(context);
-
-    // Clear data on logout logic
-    final offlineProviderService =
-        Provider.of<ServiceListProviderOffline>(context, listen: false);
-    final offlineProviderServiceCustomer =
-        Provider.of<CustomerListProviderOffline>(context, listen: false);
-    final offlineProviderServiceItem =
-        Provider.of<ItemListProviderOffline>(context, listen: false);
-    final offlineProviderEquipment =
-        Provider.of<EquipmentOfflineProvider>(context, listen: false);
-    final offlineProviderSite =
-        Provider.of<SiteListProviderOffline>(context, listen: false);
-
-    try {
-      await offlineProviderService.clearDocuments();
-      await offlineProviderServiceCustomer.clearDocuments();
-      await offlineProviderServiceItem.clearDocuments();
-      await offlineProviderEquipment.clearEquipments();
-      await offlineProviderSite.clearDocuments();
-      await LocalStorageManger.setString('isDownloaded', 'false');
-    } catch (e) {
-      debugPrint("Error clearing data during logout: $e");
-    }
-
-    await Provider.of<AuthProvider>(context, listen: false).logout();
-
-    if (context.mounted) {
-      Navigator.of(context).pop(); // Close loading
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreenV2()),
-        (route) => false,
-      );
-    }
+  /// Logout function - uses shared performLogout from helper_utils
+  void _logout(BuildContext context) {
+    performLogout(context);
   }
 
   @override

@@ -22,6 +22,7 @@ class ModernDrawer extends StatelessWidget {
   final List<DrawerItem> items;
   final String userName;
   final String userEmail;
+  final VoidCallback? onLogout;
 
   const ModernDrawer({
     super.key,
@@ -30,6 +31,7 @@ class ModernDrawer extends StatelessWidget {
     required this.items,
     required this.userName,
     required this.userEmail,
+    this.onLogout,
   });
 
   // --- Design System (Clean & Modern) ---
@@ -101,21 +103,65 @@ class ModernDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'logout' && onLogout != null) {
+                    Navigator.pop(context); // Close drawer first
+                    onLogout!();
+                  }
+                },
+                offset: const Offset(0, 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.settings_rounded,
-                    color: subTextColor, size: 18),
+                color: Colors.white,
+                elevation: 8,
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.logout_rounded,
+                            color: Color(0xFFEF4444),
+                            size: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Logout',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFEF4444),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.settings_rounded,
+                      color: subTextColor, size: 18),
+                ),
               ),
             ],
           ),
@@ -161,91 +207,90 @@ class ModernDrawer extends StatelessWidget {
   }
 
   // ================= MENU =================
-Widget _buildMenu(BuildContext context) {
-  return ListView.builder(
-    padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 15.sp),
-    itemCount: items.length,
-    itemBuilder: (context, index) {
-      final item = items[index];
-      final isSelected = selectedIndex == index;
+  Widget _buildMenu(BuildContext context) {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 15.sp),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        final isSelected = selectedIndex == index;
 
-      return Padding(
-        padding: EdgeInsets.only(bottom: 6.sp),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            onItemSelected(index);
-            Navigator.pop(context);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            padding: EdgeInsets.symmetric(
-              horizontal: 12.sp,
-              vertical: 14.5.sp,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: isSelected
-                  ? Color(0xFF10B981).withOpacity(0.08)
-                  : Colors.transparent,
+        return Padding(
+          padding: EdgeInsets.only(bottom: 6.sp),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {
+              onItemSelected(index);
+              Navigator.pop(context);
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              padding: EdgeInsets.symmetric(
+                horizontal: 12.sp,
+                vertical: 14.5.sp,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: isSelected
+                    ? Color(0xFF10B981).withOpacity(0.08)
+                    : Colors.transparent,
 
-              // LEFT ACTIVE ACCENT + SHADOW
-              // boxShadow: isSelected
-              //     ? [
-              //         BoxShadow(
-              //           color: Color(0xFF10B981).withOpacity(0.50),
-              //           blurRadius: 12,
-              //           offset: const Offset(0, 5),
-              //         ),
-              //       ]
-              //     : [],
-              border: isSelected
-                  ? Border(
-                      left: BorderSide(
-                        color: Color(0xFF10B981),
-                        width: 4,
+                // LEFT ACTIVE ACCENT + SHADOW
+                // boxShadow: isSelected
+                //     ? [
+                //         BoxShadow(
+                //           color: Color(0xFF10B981).withOpacity(0.50),
+                //           blurRadius: 12,
+                //           offset: const Offset(0, 5),
+                //         ),
+                //       ]
+                //     : [],
+                border: isSelected
+                    ? Border(
+                        left: BorderSide(
+                          color: Color(0xFF10B981),
+                          width: 4,
+                        ),
+                      )
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isSelected ? item.activeIcon : item.icon,
+                    size: 20.sp,
+                    color: isSelected ? Color(0xFF10B981) : subTextColor,
+                  ),
+                  SizedBox(width: 16.sp),
+                  Expanded(
+                    child: Text(
+                      item.label,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14.5.sp,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? Color(0xFF10B981)
+                            : textColor.withOpacity(0.8),
                       ),
-                    )
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  isSelected ? item.activeIcon : item.icon,
-                  size: 20.sp,
-                  color: isSelected ? Color(0xFF10B981) : subTextColor,
-                ),
-                SizedBox(width: 16.sp),
-                Expanded(
-                  child: Text(
-                    item.label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14.5.sp,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isSelected
-                          ? Color(0xFF10B981)
-                          : textColor.withOpacity(0.8),
                     ),
                   ),
-                ),
-                if (isSelected)
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18.sp,
-                    color: Color(0xFF10B981).withOpacity(0.4),
-                  )
-                else if (item.badgeCount != null &&
-                    item.badgeCount! > 0)
-                  _buildBadge(item.badgeCount!),
-              ],
+                  if (isSelected)
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18.sp,
+                      color: Color(0xFF10B981).withOpacity(0.4),
+                    )
+                  else if (item.badgeCount != null && item.badgeCount! > 0)
+                    _buildBadge(item.badgeCount!),
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildBadge(int count) {
     return Container(

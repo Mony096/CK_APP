@@ -134,7 +134,7 @@ class AuthProvider with ChangeNotifier {
       MaterialDialog.warning(
         context,
         title: 'Error',
-        body: "Incorrect username/password or ${e.toString()}",
+        body: "Failed to login: ${e.toString()}",
       );
     }
 

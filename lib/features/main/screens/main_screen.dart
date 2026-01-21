@@ -12,6 +12,7 @@ import 'package:bizd_tech_service/features/equipment/screens/equipment_list.dart
 import 'package:bizd_tech_service/features/main/screens/sync_screen.dart';
 import 'package:bizd_tech_service/features/main/screens/account_screen.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
+import 'package:bizd_tech_service/core/utils/helper_utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 
@@ -121,6 +122,11 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  /// Logout function - uses shared performLogout from helper_utils
+  void _logout() {
+    performLogout(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -139,6 +145,7 @@ class _MainScreenState extends State<MainScreen> {
               userName: _userName,
               userEmail: _userEmail,
               onItemSelected: _onItemTapped,
+              onLogout: _logout,
               items: [
                 const DrawerItem(
                   label: 'Dashboard',
@@ -226,8 +233,11 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
-            _selectedIndex == 0 || _selectedIndex == 1 ?
-             IconButton(onPressed: _autoSyncServices, icon: const Icon(Icons.sync_rounded)) : const SizedBox.shrink(),
+            _selectedIndex == 0 || _selectedIndex == 1
+                ? IconButton(
+                    onPressed: _autoSyncServices,
+                    icon: const Icon(Icons.sync_rounded))
+                : const SizedBox.shrink(),
           ],
           leading: Builder(
             builder: (context) => IconButton(
