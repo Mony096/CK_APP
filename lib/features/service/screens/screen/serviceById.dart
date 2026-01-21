@@ -190,6 +190,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   Future<void> _saveAndSyncToSAP() async {
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
+    final onlineProvider =
+        Provider.of<ServiceListProvider>(context, listen: false);
     final res =
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .onReject(
@@ -205,6 +207,25 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
         debugPrint("📡 Internet available - triggering immediate sync...");
         // await Provider.of<CompletedServiceProvider>(context, listen: false)
         //     .syncAllOfflineServicesToSAP(context);
+        final now = DateTime.now();
+        final timeStamp = DateFormat("HH:mm:ss").format(now);
+
+        // 2. Build the payload
+        final payload = {
+          "DocEntry": widget.data["DocEntry"],
+          "U_CK_Date": widget.data["U_CK_Date"],
+          "U_CK_Status": "Rejected",
+          "CK_JOB_TIMECollection": [
+            {
+              "U_CK_Date": widget.data["U_CK_Date"],
+              "U_CK_RejectedTime": timeStamp,
+            },
+          ],
+        };
+        await onlineProvider.updateStatusDirectToSAP(
+          updatePayload: payload,
+          context: context,
+        );
         print("Synce to SAP progress ....");
       } catch (e) {
         debugPrint(
@@ -289,6 +310,8 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
     }
 
     try {
+      MaterialDialog.loading(context);
+
       // ⏳ Small delay for better UX
       await Future.delayed(const Duration(milliseconds: 300));
 
@@ -821,7 +844,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
 
   Color _getActionColor(String status) {
     switch (status) {
-      case "Pending":
+      case "Pending" || "Open":
         return const Color(0xFF22C55E);
       case "Accept":
         return const Color(0xFFF59E0B);
@@ -836,7 +859,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
 
   String _getActionLabel(String status) {
     switch (status) {
-      case "Pending":
+      case "Pending" || "Open":
         return "ACCEPT JOB";
       case "Accept":
         return "START TRAVEL";

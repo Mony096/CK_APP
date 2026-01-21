@@ -332,8 +332,8 @@ class _DashboardState extends State<Dashboard>
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children:
-                        ["All", "Installation", "Maintenance","Others"].map((jType) {
+                    children: ["All", "Installation", "Maintenance", "Others"]
+                        .map((jType) {
                       final isSelected = _selectedJob == jType;
                       return _buildFilterSelectionChip(
                         label: jType,
@@ -1411,39 +1411,53 @@ class _DashboardState extends State<Dashboard>
                               ),
                             )
                           ]
-                        : tickets[0] == "loading"
+                        : tickets.isNotEmpty && tickets[0] == "loading"
                             ? [
                                 Column(
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.all(8),
                                       child: Center(
-                                          child: SizedBox(
-                                              width: 21,
-                                              height: 21,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: context.colors.primary,
-                                              ))),
+                                        child: SizedBox(
+                                          width: 21,
+                                          height: 21,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: context.colors.primary,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
                                       "Loading ${group["date"]}' Ticket...",
                                       style: TextStyle(
-                                          fontSize: 13,
-                                          color:
-                                              context.colors.onSurfaceVariant),
+                                        fontSize: 13,
+                                        color: context.colors.onSurfaceVariant,
+                                      ),
                                     ),
                                     const SizedBox(height: 10),
                                   ],
                                 )
                               ]
-                            : tickets.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final ticket = entry.value;
+                            : (() {
+                                // clone + sort safely
+                                final sortedTickets = [...tickets]
+                                  ..sort((a, b) {
+                                    final docNumA = a['DocNum'] ?? 0;
+                                    final docNumB = b['DocNum'] ?? 0;
+                                    return docNumB.compareTo(docNumA); // DESC
+                                  });
 
-                                return _cardTicket(ticket, index);
-                              }).toList(),
+                                return sortedTickets
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  final index = entry.key;
+                                  final ticket = entry.value;
+                                  return _cardTicket(ticket, index);
+                                }).toList();
+                              })(),
                   ),
                 ),
               );
@@ -1547,8 +1561,9 @@ class _DashboardState extends State<Dashboard>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ServiceDetailScreen(data: data as Map<String, dynamic>, isCompleted: status == "Rejected" ? false : true),
+                  builder: (context) => ServiceDetailScreen(
+                      data: data as Map<String, dynamic>,
+                      isCompleted: status == "Rejected" ? false : true),
                 ),
               ).then((value) => _fetchTicketCounts());
               return;

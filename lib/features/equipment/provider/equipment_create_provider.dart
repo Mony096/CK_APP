@@ -311,28 +311,27 @@ class EquipmentCreateProvider with ChangeNotifier {
   //     }
   //   }
   // }
-  Future<bool> syncAllOfflineEquipmentToSAP(BuildContext context) async {
+  Future<Map<String, dynamic>> syncAllOfflineEquipmentToSAP(
+      BuildContext context) async {
     final offlineProvider =
         Provider.of<EquipmentOfflineProvider>(context, listen: false);
 
-    // Filter only pending equipments
     final pendingEquipment = offlineProvider.equipments
         .where((e) => e['sync_status'] == 'pending')
         .toList();
-    // print(pendingEquipment);
-    // return false;
+
+    List<String> errors = [];
     if (pendingEquipment.isEmpty) {
       debugPrint("No pending offline equipment to sync.");
-      return false;
+      return {"total": 0, "errors": errors};
     }
 
     for (var equipmentPayload in pendingEquipment) {
-      final code = equipmentPayload['Code'];
+      final code = equipmentPayload['Code'] ?? 'N/A';
       final List<dynamic> fileDataList = equipmentPayload['files'] ?? [];
       List<File> filesToUpload = [];
 
       try {
-        // Decode files if exist
         if (fileDataList.isNotEmpty) {
           final tempDir = await getTemporaryDirectory();
           for (var f in fileDataList) {
@@ -349,17 +348,13 @@ class EquipmentCreateProvider with ChangeNotifier {
         }
 
         int? attachmentEntry;
-
         if (filesToUpload.isNotEmpty) {
           attachmentEntry = await uploadAttachmentsToSAP(filesToUpload);
           if (attachmentEntry == null) {
-            debugPrint(
-                "⚠️ Failed to sync attachments for Equipment Code: $code");
-            continue;
+            throw Exception("Failed to upload attachments");
           }
         }
 
-        // Prepare SAP payload
         final sapPayload = Map<String, dynamic>.from(equipmentPayload);
         if (attachmentEntry != null) {
           sapPayload['U_ck_AttachmentEntry'] = attachmentEntry;
@@ -367,7 +362,7 @@ class EquipmentCreateProvider with ChangeNotifier {
         sapPayload.remove('files');
         sapPayload.remove('sync_status');
         sapPayload.remove('savedAt');
-        // Send to SAP
+
         final response = await dio.post(
           "/CK_CUSEQUI",
           false,
@@ -377,8 +372,6 @@ class EquipmentCreateProvider with ChangeNotifier {
 
         if (response.statusCode == 201) {
           debugPrint("✅ Synced Equipment Code: $code");
-
-          // Update local status to 'synced' using provider method
           final index = offlineProvider.equipments
               .indexWhere((e) => e['Code'] == equipmentPayload['Code']);
           if (index != -1) {
@@ -388,18 +381,15 @@ class EquipmentCreateProvider with ChangeNotifier {
           }
         } else {
           throw Exception(
-              "Failed to sync Equipment Code: $code. Status: ${response.statusCode}");
+              "Status: ${response.statusCode}. Body: ${response.data}");
         }
-        await offlineProvider.loadEquipments();
       } catch (e) {
-        await offlineProvider.loadEquipments();
-
-        throw Exception("Equipment Failed: $e");
+        errors.add("Equipment Code #$code: $e");
       } finally {
         deleteTempFiles(filesToUpload);
       }
     }
-
-    return true;
+    await offlineProvider.loadEquipments();
+    return {"total": pendingEquipment.length, "errors": errors};
   }
 }

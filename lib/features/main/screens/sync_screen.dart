@@ -66,20 +66,47 @@ class _SyncScreenState extends State<SyncScreen> {
 
           if (mounted) {
             MaterialDialog.close(context); // Safe close loading
-            if (res1 == false && res2 == false) {
+
+            final List<String> errors = [
+              ...List<String>.from(res1['errors'] ?? []),
+              ...List<String>.from(res2['errors'] ?? []),
+            ];
+
+            if (errors.isNotEmpty) {
+              // Show warning dialog for each error document
+              for (String errorMsg in errors) {
+                if (!mounted) break;
+                await MaterialDialog.warning(
+                  context,
+                  title: "Sync Error",
+                  body: errorMsg,
+                  confirmLabel: "OK",
+                );
+              }
+            }
+
+            if (res1['total'] == 0 && res2['total'] == 0) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text("No offline data to synchronize.")));
-            } else {
+            } else if (errors.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Synchronization complete!")));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      "Synchronization finished with ${errors.length} errors.")));
             }
           }
         } catch (e) {
           debugPrint("Sync Error: $e");
           if (mounted) {
             MaterialDialog.close(context); // Safe close loading
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Sync failed: ${e.toString()}")));
+            MaterialDialog.warning(
+              context,
+              title: "Sync Process Error",
+              body: e.toString(),
+              confirmLabel: "OK",
+            );
           }
         }
       },

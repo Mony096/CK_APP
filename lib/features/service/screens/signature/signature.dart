@@ -149,8 +149,8 @@ class _SignatureCaptureScreenState extends State<SignatureCaptureScreen> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFF425364),
-                            width: 3,
+                            color: const Color.fromARGB(255, 163, 165, 166),
+                            width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(

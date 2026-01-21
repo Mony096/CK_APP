@@ -141,6 +141,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Future<void> _enrichData() async {
+    print(widget.data["CK_JOB_TASKCollection"][2]);
     _displayData = Map<String, dynamic>.from(widget.data);
     if (_displayData['U_CK_Status'] == 'Entry' &&
         (_displayData['CK_JOB_TIMECollection'] == null ||
@@ -152,12 +153,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         final richPayload = completedServices.firstWhere(
           (s) =>
               s['DocEntry']?.toString() == _displayData['DocEntry']?.toString(),
-          orElse: () => {},
+          orElse: () => <String, dynamic>{},
         );
         if (richPayload.isNotEmpty) {
           _displayData.addAll(Map<String, dynamic>.from(richPayload));
         }
-        print(_displayData);
+        // print(_displayData);
       } catch (e) {
         debugPrint("❌ Error enriching detail data: $e");
       }
@@ -1128,8 +1129,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildChecklistSection(BuildContext context) {
-    final checklist = _displayData['checklistLine'] as List? ?? [];
-    print(checklist);
+    final checklist = _displayData['CK_JOB_TASKCollection'] as List? ?? [];
+    // print(checklist);
     return _buildItemList(
       items: checklist,
       emptyMessage: "No checklist data recorded.",

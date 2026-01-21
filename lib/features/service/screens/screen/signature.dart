@@ -242,7 +242,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                     color: const Color(0xFF425364),
-                                    width: 2),
+                                    width: 1),
                                 boxShadow: [
                                   BoxShadow(
                                       color: Colors.black.withOpacity(0.05),

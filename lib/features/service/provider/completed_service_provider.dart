@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'dart:io';
 
+import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
@@ -270,119 +271,92 @@ class CompletedServiceProvider extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> syncAllOfflineServicesToSAP(BuildContext context) async {
+  Future<Map<String, dynamic>> syncAllOfflineServicesToSAP(
+      BuildContext context) async {
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
 
     List<Map<dynamic, dynamic>> completedServices =
         await offlineProvider.getCompletedServicesToSync();
-    if (completedServices.isEmpty) return false;
-    print(completedServices);
+
+    List<String> errors = [];
+    if (completedServices.isEmpty) {
+      return {"total": 0, "errors": errors};
+    }
+
     for (var servicePayload in completedServices) {
       final docEntry = servicePayload['DocEntry'];
+
+      // Get DocNum for error tracking
+      final dynamic doc = offlineProvider.documents.firstWhere(
+        (d) => d['DocEntry'].toString() == docEntry.toString(),
+        orElse: () => <String, dynamic>{},
+      );
+      final docNum = doc['DocNum'] ?? doc['id'] ?? 'N/A';
+
       final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
       final List<dynamic> fileDataList = servicePayload['files'] ?? [];
 
-      int retryCount = 0;
-      const int maxRetries = 3;
-      bool success = false;
-      dynamic lastError;
-
-      while (retryCount < maxRetries && !success) {
-        List<File> filesToUpload = [];
-        try {
-          if (retryCount > 0) {
-            debugPrint(
-                "🔄 Retrying sync for DocEntry $docEntry (Try ${retryCount + 1}/$maxRetries)...");
-            await Future.delayed(const Duration(milliseconds: 500));
-          }
-
-          // 🔑 Decode {ext, data} into temp files only if files exist
-          if (fileDataList.isNotEmpty) {
-            final tempDir = await getTemporaryDirectory();
-            int i = 0;
-            for (var f in fileDataList) {
-              if (f is Map && f.containsKey('data')) {
-                final bytes = base64Decode(f['data']);
-                final ext = f['ext'] ?? "bin";
-                final fileName =
-                    "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-                final file = File("${tempDir.path}/$fileName");
-                await file.writeAsBytes(bytes);
-                filesToUpload.add(file);
-                i++;
-              }
+      List<File> filesToUpload = [];
+      try {
+        if (fileDataList.isNotEmpty) {
+          final tempDir = await getTemporaryDirectory();
+          int i = 0;
+          for (var f in fileDataList) {
+            if (f is Map && f.containsKey('data')) {
+              final bytes = base64Decode(f['data']);
+              final ext = f['ext'] ?? "bin";
+              final fileName =
+                  "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+              final file = File("${tempDir.path}/$fileName");
+              await file.writeAsBytes(bytes);
+              filesToUpload.add(file);
+              i++;
             }
           }
+        }
 
-          int? attachmentEntry;
-
-          // 1. Upload attachments only if there are files
-          if (filesToUpload.isNotEmpty) {
-            attachmentEntry = await uploadAttachmentsToSAP(
-              filesToUpload,
-              attachmentEntryExisting,
-            );
-
-            if (attachmentEntry == null) {
-              throw Exception(
-                  "Failed to upload attachments for DocEntry: $docEntry");
-            }
-          }
-
-          // 2. Prepare SAP payload (remove offline-only keys)
-          final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
-          if (attachmentEntry != null) {
-            sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
-          }
-          sapPayload.remove('files');
-          sapPayload.remove('sync_status');
-
-          // 3. Send payload to SAP
-          final response = await dio.patch(
-            "/script/test/CK_CompleteStatus($docEntry)",
-            false,
-            false,
-            data: sapPayload,
+        int? attachmentEntry;
+        if (filesToUpload.isNotEmpty) {
+          attachmentEntry = await uploadAttachmentsToSAP(
+            filesToUpload,
+            attachmentEntryExisting,
           );
 
-          debugPrint("📡 SAP Response for DocEntry $docEntry:");
-          debugPrint("Status Code Completed: ${response.statusCode}");
-          debugPrint("Response Body: ${response.data}");
-          debugPrint("📡 SAP Response for DocEntry $docEntry:");
-
-          if (response.statusCode == 200 ||
-              response.statusCode == 204 ||
-              response.statusCode == 201) {
-            await offlineProvider.markServiceSynced(docEntry);
-            debugPrint("✅ Synced DocEntry: $sapPayload");
-            success = true;
-          } else {
-            throw Exception(
-                "❌ Failed to sync DocEntry: $docEntry. Status: ${response.statusCode}. Body: ${response.data}");
+          if (attachmentEntry == null) {
+            throw Exception("Failed to upload attachments");
           }
-        } catch (e) {
-          lastError = e;
-          retryCount++;
-          debugPrint("❌ Attempt $retryCount failed for DocEntry $docEntry: $e");
-          if (retryCount >= maxRetries) {
-            debugPrint(
-                "⚠️ Final failure after $maxRetries tries for DocEntry $docEntry");
-            // Optionally notify user or log somewhere more permanent
-          }
-        } finally {
-          // Always clean up temp files after each attempt
-          deleteTempFiles(filesToUpload);
         }
-      }
 
-      if (!success) {
-        // If a service fails after all retries, we throw so the caller knows the process wasn't fully successful
-        throw Exception(
-            "Sync failed for DocEntry $docEntry after $maxRetries attempts: $lastError");
+        final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+        if (attachmentEntry != null) {
+          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
+        }
+        sapPayload.remove('files');
+        sapPayload.remove('sync_status');
+
+        final response = await dio.patch(
+          "/script/test/CK_CompleteStatus($docEntry)",
+          false,
+          false,
+          data: sapPayload,
+        );
+
+        if (response.statusCode == 200 ||
+            response.statusCode == 204 ||
+            response.statusCode == 201) {
+          await offlineProvider.markServiceSynced(docEntry);
+        } else {
+          throw Exception(
+              "Status: ${response.statusCode}. Body: ${response.data}");
+        }
+      } catch (e) {
+        errors.add("Service Ticket #$docNum: $e");
+      } finally {
+        deleteTempFiles(filesToUpload);
       }
     }
-    return true;
+    return {"total": completedServices.length, "errors": errors};
   }
 
   // Helper function: convert File → { ext, data }
@@ -436,6 +410,38 @@ class CompletedServiceProvider extends ChangeNotifier {
     final minutes = duration.inMinutes.remainder(60);
 
     return "${hours}h ${minutes}m";
+  }
+
+  String calculateDuration({
+    required String start,
+    required String end,
+  }) {
+    DateTime parseTime(String time) {
+      // Try 24h format first (HH:mm)
+      try {
+        final parts = time.split(':');
+        return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+      } catch (_) {}
+
+      // Fallback to 12h format (h:mm AM/PM)
+      final format = DateFormat('h:mm a');
+      return format.parse(time);
+    }
+
+    final startTime = parseTime(start);
+    final endTime = parseTime(end);
+
+    Duration diff = endTime.difference(startTime);
+
+    // Handle overnight case
+    if (diff.isNegative) {
+      diff += const Duration(days: 1);
+    }
+
+    final hours = diff.inHours.toString().padLeft(2, '0');
+    final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
+
+    return "$hours:$minutes";
   }
 
   Future<bool> onCompletedServiceOffline({
@@ -534,12 +540,12 @@ class CompletedServiceProvider extends ChangeNotifier {
     for (File signatureFile in signatureList) {
       fileDataList.add(await fileToBase64WithExt(signatureFile));
     }
-    String formatSpentTime(Duration duration) {
-      final hours = duration.inHours;
-      final minutes = duration.inMinutes.remainder(60);
+    // String formatSpentTime(Duration duration) {
+    //   final hours = duration.inHours;
+    //   final minutes = duration.inMinutes.remainder(60);
 
-      return "${hours}h ${minutes}m";
-    }
+    //   return "${hours}h ${minutes}m";
+    // }
 
     final spentTime = calculateSpentTimeHM(
       travelTime: timeAction["TravelTime"],
@@ -598,8 +604,40 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       "files": fileDataList, // ✅ Each file has {ext, data}
     };
+    final firstName = await LocalStorageManger.getString('FirstName');
+    final lastName = await LocalStorageManger.getString('LastName');
+    final userId = await LocalStorageManger.getString('UserId');
+    final userCode = await LocalStorageManger.getString('UserName');
 
-    // print(payload["CK_JOB_TIMECollection"]);
+    // calculate break time (HH:mm)
+    final breakTime = calculateDuration(
+      start: _timeEntry[0]["U_CK_BreakTime"],
+      end: _timeEntry[0]["U_CK_BreakEndTime"],
+    );
+
+    payload["timeSheet"] = {
+      "TimeSheetType": "tsh_Employee",
+      "UserID": userId,
+      "LastName": lastName,
+      "FirstName": firstName,
+      // "Department": "-2",
+      "DateFrom": date,
+      "DateTo": date,
+      "SAPPassport": null,
+      "UserCode": userCode,
+      "PM_TimeSheetLineDataCollection": [
+        {
+          "LineID": null,
+          "Date": date,
+          "StartTime": startTime,
+          "EndTime": endTime,
+          "Break": breakTime,
+          "NonBillableTime": "00:00"
+        }
+      ]
+    };
+
+    // print(payload["CK_JOB_TASKCollection"][3]);
     // return false;
     // 3. Offline saving
     _submit = true;

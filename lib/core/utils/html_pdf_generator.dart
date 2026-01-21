@@ -13,13 +13,13 @@ import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter_native_html_to_pdf/flutter_native_html_to_pdf.dart';
 import 'package:hive/hive.dart';
 
-
 import 'package:flutter_native_html_to_pdf/pdf_page_size.dart';
 
 class HtmlServiceReportGenerator {
   /// Generate service report PDF using HTML rendering (better Khmer font support)
   static Future<File> generateServiceReport(Map<String, dynamic> data) async {
-    final String currentUserName = await LocalStorageManger.getString('FullName');
+    final String currentUserName =
+        await LocalStorageManger.getString('FullName');
 
     // Extract ticket number
     final String ticketNum =
@@ -45,7 +45,7 @@ class HtmlServiceReportGenerator {
         final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
         final equip = allEquips.firstWhere(
           (e) => e['Code'] == eqId,
-          orElse: () => {},
+          orElse: () => <String, dynamic>{},
         );
         if (equip.isNotEmpty) {
           serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
@@ -138,7 +138,6 @@ class HtmlServiceReportGenerator {
       'model': model,
     };
 
-
     // Load logo as base64
     String? logoBase64;
     try {
@@ -177,7 +176,8 @@ class HtmlServiceReportGenerator {
 
   /// Get HTML content for preview (without creating PDF)
   static Future<String> getHtmlPreview(Map<String, dynamic> data) async {
-    final String currentUserName = await LocalStorageManger.getString('FullName');
+    final String currentUserName =
+        await LocalStorageManger.getString('FullName');
 
     // Extract ticket number
     final String ticketNum =
@@ -203,7 +203,7 @@ class HtmlServiceReportGenerator {
         final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
         final equip = allEquips.firstWhere(
           (e) => e['Code'] == eqId,
-          orElse: () => {},
+          orElse: () => <String, dynamic>{},
         );
         if (equip.isNotEmpty) {
           serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';

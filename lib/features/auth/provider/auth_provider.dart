@@ -4,8 +4,6 @@ import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-
-
 class AuthProvider with ChangeNotifier {
   bool _isLoggedIn = false;
   bool _isLoading = false;
@@ -75,7 +73,7 @@ class AuthProvider with ChangeNotifier {
         "userName": username,
         "password": password,
       });
-      
+
       // Log the full response for debugging
       debugPrint('════════════════════════════════════════════');
       debugPrint('🔐 LOGIN RESPONSE');
@@ -83,7 +81,7 @@ class AuthProvider with ChangeNotifier {
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response Data: ${response.data}');
       debugPrint('════════════════════════════════════════════');
-      
+
       if (response.statusCode == 200) {
         if (response.data["requirePasswordChange"] == true) {
           await LocalStorageManger.setString(
@@ -92,15 +90,18 @@ class AuthProvider with ChangeNotifier {
           notifyListeners();
           return true; // Indicate that password change is required
         }
-        
+
         debugPrint('📦 Saving session data...');
         await LocalStorageManger.setString('SessionId', response.data['token']);
         await LocalStorageManger.setString(
             'UserId', response.data["employeeID"].toString());
-        await LocalStorageManger.setString(
-            'UserName', username);
+        await LocalStorageManger.setString('UserName', username);
         await LocalStorageManger.setString('FullName',
-            '${response.data["firstName"].toString()} ${response.data["lastName"].toString()}');
+            '${response.data["firstName"]} ${response.data["lastName"]}');
+        await LocalStorageManger.setString(
+            'FirstName', response.data["firstName"].toString());
+        await LocalStorageManger.setString(
+            'LastName', response.data["lastName"].toString());
         debugPrint('✅ Session data saved!');
 
         // FCM Token update - optional (won't work on iOS simulator)

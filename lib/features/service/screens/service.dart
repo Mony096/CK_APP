@@ -301,14 +301,16 @@ class _ServiceScreenState extends State<ServiceScreen> {
           final date = doc['U_CK_Date']?.toString() ?? '';
           final dateNow = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-          // return status != 'Open' &&
-          //     status != 'Entry' &&
-          //     date.compareTo(dateNow) >= 0;
           return status != 'Entry' &&
-              status != "Rejected" &&
+              status != 'Rejected' &&
               date.compareTo(dateNow) >= 0;
-          // works if date is in yyyy-MM-dd or ISO format
-        }).toList();
+        }).toList()
+          ..sort((a, b) {
+            final docNumA = a['DocNum'] ?? 0;
+            final docNumB = b['DocNum'] ?? 0;
+            return docNumB.compareTo(docNumA); // DESC
+          });
+
         final isLoading = serviceProvider.isLoading;
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
