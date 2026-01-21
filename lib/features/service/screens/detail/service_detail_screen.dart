@@ -890,9 +890,46 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   Widget _buildTimeSection(BuildContext context) {
-    final timeEntries = _displayData['CK_JOB_TIMECollection'] as List? ?? [];
+    final rawEntries = _displayData['CK_JOB_TIMECollection'] as List? ?? [];
+
+    List<Map<String, dynamic>> displayItems = [];
+    if (rawEntries.isNotEmpty && rawEntries[0] is Map) {
+      final first = Map<String, dynamic>.from(rawEntries[0]);
+
+      // Handle the case where the data is already in 3 objects (old format)
+      if (first.containsKey('U_CK_Description') &&
+          first['U_CK_Description'] != null) {
+        displayItems = rawEntries.cast<Map<String, dynamic>>();
+      } else {
+        // Map the new single-object format into 3 separate rows for display
+        // 1. Travel Time
+        displayItems.add({
+          'U_CK_Description': 'Travel Time',
+          'U_CK_StartTime': first['U_CK_TraveledTime'] ?? 'N/A',
+          'U_CK_EndTime': first['U_CK_TraveledEndTime'] ?? 'N/A',
+          'U_CK_Effort': first['U_CK_TraveledEffortTime'] ?? '0h 0m',
+        });
+
+        // 2. Service Time
+        displayItems.add({
+          'U_CK_Description': 'Service Time',
+          'U_CK_StartTime': first['U_CK_ServiceStartTime'] ?? 'N/A',
+          'U_CK_EndTime': first['U_CK_SerEndTime'] ?? 'N/A',
+          'U_CK_Effort': first['U_CK_ServiceEffortTime'] ?? '0h 0m',
+        });
+
+        // 3. Break Time
+        displayItems.add({
+          'U_CK_Description': 'Break Time',
+          'U_CK_StartTime': first['U_CK_BreakTime'] ?? 'N/A',
+          'U_CK_EndTime': first['U_CK_BreakEndTime'] ?? 'N/A',
+          'U_CK_Effort': first['U_CK_BreakEffortTime'] ?? '0h 0m',
+        });
+      }
+    }
+
     return _buildItemList(
-      items: timeEntries,
+      items: displayItems,
       emptyMessage: "No time entries recorded.",
       icon: Icons.access_time_filled_rounded,
       titleKey: 'U_CK_Description',
