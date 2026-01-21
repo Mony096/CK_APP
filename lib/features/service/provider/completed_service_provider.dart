@@ -453,7 +453,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     required String customerName,
     required String date,
     required dynamic timeAction,
-    required String activityType,
+    required dynamic activityType,
     required dynamic docNum,
     bool offline = false,
   }) async {
