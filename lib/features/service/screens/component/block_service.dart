@@ -276,8 +276,8 @@ class BlockService extends StatelessWidget {
     String label = status;
 
     switch (status) {
-      case "Pending":
-        color = const Color(0xFF3B82F6);
+      case "Pending" || "Open":
+        color = const Color.fromARGB(255, 228, 61, 61);
         break;
       case "Accept":
         color = const Color(0xFF22C55E);
@@ -289,11 +289,11 @@ class BlockService extends StatelessWidget {
         break;
       case "Service":
         color = const Color(0xFF8B5CF6);
-        label = "On Site";
+        label = "Service";
         break;
       case "Entry":
         color = const Color(0xFF64748B);
-        label = "Finalized";
+        label = "Entry";
         break;
       default:
         color = Colors.grey;
@@ -351,7 +351,7 @@ class BlockService extends StatelessWidget {
       case "Accept":
         return "START TRAVEL";
       case "Travel":
-        return "ON SITE";
+        return "SERVICE";
       case "Service":
         return "CONTINUE";
       default:

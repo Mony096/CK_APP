@@ -1792,7 +1792,7 @@ class _DashboardState extends State<Dashboard>
         bgColor = const Color(0xFFF0FDFA);
         break;
       case "Travel":
-        color = const Color(0xFF2563EB);
+        color = const Color(0xFFF59E0B);
         bgColor = const Color(0xFFEFF6FF);
         break;
       case "Service":
