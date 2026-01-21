@@ -235,15 +235,36 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       if (mounted) MaterialDialog.loading(context);
       try {
         debugPrint("📡 Internet available - triggering immediate sync...");
+        // Sync ONLY this service using DocEntry
         await Provider.of<CompletedServiceProvider>(context, listen: false)
-            .syncAllOfflineServicesToSAP(context);
-      } catch (e) {
-        debugPrint(
-            "❌ Immediate sync failed (will still reflect as offline): $e");
-        // We don't show an error here because the data is safe offline
-        // and will be shown as "Pending Sync" on the dashboard.
-      } finally {
+            .syncSingleServiceToSAP(context, widget.data["DocEntry"]);
+
+        // Close loading dialog
         if (mounted) MaterialDialog.close(context);
+
+        debugPrint("✅ Sync completed successfully!");
+      } catch (e) {
+        debugPrint("❌ Immediate sync failed: $e");
+
+        // Close loading dialog first
+        if (mounted) MaterialDialog.close(context);
+
+        // Show error dialog to user
+        if (mounted) {
+          String errorMessage;
+          if (e is Exception) {
+            errorMessage = e.toString().replaceFirst('Exception: ', '');
+          } else {
+            errorMessage = e.toString();
+          }
+
+          await MaterialDialog.warning(
+            context,
+            title: "Sync Failed",
+            body:
+                "Failed to sync to SAP: $errorMessage\n\nYour data has been saved offline and can be synced later.",
+          );
+        }
       }
 
       if (mounted) {

@@ -284,73 +284,18 @@ class CompletedServiceProvider extends ChangeNotifier {
     }
 
     for (var servicePayload in completedServices) {
-      final docEntry = servicePayload['DocEntry'];
-
-      // Get DocNum for error tracking
-      final dynamic doc = offlineProvider.documents.firstWhere(
-        (d) => d['DocEntry'].toString() == docEntry.toString(),
-        orElse: () => <String, dynamic>{},
-      );
-      final docNum = doc['DocNum'] ?? doc['id'] ?? 'N/A';
-
-      final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
-      final List<dynamic> fileDataList = servicePayload['files'] ?? [];
-
-      List<File> filesToUpload = [];
       try {
-        if (fileDataList.isNotEmpty) {
-          final tempDir = await getTemporaryDirectory();
-          int i = 0;
-          for (var f in fileDataList) {
-            if (f is Map && f.containsKey('data')) {
-              final bytes = base64Decode(f['data']);
-              final ext = f['ext'] ?? "bin";
-              final fileName =
-                  "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
-              final file = File("${tempDir.path}/$fileName");
-              await file.writeAsBytes(bytes);
-              filesToUpload.add(file);
-              i++;
-            }
-          }
-        }
-
-        int? attachmentEntry;
-        if (filesToUpload.isNotEmpty) {
-          attachmentEntry = await uploadAttachmentsToSAP(
-            filesToUpload,
-            attachmentEntryExisting,
-          );
-
-          if (attachmentEntry == null) {
-            throw Exception("Failed to upload attachments");
-          }
-        }
-
-        final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
-        if (attachmentEntry != null) {
-          sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
-        }
-        sapPayload.remove('files');
-        sapPayload.remove('sync_status');
-
-        final response = await dio.patch(
-          "/script/test/CK_CompleteStatus($docEntry)",
-          false,
-          false,
-          data: sapPayload,
-        );
-
-        if (response.statusCode == 200 ||
-            response.statusCode == 204 ||
-            response.statusCode == 201) {
-          await offlineProvider.markServiceSynced(docEntry);
-        } else {
-          throw Exception(
-              "Status: ${response.statusCode}. Body: ${response.data}");
-        }
+        await _syncServicePayload(servicePayload, offlineProvider);
       } catch (e) {
-        // Extract error message properly from Failure objects
+        final docEntry = servicePayload['DocEntry'];
+        // Get DocNum for error tracking
+        final dynamic doc = offlineProvider.documents.firstWhere(
+          (d) => d['DocEntry'].toString() == docEntry.toString(),
+          orElse: () => <String, dynamic>{},
+        );
+        final docNum = doc['DocNum'] ?? doc['id'] ?? 'N/A';
+
+        // Extract error message properly
         String errorMsg;
         if (e is Failure) {
           errorMsg = e.message;
@@ -358,11 +303,102 @@ class CompletedServiceProvider extends ChangeNotifier {
           errorMsg = e.toString();
         }
         errors.add("Service Ticket #$docNum: $errorMsg");
-      } finally {
-        deleteTempFiles(filesToUpload);
       }
     }
     return {"total": completedServices.length, "errors": errors};
+  }
+
+  /// Sync a SINGLE service by DocEntry
+  Future<void> syncSingleServiceToSAP(
+      BuildContext context, dynamic docEntry) async {
+    final offlineProvider =
+        Provider.of<ServiceListProviderOffline>(context, listen: false);
+
+    // Get all pending services
+    List<Map<dynamic, dynamic>> completedServices =
+        await offlineProvider.getCompletedServicesToSync();
+
+    // Find the specific one
+    final servicePayload = completedServices.firstWhere(
+      (s) => s['DocEntry'].toString() == docEntry.toString(),
+      orElse: () => {},
+    );
+
+    if (servicePayload.isEmpty) {
+      // If not found in pending list, maybe it's already synced or not completed offline yet
+      // We can just return silently or throw an error depending on desired behavior.
+      // For now, let's assume if it's not pending, we don't need to do anything.
+      debugPrint("⚠️ Service $docEntry not found in pending sync list.");
+      return;
+    }
+
+    // Sync just this one
+    await _syncServicePayload(servicePayload, offlineProvider);
+  }
+
+  /// Internal helper to sync a single service payload
+  Future<void> _syncServicePayload(Map<dynamic, dynamic> servicePayload,
+      ServiceListProviderOffline offlineProvider) async {
+    final docEntry = servicePayload['DocEntry'];
+    final attachmentEntryExisting = servicePayload['U_CK_AttachmentEntry'];
+    final List<dynamic> fileDataList = servicePayload['files'] ?? [];
+
+    List<File> filesToUpload = [];
+    try {
+      if (fileDataList.isNotEmpty) {
+        final tempDir = await getTemporaryDirectory();
+        int i = 0;
+        for (var f in fileDataList) {
+          if (f is Map && f.containsKey('data')) {
+            final bytes = base64Decode(f['data']);
+            final ext = f['ext'] ?? "bin";
+            final fileName =
+                "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+            final file = File("${tempDir.path}/$fileName");
+            await file.writeAsBytes(bytes);
+            filesToUpload.add(file);
+            i++;
+          }
+        }
+      }
+
+      int? attachmentEntry;
+      if (filesToUpload.isNotEmpty) {
+        attachmentEntry = await uploadAttachmentsToSAP(
+          filesToUpload,
+          attachmentEntryExisting,
+        );
+
+        if (attachmentEntry == null) {
+          throw Exception("Failed to upload attachments");
+        }
+      }
+
+      final sapPayload = Map<dynamic, dynamic>.from(servicePayload);
+      if (attachmentEntry != null) {
+        sapPayload['U_CK_AttachmentEntry'] = attachmentEntry;
+      }
+      sapPayload.remove('files');
+      sapPayload.remove('sync_status');
+
+      final response = await dio.patch(
+        "/script/test/CK_CompleteStatus($docEntry)",
+        false,
+        false,
+        data: sapPayload,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204 ||
+          response.statusCode == 201) {
+        await offlineProvider.markServiceSynced(docEntry);
+      } else {
+        throw Exception(
+            "Status: ${response.statusCode}. Body: ${response.data}");
+      }
+    } finally {
+      deleteTempFiles(filesToUpload);
+    }
   }
 
   // Helper function: convert File → { ext, data }
