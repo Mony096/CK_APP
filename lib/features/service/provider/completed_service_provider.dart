@@ -453,6 +453,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     required String customerName,
     required String date,
     required dynamic timeAction,
+    required String activityType,
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
@@ -632,6 +633,7 @@ class CompletedServiceProvider extends ChangeNotifier {
           "StartTime": startTime,
           "EndTime": endTime,
           "Break": breakTime,
+          "ActivityType": activityType,
           "NonBillableTime": "00:00"
         }
       ]

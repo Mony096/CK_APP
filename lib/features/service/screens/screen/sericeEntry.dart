@@ -180,23 +180,25 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     print(widget.data);
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
-    final res =
-        await Provider.of<CompletedServiceProvider>(context, listen: false)
-            .onCompletedServiceOffline(
-                context: context,
-                attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-                docEntry: widget.data["DocEntry"],
-                startTime: widget.data["U_CK_Time"],
-                endTime: widget.data["U_CK_EndTime"],
-                customerName: widget.data["U_CK_Cardname"],
-                date: widget.data["U_CK_Date"] ?? "",
-                timeAction: {
-          "AcceptTime": widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
-          "TravelTime":
-              widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
-          "ServiceTime": widget.data["ServiceTime"],
-          "CompleteTime": timeStamp
-        });
+    final res = await Provider.of<CompletedServiceProvider>(context,
+            listen: false)
+        .onCompletedServiceOffline(
+            context: context,
+            attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+            docEntry: widget.data["DocEntry"],
+            startTime: widget.data["U_CK_Time"],
+            endTime: widget.data["U_CK_EndTime"],
+            customerName: widget.data["U_CK_Cardname"],
+            date: widget.data["U_CK_Date"] ?? "",
+            timeAction: {
+              "AcceptTime":
+                  widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+              "TravelTime":
+                  widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+              "ServiceTime": widget.data["ServiceTime"],
+              "CompleteTime": timeStamp
+            },
+            activityType: widget.data["U_CK_JobType"]);
 
     if (res && mounted) {
       Navigator.of(context).pop(true);
@@ -207,23 +209,25 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   Future<void> _saveAndSyncToSAP() async {
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
-    final res =
-        await Provider.of<CompletedServiceProvider>(context, listen: false)
-            .onCompletedServiceOffline(
-                context: context,
-                attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-                docEntry: widget.data["DocEntry"],
-                startTime: widget.data["U_CK_Time"],
-                endTime: widget.data["U_CK_EndTime"],
-                customerName: widget.data["U_CK_Cardname"],
-                date: widget.data["U_CK_Date"] ?? "",
-                timeAction: {
-          "AcceptTime": widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
-          "TravelTime":
-              widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
-          "ServiceTime": widget.data["ServiceTime"],
-          "CompleteTime": timeStamp
-        });
+    final res = await Provider.of<CompletedServiceProvider>(context,
+            listen: false)
+        .onCompletedServiceOffline(
+            context: context,
+            attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+            docEntry: widget.data["DocEntry"],
+            startTime: widget.data["U_CK_Time"],
+            endTime: widget.data["U_CK_EndTime"],
+            customerName: widget.data["U_CK_Cardname"],
+            date: widget.data["U_CK_Date"] ?? "",
+            timeAction: {
+              "AcceptTime":
+                  widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+              "TravelTime":
+                  widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+              "ServiceTime": widget.data["ServiceTime"],
+              "CompleteTime": timeStamp
+            },
+            activityType: widget.data["U_CK_JobType"]);
 
     if (res) {
       if (mounted) MaterialDialog.loading(context);
