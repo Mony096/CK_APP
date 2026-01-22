@@ -53,7 +53,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
   final customerCode = TextEditingController();
   final customerName = TextEditingController();
   final site = TextEditingController();
-
+  final siteName = TextEditingController();
   final brand = TextEditingController();
 
   final equipName = TextEditingController();
@@ -411,6 +411,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       "U_ck_CusCode": customerCode.text,
       "U_ck_CusName": customerName.text,
       "U_ck_siteCode": site.text,
+      "U_ck_siteName": siteName.text,
       "Code": equipCode.text,
       "Name": equipName.text,
       "U_ck_eqSerNum": serialNumber.text,
@@ -438,6 +439,7 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
     customerCode.clear();
     customerName.clear();
     site.clear();
+    siteName.clear();
     brand.clear();
     equipName.clear();
     equipCode.clear();
@@ -577,7 +579,8 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
                       "uploadImg": uploadImg,
                       "installedDate": installedDate,
                       "nextDate": nextDate,
-                      "warrantyDate": warrantyDate
+                      "warrantyDate": warrantyDate,
+                      "siteName": siteName,
                     },
                   ),
                   Component(

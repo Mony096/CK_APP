@@ -395,6 +395,8 @@ class _GeneralState extends State<General> {
                 widget.controller?["customerName"].text =
                     getDataFromDynamic(value["CardName"]);
                 widget.controller?["site"].text = "";
+                widget.controller?["siteName"].text = "";
+
                 // customerCode.text = getDataFromDynamic(value["CardCode"]);
                 // customerName.text = getDataFromDynamic(value["CardName"]);
               })
@@ -411,9 +413,11 @@ class _GeneralState extends State<General> {
           if (value != null)
             {
               setState(() {
-                print(value);
                 widget.controller?["site"].text =
                     getDataFromDynamic(value["Code"]);
+                widget.controller?["siteName"].text =
+                    getDataFromDynamic(value["Name"]);
+                // print(value);
               })
             }
         });
