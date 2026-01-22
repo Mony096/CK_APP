@@ -203,7 +203,7 @@ class ServiceListProvider extends ChangeNotifier {
     String filter =
         // "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry' and U_CK_Date ge '$dateNow'";
         // "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Open' and U_CK_Status ne 'Entry'";
-        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Entry'";
+        "U_CK_TechnicianId eq $userId and U_CK_Status ne 'Completed'";
 
     // Add text filter
     if (_currentFilter.isNotEmpty) {
@@ -278,13 +278,8 @@ class ServiceListProvider extends ChangeNotifier {
       final userId = await LocalStorageManger.getString('UserId');
 
       // Build filter to exclude existing DocEntries
-      // String filter =
-      //     "U_CK_TechnicianId eq $userId and U_CK_Status eq 'Pending'";
       String today = DateTime.now().toIso8601String().split('T')[0];
 
-      // String filter = "U_CK_TechnicianId eq $userId "
-      //     "and (U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service') "
-      //     "and U_CK_Date ge '$today'";
       String filter = "U_CK_TechnicianId eq $userId "
           "and (U_CK_Status eq 'Open' or U_CK_Status eq 'Pending' or U_CK_Status eq 'Accept' or U_CK_Status eq 'Travel' or U_CK_Status eq 'Service') "
           "and U_CK_Date ge '$today'";
@@ -297,21 +292,45 @@ class ServiceListProvider extends ChangeNotifier {
         filter += " and $excludeFilter";
       }
 
-      debugPrint("📡 Fetching new services with filter: $filter");
+      int retryCount = 0;
+      const int maxRetries = 3;
+      dynamic lastError;
 
-      final response =
-          await dio.get("/script/test/GetCkServiceLists?\$filter=$filter");
+      while (retryCount < maxRetries) {
+        try {
+          debugPrint(
+              "📡 Fetching new services with filter: $filter (Attempt ${retryCount + 1}/$maxRetries)");
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        debugPrint("✅ Fetched ${data.length} new services from API");
-        return data;
-      } else {
-        debugPrint("❌ Failed to fetch services: ${response.statusCode}");
-        return [];
+          final response =
+              await dio.get("/script/test/GetCkServiceLists?\$filter=$filter");
+
+          if (response.statusCode == 200) {
+            final List<dynamic> data = response.data;
+            debugPrint("✅ Fetched ${data.length} new services from API");
+            return data;
+          } else {
+            debugPrint(
+                "❌ Failed to fetch services: ${response.statusCode} (Attempt ${retryCount + 1})");
+            lastError = "Status code: ${response.statusCode}";
+            // If it's the last attempt, we let the loop finish and return empty
+          }
+        } catch (e) {
+          debugPrint(
+              "❌ Error fetching new services: $e (Attempt ${retryCount + 1})");
+          lastError = e;
+        }
+
+        retryCount++;
+        if (retryCount < maxRetries) {
+          // Wait a bit before retrying
+          await Future.delayed(const Duration(seconds: 1));
+        }
       }
+
+      debugPrint("❌ All $maxRetries attempts failed. Last error: $lastError");
+      return [];
     } catch (e) {
-      debugPrint("❌ Error fetching new services: $e");
+      debugPrint("❌ Critical error in fetchNewServicesForSync: $e");
       return [];
     } finally {
       _isLoading = false;

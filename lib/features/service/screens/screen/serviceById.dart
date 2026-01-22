@@ -33,7 +33,7 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
   void initState() {
     super.initState();
     _loadUserName();
-    print(widget.data["CK_JOB_EQUIPMENTCollection"]);
+    // print(widget.data["CK_JOB_EQUIPMENTCollection"]);
   }
 
   void _onRejected() async {
@@ -342,27 +342,24 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
           nextStatus = "Service";
           break;
         default:
-          nextStatus = "Entry";
+          nextStatus = "Completed";
       }
 
       // Prepare payload
       final updatePayload = {
         // ...cachedDoc,
-        "U_CK_TravelTime":
-            widget.data["U_CK_Status"] == "Accept" ? timeStamp : null,
+
         "U_CK_Time": cachedDoc["U_CK_Time"] ?? "",
         "U_CK_EndTime": cachedDoc["U_CK_EndTime"] ?? "",
         'DocEntry': widget.data["DocEntry"],
         'U_CK_Status': nextStatus,
       };
-
       if (widget.data["U_CK_Status"] == "Pending" ||
           widget.data["U_CK_Status"] == "Open") {
         updatePayload["U_CK_Time"] = timeStamp;
       } else {
         updatePayload["U_CK_EndTime"] = timeStamp;
       }
-
       if (widget.data["U_CK_Status"] == "Open" ||
           widget.data["U_CK_Status"] == "Pending") {
         updatePayload["U_CK_AcceptTime"] = timeStamp;
@@ -441,7 +438,6 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
     final dateStr = widget.data["U_CK_Date"]?.split("T")[0] ?? "";
     final startTime = widget.data["U_CK_Time"] ?? "--:--";
     final endTime = widget.data["U_CK_EndTime"] ?? "--:--";
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -556,6 +552,51 @@ class __ServiceByIdScreenState extends State<ServiceByIdScreen> {
                     ],
                   ),
                 ),
+                if (widget.data["U_CK_ServiceCall"] != null &&
+                    widget.data["subject"] != null &&
+                    widget.data["subject"].toString().isNotEmpty) ...[
+                  SizedBox(height: 2.5.h),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4.w),
+                    padding: EdgeInsets.all(4.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F9FF),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: const Color(0xFFBAE6FD)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.description_rounded,
+                                size: 16.sp, color: const Color(0xFF0369A1)),
+                            SizedBox(width: 2.w),
+                            Text(
+                              "SUBJECT / PROBLEM DESCRIPTION",
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0369A1),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 1.5.h),
+                        Text(
+                          widget.data["subject"] ?? "No Subject",
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: const Color(0xFF1E293B),
+                            height: 1.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 SizedBox(height: 3.h),
                 _buildModernSectionTitle("ADDITIONAL INFORMATION"),
                 DetailRow(

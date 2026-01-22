@@ -49,10 +49,12 @@ class _DashboardState extends State<Dashboard>
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);
       // ✅ Make sure documents are loaded
       await offlineProvider.loadDocuments();
+      if (!mounted) return;
 
       // ✅ Replace the list instead of addAll
       setState(() {
@@ -62,7 +64,9 @@ class _DashboardState extends State<Dashboard>
 
       // ✅ Fetch ticket counts after docs are loaded
       await _fetchTicketCounts();
+      if (!mounted) return;
       await _autoSyncServices();
+      if (!mounted) return;
       await _fetchTicketCounts();
     });
 
@@ -84,6 +88,7 @@ class _DashboardState extends State<Dashboard>
     final name = await LocalStorageManger.getString('FullName');
     final user = await LocalStorageManger.getString('UserName');
     final isDownLoadDone = await LocalStorageManger.getString('isDownloaded');
+    if (!mounted) return;
     setState(() {
       userName = name;
       isDownloaded = isDownLoadDone;
@@ -226,6 +231,7 @@ class _DashboardState extends State<Dashboard>
     final offlineProvider =
         Provider.of<ServiceListProviderOffline>(context, listen: false);
     await offlineProvider.loadDocuments(); // make sure docs loaded
+    if (!mounted) return;
 
     documentOffline = List.from(offlineProvider.documents);
     completedService = List.from(offlineProvider.completedServices);
@@ -582,7 +588,7 @@ class _DashboardState extends State<Dashboard>
         final doc = Map<String, dynamic>.from(item);
 
         // If ticket is completed (Entry), find its sync status
-        if (doc['U_CK_Status'] == 'Entry') {
+        if (doc['U_CK_Status'] == 'Completed') {
           doc['sync_status'] = offlineProvider.getSyncStatus(doc['DocEntry']);
         }
         return doc;
@@ -1557,7 +1563,7 @@ class _DashboardState extends State<Dashboard>
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
-            if (status == "Entry" || status == "Rejected") {
+            if (status == "Completed" || status == "Rejected") {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1620,7 +1626,7 @@ class _DashboardState extends State<Dashboard>
                       ),
                     ),
                     SizedBox(width: 2.w),
-                    if (status == "Entry") ...[
+                    if (status == "Completed") ...[
                       _buildSyncIcon(data["sync_status"] ??
                           context
                               .read<ServiceListProviderOffline>()
@@ -1799,7 +1805,7 @@ class _DashboardState extends State<Dashboard>
         color = const Color(0xFF9333EA);
         bgColor = const Color(0xFFFAF5FF);
         break;
-      case "Entry":
+      case "Completed":
         color = const Color(0xFF16A34A);
         bgColor = const Color(0xFFF0FDF4);
         break;
@@ -1816,7 +1822,7 @@ class _DashboardState extends State<Dashboard>
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Text(
-        status == "Entry" ? "COMPLETED" : status.toUpperCase(),
+        status == "Completed" ? "COMPLETED" : status.toUpperCase(),
         style: GoogleFonts.inter(
           fontSize: 11.5.sp,
           fontWeight: FontWeight.w800,

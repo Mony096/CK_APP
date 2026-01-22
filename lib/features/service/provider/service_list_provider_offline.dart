@@ -282,7 +282,7 @@ class ServiceListProviderOffline extends ChangeNotifier {
 
     for (var doc in docs) {
       if (doc['DocEntry'].toString() == docEntry.toString()) {
-        doc['U_CK_Status'] = 'Entry';
+        doc['U_CK_Status'] = 'Completed';
         doc['U_CK_EndTime'] = now.split("T")[1];
         found = true;
       }
@@ -402,7 +402,7 @@ class ServiceListProviderOffline extends ChangeNotifier {
           } else {
             doc["U_CK_EndTime"] = timeStamp;
           }
-          print(doc['U_CK_Status']);
+          // print(doc['U_CK_Status']);
           // Status-specific tracking time
           switch (status) {
             case "Accept":

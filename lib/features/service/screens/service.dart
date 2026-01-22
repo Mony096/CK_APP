@@ -190,7 +190,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
           nextStatus = "Service";
           break;
         default:
-          nextStatus = "Entry";
+          nextStatus = "Completed";
       }
 
       // Prepare payload
@@ -301,7 +301,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
           final date = doc['U_CK_Date']?.toString() ?? '';
           final dateNow = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-          return status != 'Entry' &&
+          return status != 'Completed' &&
               status != 'Rejected' &&
               date.compareTo(dateNow) >= 0;
         }).toList()

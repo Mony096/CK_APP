@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 class CompletedServiceProvider extends ChangeNotifier {
   bool _submit = false;
@@ -102,8 +101,6 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       return "${hours}h ${minutes}m";
     } catch (e) {
-      // Return empty string or a default value if parsing fails
-      print("Error calculating spent time: $e");
       return "0h 0m";
     }
   }
@@ -196,16 +193,14 @@ class CompletedServiceProvider extends ChangeNotifier {
     // return 0;
     try {
       final formData = FormData();
-      const uuid = Uuid();
 
       for (var file in files) {
-        final extension = file.path.split('.').last;
-        final newFileName = '${uuid.v4()}.$extension';
+        final fileName = file.path.split('/').last;
         formData.files.add(MapEntry(
           'file',
           await MultipartFile.fromFile(
             file.path,
-            filename: newFileName,
+            filename: fileName,
           ),
         ));
       }
@@ -352,8 +347,9 @@ class CompletedServiceProvider extends ChangeNotifier {
           if (f is Map && f.containsKey('data')) {
             final bytes = base64Decode(f['data']);
             final ext = f['ext'] ?? "bin";
+            final type = f['type'] ?? "image";
             final fileName =
-                "temp_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+                "${type}_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
             final file = File("${tempDir.path}/$fileName");
             await file.writeAsBytes(bytes);
             filesToUpload.add(file);
@@ -458,32 +454,39 @@ class CompletedServiceProvider extends ChangeNotifier {
     required String start,
     required String end,
   }) {
-    DateTime parseTime(String time) {
-      // Try 24h format first (HH:mm)
-      try {
-        final parts = time.split(':');
-        return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
-      } catch (_) {}
-
-      // Fallback to 12h format (h:mm AM/PM)
-      final format = DateFormat('h:mm a');
-      return format.parse(time);
+    if (start.isEmpty || end.isEmpty || start == "--:--" || end == "--:--") {
+      return "00:00";
     }
+    try {
+      DateTime parseTime(String time) {
+        // Try 24h format first (HH:mm)
+        try {
+          final parts = time.split(':');
+          return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+        } catch (_) {}
 
-    final startTime = parseTime(start);
-    final endTime = parseTime(end);
+        // Fallback to 12h format (h:mm AM/PM)
+        final format = DateFormat('h:mm a');
+        return format.parse(time);
+      }
 
-    Duration diff = endTime.difference(startTime);
+      final startTime = parseTime(start);
+      final endTime = parseTime(end);
 
-    // Handle overnight case
-    if (diff.isNegative) {
-      diff += const Duration(days: 1);
+      Duration diff = endTime.difference(startTime);
+
+      // Handle overnight case
+      if (diff.isNegative) {
+        diff += const Duration(days: 1);
+      }
+
+      final hours = diff.inHours.toString().padLeft(2, '0');
+      final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
+
+      return "$hours:$minutes";
+    } catch (e) {
+      return "00:00";
     }
-
-    final hours = diff.inHours.toString().padLeft(2, '0');
-    final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
-
-    return "$hours:$minutes";
   }
 
   Future<bool> onCompletedServiceOffline({
@@ -497,6 +500,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     required dynamic timeAction,
     required dynamic activityType,
     required dynamic docNum,
+    required dynamic serviceCallId,
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
@@ -574,15 +578,66 @@ class CompletedServiceProvider extends ChangeNotifier {
       return false;
     }
 
+    // Generate timestamp to check against startTime
+    final now = DateTime.now();
+    final timeStamp = DateFormat("HH:mm:ss").format(now);
+
+    // Format times to HH:mm (without seconds) for comparison
+    final timeStampWithoutSeconds = timeStamp.substring(0, 5);
+    final startTimeWithoutSeconds = startTime.substring(0, 5);
+
+    // Check if U_CK_EndTime equals startTime (no time spent - compare only hours and minutes)
+    if (timeStampWithoutSeconds == startTimeWithoutSeconds) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+          behavior: SnackBarBehavior.floating,
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          content: const Row(
+            children: [
+              Icon(Icons.remove_circle, color: Colors.white, size: 28),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Service end time cannot be the same as start time",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
+
     // 1. Convert all files into List<Map<String, String>>
     List<Map<String, String>> fileDataList = [];
 
     for (File imageFile in imagesList) {
-      fileDataList.add(await fileToBase64WithExt(imageFile));
+      final fileMap = await fileToBase64WithExt(imageFile);
+      fileMap['type'] = 'image';
+      fileDataList.add(fileMap);
     }
 
     for (File signatureFile in signatureList) {
-      fileDataList.add(await fileToBase64WithExt(signatureFile));
+      final fileMap = await fileToBase64WithExt(signatureFile);
+      fileMap['type'] = 'signature';
+      fileDataList.add(fileMap);
     }
     // String formatSpentTime(Duration duration) {
     //   final hours = duration.inHours;
@@ -595,23 +650,23 @@ class CompletedServiceProvider extends ChangeNotifier {
       travelTime: timeAction["TravelTime"],
       completeTime: timeAction["CompleteTime"],
     );
-
     // 2. Build the payload
     final payload = {
       "DocEntry": docEntry,
       "U_CK_Cardname": customerName,
       "U_CK_Date": date,
-      "U_CK_Status": "Entry",
+      "U_CK_Status": "Completed",
       "U_CK_AttachmentEntry": attachmentEntryExisting,
       "U_CK_Time": startTime,
-      "U_CK_EndTime": endTime,
+      "U_CK_EndTime": timeStamp,
       "U_CK_TravelTime": timeAction["TravelTime"],
       "U_CK_AcceptTime": timeAction["AcceptTime"],
+      "U_CK_ServiceCall": serviceCallId,
       "CK_JOB_TIMECollection": [
         {
           "U_CK_Date": date,
           "U_CK_StartTime": startTime,
-          "U_CK_EndTime": endTime,
+          "U_CK_EndTime": timeStamp,
           "U_CK_Effort": spentTime,
           "U_CK_AcceptedTime": timeAction["AcceptTime"],
           "U_CK_RejectedTime": timeAction["RejectTime"],
@@ -661,7 +716,7 @@ class CompletedServiceProvider extends ChangeNotifier {
           "LineID": null,
           "Date": date,
           "StartTime": startTime,
-          "EndTime": endTime,
+          "EndTime": timeStamp,
           "Break": breakTime,
           "U_CK_JobType": activityType,
           "U_CK_JobOrder": docNum,
@@ -670,7 +725,7 @@ class CompletedServiceProvider extends ChangeNotifier {
       ]
     };
 
-    // print(payload["CK_JOB_TASKCollection"][3]);
+    // print(payload["CK_JOB_TIMECollection"]);
     // return false;
     // 3. Offline saving
     _submit = true;
@@ -704,7 +759,7 @@ class CompletedServiceProvider extends ChangeNotifier {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "✅ Service successfully completed in offline mode.",
+                      "✅ Service completed.",
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.031,
                         color: Colors.white,

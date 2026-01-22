@@ -53,6 +53,41 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     } else {
       // No internet - save offline only
       await _saveOfflineOnly();
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+      //     behavior: SnackBarBehavior.floating,
+      //     elevation: 10,
+      //     margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      //     shape: RoundedRectangleBorder(
+      //       borderRadius: BorderRadius.circular(9),
+      //     ),
+      //     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      //     content: Row(
+      //       children: [
+      //         // Icon(Icons.remove_circle,
+      //         //     color: Colors.white, size: 28),
+      //         // SizedBox(width: 16),
+      //         Expanded(
+      //           child: Column(
+      //             mainAxisSize: MainAxisSize.min,
+      //             crossAxisAlignment: CrossAxisAlignment.start,
+      //             children: [
+      //               Text(
+      //                 "✅ Service successfully completed in offline mode.",
+      //                 style: TextStyle(
+      //                   fontSize: MediaQuery.of(context).size.width * 0.031,
+      //                   color: Colors.white,
+      //                 ),
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+        //   duration: const Duration(seconds: 4),
+        // ),
+      // );
     }
   }
 
@@ -177,7 +212,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
 
   /// Save offline only without syncing to SAP
   Future<void> _saveOfflineOnly() async {
-    print(widget.data);
+    // print(widget.data);
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
     final res = await Provider.of<CompletedServiceProvider>(context,
@@ -199,7 +234,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               "CompleteTime": timeStamp
             },
             activityType: widget.data["U_CK_JobType"],
-            docNum: widget.data["DocNum"]);
+            docNum: widget.data["DocNum"],
+            serviceCallId: widget.data["U_CK_ServiceCall"]);
 
     if (res && mounted) {
       Navigator.of(context).pop(true);
@@ -229,7 +265,9 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               "CompleteTime": timeStamp
             },
             activityType: widget.data["U_CK_JobType"],
-            docNum: widget.data["DocNum"]);
+            docNum: widget.data["DocNum"],
+             serviceCallId: widget.data["U_CK_ServiceCall"]
+            );
 
     if (res) {
       if (mounted) MaterialDialog.loading(context);
@@ -328,7 +366,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final status = widget.data["U_CK_Status"] ?? "Entry";
+    final status = widget.data["U_CK_Status"] ?? "Completed";
     final docNum = widget.data["DocNum"] ?? "N/A";
     final customerName = widget.data["CustomerName"] ?? "Unknown Customer";
     final jobType = widget.data["U_CK_JobType"] ?? "Service";

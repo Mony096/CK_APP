@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as google_fonts;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -142,7 +143,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Future<void> _enrichData() async {
     _displayData = Map<String, dynamic>.from(widget.data);
-    if (_displayData['U_CK_Status'] == 'Entry' &&
+    if (_displayData['U_CK_Status'] == 'Completed' &&
         (_displayData['CK_JOB_TIMECollection'] == null ||
             (_displayData['CK_JOB_TIMECollection'] as List).isEmpty)) {
       try {
@@ -211,6 +212,51 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   _buildStatusHeader(context),
                   SizedBox(height: 2.5.h),
                   _buildInfoCard(context),
+                  if (_displayData["U_CK_ServiceCall"] != null &&
+                      _displayData["subject"] != null &&
+                      _displayData["subject"].toString().isNotEmpty) ...[
+                    SizedBox(height: 2.5.h),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 4.w),
+                      padding: EdgeInsets.all(4.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F9FF),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: const Color(0xFFBAE6FD)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.description_rounded,
+                                  size: 16.sp, color: const Color(0xFF0369A1)),
+                              SizedBox(width: 2.w),
+                              Text(
+                                "SUBJECT / PROBLEM DESCRIPTION",
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF0369A1),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 1.5.h),
+                          Text(
+                            widget.data["subject"] ?? "No Subject",
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              color: const Color(0xFF1E293B),
+                              height: 1.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "CUSTOMER INFORMATION",
                       key: _customerKey),

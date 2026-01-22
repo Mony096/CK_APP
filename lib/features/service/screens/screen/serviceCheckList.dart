@@ -213,6 +213,9 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                   onPressed: () {
                     setState(() {
                       _localTasks[index]["U_CK_Answer"] = remark.text;
+                      if (remark.text.trim().isNotEmpty) {
+                        _localTasks[index]["U_CK_Checked"] = true;
+                      }
                     });
                     Navigator.of(context).pop();
                   },
