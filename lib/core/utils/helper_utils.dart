@@ -12,6 +12,7 @@ import 'package:bizd_tech_service/features/customer/provider/customer_list_provi
 import 'package:bizd_tech_service/features/item/provider/item_list_provider_offline.dart';
 import 'package:bizd_tech_service/features/equipment/provider/equipment_offline_provider.dart';
 import 'package:bizd_tech_service/features/site/provider/site_list_provider_offline.dart';
+import 'package:bizd_tech_service/features/main/provider/download_provider.dart';
 
 Future<dynamic> goTo<T extends Widget>(BuildContext context, T route,
     {bool removeAllPreviousRoutes = false}) async {
@@ -125,6 +126,8 @@ Future<void> performLogout(BuildContext context) async {
       Provider.of<EquipmentOfflineProvider>(context, listen: false);
   final offlineProviderSite =
       Provider.of<SiteListProviderOffline>(context, listen: false);
+  final downloadProvider =
+      Provider.of<DownloadProvider>(context, listen: false);
 
   try {
     // Clear all offline data
@@ -134,6 +137,7 @@ Future<void> performLogout(BuildContext context) async {
     await offlineProviderEquipment.clearEquipments();
     await offlineProviderSite.clearDocuments();
     await LocalStorageManger.setString('isDownloaded', 'false');
+    downloadProvider.setIsCompleted(false);
   } catch (e) {
     debugPrint("Error clearing data during logout: $e");
   }

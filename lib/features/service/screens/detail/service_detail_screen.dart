@@ -210,53 +210,98 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildStatusHeader(context),
-                  SizedBox(height: 2.5.h),
-                  _buildInfoCard(context),
-                  if (_displayData["U_CK_ServiceCall"] != null &&
-                      _displayData["subject"] != null &&
+                  if (_displayData["subject"] != null &&
                       _displayData["subject"].toString().isNotEmpty) ...[
                     SizedBox(height: 2.5.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 4.w),
-                      padding: EdgeInsets.all(4.w),
+                      margin: EdgeInsets.symmetric(horizontal: 1.w),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0F9FF),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: const Color(0xFFBAE6FD)),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: const Color(0xFFE2E8F0).withOpacity(0.8)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF0369A1).withOpacity(0.06),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                            spreadRadius: -2,
+                          ),
+                          BoxShadow(
+                            color: const Color(0xFF0369A1).withOpacity(0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.description_rounded,
-                                  size: 16.sp, color: const Color(0xFF0369A1)),
-                              SizedBox(width: 2.w),
-                              Text(
-                                "SUBJECT / PROBLEM DESCRIPTION",
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF0369A1),
-                                  letterSpacing: 0.5,
-                                ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4.w, vertical: 1.5.h),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF0F9FF),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.description_rounded,
+                                    size: 16.sp,
+                                    color: const Color(0xFF0369A1)),
+                                SizedBox(width: 2.w),
+                                Text(
+                                  "SUBJECT / PROBLEM DESCRIPTION",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF0369A1),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const Spacer(),
+                                if (_displayData["U_CK_ServiceCall"] != null)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 2.w, vertical: 0.4.h),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF0369A1)
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      "SC#${_displayData["U_CK_ServiceCall"]}",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF0369A1),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                          SizedBox(height: 1.5.h),
-                          Text(
-                            widget.data["subject"] ?? "No Subject",
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: const Color(0xFF1E293B),
-                              height: 1.5,
-                              fontWeight: FontWeight.w500,
+                          Padding(
+                            padding: EdgeInsets.all(4.w),
+                            child: Text(
+                              _displayData["subject"] ?? "No Subject",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.5.sp,
+                                color: const Color(0xFF1E293B),
+                                height: 1.6,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ],
+                  SizedBox(height: 2.5.h),
+                  _buildInfoCard(context),
                   SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "CUSTOMER INFORMATION",
                       key: _customerKey),
@@ -317,8 +362,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
@@ -1028,8 +1079,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+                spreadRadius: -4,
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -1127,9 +1184,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
             boxShadow: [
               BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+                spreadRadius: -4,
+              ),
+              BoxShadow(
                 color: Colors.black.withOpacity(0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),

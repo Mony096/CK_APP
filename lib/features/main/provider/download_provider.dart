@@ -39,6 +39,12 @@ class DownloadProvider extends ChangeNotifier {
   bool get isError => _isError;
   String? get errorMessage => _errorMessage;
 
+  void setIsCompleted(bool value) {
+    _isCompleted = value;
+    _isStarted = value;
+    notifyListeners();
+  }
+
   final List<DownloadStep> _steps = [
     DownloadStep(
       name: "Customers",
@@ -155,6 +161,7 @@ class DownloadProvider extends ChangeNotifier {
       _isError = true;
       _errorMessage = e.toString();
       _isStarted = false;
+      _isCompleted = false;
       notifyListeners();
 
       // Clear data on error
