@@ -204,10 +204,37 @@ class _TimeScreenState extends State<TimeScreen> {
     }
 
     // 4️⃣ Break start must be AFTER job start
-    if (!breakStart.isAfter(jobStart)) {
+    // if (!breakStart.isAfter(jobStart)) {
+    //   breakTimeNotifier.value = {
+    //     "missing": true,
+    //     "value": "Must be after ${widget.data["U_CK_Time"]}",
+    //     "isAdded": 1
+    //   };
+    //   isValid = false;
+    // } else {
+    //   breakTimeNotifier.value = {"missing": false, "value": "", "isAdded": 1};
+    // }
+
+    // // 5️⃣ Break end must NOT be in future
+    // if (breakEnd.isAfter(currentTime())) {
+    //   breakEndTimeNotifier.value = {
+    //     "missing": true,
+    //     "value": "Cannot be in future",
+    //     "isAdded": 1
+    //   };
+    //   isValid = false;
+    // } else {
+    //   breakEndTimeNotifier.value = {
+    //     "missing": false,
+    //     "value": "",
+    //     "isAdded": 1
+    //   };
+    // }
+    // 4️⃣ Break start must be BETWEEN jobStart and current time
+    if (!breakStart.isAfter(jobStart) || breakStart.isAfter(currentTime())) {
       breakTimeNotifier.value = {
         "missing": true,
-        "value": "Must be after ${widget.data["U_CK_Time"]}",
+        "value": "Must be after ${widget.data["U_CK_Time"]} and not in future",
         "isAdded": 1
       };
       isValid = false;
@@ -215,11 +242,11 @@ class _TimeScreenState extends State<TimeScreen> {
       breakTimeNotifier.value = {"missing": false, "value": "", "isAdded": 1};
     }
 
-    // 5️⃣ Break end must NOT be in future
-    if (breakEnd.isAfter(currentTime())) {
+// 5️⃣ Break end must be BETWEEN jobStart and current time
+    if (!breakEnd.isAfter(jobStart) || breakEnd.isAfter(currentTime())) {
       breakEndTimeNotifier.value = {
         "missing": true,
-        "value": "Cannot be in future",
+        "value": "Must be after ${widget.data["U_CK_Time"]} and not in future",
         "isAdded": 1
       };
       isValid = false;
@@ -230,6 +257,7 @@ class _TimeScreenState extends State<TimeScreen> {
         "isAdded": 1
       };
     }
+
     return isValid;
   }
 
