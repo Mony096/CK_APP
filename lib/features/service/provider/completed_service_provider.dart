@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bizd_tech_service/core/utils/local_storage.dart';
 import 'package:bizd_tech_service/core/error/failure.dart';
+import 'package:bizd_tech_service/core/utils/html_pdf_generator.dart';
 import 'package:bizd_tech_service/features/service/provider/service_list_provider_offline.dart';
 import 'package:bizd_tech_service/core/utils/dialog_utils.dart';
 import 'package:bizd_tech_service/core/network/dio_client.dart';
@@ -639,6 +640,43 @@ class CompletedServiceProvider extends ChangeNotifier {
       fileMap['type'] = 'signature';
       fileDataList.add(fileMap);
     }
+
+    // Generate PDF report and add to files
+    try {
+      final pdfData = Map<String, dynamic>.from({
+        'DocEntry': docEntry,
+        'DocNum': docNum,
+        'U_CK_Date': date,
+        'U_CK_Cardname': customerName,
+        'CustomerName': customerName,
+        'U_CK_Time': startTime,
+        'U_CK_EndTime': endTime,
+        'U_CK_JobType': activityType,
+        'U_CK_ServiceCall': serviceCallId,
+        'CK_JOB_ISSUECollection': _openIssues,
+        'CK_JOB_TASKCollection': _checkListLine,
+        'files': fileDataList,
+      });
+
+      final File pdfFile = await HtmlServiceReportGenerator.generateServiceReport(pdfData);
+      final pdfBytes = await pdfFile.readAsBytes();
+      final pdfBase64 = base64Encode(pdfBytes);
+
+      fileDataList.add({
+        'ext': 'pdf',
+        'data': pdfBase64,
+        'type': 'report',
+      });
+
+      if (pdfFile.existsSync()) {
+        pdfFile.deleteSync();
+      }
+
+      debugPrint('✅ PDF report generated and added to files');
+    } catch (e) {
+      debugPrint('⚠️ Failed to generate PDF report: $e');
+    }
+
     // String formatSpentTime(Duration duration) {
     //   final hours = duration.inHours;
     //   final minutes = duration.inMinutes.remainder(60);
