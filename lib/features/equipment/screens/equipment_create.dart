@@ -404,24 +404,34 @@ class _EquipmentCreateScreenState extends State<EquipmentCreateScreen> {
       );
       return;
     }
-    final success =
-        await Provider.of<EquipmentOfflineProvider>(context, listen: false)
-            .saveEquipmentOffline(data: {
-      "U_ck_eqStatus": equipType.text,
-      "U_ck_CusCode": customerCode.text,
-      "U_ck_CusName": customerName.text,
-      "U_ck_siteCode": site.text,
-      "U_ck_siteName": siteName.text,
-      "Code": equipCode.text,
-      "Name": equipName.text,
-      "U_ck_eqSerNum": serialNumber.text,
-      "U_ck_eqBrand": brand.text,
-      "U_ck_eqModel": model.text,
-      "U_ck_Remark": remark.text,
-      "U_ck_InstalDate": installedDate.text,
-      "U_ck_NsvDate": nextDate.text,
-      "U_ck_WarExpDate": warrantyDate.text,
-    }, context: context);
+    if (mounted) MaterialDialog.loading(context);
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    bool success = false;
+    try {
+      success =
+          await Provider.of<EquipmentOfflineProvider>(context, listen: false)
+              .saveEquipmentOffline(data: {
+        "U_ck_eqStatus": equipType.text,
+        "U_ck_CusCode": customerCode.text,
+        "U_ck_CusName": customerName.text,
+        "U_ck_siteCode": site.text,
+        "U_ck_siteName": siteName.text,
+        "Code": equipCode.text,
+        "Name": equipName.text,
+        "U_ck_eqSerNum": serialNumber.text,
+        "U_ck_eqBrand": brand.text,
+        "U_ck_eqModel": model.text,
+        "U_ck_Remark": remark.text,
+        "U_ck_InstalDate": installedDate.text,
+        "U_ck_NsvDate": nextDate.text,
+        "U_ck_WarExpDate": warrantyDate.text,
+      }, context: context);
+    } catch (e) {
+      debugPrint("Error saving equipment: $e");
+    } finally {
+      if (mounted) MaterialDialog.close(context);
+    }
 
     if (success && mounted) {
       await MaterialDialog.createdSuccess(context);

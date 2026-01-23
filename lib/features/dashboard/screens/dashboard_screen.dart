@@ -1634,7 +1634,10 @@ class _DashboardState extends State<Dashboard>
                       SizedBox(width: 2.w),
                     ],
                     const Spacer(),
-                    _buildStatusBadge(status),
+                    _buildStatusBadge(status, syncStatus: data["sync_status"] ??
+                          context
+                              .read<ServiceListProviderOffline>()
+                              .getSyncStatus(data['DocEntry'])),
                   ],
                 ),
               ),
@@ -1783,35 +1786,50 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String status, {String? syncStatus}) {
     Color color;
     Color bgColor;
+    String label = status;
 
-    switch (status) {
-      case "Pending":
-      case "Open":
-        color = const Color(0xFFEF4444);
-        bgColor = const Color(0xFFFEF2F2);
-        break;
-      case "Accept":
-        color = const Color(0xFF0D9488);
-        bgColor = const Color(0xFFF0FDFA);
-        break;
-      case "Travel":
-        color = const Color(0xFFF59E0B);
-        bgColor = const Color(0xFFEFF6FF);
-        break;
-      case "Service":
-        color = const Color(0xFF9333EA);
-        bgColor = const Color(0xFFFAF5FF);
-        break;
-      case "Completed":
-        color = const Color(0xFF16A34A);
-        bgColor = const Color(0xFFF0FDF4);
-        break;
-      default:
-        color = const Color(0xFF64748B);
-        bgColor = const Color(0xFFF8FAFC);
+    // Normalize syncStatus
+    final lowerSync = (syncStatus ?? "").trim().toLowerCase();
+
+    if (status == "Completed" && lowerSync == "pending") {
+      color = const Color.fromARGB(255, 212, 146, 24);
+      bgColor = const Color(0xFFFFF7ED);
+      label = "READY TO SYNC";
+    } else if (status == "Completed" && lowerSync == "rejected") {
+      color = const Color(0xFFEF4444); // Red
+      bgColor = const Color(0xFFFEF2F2); // Light red
+      label = "REJECTED";
+    } else {
+      switch (status) {
+        case "Pending":
+        case "Open":
+          color = const Color(0xFFEF4444);
+          bgColor = const Color(0xFFFEF2F2);
+          break;
+        case "Accept":
+          color = const Color(0xFF0D9488);
+          bgColor = const Color(0xFFF0FDFA);
+          break;
+        case "Travel":
+          color = const Color(0xFFF59E0B);
+          bgColor = const Color(0xFFEFF6FF);
+          break;
+        case "Service":
+          color = const Color(0xFF9333EA);
+          bgColor = const Color(0xFFFAF5FF);
+          break;
+        case "Completed":
+          color = const Color(0xFF16A34A);
+          bgColor = const Color(0xFFF0FDF4);
+          label = "COMPLETED";
+          break;
+        default:
+          color = const Color(0xFF64748B);
+          bgColor = const Color(0xFFF8FAFC);
+      }
     }
 
     return Container(
@@ -1822,7 +1840,9 @@ class _DashboardState extends State<Dashboard>
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Text(
-        status == "Completed" ? "COMPLETED" : status.toUpperCase(),
+        label == "Ready to Sync" || label == "Rejected"
+            ? label
+            : label.toUpperCase(),
         style: GoogleFonts.inter(
           fontSize: 11.5.sp,
           fontWeight: FontWeight.w800,

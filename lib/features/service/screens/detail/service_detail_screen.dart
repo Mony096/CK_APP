@@ -180,7 +180,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-
+    // print(_displayData["sync_status"]);
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -353,6 +353,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildStatusHeader(BuildContext context) {
     final ticketNumber = _displayData['DocNum'] ?? _displayData['id'] ?? 'N/A';
+    // Handle potential whitespace issues by trimming and ignore case
+    final syncStatus =
+        (_displayData["sync_status"]?.toString() ?? "").trim().toLowerCase();
 
     return Container(
       padding: EdgeInsets.all(3.5.w),
@@ -385,9 +388,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 padding:
                     EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.6.h),
                 decoration: BoxDecoration(
-                  color: widget.isCompleted
-                      ? const Color(0xFFECFDF5)
-                      : const Color(0xFFFEF2F2),
+                  color: widget.isCompleted && syncStatus == "pending"
+                      ? const Color(0xFFFFF7ED)
+                      : syncStatus == "rejected"
+                          ? const Color(0xFFFEF2F2)
+                          : const Color(0xFFECFDF5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -397,21 +402,29 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: widget.isCompleted
-                            ? Color(0xFF10B981)
-                            : Color(0xFFEF4444),
+                        color: widget.isCompleted && syncStatus == "pending"
+                            ? const Color.fromARGB(255, 212, 146, 24)
+                            : syncStatus == "rejected"
+                                ? const Color(0xFFEF4444)
+                                : const Color(0xFF10B981),
                         shape: BoxShape.circle,
                       ),
                     ),
                     SizedBox(width: 2.w),
                     Text(
-                      widget.isCompleted ? "Completed" : "Rejected",
+                      widget.isCompleted && syncStatus == "pending"
+                          ? "Ready to Sync"
+                          : syncStatus == "rejected"
+                              ? "Rejected"
+                              : "Completed",
                       style: google_fonts.GoogleFonts.inter(
                         fontSize: 12.8.sp,
                         fontWeight: FontWeight.w600,
-                        color: widget.isCompleted
-                            ? const Color(0xFF059669)
-                            : const Color(0xFFEF4444),
+                        color: widget.isCompleted && syncStatus == "pending"
+                            ? const Color.fromARGB(255, 212, 146, 24)
+                            : syncStatus == "rejected"
+                                ? const Color(0xFFEF4444)
+                                : const Color(0xFF10B981),
                       ),
                     ),
                   ],

@@ -85,8 +85,8 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       //         ),
       //       ],
       //     ),
-        //   duration: const Duration(seconds: 4),
-        // ),
+      //   duration: const Duration(seconds: 4),
+      // ),
       // );
     }
   }
@@ -213,6 +213,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   /// Save offline only without syncing to SAP
   Future<void> _saveOfflineOnly() async {
     // print(widget.data);
+    if (mounted) MaterialDialog.loading(context);
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
     final res = await Provider.of<CompletedServiceProvider>(context,
@@ -238,12 +239,14 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             serviceCallId: widget.data["U_CK_ServiceCall"]);
 
     if (res && mounted) {
+      if (mounted) MaterialDialog.close(context);
       Navigator.of(context).pop(true);
     }
   }
 
   /// Save offline and sync to SAP
   Future<void> _saveAndSyncToSAP() async {
+    if (mounted) MaterialDialog.loading(context);
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
     final res = await Provider.of<CompletedServiceProvider>(context,
@@ -266,26 +269,20 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             },
             activityType: widget.data["U_CK_JobType"],
             docNum: widget.data["DocNum"],
-             serviceCallId: widget.data["U_CK_ServiceCall"]
-            );
+            serviceCallId: widget.data["U_CK_ServiceCall"]);
 
     if (res) {
-      if (mounted) MaterialDialog.loading(context);
       try {
         debugPrint("📡 Internet available - triggering immediate sync...");
         // Sync ONLY this service using DocEntry
         await Provider.of<CompletedServiceProvider>(context, listen: false)
             .syncSingleServiceToSAP(context, widget.data["DocEntry"]);
 
-        // Close loading dialog
-        if (mounted) MaterialDialog.close(context);
-
         debugPrint("✅ Sync completed successfully!");
       } catch (e) {
         debugPrint("❌ Immediate sync failed: $e");
 
         // Close loading dialog first
-        if (mounted) MaterialDialog.close(context);
 
         // Show error dialog to user
         if (mounted) {
@@ -306,6 +303,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       }
 
       if (mounted) {
+        if (mounted) MaterialDialog.close(context);
         Navigator.of(context).pop(true);
       }
     }
