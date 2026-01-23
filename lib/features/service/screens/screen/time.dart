@@ -70,9 +70,8 @@ class _TimeScreenState extends State<TimeScreen> {
                   _buildTimeSection("Service Time", serviceTime, serviceEndTime,
                       serviceTimeNotifier, serviceEndTimeNotifier),
                   SizedBox(height: 3.h),
-                  _buildTimeSection("Break Time (Optional)", breakTime,
-                      breakEndTime, breakTimeNotifier, breakEndTimeNotifier,
-                      isRequired: false),
+                  _buildTimeSection("Break Time", breakTime, breakEndTime,
+                      breakTimeNotifier, breakEndTimeNotifier),
                 ],
               ),
             ),
@@ -110,33 +109,65 @@ class _TimeScreenState extends State<TimeScreen> {
     );
   }
 
-  DateTime? parseTime(String value) {
-    if (value.trim().isEmpty || value == "--:--") return null;
-
-    try {
-      final t = DateFormat('h:mm a').parseLoose(value.trim());
-      return DateTime(2000, 1, 1, t.hour, t.minute);
-    } catch (_) {
-      try {
-        final p = value.split(':');
-        return DateTime(2000, 1, 1, int.parse(p[0]), int.parse(p[1]));
-      } catch (_) {
-        return null;
-      }
+  bool _validate() {
+    bool isValid = true;
+    if (travelTime.text.isEmpty) {
+      travelTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
     }
+    if (travelEndTime.text.isEmpty) {
+      travelEndTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (serviceTime.text.isEmpty) {
+      serviceTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (serviceEndTime.text.isEmpty) {
+      serviceEndTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (breakTime.text.isEmpty) {
+      breakTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    if (breakEndTime.text.isEmpty) {
+      breakEndTimeNotifier.value = {
+        "missing": true,
+        "value": "Required",
+        "isAdded": 1
+      };
+      isValid = false;
+    }
+    return isValid;
   }
 
-  DateTime currentTime() {
-    final now = DateTime.now();
-    return DateTime(2000, 1, 1, now.hour, now.minute);
-  }
   Widget _buildTimeSection(
       String title,
       TextEditingController start,
       TextEditingController end,
       ValueNotifier<Map<String, dynamic>> startN,
-      ValueNotifier<Map<String, dynamic>> endN,
-      {bool isRequired = true}) {
+      ValueNotifier<Map<String, dynamic>> endN) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -153,265 +184,33 @@ class _TimeScreenState extends State<TimeScreen> {
                     isMissingFieldNotifier: startN,
                     controller: start,
                     label: 'Start',
-                    star: isRequired)),
+                    star: true)),
             SizedBox(width: 3.w),
             Expanded(
                 child: CustomTimeFieldDialog(
                     isMissingFieldNotifier: endN,
                     controller: end,
                     label: 'End',
-                    star: isRequired)),
+                    star: true)),
           ],
         ),
       ],
     );
   }
-  bool _validate() {
-  bool isValid = true;
 
-  final breakStartText = breakTime.text.trim();
-  final breakEndText = breakEndTime.text.trim();
-
-  // ===============================
-  // 1️⃣ REQUIRED FIELDS
-  // ===============================
-  if (travelTime.text.isEmpty) {
-    travelTimeNotifier.value = {
-      "missing": true,
-      "value": "Required",
-      "isAdded": 1
+  void _onAddTimeEntry(BuildContext context) {
+    final item = {
+      "U_CK_TraveledTime": travelTime.text,
+      "U_CK_TraveledEndTime": travelEndTime.text,
+      "U_CK_ServiceStartTime": serviceTime.text,
+      "U_CK_SerEndTime": serviceEndTime.text,
+      "U_CK_BreakTime": breakTime.text,
+      "U_CK_BreakEndTime": breakEndTime.text,
     };
-    isValid = false;
+    Provider.of<CompletedServiceProvider>(context, listen: false)
+        .addOrEditTimeEntry(item, editIndex: isEditTime);
+    _clearInputs();
   }
-
-  if (travelEndTime.text.isEmpty) {
-    travelEndTimeNotifier.value = {
-      "missing": true,
-      "value": "Required",
-      "isAdded": 1
-    };
-    isValid = false;
-  }
-
-  if (serviceTime.text.isEmpty) {
-    serviceTimeNotifier.value = {
-      "missing": true,
-      "value": "Required",
-      "isAdded": 1
-    };
-    isValid = false;
-  }
-
-  if (serviceEndTime.text.isEmpty) {
-    serviceEndTimeNotifier.value = {
-      "missing": true,
-      "value": "Required",
-      "isAdded": 1
-    };
-    isValid = false;
-  }
-
-  // ===============================
-  // 2️⃣ BREAK TIME (OPTIONAL)
-  // ===============================
-
-  // Case A: both empty → allowed, skip validation
-  if (breakStartText.isEmpty && breakEndText.isEmpty) {
-    breakTimeNotifier.value = {"missing": false, "value": "", "isAdded": 0};
-    breakEndTimeNotifier.value = {
-      "missing": false,
-      "value": "",
-      "isAdded": 0
-    };
-  }
-  // Case B: one empty → error
-  else if (breakStartText.isEmpty || breakEndText.isEmpty) {
-    breakTimeNotifier.value = {
-      "missing": breakStartText.isEmpty,
-      "value": "Required",
-      "isAdded": 1
-    };
-    breakEndTimeNotifier.value = {
-      "missing": breakEndText.isEmpty,
-      "value": "Required",
-      "isAdded": 1
-    };
-    isValid = false;
-  }
-  // Case C: both filled → validate range
-  else {
-    final jobStart = parseTime(widget.data["U_CK_Time"] ?? "");
-    final breakStart = parseTime(breakStartText);
-    final breakEnd = parseTime(breakEndText);
-
-    if (jobStart == null || breakStart == null || breakEnd == null) {
-      isValid = false;
-    } else {
-      // break start between jobStart and now
-      if (!breakStart.isAfter(jobStart) ||
-          breakStart.isAfter(currentTime())) {
-        breakTimeNotifier.value = {
-          "missing": true,
-          "value":
-              "Must be after ${widget.data["U_CK_Time"]} and not in future",
-          "isAdded": 1
-        };
-        isValid = false;
-      } else {
-        breakTimeNotifier.value = {
-          "missing": false,
-          "value": "",
-          "isAdded": 1
-        };
-      }
-
-      // break end between jobStart and now
-      if (!breakEnd.isAfter(jobStart) ||
-          breakEnd.isAfter(currentTime())) {
-        breakEndTimeNotifier.value = {
-          "missing": true,
-          "value":
-              "Must be after ${widget.data["U_CK_Time"]} and not in future",
-          "isAdded": 1
-        };
-        isValid = false;
-      } else {
-        breakEndTimeNotifier.value = {
-          "missing": false,
-          "value": "",
-          "isAdded": 1
-        };
-      }
-    }
-  }
-
-  // ===============================
-  // 3️⃣ FINAL RESULT
-  // ===============================
-  return isValid;
-}
-
-//   bool _validate() {
-//     bool isValid = true;
-//     final breakStartText = breakTime.text.trim();
-//     final breakEndText = breakEndTime.text.trim();
-//     if (travelTime.text.isEmpty) {
-//       travelTimeNotifier.value = {
-//         "missing": true,
-//         "value": "Required",
-//         "isAdded": 1
-//       };
-//       isValid = false;
-//     }
-//     if (travelEndTime.text.isEmpty) {
-//       travelEndTimeNotifier.value = {
-//         "missing": true,
-//         "value": "Required",
-//         "isAdded": 1
-//       };
-//       isValid = false;
-//     }
-//     if (serviceTime.text.isEmpty) {
-//       serviceTimeNotifier.value = {
-//         "missing": true,
-//         "value": "Required",
-//         "isAdded": 1
-//       };
-//       isValid = false;
-//     }
-//     if (serviceEndTime.text.isEmpty) {
-//       serviceEndTimeNotifier.value = {
-//         "missing": true,
-//         "value": "Required",
-//         "isAdded": 1
-//       };
-//       isValid = false;
-//     }
-//     // Break Time is optional, but if one field is filled, both must be validated
-//     // 1️⃣ Optional logic
-//     if (breakStartText.isEmpty && breakEndText.isEmpty) {
-//       breakTimeNotifier.value = {"missing": false, "value": "", "isAdded": 0};
-//       breakEndTimeNotifier.value = {
-//         "missing": false,
-//         "value": "",
-//         "isAdded": 0
-//       };
-//       return true;
-//     }
-
-//     // 2️⃣ One filled, one missing
-//     if (breakStartText.isEmpty || breakEndText.isEmpty) {
-//       breakTimeNotifier.value = {
-//         "missing": breakStartText.isEmpty,
-//         "value": "Required",
-//         "isAdded": 1
-//       };
-//       breakEndTimeNotifier.value = {
-//         "missing": breakEndText.isEmpty,
-//         "value": "Required",
-//         "isAdded": 1
-//       };
-//       return false;
-//     }
-
-//     // 3️⃣ Parse times
-//     final jobStart = parseTime(widget.data["U_CK_Time"] ?? "");
-//     final breakStart = parseTime(breakStartText);
-//     final breakEnd = parseTime(breakEndText);
-
-//     if (jobStart == null || breakStart == null || breakEnd == null) {
-//       return false;
-//     }
-
-//     // 4️⃣ Break start must be BETWEEN jobStart and current time
-//     if (!breakStart.isAfter(jobStart) || breakStart.isAfter(currentTime())) {
-//       breakTimeNotifier.value = {
-//         "missing": true,
-//         "value": "Must be after ${widget.data["U_CK_Time"]} and not in future",
-//         "isAdded": 1
-//       };
-//       isValid = false;
-//     } else {
-//       breakTimeNotifier.value = {"missing": false, "value": "", "isAdded": 1};
-//     }
-
-// // 5️⃣ Break end must be BETWEEN jobStart and current time
-//     if (!breakEnd.isAfter(jobStart) || breakEnd.isAfter(currentTime())) {
-//       breakEndTimeNotifier.value = {
-//         "missing": true,
-//         "value": "Must be after ${widget.data["U_CK_Time"]} and not in future",
-//         "isAdded": 1
-//       };
-//       isValid = false;
-//     } else {
-//       breakEndTimeNotifier.value = {
-//         "missing": false,
-//         "value": "",
-//         "isAdded": 1
-//       };
-//     }
-
-//     return isValid;
-//   }
-
-
-
-void _onAddTimeEntry(BuildContext context) {
-  final item = {
-    "U_CK_TraveledTime": travelTime.text,
-    "U_CK_TraveledEndTime": travelEndTime.text,
-    "U_CK_ServiceStartTime": serviceTime.text,
-    "U_CK_SerEndTime": serviceEndTime.text,
-    "U_CK_BreakTime": breakTime.text,
-    "U_CK_BreakEndTime": breakEndTime.text,
-  };
-
-  Provider.of<CompletedServiceProvider>(context, listen: false)
-      .addOrEditTimeEntry(item, editIndex: isEditTime);
-
-  _clearInputs();
-}
-
 
   void onEditTimeEntry() {
     // Handled by callback inside _showCreateTimeEntry or by the provider directly

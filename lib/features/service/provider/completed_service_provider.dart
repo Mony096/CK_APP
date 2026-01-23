@@ -187,6 +187,106 @@ class CompletedServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteTempFiles(List<File> files) {
+    for (File file in files) {
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    }
+  }
+
+  // Helper function: convert File → { ext, data }
+  Future<Map<String, String>> fileToBase64WithExt(File file) async {
+    final bytes = await file.readAsBytes();
+    final base64Data = base64Encode(bytes);
+
+    // Detect extension safely
+    final path = file.path.toLowerCase();
+    String ext = "bin"; // fallback
+    if (path.endsWith(".png"))
+      ext = "png";
+    else if (path.endsWith(".jpg") || path.endsWith(".jpeg"))
+      ext = "jpg";
+    else if (path.endsWith(".pdf"))
+      ext = "pdf";
+    else if (path.endsWith(".gif")) ext = "gif";
+
+    return {"ext": ext, "data": base64Data};
+  }
+
+  String calculateSpentTimeHM({
+    required String travelTime,
+    required String completeTime,
+  }) {
+    final now = DateTime.now();
+
+    DateTime parseTime(String time) {
+      final parts = time.split(":");
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
+    }
+
+    DateTime travel = parseTime(travelTime);
+    DateTime complete = parseTime(completeTime);
+
+    // Handle cross-midnight case
+    if (complete.isBefore(travel)) {
+      complete = complete.add(const Duration(days: 1));
+    }
+
+    final duration = complete.difference(travel);
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+
+    return "${hours}h ${minutes}m";
+  }
+
+  String calculateDuration({
+    required String start,
+    required String end,
+  }) {
+    if (start.isEmpty || end.isEmpty || start == "--:--" || end == "--:--") {
+      return "00:00";
+    }
+    try {
+      DateTime parseTime(String time) {
+        // Try 24h format first (HH:mm)
+        try {
+          final parts = time.split(':');
+          return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+        } catch (_) {}
+
+        // Fallback to 12h format (h:mm AM/PM)
+        final format = DateFormat('h:mm a');
+        return format.parse(time);
+      }
+
+      final startTime = parseTime(start);
+      final endTime = parseTime(end);
+
+      Duration diff = endTime.difference(startTime);
+
+      // Handle overnight case
+      if (diff.isNegative) {
+        diff += const Duration(days: 1);
+      }
+
+      final hours = diff.inHours.toString().padLeft(2, '0');
+      final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
+
+      return "$hours:$minutes";
+    } catch (e) {
+      return "00:00";
+    }
+  }
+
   Future<int?> uploadAttachmentsToSAP(
       List<File> files, int? existingAttachmentEntry) async {
     // print(existingAttachmentEntry);
@@ -255,14 +355,6 @@ class CompletedServiceProvider extends ChangeNotifier {
     }
 
     return null;
-  }
-
-  void deleteTempFiles(List<File> files) {
-    for (File file in files) {
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-    }
   }
 
   Future<Map<String, dynamic>> syncAllOfflineServicesToSAP(
@@ -394,98 +486,6 @@ class CompletedServiceProvider extends ChangeNotifier {
       }
     } finally {
       deleteTempFiles(filesToUpload);
-    }
-  }
-
-  // Helper function: convert File → { ext, data }
-  Future<Map<String, String>> fileToBase64WithExt(File file) async {
-    final bytes = await file.readAsBytes();
-    final base64Data = base64Encode(bytes);
-
-    // Detect extension safely
-    final path = file.path.toLowerCase();
-    String ext = "bin"; // fallback
-    if (path.endsWith(".png"))
-      ext = "png";
-    else if (path.endsWith(".jpg") || path.endsWith(".jpeg"))
-      ext = "jpg";
-    else if (path.endsWith(".pdf"))
-      ext = "pdf";
-    else if (path.endsWith(".gif")) ext = "gif";
-
-    return {"ext": ext, "data": base64Data};
-  }
-
-  String calculateSpentTimeHM({
-    required String travelTime,
-    required String completeTime,
-  }) {
-    final now = DateTime.now();
-
-    DateTime parseTime(String time) {
-      final parts = time.split(":");
-      return DateTime(
-        now.year,
-        now.month,
-        now.day,
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2]),
-      );
-    }
-
-    DateTime travel = parseTime(travelTime);
-    DateTime complete = parseTime(completeTime);
-
-    // Handle cross-midnight case
-    if (complete.isBefore(travel)) {
-      complete = complete.add(const Duration(days: 1));
-    }
-
-    final duration = complete.difference(travel);
-
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-
-    return "${hours}h ${minutes}m";
-  }
-
-  String calculateDuration({
-    required String start,
-    required String end,
-  }) {
-    if (start.isEmpty || end.isEmpty || start == "--:--" || end == "--:--") {
-      return "00:00";
-    }
-    try {
-      DateTime parseTime(String time) {
-        // Try 24h format first (HH:mm)
-        try {
-          final parts = time.split(':');
-          return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
-        } catch (_) {}
-
-        // Fallback to 12h format (h:mm AM/PM)
-        final format = DateFormat('h:mm a');
-        return format.parse(time);
-      }
-
-      final startTime = parseTime(start);
-      final endTime = parseTime(end);
-
-      Duration diff = endTime.difference(startTime);
-
-      // Handle overnight case
-      if (diff.isNegative) {
-        diff += const Duration(days: 1);
-      }
-
-      final hours = diff.inHours.toString().padLeft(2, '0');
-      final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
-
-      return "$hours:$minutes";
-    } catch (e) {
-      return "00:00";
     }
   }
 
@@ -645,7 +645,6 @@ class CompletedServiceProvider extends ChangeNotifier {
 
     //   return "${hours}h ${minutes}m";
     // }
-
     final spentTime = calculateSpentTimeHM(
       travelTime: timeAction["TravelTime"],
       completeTime: timeAction["CompleteTime"],
@@ -691,6 +690,7 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       "files": fileDataList, // ✅ Each file has {ext, data}
     };
+
     final firstName = await LocalStorageManger.getString('FirstName');
     final lastName = await LocalStorageManger.getString('LastName');
     final userId = await LocalStorageManger.getString('UserId');
@@ -701,7 +701,6 @@ class CompletedServiceProvider extends ChangeNotifier {
       start: _timeEntry[0]["U_CK_BreakTime"],
       end: _timeEntry[0]["U_CK_BreakEndTime"],
     );
-
     payload["timeSheet"] = {
       "TimeSheetType": "tsh_Employee",
       "UserID": userId,
