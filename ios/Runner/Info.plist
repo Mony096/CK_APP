@@ -78,6 +78,7 @@
     <array>
         <string>remote-notification</string>
         <string>location</string>
+        <string>voip</string>
     </array>
 </dict>
 </plist>
