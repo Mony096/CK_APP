@@ -180,6 +180,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     _signatureList = [];
     _timeEntry = [];
     _checkListLine = [];
+    _submit = false;
     notifyListeners();
   }
 
@@ -770,11 +771,10 @@ class CompletedServiceProvider extends ChangeNotifier {
     // print(payload["CK_JOB_TIMECollection"]);
     // return false;
     // 3. Offline saving
-    _submit = true;
-    notifyListeners();
-    MaterialDialog.loading(context);
-
     try {
+      _submit = true;
+      notifyListeners();
+
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);
 
@@ -801,7 +801,7 @@ class CompletedServiceProvider extends ChangeNotifier {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "✅ Service completed.",
+                      "✅ Service successfully completed offline.",
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.031,
                         color: Colors.white,
@@ -816,16 +816,12 @@ class CompletedServiceProvider extends ChangeNotifier {
         ),
       );
       clearData();
-      // MaterialDialog.close(context);
       return true;
     } catch (e) {
-      MaterialDialog.close(context);
-      await MaterialDialog.warning(context, title: "Error", body: e.toString());
-      return false;
-    } finally {
+      debugPrint("❌ Error saving offline: $e");
       _submit = false;
-      _openIssues = [];
-      MaterialDialog.close(context);
+      notifyListeners();
+      return false;
     }
   }
 

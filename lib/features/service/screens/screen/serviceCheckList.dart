@@ -136,7 +136,7 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                 child: CheckboxListTile(
                   contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
                   title: Text(
-                    isTrue ? "true" : "false",
+                    isTrue ? "Yes" : "No",
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -527,7 +527,11 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
                       SizedBox(width: 2.w),
                       Expanded(
                         child: Text(
-                          item["U_CK_Answer"],
+                          (item["U_CK_ChecklistType"] == "True/False" &&
+                                  (item["U_CK_Answer"] == "true" ||
+                                      item["U_CK_Answer"] == "false"))
+                              ? (item["U_CK_Answer"] == "true" ? "Yes" : "No")
+                              : item["U_CK_Answer"],
                           style: GoogleFonts.inter(
                               fontSize: 12.5.sp,
                               color: const Color(0xFFB45309),

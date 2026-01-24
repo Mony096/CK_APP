@@ -212,99 +212,110 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
 
   /// Save offline only without syncing to SAP
   Future<void> _saveOfflineOnly() async {
-    // print(widget.data);
+    if (mounted) MaterialDialog.loading(context);
+    try {
+      final now = DateTime.now();
+      final timeStamp = DateFormat("HH:mm:ss").format(now);
+      final res = await Provider.of<CompletedServiceProvider>(context,
+              listen: false)
+          .onCompletedServiceOffline(
+              context: context,
+              attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+              docEntry: widget.data["DocEntry"],
+              startTime: widget.data["U_CK_Time"],
+              endTime: widget.data["U_CK_EndTime"],
+              customerName: widget.data["U_CK_Cardname"],
+              date: widget.data["U_CK_Date"] ?? "",
+              timeAction: {
+                "AcceptTime":
+                    widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+                "TravelTime":
+                    widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+                "ServiceTime": widget.data["ServiceTime"],
+                "CompleteTime": timeStamp
+              },
+              activityType: widget.data["U_CK_JobType"],
+              docNum: widget.data["DocNum"],
+              serviceCallId: widget.data["U_CK_ServiceCall"]);
 
-    final now = DateTime.now();
-    final timeStamp = DateFormat("HH:mm:ss").format(now);
-    final res = await Provider.of<CompletedServiceProvider>(context,
-            listen: false)
-        .onCompletedServiceOffline(
-            context: context,
-            attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-            docEntry: widget.data["DocEntry"],
-            startTime: widget.data["U_CK_Time"],
-            endTime: widget.data["U_CK_EndTime"],
-            customerName: widget.data["U_CK_Cardname"],
-            date: widget.data["U_CK_Date"] ?? "",
-            timeAction: {
-              "AcceptTime":
-                  widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
-              "TravelTime":
-                  widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
-              "ServiceTime": widget.data["ServiceTime"],
-              "CompleteTime": timeStamp
-            },
-            activityType: widget.data["U_CK_JobType"],
-            docNum: widget.data["DocNum"],
-            serviceCallId: widget.data["U_CK_ServiceCall"]);
+      if (mounted) MaterialDialog.close(context);
 
-    if (res && mounted) {
-      Navigator.of(context).pop(true);
+      if (res && mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      if (mounted) MaterialDialog.close(context);
+      debugPrint("❌ Save offline failed: $e");
     }
   }
 
   /// Save offline and sync to SAP
   Future<void> _saveAndSyncToSAP() async {
     if (mounted) MaterialDialog.loading(context);
-    final now = DateTime.now();
-    final timeStamp = DateFormat("HH:mm:ss").format(now);
-    final res = await Provider.of<CompletedServiceProvider>(context,
-            listen: false)
-        .onCompletedServiceOffline(
-            context: context,
-            attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-            docEntry: widget.data["DocEntry"],
-            startTime: widget.data["U_CK_Time"],
-            endTime: widget.data["U_CK_EndTime"],
-            customerName: widget.data["U_CK_Cardname"],
-            date: widget.data["U_CK_Date"] ?? "",
-            timeAction: {
-              "AcceptTime":
-                  widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
-              "TravelTime":
-                  widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
-              "ServiceTime": widget.data["ServiceTime"],
-              "CompleteTime": timeStamp
-            },
-            activityType: widget.data["U_CK_JobType"],
-            docNum: widget.data["DocNum"],
-            serviceCallId: widget.data["U_CK_ServiceCall"]);
+    try {
+      final now = DateTime.now();
+      final timeStamp = DateFormat("HH:mm:ss").format(now);
+      final res = await Provider.of<CompletedServiceProvider>(context,
+              listen: false)
+          .onCompletedServiceOffline(
+              context: context,
+              attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+              docEntry: widget.data["DocEntry"],
+              startTime: widget.data["U_CK_Time"],
+              endTime: widget.data["U_CK_EndTime"],
+              customerName: widget.data["U_CK_Cardname"],
+              date: widget.data["U_CK_Date"] ?? "",
+              timeAction: {
+                "AcceptTime":
+                    widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+                "TravelTime":
+                    widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+                "ServiceTime": widget.data["ServiceTime"],
+                "CompleteTime": timeStamp
+              },
+              activityType: widget.data["U_CK_JobType"],
+              docNum: widget.data["DocNum"],
+              serviceCallId: widget.data["U_CK_ServiceCall"]);
 
-    if (res) {
-      try {
-        debugPrint("📡 Internet available - triggering immediate sync...");
-        // Sync ONLY this service using DocEntry
-        await Provider.of<CompletedServiceProvider>(context, listen: false)
-            .syncSingleServiceToSAP(context, widget.data["DocEntry"]);
+      if (res) {
+        try {
+          debugPrint("📡 Internet available - triggering immediate sync...");
+          // Sync ONLY this service using DocEntry
+          await Provider.of<CompletedServiceProvider>(context, listen: false)
+              .syncSingleServiceToSAP(context, widget.data["DocEntry"]);
 
-        debugPrint("✅ Sync completed successfully!");
-      } catch (e) {
-        debugPrint("❌ Immediate sync failed: $e");
+          debugPrint("✅ Sync completed successfully!");
+        } catch (e) {
+          debugPrint("❌ Immediate sync failed: $e");
 
-        // Close loading dialog first
+          if (mounted) {
+            MaterialDialog.close(context); // Close loading before warning
+            String errorMessage = e is Exception
+                ? e.toString().replaceFirst('Exception: ', '')
+                : e.toString();
 
-        // Show error dialog to user
-        if (mounted) {
-          String errorMessage;
-          if (e is Exception) {
-            errorMessage = e.toString().replaceFirst('Exception: ', '');
-          } else {
-            errorMessage = e.toString();
+            await MaterialDialog.warning(
+              context,
+              title: "Sync Failed",
+              body:
+                  "Failed to sync to SAP: $errorMessage\n\nYour data has been saved offline and can be synced later.",
+            );
+
+            if (mounted) Navigator.of(context).pop(true);
+            return;
           }
-
-          await MaterialDialog.warning(
-            context,
-            title: "Sync Failed",
-            body:
-                "Failed to sync to SAP: $errorMessage\n\nYour data has been saved offline and can be synced later.",
-          );
         }
-      }
 
-      if (mounted) {
-        MaterialDialog.close(context);
-        Navigator.of(context).pop(true);
+        if (mounted) {
+          MaterialDialog.close(context);
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        if (mounted) MaterialDialog.close(context);
       }
+    } catch (e) {
+      if (mounted) MaterialDialog.close(context);
+      debugPrint("❌ Save and sync failed: $e");
     }
   }
 
@@ -626,7 +637,9 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             ],
           ),
           child: ElevatedButton(
-            onPressed: onCompletedService,
+            onPressed: context.watch<CompletedServiceProvider>().submit
+                ? null
+                : onCompletedService,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF22C55E),
               foregroundColor: Colors.white,
@@ -635,12 +648,25 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(
-              "COMPLETE SERVICE",
-              style: GoogleFonts.inter(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.0),
+            child: Consumer<CompletedServiceProvider>(
+              builder: (context, provider, child) {
+                return provider.submit
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "COMPLETE SERVICE",
+                        style: GoogleFonts.inter(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0),
+                      );
+              },
             ),
           ),
         ),
