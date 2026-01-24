@@ -625,6 +625,7 @@ class CompletedServiceProvider extends ChangeNotifier {
       );
       return false;
     }
+    // MaterialDialog.loading(context);
 
     // 1. Convert all files into List<Map<String, String>>
     List<Map<String, String>> fileDataList = [];
@@ -659,7 +660,8 @@ class CompletedServiceProvider extends ChangeNotifier {
         'files': fileDataList, // Include images/signature for PDF template
       });
 
-      final File pdfFile = await HtmlServiceReportGenerator.generateServiceReport(pdfData);
+      final File pdfFile =
+          await HtmlServiceReportGenerator.generateServiceReport(pdfData);
       final pdfBytes = await pdfFile.readAsBytes();
       final pdfBase64 = base64Encode(pdfBytes);
 
@@ -814,8 +816,10 @@ class CompletedServiceProvider extends ChangeNotifier {
         ),
       );
       clearData();
+      // MaterialDialog.close(context);
       return true;
     } catch (e) {
+      MaterialDialog.close(context);
       await MaterialDialog.warning(context, title: "Error", body: e.toString());
       return false;
     } finally {

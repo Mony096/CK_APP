@@ -213,7 +213,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   /// Save offline only without syncing to SAP
   Future<void> _saveOfflineOnly() async {
     // print(widget.data);
-    if (mounted) MaterialDialog.loading(context);
+
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
     final res = await Provider.of<CompletedServiceProvider>(context,
@@ -239,7 +239,6 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             serviceCallId: widget.data["U_CK_ServiceCall"]);
 
     if (res && mounted) {
-      if (mounted) MaterialDialog.close(context);
       Navigator.of(context).pop(true);
     }
   }
@@ -303,7 +302,7 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
       }
 
       if (mounted) {
-        if (mounted) MaterialDialog.close(context);
+        MaterialDialog.close(context);
         Navigator.of(context).pop(true);
       }
     }

@@ -210,8 +210,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildStatusHeader(context),
-                  if (_displayData["subject"] != null &&
-                      _displayData["subject"].toString().isNotEmpty) ...[
+                  if (widget.data["U_CK_ServiceCall"] != null &&
+                      widget.data["subject"] != null &&
+                      widget.data["subject"].toString().isNotEmpty) ...[
                     SizedBox(height: 2.5.h),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 1.w),

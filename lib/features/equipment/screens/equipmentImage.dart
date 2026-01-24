@@ -28,7 +28,6 @@ class _EquipmentImageScreenState extends State<EquipmentImageScreen> {
 
   Future<void> _downloadImage() async {
     MaterialDialog.loading(context);
-
     try {
       List<File> sapFiles = [];
       final attachmentEntry = widget.data["U_ck_AttachmentEntry"];
