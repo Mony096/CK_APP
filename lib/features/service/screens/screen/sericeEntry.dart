@@ -43,8 +43,14 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   }
 
   void onCompletedService() async {
+    // 0. Unfocus everything immediately
+    FocusManager.instance.primaryFocus?.unfocus();
+
     // 1. Check internet connection first
     final hasInternet = await _checkInternetConnection();
+
+    if (!mounted) return;
+    context.read<CompletedServiceProvider>().setSubmit(true);
 
     if (hasInternet) {
       // Show dialog asking user to choose between save offline or save to SAP
@@ -150,54 +156,76 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
             ],
           ),
           actions: [
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      Navigator.of(dialogContext).pop();
-                      await _saveOfflineOnly();
-                    },
-                    icon: const Icon(Icons.save_outlined, size: 18),
-                    label: Text(
-                      'Save Offline',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          Navigator.of(dialogContext).pop();
+                          await _saveOfflineOnly();
+                        },
+                        icon: const Icon(Icons.save_outlined, size: 18),
+                        label: Text(
+                          'Save Offline',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF64748B),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF64748B),
-                      side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          Navigator.of(dialogContext).pop();
+                          await _saveAndSyncToSAP();
+                        },
+                        icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                        label: Text(
+                          'Save to SAP',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF22C55E),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      context.read<CompletedServiceProvider>().setSubmit(false);
                       Navigator.of(dialogContext).pop();
-                      await _saveAndSyncToSAP();
                     },
-                    icon: const Icon(Icons.cloud_upload_outlined, size: 18),
-                    label: Text(
-                      'Save to SAP',
+                    child: Text(
+                      'Cancel',
                       style: GoogleFonts.inter(
+                        color: const Color(0xFF94A3B8),
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF22C55E),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        fontSize: 14,
                       ),
                     ),
                   ),

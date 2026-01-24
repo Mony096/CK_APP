@@ -21,6 +21,12 @@ class _ServiceCheckListScreenState extends State<ServiceCheckListScreen> {
   List<dynamic> _localTasks = [];
 
   @override
+  void dispose() {
+    remark.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     final provider = context.read<CompletedServiceProvider>();

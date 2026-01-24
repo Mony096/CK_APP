@@ -1074,13 +1074,21 @@ class MaterialDialog {
   }
 
   static close(BuildContext context) {
-    if (context.mounted && Navigator.canPop(context)) {
-      Navigator.of(context).pop();
+    if (context.mounted) {
+      // Unfocus keyboard before closing dialog to prevent IMM leaks
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      if (Navigator.of(context, rootNavigator: true).canPop()) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
     }
   }
 
   static Future<void> loading(BuildContext context,
       {bool? barrierDismissible}) async {
+    // Unfocus keyboard when showing loading
+    FocusManager.instance.primaryFocus?.unfocus();
+
     return showDialog<void>(
       context: context,
       barrierDismissible:

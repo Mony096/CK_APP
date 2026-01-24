@@ -19,6 +19,20 @@ class OpenIssueScreen extends StatefulWidget {
 
 class _OpenIssueScreenState extends State<OpenIssueScreen> {
   @override
+  void dispose() {
+    area.dispose();
+    desc.dispose();
+    critical.dispose();
+    date.dispose();
+    status.dispose();
+    handleBy.dispose();
+    remark.dispose();
+    areaFieldNotifier.dispose();
+    descFieldNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {

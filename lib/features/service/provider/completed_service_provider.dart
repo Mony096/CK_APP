@@ -33,6 +33,11 @@ class CompletedServiceProvider extends ChangeNotifier {
   List<File> get images => _imagesList.cast<File>();
   final DioClient dio = DioClient(); // Custom Dio wrapper
 
+  void setSubmit(bool val) {
+    _submit = val;
+    notifyListeners();
+  }
+
   void addOrEditOpenIssue(dynamic item, {int editIndex = -1}) {
     if (editIndex == -1) {
       _openIssues.add(item);
@@ -506,6 +511,8 @@ class CompletedServiceProvider extends ChangeNotifier {
     bool offline = false,
   }) async {
     if (_timeEntry.isEmpty) {
+      _submit = false;
+      notifyListeners();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color.fromARGB(255, 66, 83, 100),
@@ -543,6 +550,8 @@ class CompletedServiceProvider extends ChangeNotifier {
       return false;
     }
     if (_signatureList.isEmpty) {
+      _submit = false;
+      notifyListeners();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color.fromARGB(255, 66, 83, 100),
@@ -590,6 +599,8 @@ class CompletedServiceProvider extends ChangeNotifier {
 
     // Check if U_CK_EndTime equals startTime (no time spent - compare only hours and minutes)
     if (timeStampWithoutSeconds == startTimeWithoutSeconds) {
+      _submit = false;
+      notifyListeners();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color.fromARGB(255, 66, 83, 100),
@@ -626,202 +637,196 @@ class CompletedServiceProvider extends ChangeNotifier {
       );
       return false;
     }
-    // MaterialDialog.loading(context);
-
-    // 1. Convert all files into List<Map<String, String>>
-    List<Map<String, String>> fileDataList = [];
-
-    for (File imageFile in imagesList) {
-      final fileMap = await fileToBase64WithExt(imageFile);
-      fileMap['type'] = 'image';
-      fileDataList.add(fileMap);
-    }
-
-    for (File signatureFile in signatureList) {
-      final fileMap = await fileToBase64WithExt(signatureFile);
-      fileMap['type'] = 'signature';
-      fileDataList.add(fileMap);
-    }
-
-    // Generate PDF report and add to files
     try {
-      // Build data for PDF generation (need to include images/signatures for the PDF template)
-      final pdfData = Map<String, dynamic>.from({
-        'DocEntry': docEntry,
-        'DocNum': docNum,
-        'U_CK_Date': date,
-        'U_CK_Cardname': customerName,
-        'CustomerName': customerName,
-        'U_CK_Time': startTime,
-        'U_CK_EndTime': endTime,
-        'U_CK_JobType': activityType,
-        'U_CK_ServiceCall': serviceCallId,
-        'CK_JOB_ISSUECollection': _openIssues,
-        'CK_JOB_TASKCollection': _checkListLine,
-        'files': fileDataList, // Include images/signature for PDF template
-      });
+      // 1. Convert all files into List<Map<String, String>>
+      List<Map<String, String>> fileDataList = [];
 
-      final File pdfFile =
-          await HtmlServiceReportGenerator.generateServiceReport(pdfData);
-      final pdfBytes = await pdfFile.readAsBytes();
-      final pdfBase64 = base64Encode(pdfBytes);
-
-      fileDataList.add({
-        'ext': 'pdf',
-        'data': pdfBase64,
-        'type': 'report',
-      });
-
-      // Clean up temp PDF file
-      if (pdfFile.existsSync()) {
-        pdfFile.deleteSync();
+      for (File imageFile in imagesList) {
+        final fileMap = await fileToBase64WithExt(imageFile);
+        fileMap['type'] = 'image';
+        fileDataList.add(fileMap);
       }
 
-      debugPrint('✅ PDF report generated and added to files');
-    } catch (e) {
-      debugPrint('⚠️ Failed to generate PDF report: $e');
-      // Continue without PDF - don't block the completion
-    }
+      for (File signatureFile in signatureList) {
+        final fileMap = await fileToBase64WithExt(signatureFile);
+        fileMap['type'] = 'signature';
+        fileDataList.add(fileMap);
+      }
 
-    // String formatSpentTime(Duration duration) {
-    //   final hours = duration.inHours;
-    //   final minutes = duration.inMinutes.remainder(60);
+      // Generate PDF report and add to files
+      try {
+        // Build data for PDF generation (need to include images/signatures for the PDF template)
+        final pdfData = Map<String, dynamic>.from({
+          'DocEntry': docEntry,
+          'DocNum': docNum,
+          'U_CK_Date': date,
+          'U_CK_Cardname': customerName,
+          'CustomerName': customerName,
+          'U_CK_Time': startTime,
+          'U_CK_EndTime': endTime,
+          'U_CK_JobType': activityType,
+          'U_CK_ServiceCall': serviceCallId,
+          'CK_JOB_ISSUECollection': _openIssues,
+          'CK_JOB_TASKCollection': _checkListLine,
+          'files': fileDataList, // Include images/signature for PDF template
+        });
 
-    //   return "${hours}h ${minutes}m";
-    // }
-    final spentTime = calculateSpentTimeHM(
-      travelTime: timeAction["TravelTime"],
-      completeTime: timeAction["CompleteTime"],
-    );
-    // 2. Build the payload
-    final payload = {
-      "DocEntry": docEntry,
-      "U_CK_Cardname": customerName,
-      "U_CK_Date": date,
-      "U_CK_Status": "Completed",
-      "U_CK_AttachmentEntry": attachmentEntryExisting,
-      "U_CK_Time": startTime,
-      "U_CK_EndTime": timeStamp,
-      "U_CK_TravelTime": timeAction["TravelTime"],
-      "U_CK_AcceptTime": timeAction["AcceptTime"],
-      "U_CK_ServiceCall": serviceCallId,
-      "CK_JOB_TIMECollection": [
-        {
-          "U_CK_Date": date,
-          "U_CK_StartTime": startTime,
-          "U_CK_EndTime": timeStamp,
-          "U_CK_Effort": spentTime,
-          "U_CK_AcceptedTime": timeAction["AcceptTime"],
-          "U_CK_RejectedTime": timeAction["RejectTime"],
-          "U_CK_TraveledTime": _timeEntry[0]["U_CK_TraveledTime"],
-          "U_CK_TraveledEndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
-          "U_CK_TraveledEffortTime": _timeEntry[0]["total_travel_time"],
-          "U_CK_ServiceStartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
-          "U_CK_SerEndTime": _timeEntry[0]["U_CK_SerEndTime"],
-          "U_CK_ServiceEffortTime": _timeEntry[0]["total_service_time"],
-          "U_CK_BreakTime": _timeEntry[0]["U_CK_BreakTime"],
-          "U_CK_BreakEndTime": _timeEntry[0]["U_CK_BreakEndTime"],
-          "U_CK_BreakEffortTime": _timeEntry[0]["total_break_time"],
-        },
-      ],
-      "CK_JOB_ISSUECollection": _openIssues,
-      "CK_JOB_TASKCollection": _checkListLine.map((item) {
-        return {
-          ...item,
-          'U_CK_Checked': item['U_CK_Checked'] == true ? 'Y' : 'N',
-        };
-      }).toList(),
+        final File pdfFile =
+            await HtmlServiceReportGenerator.generateServiceReport(pdfData);
+        final pdfBytes = await pdfFile.readAsBytes();
+        final pdfBase64 = base64Encode(pdfBytes);
 
-      "files": fileDataList, // ✅ Each file has {ext, data}
-    };
+        fileDataList.add({
+          'ext': 'pdf',
+          'data': pdfBase64,
+          'type': 'report',
+        });
 
-    final firstName = await LocalStorageManger.getString('FirstName');
-    final lastName = await LocalStorageManger.getString('LastName');
-    final userId = await LocalStorageManger.getString('UserId');
-    final userCode = await LocalStorageManger.getString('UserName');
-
-    // calculate break time (HH:mm)
-    final breakTime = calculateDuration(
-      start: _timeEntry[0]["U_CK_BreakTime"],
-      end: _timeEntry[0]["U_CK_BreakEndTime"],
-    );
-    payload["timeSheet"] = {
-      "TimeSheetType": "tsh_Employee",
-      "UserID": userId,
-      "LastName": lastName,
-      "FirstName": firstName,
-      "DateFrom": date,
-      "DateTo": date,
-      "SAPPassport": null,
-      "UserCode": userCode,
-      "PM_TimeSheetLineDataCollection": [
-        {
-          "LineID": null,
-          "Date": date,
-          "StartTime": startTime,
-          "EndTime": timeStamp,
-          "Break": breakTime,
-          "U_CK_JobType": activityType,
-          "U_CK_JobOrder": docNum,
-          "NonBillableTime": "00:00"
+        // Clean up temp PDF file
+        if (pdfFile.existsSync()) {
+          pdfFile.deleteSync();
         }
-      ]
-    };
 
-    // print(payload["CK_JOB_TIMECollection"]);
-    // return false;
-    // 3. Offline saving
-    try {
-      _submit = true;
-      notifyListeners();
+        debugPrint('✅ PDF report generated and added to files');
+      } catch (e) {
+        debugPrint('⚠️ Failed to generate PDF report: $e');
+        // Continue without PDF - don't block the completion
+      }
 
+      // String formatSpentTime(Duration duration) {
+      //   final hours = duration.inHours;
+      //   final minutes = duration.inMinutes.remainder(60);
+
+      //   return "${hours}h ${minutes}m";
+      // }
+      final spentTime = calculateSpentTimeHM(
+        travelTime: timeAction["TravelTime"],
+        completeTime: timeAction["CompleteTime"],
+      );
+      // 2. Build the payload
+      final payload = {
+        "DocEntry": docEntry,
+        "U_CK_Cardname": customerName,
+        "U_CK_Date": date,
+        "U_CK_Status": "Completed",
+        "U_CK_AttachmentEntry": attachmentEntryExisting,
+        "U_CK_Time": startTime,
+        "U_CK_EndTime": timeStamp,
+        "U_CK_TravelTime": timeAction["TravelTime"],
+        "U_CK_AcceptTime": timeAction["AcceptTime"],
+        "U_CK_ServiceCall": serviceCallId,
+        "CK_JOB_TIMECollection": [
+          {
+            "U_CK_Date": date,
+            "U_CK_StartTime": startTime,
+            "U_CK_EndTime": timeStamp,
+            "U_CK_Effort": spentTime,
+            "U_CK_AcceptedTime": timeAction["AcceptTime"],
+            "U_CK_RejectedTime": timeAction["RejectTime"],
+            "U_CK_TraveledTime": _timeEntry[0]["U_CK_TraveledTime"],
+            "U_CK_TraveledEndTime": _timeEntry[0]["U_CK_TraveledEndTime"],
+            "U_CK_TraveledEffortTime": _timeEntry[0]["total_travel_time"],
+            "U_CK_ServiceStartTime": _timeEntry[0]["U_CK_ServiceStartTime"],
+            "U_CK_SerEndTime": _timeEntry[0]["U_CK_SerEndTime"],
+            "U_CK_ServiceEffortTime": _timeEntry[0]["total_service_time"],
+            "U_CK_BreakTime": _timeEntry[0]["U_CK_BreakTime"],
+            "U_CK_BreakEndTime": _timeEntry[0]["U_CK_BreakEndTime"],
+            "U_CK_BreakEffortTime": _timeEntry[0]["total_break_time"],
+          },
+        ],
+        "CK_JOB_ISSUECollection": _openIssues,
+        "CK_JOB_TASKCollection": _checkListLine.map((item) {
+          return {
+            ...item,
+            'U_CK_Checked': item['U_CK_Checked'] == true ? 'Y' : 'N',
+          };
+        }).toList(),
+
+        "files": fileDataList, // ✅ Each file has {ext, data}
+      };
+
+      final firstName = await LocalStorageManger.getString('FirstName');
+      final lastName = await LocalStorageManger.getString('LastName');
+      final userId = await LocalStorageManger.getString('UserId');
+      final userCode = await LocalStorageManger.getString('UserName');
+
+      // calculate break time (HH:mm)
+      final breakTime = calculateDuration(
+        start: _timeEntry[0]["U_CK_BreakTime"],
+        end: _timeEntry[0]["U_CK_BreakEndTime"],
+      );
+      payload["timeSheet"] = {
+        "TimeSheetType": "tsh_Employee",
+        "UserID": userId,
+        "LastName": lastName,
+        "FirstName": firstName,
+        "DateFrom": date,
+        "DateTo": date,
+        "SAPPassport": null,
+        "UserCode": userCode,
+        "PM_TimeSheetLineDataCollection": [
+          {
+            "LineID": null,
+            "Date": date,
+            "StartTime": startTime,
+            "EndTime": timeStamp,
+            "Break": breakTime,
+            "U_CK_JobType": activityType,
+            "U_CK_JobOrder": docNum,
+            "NonBillableTime": "00:00"
+          }
+        ]
+      };
+
+      // print(payload["CK_JOB_TIMECollection"]);
+      // return false;
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);
 
       await offlineProvider.addCompletedService(payload);
       await offlineProvider.markServiceCompleted(docEntry);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color.fromARGB(255, 66, 83, 100),
-          behavior: SnackBarBehavior.floating,
-          elevation: 10,
-          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          content: Row(
-            children: [
-              // Icon(Icons.remove_circle,
-              //     color: Colors.white, size: 28),
-              // SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "✅ Service successfully completed offline.",
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.031,
-                        color: Colors.white,
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color.fromARGB(255, 66, 83, 100),
+            behavior: SnackBarBehavior.floating,
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            content: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "✅ Service successfully completed offline.",
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.031,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            duration: const Duration(seconds: 4),
           ),
-          duration: const Duration(seconds: 4),
-        ),
-      );
+        );
+      }
       clearData();
       return true;
     } catch (e) {
       debugPrint("❌ Error saving offline: $e");
-      _submit = false;
-      notifyListeners();
       return false;
+    } finally {
+      setSubmit(false);
     }
   }
 
