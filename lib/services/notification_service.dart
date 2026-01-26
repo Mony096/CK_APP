@@ -270,8 +270,9 @@ class NotificationService {
           NotificationPermission.Badge,
           NotificationPermission.Vibration,
           NotificationPermission.Light,
+          NotificationPermission.CriticalAlert,
           NotificationPermission
-              .CriticalAlert, // Specific for iOS critical alerts
+              .FullScreenIntent, // 👈 Required for lock screen
         ],
       );
     }
@@ -306,17 +307,20 @@ class NotificationService {
   static Future<void> _showNotification(RemoteMessage message) async {
     int notificationId =
         DateTime.now().millisecondsSinceEpoch.remainder(100000);
+    String title = message.notification?.title ?? '🛠️ Technicon Service Alert';
+    String body = message.notification?.body ??
+        'A new Service has been assigned to you. Open now!';
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: notificationId,
         channelKey: 'service_channel',
-        title: '🛠️ Technicon Service Alert',
-        body: 'A new Service has been assigned to you. Open now!',
+        title: title,
+        body: body,
         notificationLayout: NotificationLayout.Default,
         category: NotificationCategory.Call, // Triggers Call behavior on iOS
         wakeUpScreen: true,
-        fullScreenIntent: true,
+        fullScreenIntent: false,
         autoDismissible: false,
         locked: true,
         criticalAlert: true,
@@ -384,7 +388,7 @@ class NotificationService {
       _isVibrating = true;
       Vibration.vibrate(
         pattern: [500, 1000, 500, 1000],
-        repeat: -1,
+        repeat: 0, // 👈 Loop until user answers
       );
     }
   }

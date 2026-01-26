@@ -1115,7 +1115,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         MaterialPageRoute(
                           builder: (context) => PDFViewerScreen(
                             memoryData: base64Decode(base64Data),
-                            title: "Signature (PDF)",
+                            title: "Report (PDF)",
                           ),
                         ),
                       );
@@ -1129,7 +1129,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               color: const Color(0xFFE11D48), size: 24.sp),
                           SizedBox(height: 1.h),
                           Text(
-                            "Signature",
+                            "Report",
                             style: google_fonts.GoogleFonts.inter(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
