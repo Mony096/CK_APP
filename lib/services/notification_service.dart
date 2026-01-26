@@ -388,7 +388,7 @@ class NotificationService {
       _isVibrating = true;
       Vibration.vibrate(
         pattern: [500, 1000, 500, 1000],
-        repeat: 0, // 👈 Loop until user answers
+        repeat: -1, // 👈 Loop until user answers
       );
     }
   }
