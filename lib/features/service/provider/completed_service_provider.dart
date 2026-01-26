@@ -66,16 +66,16 @@ class CompletedServiceProvider extends ChangeNotifier {
   void addOrEditTimeEntry(Map<String, dynamic> item, {int editIndex = -1}) {
     // Calculate durations
     item['total_travel_time'] = calculateSpentTime(
-      (item['U_CK_TraveledTime']).split(" ")[0],
-      item['U_CK_TraveledEndTime'].split(" ")[0],
+      (item['U_CK_TraveledTime'] ?? "").toString().split(" ")[0],
+      (item['U_CK_TraveledEndTime'] ?? "").toString().split(" ")[0],
     );
     item['total_service_time'] = calculateSpentTime(
-      item['U_CK_ServiceStartTime'].split(" ")[0],
-      item['U_CK_SerEndTime'].split(" ")[0],
+      (item['U_CK_ServiceStartTime'] ?? "").toString().split(" ")[0],
+      (item['U_CK_SerEndTime'] ?? "").toString().split(" ")[0],
     );
     item['total_break_time'] = calculateSpentTime(
-      item['U_CK_BreakTime'].split(" ")[0],
-      item['U_CK_BreakEndTime'].split(" ")[0],
+      (item['U_CK_BreakTime'] ?? "").toString().split(" ")[0],
+      (item['U_CK_BreakEndTime'] ?? "").toString().split(" ")[0],
     );
     if (editIndex == -1) {
       _timeEntry.add(item);
@@ -86,15 +86,21 @@ class CompletedServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  String calculateSpentTime(String start, String end) {
+  String calculateSpentTime(dynamic start, dynamic end) {
     try {
       final now = DateTime.now();
       final dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
 
+      String startStr = start?.toString() ?? "00:00";
+      String endStr = end?.toString() ?? "00:00";
+
+      if (startStr.isEmpty || startStr == "--:--") startStr = "00:00";
+      if (endStr.isEmpty || endStr == "--:--") endStr = "00:00";
+
       // Use today's date dynamically
       final dateString = DateFormat("yyyy-MM-dd").format(now);
-      final startTime = dateFormat.parse("$dateString $start:00");
-      var endTime = dateFormat.parse("$dateString $end:00");
+      final startTime = dateFormat.parse("$dateString $startStr:00");
+      var endTime = dateFormat.parse("$dateString $endStr:00");
 
       // Handle overnight time (end < start)
       if (endTime.isBefore(startTime)) {
@@ -222,25 +228,36 @@ class CompletedServiceProvider extends ChangeNotifier {
   }
 
   String calculateSpentTimeHM({
-    required String travelTime,
-    required String completeTime,
+    required dynamic travelTime,
+    required dynamic completeTime,
   }) {
     final now = DateTime.now();
 
+    String tTime = travelTime?.toString() ?? "00:00:00";
+    String cTime = completeTime?.toString() ?? "00:00:00";
+
+    if (tTime.isEmpty || tTime == "--:--") tTime = "00:00:00";
+    if (cTime.isEmpty || cTime == "--:--") cTime = "00:00:00";
+
     DateTime parseTime(String time) {
-      final parts = time.split(":");
-      return DateTime(
-        now.year,
-        now.month,
-        now.day,
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2]),
-      );
+      try {
+        final parts = time.split(":");
+        if (parts.length < 2) return now;
+        return DateTime(
+          now.year,
+          now.month,
+          now.day,
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          parts.length > 2 ? int.parse(parts[2]) : 0,
+        );
+      } catch (e) {
+        return now;
+      }
     }
 
-    DateTime travel = parseTime(travelTime);
-    DateTime complete = parseTime(completeTime);
+    DateTime travel = parseTime(tTime);
+    DateTime complete = parseTime(cTime);
 
     // Handle cross-midnight case
     if (complete.isBefore(travel)) {
@@ -256,10 +273,16 @@ class CompletedServiceProvider extends ChangeNotifier {
   }
 
   String calculateDuration({
-    required String start,
-    required String end,
+    required dynamic start,
+    required dynamic end,
   }) {
-    if (start.isEmpty || end.isEmpty || start == "--:--" || end == "--:--") {
+    String startTimeStr = start?.toString() ?? "00:00";
+    String endTimeStr = end?.toString() ?? "00:00";
+
+    if (startTimeStr.isEmpty ||
+        endTimeStr.isEmpty ||
+        startTimeStr == "--:--" ||
+        endTimeStr == "--:--") {
       return "00:00";
     }
     try {
@@ -267,7 +290,10 @@ class CompletedServiceProvider extends ChangeNotifier {
         // Try 24h format first (HH:mm)
         try {
           final parts = time.split(':');
-          return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+          if (parts.length >= 2) {
+            return DateTime(
+                2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+          }
         } catch (_) {}
 
         // Fallback to 12h format (h:mm AM/PM)
@@ -275,8 +301,8 @@ class CompletedServiceProvider extends ChangeNotifier {
         return format.parse(time);
       }
 
-      final startTime = parseTime(start);
-      final endTime = parseTime(end);
+      final startTime = parseTime(startTimeStr);
+      final endTime = parseTime(endTimeStr);
 
       Duration diff = endTime.difference(startTime);
 
@@ -593,9 +619,12 @@ class CompletedServiceProvider extends ChangeNotifier {
     final now = DateTime.now();
     final timeStamp = DateFormat("HH:mm:ss").format(now);
 
+    final sTime = startTime?.toString() ?? "00:00:00";
+
     // Format times to HH:mm (without seconds) for comparison
     final timeStampWithoutSeconds = timeStamp.substring(0, 5);
-    final startTimeWithoutSeconds = startTime.substring(0, 5);
+    final startTimeWithoutSeconds =
+        sTime.length >= 5 ? sTime.substring(0, 5) : "00:00";
 
     // Check if U_CK_EndTime equals startTime (no time spent - compare only hours and minutes)
     if (timeStampWithoutSeconds == startTimeWithoutSeconds) {
@@ -700,8 +729,8 @@ class CompletedServiceProvider extends ChangeNotifier {
       //   return "${hours}h ${minutes}m";
       // }
       final spentTime = calculateSpentTimeHM(
-        travelTime: timeAction["TravelTime"],
-        completeTime: timeAction["CompleteTime"],
+        travelTime: timeAction["TravelTime"] ?? "00:00:00",
+        completeTime: timeAction["CompleteTime"] ?? "00:00:00",
       );
       // 2. Build the payload
       final payload = {
@@ -752,8 +781,8 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       // calculate break time (HH:mm)
       final breakTime = calculateDuration(
-        start: _timeEntry[0]["U_CK_BreakTime"],
-        end: _timeEntry[0]["U_CK_BreakEndTime"],
+        start: _timeEntry[0]["U_CK_BreakTime"] ?? "00:00",
+        end: _timeEntry[0]["U_CK_BreakEndTime"] ?? "00:00",
       );
       payload["timeSheet"] = {
         "TimeSheetType": "tsh_Employee",
@@ -805,7 +834,7 @@ class CompletedServiceProvider extends ChangeNotifier {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "✅ Service successfully completed offline.",
+                        "✅ Service completed!",
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.width * 0.031,
                           color: Colors.white,
