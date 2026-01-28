@@ -1,3 +1,4 @@
+import 'package:bizd_tech_service/AppLifecycleObserver.dart';
 import 'package:bizd_tech_service/core/app_initializer.dart';
 import 'package:bizd_tech_service/core/config/environment.dart';
 import 'package:bizd_tech_service/core/theme/app_theme.dart';
@@ -27,30 +28,50 @@ import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:vibration/vibration.dart';
 
+/// 🔥 REQUIRED for background FCM
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
   await NotificationService.onBackgroundMessage(message);
 }
 
 void main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+
+  // // Initialize all app dependencies
+  // await AppInitializer.init(environment: Environment.dev);
+
+  // // Initialize Firebase
+  // await Firebase.initializeApp();
+
+  // // Set background handler
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // // Initialize Notification Service
+  // final notificationService = NotificationService();
+  // await notificationService.initialize();
+
+  // // Reset any previous state
+  // Vibration.cancel();
+  // // Run the app with all providers
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Firebase
+  await Firebase.initializeApp();
   // Initialize all app dependencies
   await AppInitializer.init(environment: Environment.dev);
+  // Background notifications
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
-
-  // Set background handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // Initialize Notification Service
+  // Initialize notifications
   final notificationService = NotificationService();
   await notificationService.initialize();
 
-  // Reset any previous state
-  Vibration.cancel();
-  // Run the app with all providers
+  // 🔥 App lifecycle observer (CRITICAL FOR iOS)
+  WidgetsBinding.instance.addObserver(AppLifecycleObserver());
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),

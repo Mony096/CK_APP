@@ -75,6 +75,7 @@ dependencies:
   google_fonts: ^7.0.1
   responsive_sizer: ^3.3.1
   share_plus: ^10.0.0
+
   # sqflite: ^2.4.2
   # flutter_polyline_points: ^3.0.1
 
@@ -88,6 +89,7 @@ flutter_icons:
   android: true
   ios: true
   image_path: "images/logo.png"
+  image_path_ios: "images/logo_ios.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

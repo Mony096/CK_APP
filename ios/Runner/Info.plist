@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>GMSApiKey</key>
-    <string>AIzaSyBIQcpR-zBoAvJ7iVNe6AEUvQFrFS6Cuog</string>
+    <string>AIzaSyCJWN78P_Vj5L5zrBEqQ57oVxeQCVHsneY</string>
 
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>This app needs your location to track live delivery routes even when the app is in the background.</string>
@@ -43,6 +43,7 @@
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>tel</string>
+        <string>audio</string>
     </array>
 
     <key>UILaunchStoryboardName</key>
