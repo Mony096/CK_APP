@@ -42,7 +42,7 @@ class AuthProvider with ChangeNotifier {
         false,
         data: {"U_ck_andriod_token": token},
       );
-      print(response.data);
+      // print(response.data);
     } catch (e) {
       rethrow; // Let the caller handle the error
     }
@@ -184,7 +184,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     await updateToken("");
     await LocalStorageManger.removeString('SessionId');
-    // await FirebaseMessaging.instance.deleteToken();
+    await FirebaseMessaging.instance.deleteToken();
     _isLoggedIn = false;
     notifyListeners();
   }

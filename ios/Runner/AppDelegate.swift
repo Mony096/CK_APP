@@ -37,7 +37,7 @@ import UserNotifications
 
     FirebaseApp.configure()
     // GMSServices.provideAPIKey("AIzaSyCJWN78P_Vj5L5zrBEqQ57oVxeQCVHsneY")
-    SwiftFlutterBackgroundServicePlugin.taskIdentifier = "com.example.ckservice.background"
+    SwiftFlutterBackgroundServicePlugin.taskIdentifier = "com.bizd.ckservice.background"
 
     // 🔥 Stop any leftover ringing
     stopRingtone()

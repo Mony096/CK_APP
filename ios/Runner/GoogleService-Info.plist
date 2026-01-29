@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.ckservice</string>
+	<string>com.bizd.ckservice</string>
 	<key>PROJECT_ID</key>
 	<string>ckservice-f43d4</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:501852299587:ios:c58da1f0ba65df9d524ff6</string>
+	<string>1:501852299587:ios:4f0e742a2ef017ac524ff6</string>
 </dict>
 </plist>
