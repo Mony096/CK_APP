@@ -16,7 +16,7 @@
 import Flutter
 import UIKit
 import FirebaseCore
-import GoogleMaps
+// import GoogleMaps
 import flutter_background_service_ios
 import AVFoundation
 import AudioToolbox
@@ -36,7 +36,7 @@ import UserNotifications
   ) -> Bool {
 
     FirebaseApp.configure()
-    GMSServices.provideAPIKey("AIzaSyCJWN78P_Vj5L5zrBEqQ57oVxeQCVHsneY")
+    // GMSServices.provideAPIKey("AIzaSyCJWN78P_Vj5L5zrBEqQ57oVxeQCVHsneY")
     SwiftFlutterBackgroundServicePlugin.taskIdentifier = "com.example.ckservice.background"
 
     // 🔥 Stop any leftover ringing

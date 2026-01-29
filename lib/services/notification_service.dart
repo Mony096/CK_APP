@@ -19,7 +19,6 @@ class NotificationService {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
   static bool _isRinging = false;
-
   // ==========================
   // 🔥 INITIALIZATION
   // ==========================
@@ -104,8 +103,8 @@ class NotificationService {
       content: NotificationContent(
         id: id,
         channelKey: 'service_channel_v2',
-        title: '🚚 New service Request',
-        body: 'A new service has been assigned to you.',
+        title: '🛠 Technicon Service Alert!',
+        body: 'A new Service has been assigned to you. Open now!',
         notificationLayout: NotificationLayout.Default,
         category: Platform.isIOS
             ? NotificationCategory.Call
@@ -143,6 +142,12 @@ class NotificationService {
   static Future<void> onActionReceivedMethod(ReceivedAction action) async {
     await forceStop();
     if (action.buttonKeyPressed == 'ACCEPT') {
+      if (Platform.isAndroid) {
+        final context = navigatorKey.currentContext;
+        if (context != null) {
+          Provider.of<AuthProvider>(context, listen: false).checkSession();
+        }
+      }
       navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const WrapperScreen()),
         (_) => false,
@@ -155,6 +160,7 @@ class NotificationService {
   @pragma('vm:entry-point')
   static Future<void> onNotificationDisplayedMethod(
       ReceivedNotification notification) async {
+    // await forceStop();
     // Optional: ring again if UI is displayed
   }
 

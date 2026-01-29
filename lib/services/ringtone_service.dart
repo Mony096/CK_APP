@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 
 class RingtoneController {
   static const MethodChannel _channel =
-      MethodChannel('com.example.lkdelivery/ringtone');
+      MethodChannel('com.example.ckservice/ringtone');
 
   static Future<void> startRingtone() async {
     try {
