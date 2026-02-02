@@ -42,6 +42,7 @@ class HtmlServiceReportGenerator {
     final String model = equipmentData['model'] ?? '';
     final String equipmentId = equipmentData['equipmentId'] ?? '';
     final String equipmentLocation = equipmentData['equipmentLocation'] ?? '';
+    final String equipmentType = equipmentData['equipmentType'] ?? '';
 
     String dateArrived = '';
 
@@ -92,7 +93,10 @@ class HtmlServiceReportGenerator {
           '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
-      'equipmentType': data['U_CK_JobType']?.toString() ?? '',
+      'equipmentType': _firstNonEmpty([
+        equipmentType,
+        data['U_CK_JobType']?.toString(),
+      ]),
       'equipmentId': equipmentId,
       'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
       'location': _firstNonEmpty([
@@ -186,6 +190,7 @@ class HtmlServiceReportGenerator {
     final String model = equipmentData['model'] ?? '';
     final String equipmentId = equipmentData['equipmentId'] ?? '';
     final String equipmentLocation = equipmentData['equipmentLocation'] ?? '';
+    final String equipmentType = equipmentData['equipmentType'] ?? '';
 
     String dateArrived = '';
 
@@ -233,7 +238,10 @@ class HtmlServiceReportGenerator {
           '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
-      'equipmentType': data['U_CK_JobType']?.toString() ?? '',
+      'equipmentType': _firstNonEmpty([
+        equipmentType,
+        data['U_CK_JobType']?.toString(),
+      ]),
       'equipmentId': equipmentId,
       'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
       'location': _firstNonEmpty([
@@ -293,18 +301,22 @@ class HtmlServiceReportGenerator {
     String serialNo = '';
     String model = '';
     String location = '';
+    String equipType = '';
 
     for (final item in equipmentList) {
       if (item is! Map) continue;
       final name = item['U_CK_EquipName']?.toString().trim() ?? '';
       final code = item['U_CK_EquipCode']?.toString().trim() ?? '';
-      final type = item['U_CK_EquipType']?.toString().trim() ?? '';
+      final type = item['U_CK_EqType']?.toString().trim() ??
+          item['U_CK_EquipType']?.toString().trim() ??
+          '';
       final serial = item['U_CK_SerialNum']?.toString().trim() ?? '';
       final equipLocation = item['U_CK_Location']?.toString().trim() ?? '';
 
       if (serialNo.isEmpty && serial.isNotEmpty) serialNo = serial;
       if (model.isEmpty && name.isNotEmpty) model = name;
       if (location.isEmpty && equipLocation.isNotEmpty) location = equipLocation;
+      if (equipType.isEmpty && type.isNotEmpty) equipType = type;
 
       final parts = <String>[];
       if (name.isNotEmpty) parts.add(name);
@@ -352,6 +364,7 @@ class HtmlServiceReportGenerator {
       'serialNo': serialNo,
       'model': model,
       'equipmentLocation': location,
+      'equipmentType': equipType,
     };
   }
 

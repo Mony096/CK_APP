@@ -86,7 +86,7 @@ class ServiceReportGenerator {
       'customer': data['CustomerName']?.toString() ?? '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
-      'equipmentType': data['U_CK_JobType']?.toString() ?? '',
+      'equipmentType': _extractEquipmentType(data),
       'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
       'serviceType': data['U_CK_ServiceType']?.toString() ?? '',
       'location': data['U_CK_Location']?.toString() ?? '',
@@ -287,6 +287,18 @@ class ServiceReportGenerator {
         ),
       ),
     );
+  }
+
+  static String _extractEquipmentType(Map<String, dynamic> data) {
+    final equipment = data['CK_JOB_EQUIPMENTCollection'] as List? ?? [];
+    for (final item in equipment) {
+      if (item is! Map) continue;
+      final type = item['U_CK_EqType']?.toString().trim() ??
+          item['U_CK_EquipType']?.toString().trim() ??
+          '';
+      if (type.isNotEmpty) return type;
+    }
+    return data['U_CK_JobType']?.toString() ?? '';
   }
 
   static pw.Widget _buildFullWidthSection(
