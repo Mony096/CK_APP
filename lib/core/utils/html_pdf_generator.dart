@@ -93,10 +93,7 @@ class HtmlServiceReportGenerator {
           '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
-      'equipmentType': _firstNonEmpty([
-        equipmentType,
-        data['U_CK_JobType']?.toString(),
-      ]),
+      'equipmentType': equipmentType.isNotEmpty ? equipmentType : 'N/A',
       'equipmentId': equipmentId,
       'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
       'location': _firstNonEmpty([
@@ -238,10 +235,7 @@ class HtmlServiceReportGenerator {
           '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
-      'equipmentType': _firstNonEmpty([
-        equipmentType,
-        data['U_CK_JobType']?.toString(),
-      ]),
+      'equipmentType': equipmentType.isNotEmpty ? equipmentType : 'N/A',
       'equipmentId': equipmentId,
       'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
       'location': _firstNonEmpty([

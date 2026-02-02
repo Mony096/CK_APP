@@ -304,7 +304,7 @@ class ServiceReportGenerator {
       }
     }
     if (types.isNotEmpty) return types.join(', ');
-    return data['U_CK_JobType']?.toString() ?? '';
+    return 'N/A';
   }
 
   static pw.Widget _buildFullWidthSection(
