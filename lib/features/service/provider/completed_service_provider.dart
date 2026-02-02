@@ -17,6 +17,8 @@ class CompletedServiceProvider extends ChangeNotifier {
   bool _submit = false;
   List<dynamic> _openIssues = [];
   List<dynamic> _imagesList = [];
+  Map<String, String> _imageRemarks =
+      {}; // Store remarks: key=filePath, value=remark
   List<dynamic> _signatureList = [];
   List<dynamic> _timeEntry = [];
   List<dynamic> _checkListLine = [];
@@ -24,6 +26,7 @@ class CompletedServiceProvider extends ChangeNotifier {
   bool get submit => _submit;
   List<dynamic> get openIssues => _openIssues;
   List<dynamic> get imagesList => _imagesList;
+  Map<String, String> get imageRemarks => _imageRemarks;
   List<dynamic> get signatureList => _signatureList;
   List<dynamic> get timeEntry => _timeEntry;
   List<dynamic> get checkListLine => _checkListLine;
@@ -140,8 +143,28 @@ class CompletedServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateImage(int index, File newFile) {
+    if (index >= 0 && index < _imagesList.length) {
+      final oldFile = _imagesList[index] as File;
+      if (_imageRemarks.containsKey(oldFile.path)) {
+        final remark = _imageRemarks[oldFile.path]!;
+        _imageRemarks.remove(oldFile.path);
+        _imageRemarks[newFile.path] = remark;
+      }
+      _imagesList[index] = newFile;
+      notifyListeners();
+    }
+  }
+
+  void setImageRemark(String path, String remark) {
+    _imageRemarks[path] = remark;
+    notifyListeners();
+  }
+
   void removeImage(int index) {
     if (index >= 0 && index < _imagesList.length) {
+      final file = _imagesList[index] as File;
+      _imageRemarks.remove(file.path); // Remove remark associated with file
       _imagesList.removeAt(index);
       notifyListeners();
     }
@@ -188,6 +211,7 @@ class CompletedServiceProvider extends ChangeNotifier {
   void clearData() {
     _openIssues = [];
     _imagesList = [];
+    _imageRemarks = {};
     _signatureList = [];
     _timeEntry = [];
     _checkListLine = [];
@@ -224,7 +248,11 @@ class CompletedServiceProvider extends ChangeNotifier {
       ext = "pdf";
     else if (path.endsWith(".gif")) ext = "gif";
 
-    return {"ext": ext, "data": base64Data};
+    return {
+      "ext": ext,
+      "data": base64Data,
+      "fileName": file.path.split(Platform.pathSeparator).last
+    };
   }
 
   String calculateSpentTimeHM({
@@ -329,6 +357,7 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       for (var file in files) {
         final fileName = file.path.split('/').last;
+        print("Uploading Attachment: $fileName"); // Print for debugging
         formData.files.add(MapEntry(
           'file',
           await MultipartFile.fromFile(
@@ -473,8 +502,13 @@ class CompletedServiceProvider extends ChangeNotifier {
             final bytes = base64Decode(f['data']);
             final ext = f['ext'] ?? "bin";
             final type = f['type'] ?? "image";
-            final fileName =
-                "${type}_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+            String fileName;
+            if (f.containsKey('fileName') && f['fileName'] != null) {
+              fileName = f['fileName'];
+            } else {
+              fileName =
+                  "${type}_${DateTime.now().millisecondsSinceEpoch}_$i.$ext";
+            }
             final file = File("${tempDir.path}/$fileName");
             await file.writeAsBytes(bytes);
             filesToUpload.add(file);
@@ -534,8 +568,15 @@ class CompletedServiceProvider extends ChangeNotifier {
     required dynamic activityType,
     required dynamic docNum,
     required dynamic serviceCallId,
+    required dynamic location,
+    required dynamic material,
+    required dynamic project,
+    required dynamic equipment,
+    String? remark,
     bool offline = false,
   }) async {
+    // print(location);
+    // return false;
     if (_timeEntry.isEmpty) {
       _submit = false;
       notifyListeners();
@@ -672,6 +713,7 @@ class CompletedServiceProvider extends ChangeNotifier {
 
       for (File imageFile in imagesList) {
         final fileMap = await fileToBase64WithExt(imageFile);
+        print("Attachment Name: ${fileMap['fileName']}");
         fileMap['type'] = 'image';
         fileDataList.add(fileMap);
       }
@@ -732,9 +774,26 @@ class CompletedServiceProvider extends ChangeNotifier {
         travelTime: timeAction["TravelTime"] ?? "00:00:00",
         completeTime: timeAction["CompleteTime"] ?? "00:00:00",
       );
+
+      // Prepare Attachment Remarks separate array
+      List<Map<String, String>> attachmentRemarks = [];
+      for (File img in imagesList) {
+        final path = img.path;
+        final name = path.split(Platform.pathSeparator).last;
+        if (_imageRemarks.containsKey(path) &&
+            _imageRemarks[path]!.isNotEmpty) {
+          attachmentRemarks.add({
+            "desc": _imageRemarks[path]!,
+            "refImage": name,
+          });
+        }
+      }
+
       // 2. Build the payload
       final payload = {
         "DocEntry": docEntry,
+        "U_CK_Description": remark,
+        "CK_JOB_ATTACHMENT_REMARKS": attachmentRemarks, // Add the new array
         "U_CK_Cardname": customerName,
         "U_CK_Date": date,
         "U_CK_Status": "Completed",
@@ -744,6 +803,10 @@ class CompletedServiceProvider extends ChangeNotifier {
         "U_CK_TravelTime": timeAction["TravelTime"],
         "U_CK_AcceptTime": timeAction["AcceptTime"],
         "U_CK_ServiceCall": serviceCallId,
+        "U_CK_WorkLoc": location,
+        "U_CK_Project": project,
+        "CK_JOB_MATERIALCollection": material,
+        "CK_JOB_EQUIPMENTCollection": equipment,
         "CK_JOB_TIMECollection": [
           {
             "U_CK_Date": date,
@@ -807,7 +870,7 @@ class CompletedServiceProvider extends ChangeNotifier {
         ]
       };
 
-      // print(payload["CK_JOB_TIMECollection"]);
+      // print(payload);
       // return false;
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);

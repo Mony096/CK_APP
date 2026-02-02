@@ -257,11 +257,15 @@ class _ImageScreenState extends State<ImageScreen> {
                         crossAxisCount: 2,
                         crossAxisSpacing: 3.w,
                         mainAxisSpacing: 3.w,
-                        childAspectRatio: 1,
+                        childAspectRatio: 0.7,
                       ),
                       itemCount: images.length,
                       itemBuilder: (context, index) {
-                        return _buildImageCard(images[index], index);
+                        return ImageCard(
+                          key: ValueKey(images[index].path),
+                          file: images[index],
+                          index: index,
+                        );
                       },
                     );
                   },
@@ -274,8 +278,148 @@ class _ImageScreenState extends State<ImageScreen> {
       ),
     );
   }
+}
 
-  Widget _buildImageCard(File imageFile, int index) {
+class ImageCard extends StatefulWidget {
+  final File file;
+  final int index;
+
+  const ImageCard({super.key, required this.file, required this.index});
+
+  @override
+  State<ImageCard> createState() => _ImageCardState();
+}
+
+class _ImageCardState extends State<ImageCard> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCard();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        _saveRemark();
+      }
+    });
+  }
+
+  void _initializeCard() {
+    // 1. Try get remark from provider
+    final provider = context.read<CompletedServiceProvider>();
+    String currentPath = widget.file.path;
+    String remark = provider.imageRemarks[currentPath] ?? "";
+
+    // 2. If empty, check migration from filename (legacy: image_REMARK_UniqueId)
+    if (remark.isEmpty) {
+      final name = currentPath.split(Platform.pathSeparator).last;
+      if (name.startsWith("image_")) {
+        // Expected format: image_REMARK_UniqueId.ext or image_UniqueId.ext
+        // If it has 2 underscores after image_, it likely has a remark
+        final content = name.substring("image_".length);
+        final firstUnderscore = content.indexOf('_');
+
+        if (firstUnderscore > 0) {
+          // Found a remark in filename
+          final legacyRemark = content.substring(0, firstUnderscore);
+          final uniquePart = content.substring(firstUnderscore + 1);
+
+          // We should migrate:
+          // 1. Extract remark
+          remark = legacyRemark;
+
+          // 2. Rename file to remove remark (image_UniqueId.ext)
+          // We do this asynchronously
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _migrateLegacyFile(currentPath, legacyRemark, uniquePart);
+          });
+        }
+      }
+    }
+
+    _controller.text = remark;
+  }
+
+  Future<void> _migrateLegacyFile(
+      String path, String remark, String uniquePart) async {
+    try {
+      String dir = path.substring(0, path.lastIndexOf(Platform.pathSeparator));
+      // Reconstruct clean name
+      String newName = "image_$uniquePart";
+      // Note: uniquePart includes extension if it was at the end of legacy name
+
+      // Rename
+      final newPath = "$dir${Platform.pathSeparator}$newName";
+      final file = File(path);
+      if (await file.exists()) {
+        final newFile = await file.rename(newPath);
+
+        if (mounted) {
+          final provider = context.read<CompletedServiceProvider>();
+          // Update file reference in list (which also migrates map key if we used updateImage logic)
+          // But since we are extracting remark separately, we set it manually
+          provider.updateImage(widget.index, newFile);
+          provider.setImageRemark(newPath, remark);
+        }
+      }
+    } catch (e) {
+      debugPrint("Migration failed: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _saveRemark() {
+    final text = _controller.text.trim();
+    context
+        .read<CompletedServiceProvider>()
+        .setImageRemark(widget.file.path, text);
+
+    // Also ensure proper naming if still default pick (Sanitization)
+    _ensureCleanFilename();
+  }
+
+  Future<void> _ensureCleanFilename() async {
+    // Ensure file is named image_UniqueId.ext instead of image_picker_...
+    // This is just for cleanliness, not critical for the remark logic anymore.
+    String path = widget.file.path;
+    String name = path.split(Platform.pathSeparator).last;
+
+    // Only rename if it looks like a temporary picker file
+    if (name.contains("image_picker") || name.startsWith("scaled_")) {
+      String dir = path.substring(0, path.lastIndexOf(Platform.pathSeparator));
+      String ext = "";
+      if (name.contains('.')) {
+        ext = name.substring(name.lastIndexOf('.'));
+      }
+
+      String uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+      String newName = "image_$uniqueId$ext";
+      String newPath = "$dir${Platform.pathSeparator}$newName";
+
+      try {
+        final file = File(path);
+        final newFile = await file.rename(newPath);
+        if (mounted) {
+          context
+              .read<CompletedServiceProvider>()
+              .updateImage(widget.index, newFile);
+          // The remark key migration in updateImage handles moving the remark to the new key
+        }
+      } catch (e) {
+        debugPrint("Sanitization failed: $e");
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -287,32 +431,79 @@ class _ImageScreenState extends State<ImageScreen> {
               offset: const Offset(0, 4))
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            GestureDetector(
-              onTap: () => MaterialDialog.showImagePreview(context, imageFile),
-              child: Image.file(imageFile, fit: BoxFit.cover),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: () =>
-                    context.read<CompletedServiceProvider>().removeImage(index),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                      color: Colors.red, shape: BoxShape.circle),
-                  child: const Icon(Icons.close_rounded,
-                      color: Colors.white, size: 16),
-                ),
+      child: Column(
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  GestureDetector(
+                    onTap: () =>
+                        MaterialDialog.showImagePreview(context, widget.file),
+                    child: Image.file(widget.file, fit: BoxFit.cover),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => context
+                          .read<CompletedServiceProvider>()
+                          .removeImage(widget.index),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                            color: Colors.red, shape: BoxShape.circle),
+                        child: const Icon(Icons.close_rounded,
+                            color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          Container(
+            padding: EdgeInsets.fromLTRB(2.w, 1.h, 2.w, 1.5.h),
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              maxLines: null,
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: "",
+                hintStyle: GoogleFonts.inter(
+                    fontSize: 13.sp, color: const Color(0xFF94A3B8)),
+                fillColor: const Color(0xFFF8FAFC),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFF22C55E)),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+              ),
+              style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF1E293B),
+                  fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              onSubmitted: (_) {
+                _focusNode.unfocus();
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

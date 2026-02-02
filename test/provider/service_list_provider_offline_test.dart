@@ -64,7 +64,7 @@ void main() {
       provider.clearCurrentDate();
       expect(provider.currentDate, isNull);
     });
-
+ 
     test('saveDocuments should store documents', () async {
       final testDocs = [
         {'DocEntry': 1, 'U_CK_Status': 'Open'},

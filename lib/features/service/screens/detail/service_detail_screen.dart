@@ -37,6 +37,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   final GlobalKey _issueKey = GlobalKey();
   final GlobalKey _checklistKey = GlobalKey();
   final GlobalKey _attachmentKey = GlobalKey();
+  final GlobalKey _remarkKey = GlobalKey();
 
   // Navigation Keys
   final GlobalKey _navCustomerKey = GlobalKey();
@@ -48,6 +49,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   final GlobalKey _navIssueKey = GlobalKey();
   final GlobalKey _navChecklistKey = GlobalKey();
   final GlobalKey _navAttachmentKey = GlobalKey();
+  final GlobalKey _navRemarkKey = GlobalKey();
 
   late Map<GlobalKey, GlobalKey> _sectionToNavKey;
   late Map<String, dynamic> _displayData;
@@ -68,6 +70,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       _issueKey: _navIssueKey,
       _checklistKey: _navChecklistKey,
       _attachmentKey: _navAttachmentKey,
+      _remarkKey: _navRemarkKey,
     };
     _scrollController.addListener(_onScroll);
     _enrichData();
@@ -84,6 +87,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       _issueKey,
       _checklistKey,
       _attachmentKey,
+      _remarkKey,
     ];
 
     GlobalKey? mostVisibleKey;
@@ -337,6 +341,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   _buildSectionHeader(context, "CHECKLIST", key: _checklistKey),
                   SizedBox(height: 1.5.h),
                   _buildChecklistSection(context),
+                  SizedBox(height: 3.5.h),
+                  _buildSectionHeader(context, "REMARKS", key: _remarkKey),
+                  SizedBox(height: 1.5.h),
+                  _buildRemarkSection(context),
                   SizedBox(height: 3.5.h),
                   _buildSectionHeader(context, "ATTACHMENTS",
                       key: _attachmentKey),
@@ -747,6 +755,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 _issueKey, _navIssueKey),
             _buildNavChip(context, "Checklist", Icons.fact_check_rounded,
                 _checklistKey, _navChecklistKey),
+            _buildNavChip(context, "Remarks", Icons.comment_rounded, _remarkKey,
+                _navRemarkKey),
             _buildNavChip(context, "Files", Icons.attach_file_rounded,
                 _attachmentKey, _navAttachmentKey),
           ],
@@ -1077,13 +1087,45 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 3.5.w,
         mainAxisSpacing: 3.5.w,
-        childAspectRatio: 1.1,
+        childAspectRatio: 0.75, // Adjusted to fit remark
       ),
       itemCount: files.length,
       itemBuilder: (context, index) {
         final file = files[index];
         final String? base64Data = file['data'];
         final String ext = (file['ext'] ?? 'png').toString().toLowerCase();
+        final String? fileName = file['fileName'];
+
+        // Extract remark
+        String remark = "";
+
+        // 1. Try from separate array CK_JOB_ATTACHMENT_REMARKS
+        final remarksList = _displayData['CK_JOB_ATTACHMENT_REMARKS'] as List?;
+        if (remarksList != null && fileName != null) {
+          for (var r in remarksList) {
+            if (r['refImage'] == fileName) {
+              remark = r['desc'] ?? "";
+              break;
+            }
+          }
+        }
+
+        // 2. Fallback: Extract from filename (Legacy support)
+        if (remark.isEmpty && fileName != null) {
+          String name = fileName;
+          if (name.contains('.')) {
+            name = name.substring(0, name.lastIndexOf('.'));
+          }
+
+          if (!name.contains("image_picker") && name.startsWith("image_")) {
+            String content = name.substring("image_".length);
+            int firstUnderscore = content.indexOf('_');
+            if (firstUnderscore > 0) {
+              remark = content.substring(0, firstUnderscore);
+            }
+          }
+        }
+
         if (base64Data == null) return const SizedBox();
 
         return Container(
@@ -1105,53 +1147,91 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: ext == 'pdf'
-                ? InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PDFViewerScreen(
-                            memoryData: base64Decode(base64Data),
-                            title: "Report (PDF)",
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      color: const Color(0xFFFFF1F2),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.picture_as_pdf_rounded,
-                              color: const Color(0xFFE11D48), size: 24.sp),
-                          SizedBox(height: 1.h),
-                          Text(
-                            "Report",
-                            style: google_fonts.GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFE11D48),
+          child: Column(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(15)),
+                  child: ext == 'pdf'
+                      ? InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PDFViewerScreen(
+                                  memoryData: base64Decode(base64Data),
+                                  title: "Report (PDF)",
+                                ),
+                              ),
+                            );
+                          },
+                          child: SizedBox(
+                            // color: const Color(0xFFFFF1F2),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.picture_as_pdf_rounded,
+                                    color: const Color(0xFFE11D48),
+                                    size: 24.sp),
+                                SizedBox(height: 1.h),
+                                Text(
+                                  "Report",
+                                  style: google_fonts.GoogleFonts.inter(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFE11D48),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  )
-                : InkWell(
-                    onTap: () {
-                      _showImagePreview(context, base64Data);
-                    },
-                    child: Image.memory(
-                      base64Decode(base64Data),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Center(
-                          child: Icon(Icons.broken_image_rounded,
-                              size: 20.sp, color: Colors.grey)),
-                    ),
+                        )
+                      : InkWell(
+                          onTap: () {
+                            _showImagePreview(context, base64Data);
+                          },
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.memory(
+                                base64Decode(base64Data),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Center(
+                                        child: Icon(Icons.broken_image_rounded,
+                                            size: 20.sp, color: Colors.grey)),
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
+              ),
+              if (remark.isNotEmpty)
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(15)),
                   ),
+                  child: Text(
+                    remark,
+                    style: google_fonts.GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: const Color(0xFF1E293B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              else
+                SizedBox(height: 1.5.h),
+            ],
           ),
         );
       },
@@ -1361,6 +1441,81 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildRemarkSection(BuildContext context) {
+    final remark = _displayData['U_CK_Description']?.toString();
+
+    if (remark == null || remark.trim().isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Text(
+          "No remarks recorded.",
+          style: google_fonts.GoogleFonts.inter(
+              fontSize: 13.5.sp, color: const Color(0xFF94A3B8)),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(5.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F9FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.comment_rounded,
+                    size: 18.sp, color: const Color(0xFF0EA5E9)),
+              ),
+              SizedBox(width: 3.w),
+              Text(
+                "Additional Comments",
+                style: google_fonts.GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            remark,
+            style: google_fonts.GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: const Color(0xFF334155),
+              height: 1.6,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
