@@ -429,7 +429,7 @@ class HtmlServiceReportGenerator {
     }
 
     if (description.isEmpty) {
-      description = image['U_CK_Description']?.toString() ?? 'Image';
+      description = image['U_CK_Description']?.toString() ?? 'Image title';
     }
 
     return description;
