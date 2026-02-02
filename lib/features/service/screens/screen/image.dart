@@ -26,8 +26,26 @@ class _ImageScreenState extends State<ImageScreen> {
             await _picker.pickMultiImage(imageQuality: 50);
         if (images.isNotEmpty) {
           if (!mounted) return;
+          final provider = context.read<CompletedServiceProvider>();
+          final int availableSlots = 4 - provider.images.length;
+
+          int count = 0;
           for (var image in images) {
-            context.read<CompletedServiceProvider>().addImage(File(image.path));
+            if (count >= availableSlots) break;
+            provider.addImage(File(image.path));
+            count++;
+          }
+
+          if (images.length > count) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  "Maximum 4 images limit reached",
+                  style: GoogleFonts.inter(color: Colors.white),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
         }
       } else {
@@ -35,7 +53,20 @@ class _ImageScreenState extends State<ImageScreen> {
             await _picker.pickImage(source: source, imageQuality: 50);
         if (image != null) {
           if (!mounted) return;
-          context.read<CompletedServiceProvider>().addImage(File(image.path));
+          final provider = context.read<CompletedServiceProvider>();
+          if (provider.images.length < 4) {
+            provider.addImage(File(image.path));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  "Maximum 4 images allowed",
+                  style: GoogleFonts.inter(color: Colors.white),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -44,6 +75,18 @@ class _ImageScreenState extends State<ImageScreen> {
   }
 
   void _showImageOptions() {
+    if (context.read<CompletedServiceProvider>().images.length >= 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Maximum 4 images allowed",
+            style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
