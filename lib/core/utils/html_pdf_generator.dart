@@ -18,9 +18,8 @@ import 'package:flutter_native_html_to_pdf/pdf_page_size.dart';
 class HtmlServiceReportGenerator {
   /// Generate service report PDF using HTML rendering (better Khmer font support)
   static Future<File> generateServiceReport(Map<String, dynamic> data) async {
-    final equipmentList = data['CK_JOB_EQUIPMENTCollection'] as List? ?? [];
     debugPrint(
-        '🧾 PDF data DocEntry=${data['DocEntry'] ?? 'N/A'} DocNum=${data['DocNum'] ?? data['id'] ?? 'N/A'} equipCount=${equipmentList.length}');
+        '🧾 PDF data DocEntry=${data['DocEntry'] ?? 'N/A'} DocNum=${data['DocNum'] ?? data['id'] ?? 'N/A'}');
     final String currentUserName =
         await LocalStorageManger.getString('FullName');
 
@@ -313,8 +312,6 @@ class HtmlServiceReportGenerator {
       final type = item['U_CK_EqType']?.toString().trim() ??
           item['U_CK_EquipType']?.toString().trim() ??
           '';
-      debugPrint(
-          '🔎 Equipment type fields: EqType=${item['U_CK_EqType'] ?? ''}, EquipType=${item['U_CK_EquipType'] ?? ''}, JobType=${data['U_CK_JobType'] ?? ''}, EquipName=${item['U_CK_EquipName'] ?? ''}, EquipCode=${item['U_CK_EquipCode'] ?? ''}');
       final serial = item['U_CK_SerialNum']?.toString().trim() ?? '';
       final equipLocation = item['U_CK_Location']?.toString().trim() ?? '';
 
