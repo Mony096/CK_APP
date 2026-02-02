@@ -18,6 +18,8 @@ import 'package:flutter_native_html_to_pdf/pdf_page_size.dart';
 class HtmlServiceReportGenerator {
   /// Generate service report PDF using HTML rendering (better Khmer font support)
   static Future<File> generateServiceReport(Map<String, dynamic> data) async {
+    debugPrint(
+        '🧾 PDF data DocEntry=${data['DocEntry'] ?? 'N/A'} DocNum=${data['DocNum'] ?? data['id'] ?? 'N/A'}');
     final String currentUserName =
         await LocalStorageManger.getString('FullName');
 
@@ -35,26 +37,11 @@ class HtmlServiceReportGenerator {
     final List<dynamic> timeEntries =
         data['CK_JOB_TIMECollection'] as List? ?? [];
 
-    // Fetch extra equipment details from offline storage if available
-    String serialNo = '';
-    String model = '';
-    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
-    if (eqId.isNotEmpty) {
-      try {
-        final box = Hive.box('equipment_box');
-        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
-        final equip = allEquips.firstWhere(
-          (e) => e['Code'] == eqId,
-          orElse: () => <String, dynamic>{},
-        );
-        if (equip.isNotEmpty) {
-          serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
-          model = equip['U_ck_eqModel']?.toString() ?? '';
-        }
-      } catch (e) {
-        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
-      }
-    }
+    final equipmentData = _extractEquipmentData(data);
+    final String serialNo = equipmentData['serialNo'] ?? '';
+    final String model = equipmentData['model'] ?? '';
+    final String equipmentId = equipmentData['equipmentId'] ?? '';
+    final String equipmentLocation = equipmentData['equipmentLocation'] ?? '';
 
     String dateArrived = '';
 
@@ -80,38 +67,39 @@ class HtmlServiceReportGenerator {
         }
       }
     }
-
-    // Build diagnosis from issues collection
-    String diagnosis = data['U_CK_Diagnosis']?.toString() ?? '';
-    final List<dynamic> issues = data['CK_JOB_ISSUECollection'] as List? ?? [];
-    if (issues.isNotEmpty) {
-      final issueText = issues.map((i) {
-        final type = i['U_CK_IssueType']?.toString() ?? '';
-        final desc = i['U_CK_IssueDesc']?.toString() ?? '';
-        return '${type.isNotEmpty ? "_ $type: " : "_ "}$desc';
-      }).join('\n');
-
-      if (diagnosis.isEmpty) {
-        diagnosis = issueText;
-      } else {
-        diagnosis += '\n$issueText';
-      }
+    if (timeArrived.isEmpty) {
+      timeArrived = data['U_CK_Time']?.toString() ?? '';
     }
+    if (timeCompleted.isEmpty) {
+      timeCompleted = data['U_CK_EndTime']?.toString() ?? '';
+    }
+    totalHours = _calculateDuration(timeArrived, timeCompleted, totalHours);
+
+    final String diagnosis = _buildDiagnosis(data);
 
     // Build comprehensive report data map
     final Map<String, dynamic> reportData = {
       ...data,
       'reportNo': ticketNum,
       'reportDate': dateStr,
-      'wod': data['U_CK_WOD']?.toString() ?? '',
+      'wod': _firstNonEmpty([
+        data['U_CK_WOD']?.toString(),
+        data['U_CK_Project']?.toString(),
+      ]),
       'contract': data['U_CK_Contract']?.toString() ?? 'Yes',
-      'customer': data['CustomerName']?.toString() ?? '',
+      'customer': data['CustomerName']?.toString() ??
+          data['U_CK_Cardname']?.toString() ??
+          '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
       'equipmentType': data['U_CK_JobType']?.toString() ?? '',
-      'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
-      'lastPM': data['U_CK_LastPM'],
-      'location': data['U_CK_Location']?.toString() ?? '',
+      'equipmentId': equipmentId,
+      'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
+      'location': _firstNonEmpty([
+        data['U_CK_WorkLoc']?.toString(),
+        data['U_CK_Location']?.toString(),
+        equipmentLocation,
+      ]),
       'serviceType': data['U_CK_JobClass']?.toString() ??
           data['U_CK_ServiceType']?.toString() ??
           '',
@@ -193,26 +181,11 @@ class HtmlServiceReportGenerator {
     final List<dynamic> timeEntries =
         data['CK_JOB_TIMECollection'] as List? ?? [];
 
-    // Fetch extra equipment details
-    String serialNo = '';
-    String model = '';
-    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
-    if (eqId.isNotEmpty) {
-      try {
-        final box = Hive.box('equipment_box');
-        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
-        final equip = allEquips.firstWhere(
-          (e) => e['Code'] == eqId,
-          orElse: () => <String, dynamic>{},
-        );
-        if (equip.isNotEmpty) {
-          serialNo = equip['U_ck_eqSerNum']?.toString() ?? '';
-          model = equip['U_ck_eqModel']?.toString() ?? '';
-        }
-      } catch (e) {
-        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
-      }
-    }
+    final equipmentData = _extractEquipmentData(data);
+    final String serialNo = equipmentData['serialNo'] ?? '';
+    final String model = equipmentData['model'] ?? '';
+    final String equipmentId = equipmentData['equipmentId'] ?? '';
+    final String equipmentLocation = equipmentData['equipmentLocation'] ?? '';
 
     String dateArrived = '';
 
@@ -238,20 +211,36 @@ class HtmlServiceReportGenerator {
         }
       }
     }
+    if (timeArrived.isEmpty) {
+      timeArrived = data['U_CK_Time']?.toString() ?? '';
+    }
+    if (timeCompleted.isEmpty) {
+      timeCompleted = data['U_CK_EndTime']?.toString() ?? '';
+    }
+    totalHours = _calculateDuration(timeArrived, timeCompleted, totalHours);
 
     final Map<String, dynamic> reportData = {
       ...data,
       'reportNo': ticketNum,
       'reportDate': dateStr,
-      'wod': data['U_CK_WOD']?.toString() ?? '',
+      'wod': _firstNonEmpty([
+        data['U_CK_WOD']?.toString(),
+        data['U_CK_Project']?.toString(),
+      ]),
       'contract': data['U_CK_Contract']?.toString() ?? 'Yes',
-      'customer': data['CustomerName']?.toString() ?? '',
+      'customer': data['CustomerName']?.toString() ??
+          data['U_CK_Cardname']?.toString() ??
+          '',
       'ckNo': data['U_CK_CKNo']?.toString() ?? '',
       'brand': data['U_CK_Brand']?.toString() ?? '',
       'equipmentType': data['U_CK_JobType']?.toString() ?? '',
-      'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
-      'lastPM': data['U_CK_LastPM'],
-      'location': data['U_CK_Location']?.toString() ?? '',
+      'equipmentId': equipmentId,
+      'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
+      'location': _firstNonEmpty([
+        data['U_CK_WorkLoc']?.toString(),
+        data['U_CK_Location']?.toString(),
+        equipmentLocation,
+      ]),
       'serviceType': data['U_CK_JobClass']?.toString() ??
           data['U_CK_ServiceType']?.toString() ??
           '',
@@ -259,7 +248,7 @@ class HtmlServiceReportGenerator {
       'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
           data['U_CK_JobType']?.toString() ??
           '',
-      'diagnosis': data['U_CK_Diagnosis']?.toString() ?? '',
+      'diagnosis': _buildDiagnosis(data),
       'measurements': data['U_CK_Measurements']?.toString() ?? '',
       'recommendation': data['U_CK_Recommendation']?.toString() ?? '',
       'problemFixed': data['U_CK_ProblemFixed']?.toString() ?? 'Yes',
@@ -290,6 +279,143 @@ class HtmlServiceReportGenerator {
     return _generateHtml(reportData, logoBase64);
   }
 
+  static String _firstNonEmpty(List<String?> values) {
+    for (final value in values) {
+      final trimmed = value?.trim() ?? '';
+      if (trimmed.isNotEmpty) return trimmed;
+    }
+    return '';
+  }
+
+  static Map<String, String> _extractEquipmentData(Map<String, dynamic> data) {
+    final equipmentList = data['CK_JOB_EQUIPMENTCollection'] as List? ?? [];
+    final entries = <String>[];
+    String serialNo = '';
+    String model = '';
+    String location = '';
+
+    for (final item in equipmentList) {
+      if (item is! Map) continue;
+      final name = item['U_CK_EquipName']?.toString().trim() ?? '';
+      final code = item['U_CK_EquipCode']?.toString().trim() ?? '';
+      final type = item['U_CK_EquipType']?.toString().trim() ?? '';
+      final serial = item['U_CK_SerialNum']?.toString().trim() ?? '';
+      final equipLocation = item['U_CK_Location']?.toString().trim() ?? '';
+
+      if (serialNo.isEmpty && serial.isNotEmpty) serialNo = serial;
+      if (model.isEmpty && name.isNotEmpty) model = name;
+      if (location.isEmpty && equipLocation.isNotEmpty) location = equipLocation;
+
+      final parts = <String>[];
+      if (name.isNotEmpty) parts.add(name);
+      if (code.isNotEmpty && code != name) parts.add(code);
+      if (type.isNotEmpty && type != name && type != code) parts.add(type);
+      String label = parts.join(' / ');
+      if (serial.isNotEmpty) {
+        label = label.isNotEmpty ? '$label ($serial)' : serial;
+      }
+      if (label.isNotEmpty) entries.add(label);
+    }
+
+    // Fallback to offline equipment details if present
+    final String eqId = data['U_CK_EquipmentID']?.toString() ?? '';
+    if ((serialNo.isEmpty || model.isEmpty) && eqId.isNotEmpty) {
+      try {
+        final box = Hive.box('equipment_box');
+        final List<dynamic> allEquips = box.get('equipments', defaultValue: []);
+        final equip = allEquips.firstWhere(
+          (e) => e['Code'] == eqId,
+          orElse: () => <String, dynamic>{},
+        );
+        if (equip.isNotEmpty) {
+          serialNo = serialNo.isNotEmpty
+              ? serialNo
+              : (equip['U_ck_eqSerNum']?.toString() ?? '');
+          model =
+              model.isNotEmpty ? model : (equip['U_ck_eqModel']?.toString() ?? '');
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not fetch equipment details from Hive: $e');
+      }
+    }
+
+    String equipmentIdValue = entries.join('<br/>');
+    if (equipmentIdValue.trim().isEmpty) {
+      equipmentIdValue = eqId;
+      if (equipmentIdValue.isNotEmpty && serialNo.isNotEmpty) {
+        equipmentIdValue = '$equipmentIdValue ($serialNo)';
+      }
+    }
+
+    return {
+      'equipmentId': equipmentIdValue,
+      'serialNo': serialNo,
+      'model': model,
+      'equipmentLocation': location,
+    };
+  }
+
+  static String _buildDiagnosis(Map<String, dynamic> data) {
+    String diagnosis = data['U_CK_Diagnosis']?.toString() ?? '';
+    final issues = data['CK_JOB_ISSUECollection'] as List? ?? [];
+    final issueLines = <String>[];
+    for (final item in issues) {
+      if (item is! Map) continue;
+      final desc = item['U_CK_IssueDesc']?.toString() ??
+          item['U_CK_Description']?.toString() ??
+          '';
+      final trimmed = desc.toString().trim();
+      if (trimmed.isNotEmpty) issueLines.add(trimmed);
+    }
+
+    if (issueLines.isNotEmpty) {
+      final issueText = issueLines.map((line) => '- $line').join('\n');
+      diagnosis = diagnosis.isEmpty ? issueText : '$diagnosis\n$issueText';
+    }
+
+    return diagnosis;
+  }
+
+  static String _resolveImageDescription(
+    dynamic image,
+    Map<String, String> remarksByRef,
+    List<String> remarksInOrder,
+    int index,
+  ) {
+    if (image is! Map) {
+      if (index < remarksInOrder.length) return remarksInOrder[index];
+      return 'Image';
+    }
+    String? name = image['name']?.toString();
+    name ??= image['fileName']?.toString();
+    name ??= image['filename']?.toString();
+    name ??= image['refImage']?.toString();
+    name ??= image['U_CK_FileName']?.toString();
+    name ??= image['U_CK_RefImage']?.toString();
+
+    String description = '';
+    if (name != null && name.trim().isNotEmpty) {
+      String normalized = name.toLowerCase().trim();
+      if (normalized.contains('/')) {
+        normalized = normalized.split('/').last;
+      }
+      description = remarksByRef[normalized] ??
+          remarksByRef[
+              normalized.replaceAll(RegExp(r'\.(jpg|jpeg|png)$'), '')] ??
+          '';
+    }
+
+    if (description.isEmpty && index < remarksInOrder.length) {
+      description = remarksInOrder[index];
+    }
+
+    if (description.isEmpty) {
+      description = image['U_CK_Description']?.toString() ?? 'Image';
+    }
+
+    return description;
+  }
+
   /// Generate HTML content matching App.tsx exactly
   static String _generateHtml(Map<String, dynamic> data, String? logoBase64) {
     // Extract parts/materials
@@ -297,6 +423,24 @@ class HtmlServiceReportGenerator {
 
     // Extract files/attachments
     final List<dynamic> files = data['files'] as List? ?? [];
+
+    // Attachment remarks (image title mapping)
+    final List<dynamic> attachmentRemarks =
+        data['CK_JOB_ATTACHMENT_REMARKS'] as List? ?? [];
+    final Map<String, String> remarksByRef = {};
+    final List<String> remarksInOrder = [];
+    for (final remark in attachmentRemarks) {
+      if (remark is! Map) continue;
+      final desc = remark['desc']?.toString().trim() ?? '';
+      final ref = remark['refImage']?.toString().trim() ?? '';
+      if (desc.isNotEmpty) remarksInOrder.add(desc);
+      if (ref.isNotEmpty && desc.isNotEmpty) {
+        final refLower = ref.toLowerCase();
+        remarksByRef[refLower] = desc;
+        remarksByRef[refLower.replaceAll(RegExp(r'\.(jpg|jpeg|png)$'), '')] =
+            desc;
+      }
+    }
 
     // Find signature and images
     final List<dynamic> allImageFiles = [];
@@ -372,7 +516,8 @@ class HtmlServiceReportGenerator {
       if (i < images.length) {
         final img = images[i];
         final imageData = 'data:image/png;base64,${img['data']}';
-        final description = img['U_CK_Description']?.toString() ?? 'Image';
+        final description =
+            _resolveImageDescription(img, remarksByRef, remarksInOrder, i);
         imagesHtml += '''
           <div style="border-right:$borderRight;flex:1;display:flex;flex-direction:column;overflow:hidden;">
             <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff;padding:2px;">
@@ -547,8 +692,8 @@ class HtmlServiceReportGenerator {
                 </div>
                 <div class="span-8 grid grid-12">
                     <div class="span-6 border-r p-1 min-h-1 text-blue italic bold">${data['equipmentType'] ?? ''}</div>
-                    <div class="span-3 border-r p-1 min-h-1"><span class="khmer">បរិក្ខារ</span>/Equipment (SN)</div>
-                    <div class="span-3 p-1 min-h-1 text-blue italic bold">${data['equipmentId'] ?? ''} ${data['serialNo'] != '' ? '(${data['serialNo']})' : ''}</div>
+                    <div class="span-3 border-r p-1 min-h-1"><span class="khmer">បរិក្ខារ</span>/Equipment</div>
+                    <div class="span-3 p-1 min-h-1 text-blue italic bold" style="white-space: pre-wrap;">${data['equipmentId'] ?? ''}</div>
                 </div>
             </div>
 
@@ -652,16 +797,14 @@ class HtmlServiceReportGenerator {
                     </div>
                     <div class="flex border-b">
                         <div style="width: 30%;" class="p-1 border-r bold">Date & Time Arrived</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex justify-between">
-                            <span>${_formatDate(data['reportDate'] ?? data['U_CK_Date'])}</span>
-                            <span>${data['timeArrived'] ?? ''}</span>
+                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold">
+                            ${_formatDateTime(data['reportDate'] ?? data['U_CK_Date'], data['timeArrived'])}
                         </div>
                     </div>
                     <div class="flex border-b">
                         <div style="width: 30%;" class="p-1 border-r bold">Date & Time Completed</div>
-                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold flex justify-between">
-                            <span>${_formatDate(data['reportDate'] ?? data['U_CK_Date'])}</span>
-                            <span>${data['timeCompleted'] ?? ''}</span>
+                        <div style="flex-grow: 1;" class="p-1 text-blue italic bold">
+                            ${_formatDateTime(data['reportDate'] ?? data['U_CK_Date'], data['timeCompleted'])}
                         </div>
                     </div>
                     <div class="flex">
@@ -684,7 +827,7 @@ class HtmlServiceReportGenerator {
         <!-- Footer Metadata -->
         <div class="flex justify-between items-end" style="margin-top: 4px;">
             <div style="font-size: 7px; color: #000; font-weight: 500;">
-                <div>Form Number: CK-SDD-F-0042</div>
+                <div>Form Number: ${data['DocEntry'] ?? 'N/A'}-${data['DocNum'] ?? data['id'] ?? 'N/A'}</div>
                 <div>Revision: 2</div>
                 <div>Date: ${DateFormat('dd-MMM-yyyy').format(DateTime.now())}</div>
             </div>
@@ -704,5 +847,55 @@ class HtmlServiceReportGenerator {
     } catch (e) {
       return dateStr.toString();
     }
+  }
+
+  static String _formatDateTime(dynamic dateStr, dynamic timeStr) {
+    final datePart = _formatDate(dateStr);
+    final timePart = (timeStr ?? '').toString().trim();
+    if (timePart.isEmpty || timePart == 'N/A') return datePart;
+    if (datePart.isEmpty || datePart == 'N/A') return timePart;
+    return '$datePart, $timePart';
+  }
+
+  static String _calculateDuration(
+      dynamic startTime, dynamic endTime, String fallback) {
+    final startMinutes = _parseTimeToMinutes(startTime);
+    final endMinutes = _parseTimeToMinutes(endTime);
+    if (startMinutes == null || endMinutes == null) return fallback;
+
+    var diff = endMinutes - startMinutes;
+    if (diff < 0) diff += 24 * 60;
+    final hours = diff ~/ 60;
+    final minutes = diff % 60;
+    return '${hours}h ${minutes}m';
+  }
+
+  static int? _parseTimeToMinutes(dynamic timeStr) {
+    if (timeStr == null) return null;
+    final raw = timeStr.toString().trim();
+    if (raw.isEmpty || raw == 'N/A' || raw == '--:--') return null;
+
+    if (raw.contains('T')) {
+      try {
+        final dt = DateTime.parse(raw);
+        return dt.hour * 60 + dt.minute;
+      } catch (_) {}
+    }
+
+    final formats = [
+      DateFormat('HH:mm:ss'),
+      DateFormat('HH:mm'),
+      DateFormat('hh:mm a'),
+      DateFormat('h:mm a'),
+    ];
+
+    for (final format in formats) {
+      try {
+        final dt = format.parse(raw);
+        return dt.hour * 60 + dt.minute;
+      } catch (_) {}
+    }
+
+    return null;
   }
 }

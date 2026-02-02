@@ -650,6 +650,22 @@ class ServiceReportGenerator {
   static pw.Widget _buildImageAttachments(Map<String, dynamic> data,
       {pw.Font? pdfFont}) {
     final List<dynamic> files = data['files'] as List? ?? [];
+    final List<dynamic> attachmentRemarks =
+        data['CK_JOB_ATTACHMENT_REMARKS'] as List? ?? [];
+    final Map<String, String> remarksByRef = {};
+    final List<String> remarksInOrder = [];
+    for (final remark in attachmentRemarks) {
+      if (remark is! Map) continue;
+      final desc = remark['desc']?.toString().trim() ?? '';
+      final ref = remark['refImage']?.toString().trim() ?? '';
+      if (desc.isNotEmpty) remarksInOrder.add(desc);
+      if (ref.isNotEmpty && desc.isNotEmpty) {
+        final refLower = ref.toLowerCase();
+        remarksByRef[refLower] = desc;
+        remarksByRef[refLower.replaceAll(RegExp(r'\.(jpg|jpeg|png)$'), '')] =
+            desc;
+      }
+    }
     final List<dynamic> allImages = files
         .where((f) => (f is Map &&
             (f['ext']?.toString().toLowerCase() == 'jpg' ||
@@ -691,7 +707,9 @@ class ServiceReportGenerator {
             padding: const pw.EdgeInsets.all(5),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.start,
-              children: reportImages.take(4).map((img) {
+              children: reportImages.take(4).toList().asMap().entries.map((entry) {
+                final index = entry.key;
+                final img = entry.value;
                 try {
                   final image = pw.MemoryImage(base64Decode(img['data']));
                   return pw.Expanded(
@@ -707,7 +725,9 @@ class ServiceReportGenerator {
                             child: pw.Image(image, fit: pw.BoxFit.cover),
                           ),
                           pw.SizedBox(height: 2),
-                          pw.Text(img['U_CK_Description']?.toString() ?? 'Image',
+                          pw.Text(
+                              _resolveImageDescription(
+                                  img, remarksByRef, remarksInOrder, index),
                               style: pw.TextStyle(
                                   font: pdfFont,
                                   fontSize: 7,
@@ -726,6 +746,46 @@ class ServiceReportGenerator {
         ],
       ),
     );
+  }
+
+  static String _resolveImageDescription(
+    dynamic image,
+    Map<String, String> remarksByRef,
+    List<String> remarksInOrder,
+    int index,
+  ) {
+    if (image is! Map) {
+      if (index < remarksInOrder.length) return remarksInOrder[index];
+      return 'Image';
+    }
+    String? name = image['name']?.toString();
+    name ??= image['fileName']?.toString();
+    name ??= image['filename']?.toString();
+    name ??= image['refImage']?.toString();
+    name ??= image['U_CK_FileName']?.toString();
+    name ??= image['U_CK_RefImage']?.toString();
+
+    String description = '';
+    if (name != null && name.trim().isNotEmpty) {
+      String normalized = name.toLowerCase().trim();
+      if (normalized.contains('/')) {
+        normalized = normalized.split('/').last;
+      }
+      description = remarksByRef[normalized] ??
+          remarksByRef[
+              normalized.replaceAll(RegExp(r'\.(jpg|jpeg|png)$'), '')] ??
+          '';
+    }
+
+    if (description.isEmpty && index < remarksInOrder.length) {
+      description = remarksInOrder[index];
+    }
+
+    if (description.isEmpty) {
+      description = image['U_CK_Description']?.toString() ?? 'Image';
+    }
+
+    return description;
   }
 
   static pw.Widget _buildFooterMeta({pw.Font? pdfFont}) {
