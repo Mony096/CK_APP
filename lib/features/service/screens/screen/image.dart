@@ -516,7 +516,7 @@ class _ImageCardState extends State<ImageCard> {
               maxLines: null,
               decoration: InputDecoration(
                 isDense: true,
-                hintText: "",
+                hintText: "Image title",
                 hintStyle: GoogleFonts.inter(
                     fontSize: 13.sp, color: const Color(0xFF94A3B8)),
                 fillColor: const Color(0xFFF8FAFC),
