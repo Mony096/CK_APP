@@ -83,6 +83,7 @@ class ServiceReportGenerator {
       'reportDate': dateStr,
       'reportNo': ticketNum,
       'wod': data['U_CK_QuoteNumber']?.toString() ??
+          data['QuoteNumber']?.toString() ??
           data['U_CK_WOD']?.toString() ??
           data['U_CK_Project']?.toString() ??
           '',
