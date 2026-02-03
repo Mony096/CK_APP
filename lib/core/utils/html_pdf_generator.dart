@@ -108,9 +108,7 @@ class HtmlServiceReportGenerator {
           data['U_CK_ServiceType']?.toString() ??
           '',
       'hourMeter': data['U_CK_HourMeter']?.toString() ?? 'N/A',
-      'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
-          data['U_CK_JobType']?.toString() ??
-          '',
+      'customerRequest': data['U_CK_Description']?.toString() ?? '',
       'diagnosis': diagnosis,
       'measurements': data['U_CK_Measurements']?.toString() ?? '',
       'recommendation': data['U_CK_Recommendation']?.toString() ?? '',
@@ -231,8 +229,7 @@ class HtmlServiceReportGenerator {
       'reportNo': ticketNum,
       'reportDate': dateStr,
       'wod': _firstNonEmpty([
-        data['U_CK_WOD']?.toString(),
-        data['U_CK_Project']?.toString(),
+        data['U_CK_QuoteNumber']?.toString(),
       ]),
       'contract': data['U_CK_Contract']?.toString() ?? 'Yes',
       'customer': data['CustomerName']?.toString() ??
@@ -254,9 +251,7 @@ class HtmlServiceReportGenerator {
           data['U_CK_ServiceType']?.toString() ??
           '',
       'hourMeter': data['U_CK_HourMeter']?.toString() ?? 'N/A',
-      'customerRequest': data['U_CK_CustomerRequest']?.toString() ??
-          data['U_CK_JobType']?.toString() ??
-          '',
+      'customerRequest': data['U_CK_Description']?.toString() ?? '',
       'diagnosis': _buildDiagnosis(data),
       'measurements': data['U_CK_Measurements']?.toString() ?? '',
       'recommendation': data['U_CK_Recommendation']?.toString() ?? '',
