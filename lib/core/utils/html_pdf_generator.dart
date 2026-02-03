@@ -346,7 +346,7 @@ class HtmlServiceReportGenerator {
       final parts = <String>[];
       if (name.isNotEmpty) parts.add(name);
       if (code.isNotEmpty && code != name) parts.add(code);
-      if (type.isNotEmpty && type != name && type != code) parts.add(type);
+      if (parts.isEmpty && type.isNotEmpty) parts.add(type);
       String label = parts.join(' / ');
       if (serial.isNotEmpty) {
         label = label.isNotEmpty ? '$label ($serial)' : serial;
