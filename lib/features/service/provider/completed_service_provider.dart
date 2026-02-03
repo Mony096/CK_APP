@@ -725,6 +725,20 @@ class CompletedServiceProvider extends ChangeNotifier {
         fileDataList.add(fileMap);
       }
 
+      // Prepare Attachment Remarks separate array (for PDF + payload)
+      List<Map<String, String>> attachmentRemarks = [];
+      for (File img in imagesList) {
+        final path = img.path;
+        final name = path.split(Platform.pathSeparator).last;
+        if (_imageRemarks.containsKey(path) &&
+            _imageRemarks[path]!.isNotEmpty) {
+          attachmentRemarks.add({
+            "desc": _imageRemarks[path]!,
+            "refImage": name,
+          });
+        }
+      }
+
       // Generate PDF report and add to files
       try {
         // Build data for PDF generation (need to include images/signatures for the PDF template)
@@ -732,14 +746,23 @@ class CompletedServiceProvider extends ChangeNotifier {
           'DocEntry': docEntry,
           'DocNum': docNum,
           'U_CK_Date': date,
+          'U_CK_QuoteNumber': quoteNumber,
           'U_CK_Cardname': customerName,
           'CustomerName': customerName,
+          'U_CK_Description': remark,
           'U_CK_Time': startTime,
           'U_CK_EndTime': endTime,
           'U_CK_JobType': activityType,
+          'U_CK_JobClass': activityType,
+          'U_CK_ServiceType': activityType,
           'U_CK_ServiceCall': serviceCallId,
+          'U_CK_WorkLoc': location,
+          'U_CK_Project': project,
+          'CK_JOB_MATERIALCollection': material,
+          'CK_JOB_EQUIPMENTCollection': equipment,
           'CK_JOB_ISSUECollection': _openIssues,
           'CK_JOB_TASKCollection': _checkListLine,
+          'CK_JOB_ATTACHMENT_REMARKS': attachmentRemarks,
           'files': fileDataList, // Include images/signature for PDF template
         });
 
@@ -775,20 +798,6 @@ class CompletedServiceProvider extends ChangeNotifier {
         travelTime: timeAction["TravelTime"] ?? "00:00:00",
         completeTime: timeAction["CompleteTime"] ?? "00:00:00",
       );
-
-      // Prepare Attachment Remarks separate array
-      List<Map<String, String>> attachmentRemarks = [];
-      for (File img in imagesList) {
-        final path = img.path;
-        final name = path.split(Platform.pathSeparator).last;
-        if (_imageRemarks.containsKey(path) &&
-            _imageRemarks[path]!.isNotEmpty) {
-          attachmentRemarks.add({
-            "desc": _imageRemarks[path]!,
-            "refImage": name,
-          });
-        }
-      }
 
       // 2. Build the payload
       final payload = {
