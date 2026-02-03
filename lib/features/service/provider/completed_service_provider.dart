@@ -572,6 +572,7 @@ class CompletedServiceProvider extends ChangeNotifier {
     required dynamic material,
     required dynamic project,
     required dynamic equipment,
+    required dynamic quoteNumber,
     String? remark,
     bool offline = false,
   }) async {
@@ -792,7 +793,7 @@ class CompletedServiceProvider extends ChangeNotifier {
       // 2. Build the payload
       final payload = {
         "DocEntry": docEntry,
-        "U_CK_Description": remark,
+        // "U_CK_Description": remark,
         "CK_JOB_ATTACHMENT_REMARKS": attachmentRemarks, // Add the new array
         "U_CK_Cardname": customerName,
         "U_CK_Date": date,
@@ -870,8 +871,8 @@ class CompletedServiceProvider extends ChangeNotifier {
         ]
       };
 
-      // print(payload);
-      // return false;
+      print(equipment);
+      return false;
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);
 

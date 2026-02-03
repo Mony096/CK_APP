@@ -39,17 +39,17 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
   @override
   void initState() {
     super.initState();
-    _remarkController.text = widget.data["U_CK_Description"] ?? "";
+    // _remarkController.text = widget.data["U_CK_Description"] ?? "";
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CompletedServiceProvider>().clearData();
     });
   }
 
-  @override
-  void dispose() {
-    _remarkController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _remarkController.dispose();
+  //   super.dispose();
+  // }
 
   void onCompletedService() async {
     // 0. Unfocus everything immediately
@@ -253,32 +253,34 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     try {
       final now = DateTime.now();
       final timeStamp = DateFormat("HH:mm:ss").format(now);
-      final res = await Provider.of<CompletedServiceProvider>(context,
-              listen: false)
-          .onCompletedServiceOffline(
-              context: context,
-              attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-              docEntry: widget.data["DocEntry"],
-              startTime: widget.data["U_CK_Time"],
-              endTime: widget.data["U_CK_EndTime"],
-              customerName: widget.data["U_CK_Cardname"],
-              date: widget.data["U_CK_Date"] ?? "",
-              timeAction: {
-                "AcceptTime":
-                    widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
-                "TravelTime":
-                    widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
-                "ServiceTime": widget.data["ServiceTime"],
-                "CompleteTime": timeStamp
-              },
-              activityType: widget.data["U_CK_JobType"],
-              docNum: widget.data["DocNum"],
-              serviceCallId: widget.data["U_CK_ServiceCall"],
-              location: widget.data["U_CK_WorkLoc"],
-              material: widget.data["CK_JOB_MATERIALCollection"],
-              project: widget.data["U_CK_Project"],
-              equipment: widget.data["CK_JOB_EQUIPMENTCollection"],
-              remark: _remarkController.text);
+      final res =
+          await Provider.of<CompletedServiceProvider>(context, listen: false)
+              .onCompletedServiceOffline(
+        context: context,
+        attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+        docEntry: widget.data["DocEntry"],
+        startTime: widget.data["U_CK_Time"],
+        endTime: widget.data["U_CK_EndTime"],
+        customerName: widget.data["U_CK_Cardname"],
+        date: widget.data["U_CK_Date"] ?? "",
+        timeAction: {
+          "AcceptTime":
+              widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+          "TravelTime":
+              widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+          "ServiceTime": widget.data["ServiceTime"],
+          "CompleteTime": timeStamp
+        },
+        activityType: widget.data["U_CK_JobType"],
+        docNum: widget.data["DocNum"],
+        serviceCallId: widget.data["U_CK_ServiceCall"],
+        location: widget.data["U_CK_WorkLoc"],
+        material: widget.data["CK_JOB_MATERIALCollection"],
+        project: widget.data["U_CK_Project"],
+        equipment: widget.data["CK_JOB_EQUIPMENTCollection"],
+        remark: widget.data["U_CK_Description"],
+        quoteNumber: widget.data["U_CK_QuoteNumber"],
+      );
 
       if (mounted) MaterialDialog.close(context);
 
@@ -297,32 +299,34 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
     try {
       final now = DateTime.now();
       final timeStamp = DateFormat("HH:mm:ss").format(now);
-      final res = await Provider.of<CompletedServiceProvider>(context,
-              listen: false)
-          .onCompletedServiceOffline(
-              context: context,
-              attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
-              docEntry: widget.data["DocEntry"],
-              startTime: widget.data["U_CK_Time"],
-              endTime: widget.data["U_CK_EndTime"],
-              customerName: widget.data["U_CK_Cardname"],
-              date: widget.data["U_CK_Date"] ?? "",
-              timeAction: {
-                "AcceptTime":
-                    widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
-                "TravelTime":
-                    widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
-                "ServiceTime": widget.data["ServiceTime"],
-                "CompleteTime": timeStamp
-              },
-              activityType: widget.data["U_CK_JobType"],
-              docNum: widget.data["DocNum"],
-              serviceCallId: widget.data["U_CK_ServiceCall"],
-              location: widget.data["U_CK_WorkLoc"],
-              material: widget.data["CK_JOB_MATERIALCollection"],
-              project: widget.data["U_CK_Project"],
-              equipment: widget.data["CK_JOB_EQUIPMENTCollection"],
-              remark: _remarkController.text);
+      final res =
+          await Provider.of<CompletedServiceProvider>(context, listen: false)
+              .onCompletedServiceOffline(
+        context: context,
+        attachmentEntryExisting: widget.data["U_CK_AttachmentEntry"],
+        docEntry: widget.data["DocEntry"],
+        startTime: widget.data["U_CK_Time"],
+        endTime: widget.data["U_CK_EndTime"],
+        customerName: widget.data["U_CK_Cardname"],
+        date: widget.data["U_CK_Date"] ?? "",
+        timeAction: {
+          "AcceptTime":
+              widget.data["AcceptTime"] ?? widget.data["U_CK_AcceptTime"],
+          "TravelTime":
+              widget.data["TravelTime"] ?? widget.data["U_CK_TravelTime"],
+          "ServiceTime": widget.data["ServiceTime"],
+          "CompleteTime": timeStamp
+        },
+        activityType: widget.data["U_CK_JobType"],
+        docNum: widget.data["DocNum"],
+        serviceCallId: widget.data["U_CK_ServiceCall"],
+        location: widget.data["U_CK_WorkLoc"],
+        material: widget.data["CK_JOB_MATERIALCollection"],
+        project: widget.data["U_CK_Project"],
+        equipment: widget.data["CK_JOB_EQUIPMENTCollection"],
+        remark: widget.data["U_CK_Description"],
+        quoteNumber: widget.data["U_CK_QuoteNumber"],
+      );
 
       if (res) {
         try {
@@ -667,68 +671,68 @@ class __ServiceEntryScreenState extends State<ServiceEntryScreen> {
                         goTo(context, OpenIssueScreen(data: widget.data)),
                   ),
                   SizedBox(height: 3.h),
-                  _buildSectionTitle("REMARKS"),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 3.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: const Color(0xFFF1F5F9)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Additional Comments",
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1E293B),
-                          ),
-                        ),
-                        SizedBox(height: 1.5.h),
-                        TextField(
-                          controller: _remarkController,
-                          maxLines: 4,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: const Color(0xFF1E293B),
-                          ),
-                          decoration: InputDecoration(
-                            hintText: "Enter service remarks here...",
-                            hintStyle: GoogleFonts.inter(
-                              color: const Color(0xFF94A3B8),
-                              fontSize: 14.sp,
-                            ),
-                            fillColor: const Color(0xFFF8FAFC),
-                            filled: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Color(0xFFE2E8F0)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Color(0xFFE2E8F0)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Color(0xFF22C55E)),
-                            ),
-                            contentPadding: EdgeInsets.all(4.w),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // _buildSectionTitle("REMARKS"),
+                  // Container(
+                  //   margin: EdgeInsets.symmetric(horizontal: 3.w),
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.white,
+                  //     borderRadius: BorderRadius.circular(15),
+                  //     border: Border.all(color: const Color(0xFFF1F5F9)),
+                  //     boxShadow: [
+                  //       BoxShadow(
+                  //         color: Colors.black.withOpacity(0.02),
+                  //         blurRadius: 8,
+                  //         offset: const Offset(0, 2),
+                  //       )
+                  //     ],
+                  //   ),
+                  //   padding:
+                  //       EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Text(
+                  //         "Additional Comments",
+                  //         style: GoogleFonts.inter(
+                  //           fontSize: 13.sp,
+                  //           fontWeight: FontWeight.w700,
+                  //           color: const Color(0xFF1E293B),
+                  //         ),
+                  //       ),
+                  //       SizedBox(height: 1.5.h),
+                  //       TextField(
+                  //         controller: _remarkController,
+                  //         maxLines: 4,
+                  //         style: GoogleFonts.inter(
+                  //           fontSize: 14.sp,
+                  //           color: const Color(0xFF1E293B),
+                  //         ),
+                  //         decoration: InputDecoration(
+                  //           hintText: "Enter service remarks here...",
+                  //           hintStyle: GoogleFonts.inter(
+                  //             color: const Color(0xFF94A3B8),
+                  //             fontSize: 14.sp,
+                  //           ),
+                  //           fillColor: const Color(0xFFF8FAFC),
+                  //           filled: true,
+                  //           border: OutlineInputBorder(
+                  //             borderRadius: BorderRadius.circular(12),
+                  //             borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+                  //           ),
+                  //           enabledBorder: OutlineInputBorder(
+                  //             borderRadius: BorderRadius.circular(12),
+                  //             borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+                  //           ),
+                  //           focusedBorder: OutlineInputBorder(
+                  //             borderRadius: BorderRadius.circular(12),
+                  //             borderSide: BorderSide(color: Color(0xFF22C55E)),
+                  //           ),
+                  //           contentPadding: EdgeInsets.all(4.w),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   SizedBox(height: 10.h),
                 ],
               ),
