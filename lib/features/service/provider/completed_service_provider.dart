@@ -871,8 +871,6 @@ class CompletedServiceProvider extends ChangeNotifier {
         ]
       };
 
-      print(equipment);
-      return false;
       final offlineProvider =
           Provider.of<ServiceListProviderOffline>(context, listen: false);
 
