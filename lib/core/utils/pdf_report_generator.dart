@@ -84,8 +84,8 @@ class ServiceReportGenerator {
       'reportNo': ticketNum,
       'wod': data['U_CK_WOD']?.toString() ?? '',
       'customer': data['CustomerName']?.toString() ?? '',
-      'ckNo': data['U_CK_CKNo']?.toString() ?? '',
-      'brand': data['U_CK_Brand']?.toString() ?? '',
+      'ckNo': _extractEquipmentCode(data),
+      'brand': _extractEquipmentBrand(data),
       'equipmentType': _extractEquipmentType(data),
       'equipmentId': data['U_CK_EquipmentID']?.toString() ?? '',
       'serviceType': data['U_CK_ServiceType']?.toString() ?? '',
@@ -209,7 +209,7 @@ class ServiceReportGenerator {
           _buildInfoRow([
             _buildCell("កាលបរិច្ឆេទ/ Date:", data['reportDate'] ?? '',
                 flex: 3, pdfFont: pdfFont),
-            _buildCell("WOD:", data['wod'] ?? '',
+            _buildCell("Quote No.:", data['wod'] ?? '',
                 flex: 3, pdfFont: pdfFont),
             _buildCell("Contract:", data['U_CK_Contract']?.toString() ?? "Yes",
                 flex: 2, isLast: true, pdfFont: pdfFont),
@@ -305,6 +305,40 @@ class ServiceReportGenerator {
     }
     if (types.isNotEmpty) return types.join(', ');
     return 'N/A';
+  }
+
+  static String _extractEquipmentBrand(Map<String, dynamic> data) {
+    final equipment = data['CK_JOB_EQUIPMENTCollection'] as List? ?? [];
+    final List<String> brands = [];
+    final Set<String> seen = {};
+    for (final item in equipment) {
+      if (item is! Map) continue;
+      final brand = item['U_CK_Brand']?.toString().trim() ?? '';
+      if (brand.isNotEmpty && !seen.contains(brand)) {
+        brands.add(brand);
+        seen.add(brand);
+      }
+    }
+    if (brands.isNotEmpty) return brands.join(', ');
+    return data['U_CK_Brand']?.toString() ?? 'N/A';
+  }
+
+  static String _extractEquipmentCode(Map<String, dynamic> data) {
+    final equipment = data['CK_JOB_EQUIPMENTCollection'] as List? ?? [];
+    final List<String> codes = [];
+    final Set<String> seen = {};
+    for (final item in equipment) {
+      if (item is! Map) continue;
+      final code = item['U_CK_Code']?.toString().trim() ??
+          item['U_CK_EquipCode']?.toString().trim() ??
+          '';
+      if (code.isNotEmpty && !seen.contains(code)) {
+        codes.add(code);
+        seen.add(code);
+      }
+    }
+    if (codes.isNotEmpty) return codes.join(', ');
+    return data['U_CK_CKNo']?.toString() ?? 'N/A';
   }
 
   static pw.Widget _buildFullWidthSection(
@@ -819,7 +853,10 @@ class ServiceReportGenerator {
                   style: pw.TextStyle(font: pdfFont, fontSize: 8)),
               pw.Text("Revision: 2",
                   style: pw.TextStyle(font: pdfFont, fontSize: 8)),
-              pw.Text("Date: 12-Aug-2025",
+              pw.Text(
+                  "Date: ${DateFormat('dd-MMM-yyyy').format(DateTime.now())}",
+                  style: pw.TextStyle(font: pdfFont, fontSize: 8)),
+              pw.Text("Page: 1 of 1",
                   style: pw.TextStyle(font: pdfFont, fontSize: 8)),
             ],
           ),

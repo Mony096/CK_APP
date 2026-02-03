@@ -43,6 +43,8 @@ class HtmlServiceReportGenerator {
     final String equipmentId = equipmentData['equipmentId'] ?? '';
     final String equipmentLocation = equipmentData['equipmentLocation'] ?? '';
     final String equipmentType = equipmentData['equipmentType'] ?? '';
+    final String equipmentBrand = equipmentData['equipmentBrand'] ?? '';
+    final String equipmentCode = equipmentData['equipmentCode'] ?? '';
 
     String dateArrived = '';
 
@@ -91,8 +93,12 @@ class HtmlServiceReportGenerator {
       'customer': data['CustomerName']?.toString() ??
           data['U_CK_Cardname']?.toString() ??
           '',
-      'ckNo': data['U_CK_CKNo']?.toString() ?? '',
-      'brand': data['U_CK_Brand']?.toString() ?? '',
+      'ckNo': equipmentCode.isNotEmpty
+          ? equipmentCode
+          : (data['U_CK_CKNo']?.toString() ?? ''),
+      'brand': equipmentBrand.isNotEmpty
+          ? equipmentBrand
+          : (data['U_CK_Brand']?.toString() ?? ''),
       'equipmentType': equipmentType.isNotEmpty ? equipmentType : 'N/A',
       'equipmentId': equipmentId,
       'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
@@ -188,6 +194,8 @@ class HtmlServiceReportGenerator {
     final String equipmentId = equipmentData['equipmentId'] ?? '';
     final String equipmentLocation = equipmentData['equipmentLocation'] ?? '';
     final String equipmentType = equipmentData['equipmentType'] ?? '';
+    final String equipmentBrand = equipmentData['equipmentBrand'] ?? '';
+    final String equipmentCode = equipmentData['equipmentCode'] ?? '';
 
     String dateArrived = '';
 
@@ -233,8 +241,12 @@ class HtmlServiceReportGenerator {
       'customer': data['CustomerName']?.toString() ??
           data['U_CK_Cardname']?.toString() ??
           '',
-      'ckNo': data['U_CK_CKNo']?.toString() ?? '',
-      'brand': data['U_CK_Brand']?.toString() ?? '',
+      'ckNo': equipmentCode.isNotEmpty
+          ? equipmentCode
+          : (data['U_CK_CKNo']?.toString() ?? ''),
+      'brand': equipmentBrand.isNotEmpty
+          ? equipmentBrand
+          : (data['U_CK_Brand']?.toString() ?? ''),
       'equipmentType': equipmentType.isNotEmpty ? equipmentType : 'N/A',
       'equipmentId': equipmentId,
       'lastPM': data['U_CK_LastPM'] ?? data['U_CK_Date'],
@@ -296,8 +308,14 @@ class HtmlServiceReportGenerator {
     String model = '';
     String location = '';
     String equipType = '';
+    String equipBrand = '';
+    String equipCode = '';
     final List<String> equipTypes = [];
     final Set<String> equipTypeSeen = {};
+    final List<String> equipBrands = [];
+    final Set<String> equipBrandSeen = {};
+    final List<String> equipCodes = [];
+    final Set<String> equipCodeSeen = {};
 
     for (final item in equipmentList) {
       if (item is! Map) continue;
@@ -308,14 +326,29 @@ class HtmlServiceReportGenerator {
           '';
       final serial = item['U_CK_SerialNum']?.toString().trim() ?? '';
       final equipLocation = item['U_CK_Location']?.toString().trim() ?? '';
+      final brand = item['U_CK_Brand']?.toString().trim() ?? '';
+      final code =
+          item['U_CK_Code']?.toString().trim() ??
+              item['U_CK_EquipCode']?.toString().trim() ??
+              '';
 
       if (serialNo.isEmpty && serial.isNotEmpty) serialNo = serial;
       if (model.isEmpty && name.isNotEmpty) model = name;
       if (location.isEmpty && equipLocation.isNotEmpty) location = equipLocation;
       if (equipType.isEmpty && type.isNotEmpty) equipType = type;
+      if (equipBrand.isEmpty && brand.isNotEmpty) equipBrand = brand;
+      if (equipCode.isEmpty && code.isNotEmpty) equipCode = code;
       if (type.isNotEmpty && !equipTypeSeen.contains(type)) {
         equipTypes.add(type);
         equipTypeSeen.add(type);
+      }
+      if (brand.isNotEmpty && !equipBrandSeen.contains(brand)) {
+        equipBrands.add(brand);
+        equipBrandSeen.add(brand);
+      }
+      if (code.isNotEmpty && !equipCodeSeen.contains(code)) {
+        equipCodes.add(code);
+        equipCodeSeen.add(code);
       }
 
       final parts = <String>[];
@@ -365,6 +398,9 @@ class HtmlServiceReportGenerator {
       'model': model,
       'equipmentLocation': location,
       'equipmentType': equipTypes.isNotEmpty ? equipTypes.join(', ') : equipType,
+      'equipmentBrand':
+          equipBrands.isNotEmpty ? equipBrands.join(', ') : equipBrand,
+      'equipmentCode': equipCodes.isNotEmpty ? equipCodes.join(', ') : equipCode,
     };
   }
 
@@ -671,7 +707,7 @@ class HtmlServiceReportGenerator {
                     <div class="text-blue italic bold">${data['reportDate'] ?? 'N/A'}</div>
                 </div>
                 <div class="span-4 border-r p-1 min-h-1 flex items-center justify-between">
-                    <div>WOD:</div>
+                    <div>Quote No.:</div>
                     <div class="text-blue italic bold">${data['wod'] ?? ''}</div>
                 </div>
                 <div class="span-4 p-1 min-h-1 flex items-center justify-between">
@@ -693,8 +729,8 @@ class HtmlServiceReportGenerator {
                         <div class="w-50 p-1 text-blue italic bold flex items-center">${data['ckNo'] ?? ''}</div>
                     </div>
                     <div class="flex" style="flex: 1;">
-                    <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក/ម៉ូដែល</span> / Brand/Model</div>
-                    <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''} ${data['model'] != '' ? '/ ${data['model']}' : ''}</div>
+                    <div class="w-50 border-r p-1 flex items-center"><span class="khmer">ម៉ាក</span> / Brand</div>
+                    <div class="w-50 p-1 text-blue italic bold flex items-center">${data['brand'] ?? ''}</div>
                     </div>
                 </div>
             </div>
@@ -840,9 +876,10 @@ class HtmlServiceReportGenerator {
         <!-- Footer Metadata -->
         <div class="flex justify-between items-end" style="margin-top: 4px;">
             <div style="font-size: 7px; color: #000; font-weight: 500;">
-                <div>Form Number: ${data['DocEntry'] ?? 'N/A'}-${data['DocNum'] ?? data['id'] ?? 'N/A'}</div>
+                <div>Form Number: CK-SDD-F-0042</div>
                 <div>Revision: 2</div>
                 <div>Date: ${DateFormat('dd-MMM-yyyy').format(DateTime.now())}</div>
+                <div>Page: 1 of 1</div>
             </div>
         </div>
     </div>
