@@ -86,8 +86,7 @@ class HtmlServiceReportGenerator {
       'reportNo': ticketNum,
       'reportDate': dateStr,
       'wod': _firstNonEmpty([
-        data['U_CK_WOD']?.toString(),
-        data['U_CK_Project']?.toString(),
+        data['U_CK_QuoteNumber']?.toString(),
       ]),
       'contract': data['U_CK_Contract']?.toString() ?? 'Yes',
       'customer': data['CustomerName']?.toString() ??
@@ -346,7 +345,6 @@ class HtmlServiceReportGenerator {
       final parts = <String>[];
       if (name.isNotEmpty) parts.add(name);
       if (code.isNotEmpty && code != name) parts.add(code);
-      if (parts.isEmpty && type.isNotEmpty) parts.add(type);
       String label = parts.join(' / ');
       if (serial.isNotEmpty) {
         label = label.isNotEmpty ? '$label ($serial)' : serial;
