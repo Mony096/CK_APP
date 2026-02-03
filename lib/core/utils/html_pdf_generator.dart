@@ -87,9 +87,6 @@ class HtmlServiceReportGenerator {
       'reportDate': dateStr,
       'wod': _firstNonEmpty([
         data['U_CK_QuoteNumber']?.toString(),
-        data['QuoteNumber']?.toString(),
-        data['U_CK_WOD']?.toString(),
-        data['U_CK_Project']?.toString(),
       ]),
       'contract': data['U_CK_Contract']?.toString() ?? 'Yes',
       'customer': data['CustomerName']?.toString() ??
