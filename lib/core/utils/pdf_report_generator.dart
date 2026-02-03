@@ -329,16 +329,14 @@ class ServiceReportGenerator {
     final Set<String> seen = {};
     for (final item in equipment) {
       if (item is! Map) continue;
-      final code = item['U_CK_Code']?.toString().trim() ??
-          item['U_CK_EquipCode']?.toString().trim() ??
-          '';
+      final code = item['U_CK_EquipCode']?.toString().trim() ?? '';
       if (code.isNotEmpty && !seen.contains(code)) {
         codes.add(code);
         seen.add(code);
       }
     }
     if (codes.isNotEmpty) return codes.join(', ');
-    return data['U_CK_CKNo']?.toString() ?? 'N/A';
+    return 'N/A';
   }
 
   static pw.Widget _buildFullWidthSection(

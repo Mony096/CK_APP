@@ -93,9 +93,7 @@ class HtmlServiceReportGenerator {
       'customer': data['CustomerName']?.toString() ??
           data['U_CK_Cardname']?.toString() ??
           '',
-      'ckNo': equipmentCode.isNotEmpty
-          ? equipmentCode
-          : (data['U_CK_CKNo']?.toString() ?? ''),
+      'ckNo': equipmentCode.isNotEmpty ? equipmentCode : 'N/A',
       'brand': equipmentBrand.isNotEmpty
           ? equipmentBrand
           : (data['U_CK_Brand']?.toString() ?? ''),
@@ -241,9 +239,7 @@ class HtmlServiceReportGenerator {
       'customer': data['CustomerName']?.toString() ??
           data['U_CK_Cardname']?.toString() ??
           '',
-      'ckNo': equipmentCode.isNotEmpty
-          ? equipmentCode
-          : (data['U_CK_CKNo']?.toString() ?? ''),
+      'ckNo': equipmentCode.isNotEmpty ? equipmentCode : 'N/A',
       'brand': equipmentBrand.isNotEmpty
           ? equipmentBrand
           : (data['U_CK_Brand']?.toString() ?? ''),
@@ -327,10 +323,7 @@ class HtmlServiceReportGenerator {
       final serial = item['U_CK_SerialNum']?.toString().trim() ?? '';
       final equipLocation = item['U_CK_Location']?.toString().trim() ?? '';
       final brand = item['U_CK_Brand']?.toString().trim() ?? '';
-      final code =
-          item['U_CK_Code']?.toString().trim() ??
-              item['U_CK_EquipCode']?.toString().trim() ??
-              '';
+      final code = item['U_CK_EquipCode']?.toString().trim() ?? '';
 
       if (serialNo.isEmpty && serial.isNotEmpty) serialNo = serial;
       if (model.isEmpty && name.isNotEmpty) model = name;
