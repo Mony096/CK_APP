@@ -82,7 +82,10 @@ class ServiceReportGenerator {
       ...data,
       'reportDate': dateStr,
       'reportNo': ticketNum,
-      'wod': data['U_CK_WOD']?.toString() ?? '',
+      'wod': data['U_CK_QuoteNumber']?.toString() ??
+          data['U_CK_WOD']?.toString() ??
+          data['U_CK_Project']?.toString() ??
+          '',
       'customer': data['CustomerName']?.toString() ?? '',
       'ckNo': _extractEquipmentCode(data),
       'brand': _extractEquipmentBrand(data),
