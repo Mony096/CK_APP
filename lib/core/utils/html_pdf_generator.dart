@@ -323,7 +323,6 @@ class HtmlServiceReportGenerator {
       final serial = item['U_CK_SerialNum']?.toString().trim() ?? '';
       final equipLocation = item['U_CK_Location']?.toString().trim() ?? '';
       final brand = item['U_CK_Brand']?.toString().trim() ?? '';
-      final code = item['U_CK_EquipCode']?.toString().trim() ?? '';
 
       if (serialNo.isEmpty && serial.isNotEmpty) serialNo = serial;
       if (model.isEmpty && name.isNotEmpty) model = name;
